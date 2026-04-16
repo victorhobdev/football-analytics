@@ -237,7 +237,6 @@ Gate mínimo de backend/dados:
 python tools/backend_data_readiness_gate.py
 ```
 
-Esses gates existem para verificar readiness operacional antes de demo, entrega técnica ou revisão final.
 
 ## Documentação complementar
 
