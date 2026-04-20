@@ -23,6 +23,8 @@ import type {
   WorldCupHubEdition,
 } from "@/features/world-cup/types/world-cup.types";
 
+const WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens";
+
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -227,8 +229,8 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
             <div className="flex items-center gap-3">
               <ProfileMedia
                 alt={`País-sede ${hostCountryName}`}
-                assetId={null}
-                category="clubs"
+                assetId={edition.hostCountryKey}
+                category="countries"
                 className="h-10 w-10 rounded-full"
                 fallback={buildFallbackLabel(hostCountryName)}
                 imageClassName="p-1.5"
@@ -353,7 +355,7 @@ export function WorldCupHubContent() {
             <div className="flex items-center gap-4 rounded-[1.3rem] border border-white/10 bg-white/8 p-4">
               <ProfileMedia
                 alt="Identidade visual da Copa do Mundo"
-                assetId={null}
+                assetId={WORLD_CUP_COMPETITION_KEY}
                 category="competitions"
                 className="h-20 w-20 rounded-[1.4rem]"
                 fallback="FIFA"

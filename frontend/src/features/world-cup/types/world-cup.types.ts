@@ -25,6 +25,7 @@ export interface WorldCupHubEdition {
   year: number;
   editionName: string;
   hostCountry: string | null;
+  hostCountryKey: string | null;
   teamsCount: number | null;
   matchesCount: number;
   champion: WorldCupTeamReference | null;

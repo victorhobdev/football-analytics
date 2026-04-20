@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from typing import Any
 
 TEAM_AND_COUNTRY_NAME_OVERRIDES = {
@@ -158,6 +160,18 @@ def serialize_world_cup_display_team(team_id: int | str | None, team_name: str |
         "teamId": display_team_id,
         "teamName": display_team_name,
     }
+
+
+def build_world_cup_country_key(value: str | None) -> str | None:
+    translated_value = translate_world_cup_display_name(value)
+    normalized_value = _normalize_compare_key(translated_value)
+    if normalized_value is None:
+        return None
+
+    ascii_normalized = (
+        unicodedata.normalize("NFKD", normalized_value).encode("ascii", "ignore").decode("ascii")
+    )
+    return re.sub(r"[^a-z0-9]+", "_", ascii_normalized).strip("_") or None
 
 
 def build_world_cup_edition_name(season_label: str) -> str:
