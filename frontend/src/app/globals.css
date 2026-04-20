@@ -11,6 +11,19 @@
   --app-text-muted: #57657a;
   --app-primary: #003526;
   --app-primary-strong: #004e39;
+  --wc-surface: #fff9ec;
+  --wc-surface-soft: #f6edd6;
+  --wc-surface-card: #fffdf7;
+  --wc-outline: rgba(138, 109, 24, 0.24);
+  --wc-text: #1d160c;
+  --wc-text-muted: #6d5c3f;
+  --wc-accent: #8a6d18;
+  --wc-accent-strong: #5f430a;
+  --wc-accent-soft: #f3df9f;
+  --wc-hero-bg:
+    radial-gradient(circle at top left, rgba(243, 223, 159, 0.24), transparent 36%),
+    radial-gradient(circle at top right, rgba(162, 114, 14, 0.3), transparent 30%),
+    linear-gradient(135deg, #24170a 0%, #5a3f0f 54%, #8a6d18 100%);
 }
 
 * {
@@ -73,4 +86,29 @@ svg {
 ::selection {
   background: rgba(139, 214, 182, 0.36);
   color: var(--app-text);
+}
+
+.world-cup-theme {
+  background:
+    radial-gradient(circle at top left, rgba(243, 223, 159, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(138, 109, 24, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 252, 244, 0.98) 0%, rgba(248, 242, 227, 0.94) 100%);
+  color: var(--wc-text);
+}
+
+.world-cup-hero {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--wc-hero-bg);
+  box-shadow: 0 38px 88px -54px rgba(68, 43, 4, 0.55);
+}
+
+.world-cup-hero-tag {
+  background: rgba(255, 243, 212, 0.16);
+  color: #fff6dd;
+}
+
+.world-cup-nav-badge {
+  border: 1px solid rgba(138, 109, 24, 0.28);
+  background: var(--wc-surface-soft);
+  color: var(--wc-accent-strong);
 }
