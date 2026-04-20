@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-13T01:36:06.696778+00:00",
+  "generated_at": "2026-04-20T03:51:56.646889+00:00",
   "source_root": "images",
   "target_root": "frontend/public/images/competition-season/editions",
   "summary": {
-    "editions_total": 50,
-    "competitions_total": 14
+    "editions_total": 72,
+    "competitions_total": 15
   },
   "entries": [
     {
@@ -222,6 +222,204 @@
       "source_file": "001.jpg",
       "public_filename": "fifa_intercontinental_cup__2024.jpg",
       "public_src": "/images/competition-season/editions/fifa_intercontinental_cup__2024.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1930",
+      "edition_key": "fifa_world_cup_mens::1930",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1930.jpg",
+      "public_filename": "fifa_world_cup_mens__1930.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1930.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1934",
+      "edition_key": "fifa_world_cup_mens::1934",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1934.jpg",
+      "public_filename": "fifa_world_cup_mens__1934.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1934.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1938",
+      "edition_key": "fifa_world_cup_mens::1938",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1938.jpg",
+      "public_filename": "fifa_world_cup_mens__1938.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1938.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1950",
+      "edition_key": "fifa_world_cup_mens::1950",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1950.jpg",
+      "public_filename": "fifa_world_cup_mens__1950.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1950.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1954",
+      "edition_key": "fifa_world_cup_mens::1954",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1954.jpg",
+      "public_filename": "fifa_world_cup_mens__1954.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1954.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1958",
+      "edition_key": "fifa_world_cup_mens::1958",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1958.jpg",
+      "public_filename": "fifa_world_cup_mens__1958.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1958.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1962",
+      "edition_key": "fifa_world_cup_mens::1962",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1962.jpg",
+      "public_filename": "fifa_world_cup_mens__1962.jpg",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1962.jpg"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1966",
+      "edition_key": "fifa_world_cup_mens::1966",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1966.png",
+      "public_filename": "fifa_world_cup_mens__1966.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1966.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1970",
+      "edition_key": "fifa_world_cup_mens::1970",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1970.png",
+      "public_filename": "fifa_world_cup_mens__1970.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1970.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1974",
+      "edition_key": "fifa_world_cup_mens::1974",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1974.png",
+      "public_filename": "fifa_world_cup_mens__1974.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1974.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1978",
+      "edition_key": "fifa_world_cup_mens::1978",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1978.png",
+      "public_filename": "fifa_world_cup_mens__1978.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1978.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1982",
+      "edition_key": "fifa_world_cup_mens::1982",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1982.png",
+      "public_filename": "fifa_world_cup_mens__1982.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1982.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1986",
+      "edition_key": "fifa_world_cup_mens::1986",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1986.png",
+      "public_filename": "fifa_world_cup_mens__1986.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1986.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1990",
+      "edition_key": "fifa_world_cup_mens::1990",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1990.png",
+      "public_filename": "fifa_world_cup_mens__1990.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1990.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1994",
+      "edition_key": "fifa_world_cup_mens::1994",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1994.png",
+      "public_filename": "fifa_world_cup_mens__1994.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1994.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "1998",
+      "edition_key": "fifa_world_cup_mens::1998",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__1998.png",
+      "public_filename": "fifa_world_cup_mens__1998.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__1998.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2002",
+      "edition_key": "fifa_world_cup_mens::2002",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2002.png",
+      "public_filename": "fifa_world_cup_mens__2002.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2002.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2006",
+      "edition_key": "fifa_world_cup_mens::2006",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2006.png",
+      "public_filename": "fifa_world_cup_mens__2006.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2006.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2010",
+      "edition_key": "fifa_world_cup_mens::2010",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2010.png",
+      "public_filename": "fifa_world_cup_mens__2010.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2010.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2014",
+      "edition_key": "fifa_world_cup_mens::2014",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2014.png",
+      "public_filename": "fifa_world_cup_mens__2014.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2014.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2018",
+      "edition_key": "fifa_world_cup_mens::2018",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2018.png",
+      "public_filename": "fifa_world_cup_mens__2018.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2018.png"
+    },
+    {
+      "competition_key": "fifa_world_cup_mens",
+      "season_label": "2022",
+      "edition_key": "fifa_world_cup_mens::2022",
+      "source_folder": "world_cup_assets",
+      "source_file": "fifa_world_cup_mens__2022.png",
+      "public_filename": "fifa_world_cup_mens__2022.png",
+      "public_src": "/images/competition-season/editions/fifa_world_cup_mens__2022.png"
     },
     {
       "competition_key": "la_liga",

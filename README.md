@@ -10,7 +10,7 @@
 
 Plataforma full-stack de exploração de futebol histórico, construída como produto de dados ponta a ponta: ingestão, modelagem, BFF, frontend analítico e camada de BI.
 
-O projeto não tenta ser um placar ao vivo. O foco é arquivo histórico e navegação canônica por competição, temporada, partida, time, jogador e rankings.
+O projeto não tenta ser um placar ao vivo. Ele organiza um arquivo histórico com navegação canônica por competição, temporada, partida, time, jogador e rankings.
 
 **Repositório:** [github.com/victorhob1981/football-analytics](https://github.com/victorhob1981/football-analytics)
 
@@ -28,9 +28,9 @@ Na prática, o projeto combina:
 - frontend em Next.js com superfícies de navegação;
 - assets e BI integrados ao mesmo fluxo.
 
-## Escopo técnico
+## Características do projeto
 
-Este repositório concentra, no mesmo fluxo, as camadas centrais da aplicação:
+Este projeto reúne capacidades técnicas de ponta a ponta:
 
 - ingestão, warehouse, BFF e UI com fronteiras explícitas;
 - modelagem canônica de competições e temporadas;
@@ -237,7 +237,6 @@ Gate mínimo de backend/dados:
 python tools/backend_data_readiness_gate.py
 ```
 
-Esses gates existem para verificar o estado operacional mínimo antes de revisão manual ou mudança relevante.
 
 ## Documentação complementar
 
@@ -247,3 +246,10 @@ Esses gates existem para verificar o estado operacional mínimo antes de revisã
 - [Contrato mart -> frontend -> BFF](docs/MART_FRONTEND_BFF_CONTRACTS.md)
 - [Readiness de frontend](docs/FRONTEND_RELEASE_READINESS.md)
 - [Readiness de backend/dados](docs/BACKEND_DATA_RELEASE_READINESS.md)
+
+## Resumo do que está implementado aqui
+
+- visão de produto, não só scripts isolados;
+- integração real entre data engineering, backend e frontend;
+- modelagem orientada a domínio;
+- preocupação com contratos, cobertura e rastreabilidade;

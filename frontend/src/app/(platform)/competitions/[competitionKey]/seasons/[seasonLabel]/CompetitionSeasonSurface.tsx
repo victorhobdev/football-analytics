@@ -23,6 +23,7 @@ import { useStageTies } from "@/features/competitions/hooks/useStageTies";
 import { competitionStructureQueryKeys } from "@/features/competitions/queryKeys";
 import { fetchStageTies } from "@/features/competitions/services/competition-hub.service";
 import type {
+  CompetitionAnalyticsData,
   CompetitionStructureData,
   CompetitionStructureStage,
   StageTie,
@@ -135,6 +136,7 @@ type HistoricalRankingLeader = {
   entityId: string;
   entityName: string;
   metricValue: number;
+  matchesPlayed: number | null;
   minutesPlayed: number | null;
   teamId?: string | null;
   teamName?: string | null;
@@ -142,6 +144,10 @@ type HistoricalRankingLeader = {
 
 type HistoricalRankingLeaderData = {
   leader: HistoricalRankingLeader | null;
+};
+
+type HistoricalRankingLeadersData = {
+  leaders: HistoricalRankingLeader[];
 };
 
 type TeamMetricInsight = {
@@ -225,6 +231,8 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 });
 
 const MATCHES_LIST_ALL_PAGES_SIZE = 100;
+const EDITION_TOP_RATED_PLAYERS_LIMIT = 3;
+const EDITION_TOP_RATED_PLAYERS_MIN_MATCHES = 5;
 
 function formatKickoff(value: string | null | undefined): string {
   if (!value) {
@@ -797,12 +805,49 @@ function resolveCupFinalStage(
 
 function resolveCupParticipantCount(
   resolution: CompetitionSeasonSurfaceResolution,
-): number | null {
-  const openingStage = resolveCupOpeningStage(resolution);
+  analyticsData?: CompetitionAnalyticsData | null,
+): {
+  count: number | null;
+  source: "analytics" | "structure" | "unavailable";
+} {
+  const participantStage = resolution.knockoutStages[0] ?? resolveCupOpeningStage(resolution);
 
-  return typeof openingStage?.expectedTeams === "number" && openingStage.expectedTeams > 0
-    ? openingStage.expectedTeams
-    : null;
+  if (typeof participantStage?.expectedTeams === "number" && participantStage.expectedTeams > 0) {
+    return {
+      count: participantStage.expectedTeams,
+      source: "structure",
+    };
+  }
+
+  const openingStageAnalytics =
+    (participantStage
+      ? analyticsData?.stageAnalytics.find((stage) => stage.stageId === participantStage.stageId && stage.teamCount > 0)
+      : null) ??
+    [...(analyticsData?.stageAnalytics ?? [])]
+      .filter((stage) => stage.teamCount > 0)
+      .sort((left, right) => {
+        const leftOrder = left.stageOrder ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = right.stageOrder ?? Number.MAX_SAFE_INTEGER;
+
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+
+        return right.teamCount - left.teamCount;
+      })[0] ??
+    null;
+
+  if (openingStageAnalytics) {
+    return {
+      count: openingStageAnalytics.teamCount,
+      source: "analytics",
+    };
+  }
+
+  return {
+    count: null,
+    source: "unavailable",
+  };
 }
 
 function resolveCupStageRangeLabel(
@@ -1070,6 +1115,7 @@ type HistoricalTopScorer = {
   entityId: string;
   entityName: string;
   goals: number;
+  matchesPlayed: number | null;
   minutesPlayed: number | null;
   teamId?: string | null;
   teamName?: string | null;
@@ -1118,6 +1164,10 @@ async function fetchEditionTopScorer(context: CompetitionSeasonContext): Promise
               typeof scorerRow.metricValue === "number" && Number.isFinite(scorerRow.metricValue)
                 ? scorerRow.metricValue
                 : 0,
+            matchesPlayed:
+              typeof scorerRow.matchesPlayed === "number" && Number.isFinite(scorerRow.matchesPlayed)
+                ? scorerRow.matchesPlayed
+                : null,
             minutesPlayed:
               typeof scorerRow.minutesPlayed === "number" && Number.isFinite(scorerRow.minutesPlayed)
                 ? scorerRow.minutesPlayed
@@ -1152,6 +1202,29 @@ function resolveRankingMinutes(row: RankingTableRow, fallback: number): number {
   return typeof row.minutesPlayed === "number" && Number.isFinite(row.minutesPlayed)
     ? row.minutesPlayed
     : fallback;
+}
+
+function resolveRankingMatchesPlayed(row: RankingTableRow, fallback: number): number {
+  return typeof row.matchesPlayed === "number" && Number.isFinite(row.matchesPlayed)
+    ? row.matchesPlayed
+    : fallback;
+}
+
+function mapHistoricalRankingLeader(row: RankingTableRow): HistoricalRankingLeader {
+  const matchesPlayed = resolveRankingMatchesPlayed(row, Number.NaN);
+
+  return {
+    entityId: row.entityId,
+    entityName: row.entityName?.trim() || row.entityId,
+    matchesPlayed: Number.isFinite(matchesPlayed) ? matchesPlayed : null,
+    metricValue: resolveRankingMetricValue(row, 0),
+    minutesPlayed:
+      typeof row.minutesPlayed === "number" && Number.isFinite(row.minutesPlayed)
+        ? row.minutesPlayed
+        : null,
+    teamId: typeof row.teamId === "string" ? row.teamId : null,
+    teamName: typeof row.teamName === "string" ? row.teamName : null,
+  };
 }
 
 function compareHistoricalRatings(left: RankingTableRow, right: RankingTableRow): number {
@@ -1265,31 +1338,53 @@ async function fetchEditionRankingLeader(
 
   return {
     data: {
-      leader: leaderRow
-        ? {
-            entityId: leaderRow.entityId,
-            entityName: leaderRow.entityName?.trim() || leaderRow.entityId,
-            metricValue: resolveRankingMetricValue(leaderRow, 0),
-            minutesPlayed:
-              typeof leaderRow.minutesPlayed === "number" && Number.isFinite(leaderRow.minutesPlayed)
-                ? leaderRow.minutesPlayed
-                : null,
-            teamId: typeof leaderRow.teamId === "string" ? leaderRow.teamId : null,
-            teamName: typeof leaderRow.teamName === "string" ? leaderRow.teamName : null,
-          }
-        : null,
+      leader: leaderRow ? mapHistoricalRankingLeader(leaderRow) : null,
     },
     meta: firstResponse?.meta,
   };
 }
 
-function useEditionTopRatedPlayer(context: CompetitionSeasonContext) {
-  return useQueryWithCoverage<HistoricalRankingLeaderData>({
+async function fetchEditionTopRatedPlayers(context: CompetitionSeasonContext): Promise<ApiResponse<HistoricalRankingLeadersData>> {
+  const rankingDefinition = getRankingDefinition("player-rating");
+
+  if (!rankingDefinition) {
+    return {
+      data: { leaders: [] },
+      meta: {
+        coverage: {
+          label: "Ranking player-rating indisponível no registro.",
+          status: "unknown",
+        },
+      },
+    };
+  }
+
+  const { firstResponse, rows } = await fetchAllHistoricalRankingRows(context, rankingDefinition);
+  const leaders = [...rows]
+    .filter((row) => resolveRankingMatchesPlayed(row, 0) >= EDITION_TOP_RATED_PLAYERS_MIN_MATCHES)
+    .sort(compareHistoricalRatings)
+    .slice(0, EDITION_TOP_RATED_PLAYERS_LIMIT)
+    .map(mapHistoricalRankingLeader);
+
+  return {
+    data: { leaders },
+    meta: firstResponse?.meta,
+  };
+}
+
+function useEditionTopRatedPlayers(context: CompetitionSeasonContext) {
+  return useQueryWithCoverage<HistoricalRankingLeadersData>({
     enabled: Boolean(context.competitionId && context.seasonId),
     gcTime: 30 * 60 * 1000,
-    isDataEmpty: (data) => data.leader === null,
-    queryFn: () => fetchEditionRankingLeader(context, "player-rating", compareHistoricalRatings),
-    queryKey: ["competition-season-top-rated-player", context.competitionId, context.seasonId],
+    isDataEmpty: (data) => data.leaders.length === 0,
+    queryFn: () => fetchEditionTopRatedPlayers(context),
+    queryKey: [
+      "competition-season-top-rated-players",
+      context.competitionId,
+      context.seasonId,
+      EDITION_TOP_RATED_PLAYERS_LIMIT,
+      EDITION_TOP_RATED_PLAYERS_MIN_MATCHES,
+    ],
     staleTime: 10 * 60 * 1000,
   });
 }
@@ -1550,6 +1645,32 @@ function formatPointCount(value: number | null | undefined): string {
   }
 
   return `${formatHistoricalMatchCount(value)} pts`;
+}
+
+function resolveGoalCadenceMinutes(
+  goals: number | null | undefined,
+  minutesPlayed: number | null | undefined,
+): number | null {
+  if (
+    typeof goals !== "number" ||
+    !Number.isFinite(goals) ||
+    goals <= 0 ||
+    typeof minutesPlayed !== "number" ||
+    !Number.isFinite(minutesPlayed) ||
+    minutesPlayed <= 0
+  ) {
+    return null;
+  }
+
+  return Math.max(1, Math.round(minutesPlayed / goals));
+}
+
+function formatMinutesLabel(value: number | null | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  return `${formatHistoricalMatchCount(value)} min`;
 }
 
 function compareTeamNames(left: { key: string; teamName: string }, right: { key: string; teamName: string }): number {
@@ -2838,87 +2959,6 @@ function KnockoutBracketPanel({
   );
 }
 
-function ChampionPathPanel({
-  championName,
-  context,
-  resolution,
-}: {
-  championName: string | null;
-  context: CompetitionSeasonContext;
-  resolution: CompetitionSeasonSurfaceResolution;
-}) {
-  const queries = useQueries({
-    queries: resolution.knockoutStages.map((stage) => ({
-      queryKey: competitionStructureQueryKeys.ties({
-        competitionKey: context.competitionKey,
-        seasonLabel: context.seasonLabel,
-        stageId: stage.stageId,
-      }),
-      queryFn: () =>
-        fetchStageTies({
-          competitionKey: context.competitionKey,
-          seasonLabel: context.seasonLabel,
-          stageId: stage.stageId,
-        }),
-      enabled: Boolean(context.competitionKey && context.seasonLabel && stage.stageId),
-      staleTime: 5 * 60 * 1000,
-      gcTime: 20 * 60 * 1000,
-    })),
-  });
-
-  const pathRows = useMemo(
-    () =>
-      resolution.knockoutStages.flatMap((stage, index) => {
-        const ties = queries[index]?.data?.data?.ties ?? [];
-        return ties
-          .filter((tie) => championName && tie.winnerTeamName === championName)
-          .map((tie) => ({
-            stageName: localizeSeasonStageName(stage.stageName ?? stage.stageId),
-            tie,
-          }));
-      }),
-    [championName, queries, resolution.knockoutStages],
-  );
-
-  return (
-    <ProfilePanel className="space-y-4" tone="soft">
-      <SeasonSectionHeader
-        description="Confrontos do campeão em cada fase eliminatória."
-        eyebrow="Caminho do campeão"
-        title={championName ? `${championName} até o título` : "Progressão do campeão"}
-      />
-
-      {pathRows.length === 0 ? (
-        <EmptyState
-          className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
-          description="Caminho do campeão indisponível."
-          title="Sem caminho consolidado"
-        />
-      ) : (
-        <div className="grid gap-3">
-          {pathRows.map(({ stageName, tie }) => (
-            <div
-              className="rounded-[1.2rem] border border-[rgba(191,201,195,0.55)] bg-white/88 px-4 py-4"
-              key={`${stageName}-${tie.tieId}`}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <ProfileTag>{stageName}</ProfileTag>
-                {tie.resolutionType ? <ProfileTag>{tie.resolutionType}</ProfileTag> : null}
-              </div>
-              <p className="mt-3 font-semibold text-[#111c2d]">
-                {tie.homeTeamName ?? "Mandante"} {tie.homeGoals} x {tie.awayGoals} {tie.awayTeamName ?? "Visitante"}
-              </p>
-              <p className="mt-1 text-sm text-[#57657a]">
-                {tie.matchCount} jogos{formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? ` • ${formatDateWindow(tie.firstLegAt, tie.lastLegAt)}` : ""}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </ProfilePanel>
-  );
-}
-
 function GroupPhaseSummaryPanel({
   context,
   stage,
@@ -3180,7 +3220,7 @@ function LeagueOverviewSection({ context }: { context: CompetitionSeasonContext 
   );
 }
 
-function SeasonFactsCard({
+function LeagueEditionSummaryStrip({
   context,
 }: {
   context: CompetitionSeasonContext;
@@ -3199,12 +3239,13 @@ function SeasonFactsCard({
   const totalGoals = resolveLeagueGoalsFromStandings(standingsQuery.data?.rows ?? []);
   const averageGoals = analyticsQuery.data?.seasonSummary.averageGoals;
 
-  const facts: Array<{ label: string; value: string }> = [
+  const facts: Array<{ label: string; value: string; valueClassName?: string }> = [
     {
       label: "Campeão",
       value: standingsQuery.isLoading
         ? "..."
         : (champion?.teamName ?? "Não identificado"),
+      valueClassName: "text-[1.45rem] leading-[1.02] tracking-[-0.04em]",
     },
     {
       label: "Gols na edição",
@@ -3226,28 +3267,34 @@ function SeasonFactsCard({
   ];
 
   return (
-    <ProfilePanel className="space-y-4">
-      <div>
-        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edição</p>
-        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
-          {context.competitionName}
+    <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="shrink-0">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+          Resumo da edição
         </p>
-        <p className="mt-1 text-sm text-[#57657a]">{context.seasonLabel}</p>
+        <p className="mt-1 text-sm font-semibold text-[#111c2d]">
+          Liga encerrada · {context.seasonLabel}
+        </p>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {facts.map((fact) => (
+
+      <div className="grid flex-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {facts.map((fact, index) => (
           <div
-            className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3"
+            className={index > 0 ? "xl:border-l xl:border-[rgba(191,201,195,0.48)] xl:pl-4" : undefined}
             key={fact.label}
           >
-            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">{fact.label}</p>
-            <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-base font-extrabold text-[#111c2d]">
+            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+              {fact.label}
+            </p>
+            <p
+              className={`mt-1.5 font-[family:var(--font-profile-headline)] text-[1.18rem] font-extrabold tracking-[-0.03em] text-[#111c2d] ${fact.valueClassName ?? ""}`}
+            >
               {fact.value}
             </p>
           </div>
         ))}
       </div>
-    </ProfilePanel>
+    </div>
   );
 }
 
@@ -3267,41 +3314,45 @@ function resolveRailCoverage(coverages: CoverageLike[], label: string): Coverage
   return { label, status: "complete" };
 }
 
-function EditionInsightRow({
+function CompactSuperlativeTile({
   href,
   label,
-  media,
   primary,
   secondary,
+  unit,
   value,
 }: {
   href?: string | null;
   label: string;
-  media?: ReactNode;
   primary: string;
   secondary?: string | null;
+  unit?: string | null;
   value: string;
 }) {
   const content = (
-    <>
-      <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[#57657a]">{label}</p>
-      <div className="mt-2 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          {media ? <div className="shrink-0">{media}</div> : null}
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-[#111c2d]">{primary}</p>
-            {secondary ? <p className="truncate text-[0.7rem] text-[#57657a]">{secondary}</p> : null}
-          </div>
-        </div>
-        <p className="shrink-0 text-sm font-extrabold text-[#003526]">{value}</p>
+    <div className="rounded-[1.2rem] border border-[rgba(191,201,195,0.52)] bg-[rgba(255,255,255,0.88)] px-3.5 py-3 shadow-[0_16px_34px_-34px_rgba(17,28,45,0.22)] transition-[transform,border-color,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#8bd6b6] hover:bg-white">
+      <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+        {label}
+      </p>
+      <div className="mt-2 flex items-end gap-2">
+        <p className="font-[family:var(--font-profile-headline)] text-[1.7rem] font-extrabold leading-none tracking-[-0.04em] text-[#003526]">
+          {value}
+        </p>
+        {unit ? (
+          <p className="pb-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+            {unit}
+          </p>
+        ) : null}
       </div>
-    </>
+      <p className="mt-2 text-sm font-semibold leading-5 text-[#111c2d]">{primary}</p>
+      {secondary ? <p className="mt-1 text-[0.72rem] leading-5 text-[#57657a]">{secondary}</p> : null}
+    </div>
   );
 
   if (href) {
     return (
       <Link
-        className="block rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
+        className="block transition-[transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 active:scale-[0.99]"
         href={href}
       >
         {content}
@@ -3309,30 +3360,197 @@ function EditionInsightRow({
     );
   }
 
+  return <div>{content}</div>;
+}
+
+function CupOverviewStatCard({
+  detail,
+  label,
+  value,
+}: {
+  detail: string;
+  label: string;
+  value: ReactNode;
+}) {
   return (
-    <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3">
-      {content}
+    <article className="relative overflow-hidden rounded-[1.4rem] border border-[rgba(191,201,195,0.52)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(240,243,255,0.88)_100%)] p-4 shadow-[0_20px_42px_-34px_rgba(17,28,45,0.28)] md:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(166,242,209,0.18),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(216,227,251,0.42),transparent_36%)]" />
+      <div className="relative space-y-4">
+        <span className="inline-flex rounded-full border border-[rgba(191,201,195,0.44)] bg-white/76 px-2.5 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-[#5f7087]">
+          {label}
+        </span>
+        <div>
+          <p className="font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
+            {value}
+          </p>
+          <p className="mt-2 text-[0.8rem]/6 text-[#57657a]">{detail}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CompactTravelRow({
+  href,
+  label,
+  primary,
+  value,
+}: {
+  href?: string | null;
+  label: string;
+  primary: string;
+  value: string;
+}) {
+  const content = (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3">
+      <div className="min-w-0">
+        <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+          {label}
+        </p>
+        <p className="mt-1 text-sm font-semibold leading-5 text-[#111c2d]">{primary}</p>
+      </div>
+      <p className="text-right font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#003526]">
+        {value}
+      </p>
     </div>
+  );
+
+  if (href) {
+    return (
+      <Link
+        className="block transition-[transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 active:scale-[0.99]"
+        href={href}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <div>{content}</div>;
+}
+
+function TopScorerSupportMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-[1.15rem] border border-white/10 bg-white/8 px-3.5 py-3 backdrop-blur-sm">
+      <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-white/62">{label}</p>
+      <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.18rem] font-extrabold tracking-[-0.03em] text-white">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
+  const scorerQuery = useEditionTopScorer(context);
+  const scorer = scorerQuery.data?.scorer ?? null;
+  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
+  const goalCadence = resolveGoalCadenceMinutes(scorer?.goals, scorer?.minutesPlayed);
+
+  return (
+    <ProfilePanel className="relative overflow-hidden p-5 md:p-5" tone="accent">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,224,130,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(166,242,209,0.18),transparent_34%)]" />
+      <div className="relative space-y-5">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#bfe6d6]">
+            Artilheiro
+          </p>
+          {scorerQuery.coverage.status !== "complete" ? <ProfileCoveragePill coverage={scorerQuery.coverage} /> : null}
+        </div>
+
+        {scorerQuery.isLoading ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-24 w-24 animate-pulse rounded-full bg-white/10" />
+              <div className="flex-1 space-y-2">
+                <div className="h-8 w-40 animate-pulse rounded bg-white/10" />
+                <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
+              </div>
+            </div>
+            <div className="h-24 w-28 animate-pulse rounded bg-white/10" />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="h-20 animate-pulse rounded-[1.15rem] bg-white/10" />
+              <div className="h-20 animate-pulse rounded-[1.15rem] bg-white/10" />
+            </div>
+          </div>
+        ) : scorer ? (
+          <>
+            <div className="flex items-start gap-4">
+              <PlayerPhoto playerId={scorer.entityId} playerName={scorer.entityName} size={96} />
+
+              <div className="min-w-0 flex-1 pt-1">
+                {scorerHref ? (
+                  <Link
+                    className="block font-[family:var(--font-profile-headline)] text-[2.1rem] font-extrabold leading-[0.94] tracking-[-0.05em] text-white transition-opacity hover:opacity-80"
+                    href={scorerHref}
+                  >
+                    {scorer.entityName}
+                  </Link>
+                ) : (
+                  <p className="font-[family:var(--font-profile-headline)] text-[2.1rem] font-extrabold leading-[0.94] tracking-[-0.05em] text-white">
+                    {scorer.entityName}
+                  </p>
+                )}
+
+                {scorer.teamName ? (
+                  <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#d7efe4]">
+                    <TeamBadge size={28} teamId={scorer.teamId} teamName={scorer.teamName} />
+                    <span>{scorer.teamName}</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/58">Gols</p>
+              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[5rem] font-extrabold leading-none tracking-[-0.08em] text-white">
+                {formatHistoricalMatchCount(scorer.goals)}
+              </p>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <TopScorerSupportMetric
+                label="Jogos"
+                value={formatHistoricalMatchCount(scorer.matchesPlayed)}
+              />
+              <TopScorerSupportMetric
+                label="1 gol a cada"
+                value={formatMinutesLabel(goalCadence)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="rounded-[1.2rem] border border-white/10 bg-white/6 px-4 py-4 text-sm text-white/72">
+            Artilharia indisponível no recorte atual.
+          </div>
+        )}
+      </div>
+    </ProfilePanel>
   );
 }
 
 function EditionSuperlativesRailCard({ context }: { context: CompetitionSeasonContext }) {
   const insights = useEditionRailInsights(context);
-  const topRatedQuery = useEditionTopRatedPlayer(context);
+  const topRatedPlayersQuery = useEditionTopRatedPlayers(context);
   const assistProviderQuery = useEditionTopAssistProvider(context);
   const coverage = resolveRailCoverage(
     [
       insights.standingsQuery.coverage,
       insights.matchesQuery.coverage,
-      topRatedQuery.coverage,
+      topRatedPlayersQuery.coverage,
       assistProviderQuery.coverage,
     ],
     "Dados parciais dos superlativos",
   );
 
   const bestAttack = insights.bestAttack;
-  const bestDefense = insights.bestDefense;
-  const topRatedPlayer = topRatedQuery.data?.leader ?? null;
+  const topRatedPlayers = topRatedPlayersQuery.data?.leaders ?? [];
+  const topRatedPlayer = topRatedPlayers[0] ?? null;
   const topAssistProvider = assistProviderQuery.data?.leader ?? null;
   const highestScoringMatch = insights.highestScoringMatch;
 
@@ -3340,94 +3558,77 @@ function EditionSuperlativesRailCard({ context }: { context: CompetitionSeasonCo
     {
       href: bestAttack?.teamId ? buildCanonicalTeamPath(context, bestAttack.teamId) : null,
       label: "Melhor ataque",
-      media: bestAttack ? <TeamBadge size={38} teamId={bestAttack.teamId} teamName={bestAttack.teamName} /> : null,
       primary:
         bestAttack?.teamName ??
         (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
       secondary: null,
       value:
         bestAttack
-          ? `${formatMetricValue("goals", bestAttack.metricValue)} gols`
+          ? formatMetricValue("goals", bestAttack.metricValue)
           : (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
-    },
-    {
-      href: bestDefense?.teamId ? buildCanonicalTeamPath(context, bestDefense.teamId) : null,
-      label: "Melhor defesa",
-      media: bestDefense ? <TeamBadge size={38} teamId={bestDefense.teamId} teamName={bestDefense.teamName} /> : null,
-      primary:
-        bestDefense?.teamName ??
-        (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
-      secondary: null,
-      value:
-        bestDefense
-          ? `${formatMetricValue("goals", bestDefense.metricValue)} sofridos`
-          : (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
+      unit: bestAttack ? "gols" : null,
     },
     {
       href: topRatedPlayer ? buildCanonicalPlayerPath(context, topRatedPlayer.entityId) : null,
-      label: "Maior nota média",
-      media: topRatedPlayer ? <PlayerPhoto playerId={topRatedPlayer.entityId} playerName={topRatedPlayer.entityName} size={40} /> : null,
-      primary: topRatedPlayer?.entityName ?? (topRatedQuery.isLoading ? "..." : "-"),
+      label: "Maior nota",
+      primary: topRatedPlayer?.entityName ?? (topRatedPlayersQuery.isLoading ? "..." : "-"),
       secondary: topRatedPlayer?.teamName ?? null,
       value:
         topRatedPlayer
           ? formatMetricValue("player_rating", topRatedPlayer.metricValue)
-          : (topRatedQuery.isLoading ? "..." : "-"),
+          : (topRatedPlayersQuery.isLoading ? "..." : "-"),
+      unit: null,
     },
     {
       href: topAssistProvider ? buildCanonicalPlayerPath(context, topAssistProvider.entityId) : null,
       label: "Maior assistente",
-      media: topAssistProvider ? <PlayerPhoto playerId={topAssistProvider.entityId} playerName={topAssistProvider.entityName} size={40} /> : null,
       primary: topAssistProvider?.entityName ?? (assistProviderQuery.isLoading ? "..." : "-"),
       secondary: topAssistProvider?.teamName ?? null,
       value:
         topAssistProvider
-          ? formatAssistCount(topAssistProvider.metricValue)
+          ? formatHistoricalMatchCount(topAssistProvider.metricValue)
           : (assistProviderQuery.isLoading ? "..." : "-"),
+      unit: topAssistProvider ? "assist." : null,
     },
     {
       href: highestScoringMatch
         ? `/matches/${encodeURIComponent(highestScoringMatch.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`
         : null,
       label: "Jogo com mais gols",
-      media: highestScoringMatch ? (
-        <div className="flex items-center -space-x-2">
-          <TeamBadge size={30} teamId={highestScoringMatch.homeTeamId} teamName={highestScoringMatch.homeTeamName} />
-          <TeamBadge size={30} teamId={highestScoringMatch.awayTeamId} teamName={highestScoringMatch.awayTeamName} />
-        </div>
-      ) : null,
       primary:
         highestScoringMatch
-          ? `${highestScoringMatch.homeTeamName} ${highestScoringMatch.homeScore} - ${highestScoringMatch.awayScore} ${highestScoringMatch.awayTeamName}`
+          ? `${highestScoringMatch.homeTeamName} x ${highestScoringMatch.awayTeamName}`
           : (insights.matchesQuery.isLoading ? "..." : "-"),
-      secondary: highestScoringMatch?.kickoffAt ? formatLongDate(highestScoringMatch.kickoffAt) : null,
+      secondary:
+        highestScoringMatch
+          ? `${highestScoringMatch.homeScore} - ${highestScoringMatch.awayScore}`
+          : null,
       value:
         highestScoringMatch
-          ? `${formatMetricValue("goals", highestScoringMatch.metricValue)} gols`
+          ? formatMetricValue("goals", highestScoringMatch.metricValue)
           : (insights.matchesQuery.isLoading ? "..." : "-"),
+      unit: highestScoringMatch ? "gols" : null,
     },
   ];
 
   return (
-    <ProfilePanel className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Destaques</p>
-          <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
-            Superlativos da edição
-          </p>
-        </div>
+    <ProfilePanel className="space-y-3.5 p-4 md:p-5" tone="soft">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+          Superlativos
+        </p>
         {coverage.status !== "complete" ? <ProfileCoveragePill coverage={coverage} /> : null}
       </div>
-      <div className="space-y-2">
+
+      <div className="grid gap-2.5 sm:grid-cols-2">
         {items.map((item) => (
-          <EditionInsightRow
+          <CompactSuperlativeTile
             href={item.href}
             key={item.label}
             label={item.label}
-            media={item.media}
             primary={item.primary}
             secondary={item.secondary}
+            unit={item.unit}
             value={item.value}
           />
         ))}
@@ -3453,28 +3654,24 @@ function EditionTravelRailCard({ context }: { context: CompetitionSeasonContext 
     {
       href: bestHomeTeam?.teamId ? buildCanonicalTeamPath(context, bestHomeTeam.teamId) : null,
       label: "Melhor mandante",
-      media: bestHomeTeam ? <TeamBadge size={38} teamId={bestHomeTeam.teamId} teamName={bestHomeTeam.teamName} /> : null,
       primary: bestHomeTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
       value: bestHomeTeam ? formatPointCount(bestHomeTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
     },
     {
       href: bestAwayTeam?.teamId ? buildCanonicalTeamPath(context, bestAwayTeam.teamId) : null,
       label: "Melhor visitante",
-      media: bestAwayTeam ? <TeamBadge size={38} teamId={bestAwayTeam.teamId} teamName={bestAwayTeam.teamName} /> : null,
       primary: bestAwayTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
       value: bestAwayTeam ? formatPointCount(bestAwayTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
     },
     {
       href: worstAwayTeam?.teamId ? buildCanonicalTeamPath(context, worstAwayTeam.teamId) : null,
       label: "Pior visitante",
-      media: worstAwayTeam ? <TeamBadge size={38} teamId={worstAwayTeam.teamId} teamName={worstAwayTeam.teamName} /> : null,
       primary: worstAwayTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
       value: worstAwayTeam ? formatPointCount(worstAwayTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
     },
     {
       href: longestUnbeatenRun?.teamId ? buildCanonicalTeamPath(context, longestUnbeatenRun.teamId) : null,
       label: "Maior sequência invicta",
-      media: longestUnbeatenRun ? <TeamBadge size={38} teamId={longestUnbeatenRun.teamId} teamName={longestUnbeatenRun.teamName} /> : null,
       primary: longestUnbeatenRun?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
       value:
         longestUnbeatenRun
@@ -3484,7 +3681,6 @@ function EditionTravelRailCard({ context }: { context: CompetitionSeasonContext 
     {
       href: longestWinningRun?.teamId ? buildCanonicalTeamPath(context, longestWinningRun.teamId) : null,
       label: "Maior sequência de vitórias",
-      media: longestWinningRun ? <TeamBadge size={38} teamId={longestWinningRun.teamId} teamName={longestWinningRun.teamName} /> : null,
       primary: longestWinningRun?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
       value:
         longestWinningRun
@@ -3494,21 +3690,20 @@ function EditionTravelRailCard({ context }: { context: CompetitionSeasonContext 
   ];
 
   return (
-    <ProfilePanel className="space-y-4" tone="soft">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Mandos</p>
-          
-        </div>
+    <ProfilePanel className="space-y-3.5 p-4 md:p-5" tone="soft">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+          Mandos e sequências
+        </p>
         {coverage.status !== "complete" ? <ProfileCoveragePill coverage={coverage} /> : null}
       </div>
-      <div className="space-y-2">
+
+      <div className="divide-y divide-[rgba(191,201,195,0.42)]">
         {items.map((item) => (
-          <EditionInsightRow
+          <CompactTravelRow
             href={item.href}
             key={item.label}
             label={item.label}
-            media={item.media}
             primary={item.primary}
             value={item.value}
           />
@@ -3569,7 +3764,7 @@ function CupHistoricalHero({
     ? "..."
     : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount);
   const primaryStageCount = resolveCupPrimaryStages(resolution).length || resolution.knockoutStages.length;
-  const participantCount = resolveCupParticipantCount(resolution);
+  const participantCount = resolveCupParticipantCount(resolution, analyticsQuery.data ?? null).count;
   const topScorer = topScorerQuery.data?.scorer ?? null;
   const topScorerName = topScorerQuery.isLoading ? "..." : (topScorer?.entityName ?? "Artilharia indisponível");
   const topScorerDetail = topScorer ? (
@@ -3757,83 +3952,9 @@ function CupStructureStrip({
   );
 }
 
-// ─── Rail cards visuais ───────────────────────────────────────────────────────
-
-function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
-  const scorerQuery = useEditionTopScorer(context);
-  const scorer = scorerQuery.data?.scorer ?? null;
-  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
-
-  return (
-    <div className="relative overflow-hidden rounded-xl bg-[#003526] p-5 text-white">
-      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-emerald-400/10 blur-3xl" />
-      <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-400">
-        Artilheiro
-      </p>
-
-      <div className="mt-4">
-        {scorerQuery.isLoading ? (
-          <div className="flex items-center gap-3">
-            <div className="h-14 w-14 animate-pulse rounded-full bg-white/10" />
-            <div className="space-y-2 flex-1">
-              <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
-              <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
-            </div>
-          </div>
-        ) : scorer ? (
-          <div className="flex items-center gap-4">
-            <PlayerPhoto playerId={scorer.entityId} playerName={scorer.entityName} size={56} />
-            <div className="space-y-0.5 min-w-0">
-              {scorerHref ? (
-                <Link
-                  className="block font-[family:var(--font-profile-headline)] text-xl font-extrabold leading-tight text-white transition-opacity hover:opacity-80 truncate"
-                  href={scorerHref}
-                >
-                  {scorer.entityName}
-                </Link>
-              ) : (
-                <p className="font-[family:var(--font-profile-headline)] text-xl font-extrabold leading-tight truncate">
-                  {scorer.entityName}
-                </p>
-              )}
-              {scorer.teamName ? (
-                <p className="text-xs font-medium uppercase tracking-wide text-emerald-400/80 truncate">
-                  {scorer.teamName}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm font-medium text-white/60">Não identificado</p>
-        )}
-      </div>
-
-      {scorer ? (
-        <div className="mt-5 flex items-end justify-between border-t border-white/10 pt-4">
-          <div>
-            <p className="text-[0.6rem] font-bold uppercase tracking-widest text-emerald-400/60">Gols</p>
-            <p className="font-[family:var(--font-profile-headline)] text-4xl font-black">
-              {String(scorer.goals).padStart(2, "0")}
-            </p>
-          </div>
-          {scorer.minutesPlayed ? (
-            <div className="text-right">
-              <p className="text-[0.6rem] font-bold uppercase tracking-widest text-emerald-400/60">Minutos</p>
-              <p className="font-[family:var(--font-profile-headline)] text-xl font-bold">
-                {Math.round(scorer.minutesPlayed).toLocaleString("pt-BR")}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function LeagueEditionRail({ context }: { context: CompetitionSeasonContext }) {
   return (
     <>
-      <SeasonFactsCard context={context} />
       <TopScorerRailCard context={context} />
       <EditionRailInsightsCards context={context} />
     </>
@@ -3871,89 +3992,133 @@ function LeagueStructureSection({ context }: { context: CompetitionSeasonContext
 // ─── Bloco 4 — Canvas da copa ────────────────────────────────────────────────
 
 function CupOverviewSection({
-  championTieQuery,
   context,
   resolution,
 }: {
-  championTieQuery: ReturnType<typeof useStageTies>;
   context: CompetitionSeasonContext;
   resolution: CompetitionSeasonSurfaceResolution;
 }) {
-  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
-  const championName = championTieQuery.isLoading ? null : (championTie?.winnerTeamName ?? null);
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
   const primaryStages = resolveCupPrimaryStages(resolution);
   const openingStage = resolveCupOpeningStage(resolution);
   const finalStage = resolveCupFinalStage(resolution);
-  const participantCount = resolveCupParticipantCount(resolution);
+  const participantCountState = resolveCupParticipantCount(resolution, analyticsQuery.data ?? null);
+  const participantCountValue =
+    participantCountState.count !== null
+      ? formatHistoricalMatchCount(participantCountState.count)
+      : (analyticsQuery.isLoading ? "..." : "-");
+  const participantCountDetail =
+    participantCountState.source === "structure"
+      ? "Estimativa vinda da estrutura da etapa inicial."
+      : participantCountState.source === "analytics"
+        ? "Derivado do total de equipes consolidadas na primeira fase da edição."
+        : "Participantes não consolidados na estrutura.";
+  const seasonSummary = analyticsQuery.data?.seasonSummary ?? null;
+  const summaryBadges = [
+    seasonSummary?.matchCount ? `${formatHistoricalMatchCount(seasonSummary.matchCount)} partidas` : null,
+    seasonSummary?.tieCount ? `${formatHistoricalMatchCount(seasonSummary.tieCount)} confrontos` : null,
+    primaryStages.length > 0 ? formatCupStageCount(primaryStages.length) : null,
+  ].filter((badge): badge is string => Boolean(badge));
 
   return (
     <div className="space-y-5">
-      <ProfilePanel className="space-y-5">
-        <SeasonSectionHeader
-          description="Leitura direta da edição eliminatória, sem fase de grupos ou tabela classificatória."
-          eyebrow="Visão geral"
-          title="Leitura da copa"
-        />
+      <ProfilePanel className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(216,227,251,0.5),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(166,242,209,0.16),transparent_30%)]" />
+        <div className="relative space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Visão geral</p>
+              <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
+                Leitura da copa
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
+                Leitura direta da edição eliminatória, sem fase de grupos ou tabela classificatória.
+              </p>
+            </div>
+            {summaryBadges.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {summaryBadges.map((badge) => (
+                  <span
+                    className="inline-flex rounded-full border border-[rgba(191,201,195,0.44)] bg-white/76 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#455468]"
+                    key={badge}
+                  >
+                    {badge}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <HistoricalHeroCard
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <CupOverviewStatCard
             detail="A edição é tratada como torneio eliminatório puro."
             label="Formato"
-            tone="soft"
             value={resolution.editionLabel ?? "Mata-mata"}
-          />
-          <HistoricalHeroCard
+            />
+            <CupOverviewStatCard
             detail="Primeira etapa exibida no chaveamento principal."
             label="Entrada"
-            tone="soft"
             value={openingStage ? localizeSeasonStageName(openingStage.stageName ?? openingStage.stageId) : "-"}
-          />
-          <HistoricalHeroCard
+            />
+            <CupOverviewStatCard
             detail="Última etapa eliminatória consolidada."
             label="Decisão"
-            tone="soft"
             value={finalStage ? localizeSeasonStageName(finalStage.stageName ?? finalStage.stageId) : "-"}
-          />
-          <HistoricalHeroCard
-            detail={participantCount ? "Estimativa vinda da estrutura da etapa inicial." : "Participantes não consolidados na estrutura."}
+            />
+            <CupOverviewStatCard
+            detail={participantCountDetail}
             label="Clubes"
-            tone="soft"
-            value={participantCount ? String(participantCount) : "-"}
-          />
-        </div>
-
-        {primaryStages.length > 0 ? (
-          <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.55)] bg-white/88 px-4 py-4">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-              Trilha principal
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {primaryStages.map((stage, index) => (
-                <div className="flex items-center gap-2" key={stage.stageId}>
-                  <span className="rounded-full border border-[rgba(191,201,195,0.62)] bg-[rgba(240,243,255,0.88)] px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#455468]">
-                    {localizeSeasonStageName(stage.stageName ?? stage.stageId)}
-                  </span>
-                  {index < primaryStages.length - 1 ? (
-                    <span className="text-sm font-semibold text-[#8fa097]">→</span>
-                  ) : null}
-                </div>
-              ))}
-            </div>
+            value={participantCountValue}
+            />
           </div>
-        ) : (
-          <EmptyState
-            className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-            description="A estrutura não trouxe fases eliminatórias suficientes para descrever a trilha."
-            title="Sem trilha consolidada"
-          />
-        )}
+
+          {primaryStages.length > 0 ? (
+            <div className="relative overflow-hidden rounded-[1.5rem] border border-[rgba(191,201,195,0.52)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(241,245,255,0.72)_100%)] p-4 shadow-[0_18px_42px_-36px_rgba(17,28,45,0.22)] md:p-5">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(216,227,251,0.34),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(166,242,209,0.14),transparent_32%)]" />
+              <div className="relative">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+                      Trilha principal
+                    </p>
+                    <p className="mt-1 text-sm text-[#57657a]">
+                      Sequência do chaveamento principal até a decisão da edição.
+                    </p>
+                  </div>
+                  <span className="inline-flex rounded-full border border-[rgba(191,201,195,0.44)] bg-white/78 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
+                    {formatCupStageCount(primaryStages.length)}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2 md:gap-3">
+                  {primaryStages.map((stage, index) => (
+                    <div className="flex items-center gap-2 md:gap-3" key={stage.stageId}>
+                      <span className="inline-flex rounded-full border border-[rgba(191,201,195,0.56)] bg-white/86 px-3.5 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#455468] shadow-[0_14px_28px_-24px_rgba(17,28,45,0.25)]">
+                        {localizeSeasonStageName(stage.stageName ?? stage.stageId)}
+                      </span>
+                      {index < primaryStages.length - 1 ? (
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(191,201,195,0.52)] bg-white/74 text-[0.9rem] font-semibold text-[#7b8c87]">
+                          →
+                        </span>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
+              description="A estrutura não trouxe fases eliminatórias suficientes para descrever a trilha."
+              title="Sem trilha consolidada"
+            />
+          )}
+        </div>
       </ProfilePanel>
 
-      <ChampionPathPanel
-        championName={championName}
-        context={context}
-        resolution={resolution}
-      />
+      <EditionSuperlativesRailCard context={context} />
     </div>
   );
 }
@@ -4835,6 +5000,7 @@ function LeagueSeasonSurface({
       context={context}
       density="compact"
       hero={<LeaguePageHeader context={context} navigation={navigation} tag="Pontos Corridos" />}
+      summaryStrip={<LeagueEditionSummaryStrip context={context} />}
       mainCanvas={
         <>
           {shouldShowClassification ? <LeagueOverviewSection context={context} /> : null}
@@ -4862,11 +5028,6 @@ function CupSeasonSurface({
   structure: CompetitionStructureData | null;
 }) {
   const searchParams = useSearchParams();
-  const championTieQuery = useStageTies({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-    stageId: resolution.finalKnockoutStage?.stageId,
-  });
   const navLabels = buildSurfaceNavLabels(resolution);
   const overviewBracket = (
     <KnockoutBracketPanel
@@ -4887,11 +5048,7 @@ function CupSeasonSurface({
           {activeSection === "overview" ? (
             <div className="space-y-6">
               {overviewBracket}
-              <CupOverviewSection
-                championTieQuery={championTieQuery}
-                context={context}
-                resolution={resolution}
-              />
+              <CupOverviewSection context={context} resolution={resolution} />
             </div>
           ) : null}
           {activeSection === "structure" ? <CupStructureSection context={context} resolution={resolution} /> : null}
