@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-import unicodedata
 from typing import Any
 
 TEAM_AND_COUNTRY_NAME_OVERRIDES = {
@@ -75,23 +73,100 @@ TEAM_AND_COUNTRY_NAME_OVERRIDES = {
     "Yugoslavia": "Iugoslávia",
 }
 
+WORLD_CUP_CANONICAL_TEAM_VARIANTS = (
+    ("world-cup-algeria", "Argélia", ("Algeria", "Argélia")),
+    ("world-cup-angola", "Angola", ("Angola",)),
+    ("world-cup-argentina", "Argentina", ("Argentina",)),
+    ("world-cup-australia", "Austrália", ("Australia", "Austrália")),
+    ("world-cup-austria", "Áustria", ("Austria", "Áustria")),
+    ("world-cup-belgium", "Bélgica", ("Belgium", "Bélgica")),
+    ("world-cup-bolivia", "Bolívia", ("Bolivia", "Bolívia")),
+    ("world-cup-bosnia-and-herzegovina", "Bósnia e Herzegovina", ("Bosnia and Herzegovina", "Bósnia e Herzegovina")),
+    ("world-cup-brazil", "Brasil", ("Brazil", "Brasil")),
+    ("world-cup-bulgaria", "Bulgária", ("Bulgaria", "Bulgária")),
+    ("world-cup-cameroon", "Camarões", ("Cameroon", "Camarões")),
+    ("world-cup-canada", "Canadá", ("Canada", "Canadá")),
+    ("world-cup-chile", "Chile", ("Chile",)),
+    ("world-cup-china", "China", ("China",)),
+    ("world-cup-colombia", "Colômbia", ("Colombia", "Colômbia")),
+    ("world-cup-costa-rica", "Costa Rica", ("Costa Rica",)),
+    ("world-cup-croatia", "Croácia", ("Croatia", "Croácia")),
+    ("world-cup-cuba", "Cuba", ("Cuba",)),
+    ("world-cup-czech-republic", "República Tcheca", ("Czech Republic", "República Tcheca")),
+    ("world-cup-czechoslovakia", "Tchecoslováquia", ("Czechoslovakia", "Tchecoslováquia")),
+    ("world-cup-denmark", "Dinamarca", ("Denmark", "Dinamarca")),
+    ("world-cup-dutch-east-indies", "Índias Orientais Neerlandesas", ("Dutch East Indies", "Índias Orientais Neerlandesas")),
+    ("world-cup-east-germany", "Alemanha Oriental", ("East Germany", "Alemanha Oriental")),
+    ("world-cup-ecuador", "Equador", ("Ecuador", "Equador")),
+    ("world-cup-egypt", "Egito", ("Egypt", "Egito")),
+    ("world-cup-el-salvador", "El Salvador", ("El Salvador",)),
+    ("world-cup-england", "Inglaterra", ("England", "Inglaterra")),
+    ("world-cup-france", "França", ("France", "França")),
+    ("world-cup-germany", "Alemanha", ("Germany", "Alemanha", "West Germany", "Alemanha Ocidental")),
+    ("world-cup-ghana", "Ghana", ("Ghana",)),
+    ("world-cup-greece", "Grécia", ("Greece", "Grécia")),
+    ("world-cup-haiti", "Haiti", ("Haiti",)),
+    ("world-cup-honduras", "Honduras", ("Honduras",)),
+    ("world-cup-hungary", "Hungria", ("Hungary", "Hungria")),
+    ("world-cup-iceland", "Islândia", ("Iceland", "Islândia")),
+    ("world-cup-iran", "Irã", ("Iran", "Irã")),
+    ("world-cup-iraq", "Iraque", ("Iraq", "Iraque")),
+    ("world-cup-israel", "Israel", ("Israel",)),
+    ("world-cup-italy", "Itália", ("Italy", "Itália")),
+    ("world-cup-ivory-coast", "Costa do Marfim", ("Ivory Coast", "Costa do Marfim")),
+    ("world-cup-jamaica", "Jamaica", ("Jamaica",)),
+    ("world-cup-japan", "Japão", ("Japan", "Japão")),
+    ("world-cup-kuwait", "Kuwait", ("Kuwait",)),
+    ("world-cup-mexico", "México", ("Mexico", "México")),
+    ("world-cup-morocco", "Marrocos", ("Morocco", "Marrocos")),
+    ("world-cup-netherlands", "Países Baixos", ("Netherlands", "Países Baixos")),
+    ("world-cup-new-zealand", "Nova Zelândia", ("New Zealand", "Nova Zelândia")),
+    ("world-cup-nigeria", "Nigéria", ("Nigeria", "Nigéria")),
+    ("world-cup-north-korea", "Coreia do Norte", ("North Korea", "Coreia do Norte")),
+    ("world-cup-northern-ireland", "Irlanda do Norte", ("Northern Ireland", "Irlanda do Norte")),
+    ("world-cup-norway", "Noruega", ("Norway", "Noruega")),
+    ("world-cup-panama", "Panamá", ("Panama", "Panamá")),
+    ("world-cup-paraguay", "Paraguai", ("Paraguay", "Paraguai")),
+    ("world-cup-peru", "Peru", ("Peru",)),
+    ("world-cup-poland", "Polônia", ("Poland", "Polônia")),
+    ("world-cup-portugal", "Portugal", ("Portugal",)),
+    ("world-cup-qatar", "Catar", ("Qatar", "Catar")),
+    ("world-cup-republic-of-ireland", "República da Irlanda", ("Republic of Ireland", "República da Irlanda")),
+    ("world-cup-romania", "Romênia", ("Romania", "Romênia")),
+    ("world-cup-russia", "Rússia", ("Russia", "Rússia")),
+    ("world-cup-saudi-arabia", "Arábia Saudita", ("Saudi Arabia", "Arábia Saudita")),
+    ("world-cup-scotland", "Escócia", ("Scotland", "Escócia")),
+    ("world-cup-senegal", "Senegal", ("Senegal",)),
+    ("world-cup-serbia", "Sérvia", ("Serbia", "Sérvia")),
+    ("world-cup-serbia-and-montenegro", "Sérvia e Montenegro", ("Serbia and Montenegro", "Sérvia e Montenegro")),
+    ("world-cup-slovakia", "Eslováquia", ("Slovakia", "Eslováquia")),
+    ("world-cup-slovenia", "Eslovênia", ("Slovenia", "Eslovênia")),
+    ("world-cup-south-africa", "África do Sul", ("South Africa", "África do Sul")),
+    ("world-cup-south-korea", "Coreia do Sul", ("South Korea", "Coreia do Sul")),
+    ("world-cup-soviet-union", "União Soviética", ("Soviet Union", "União Soviética")),
+    ("world-cup-spain", "Espanha", ("Spain", "Espanha")),
+    ("world-cup-sweden", "Suécia", ("Sweden", "Suécia")),
+    ("world-cup-switzerland", "Suíça", ("Switzerland", "Suíça")),
+    ("world-cup-togo", "Togo", ("Togo",)),
+    ("world-cup-trinidad-and-tobago", "Trinidad e Tobago", ("Trinidad and Tobago", "Trinidad e Tobago")),
+    ("world-cup-tunisia", "Tunísia", ("Tunisia", "Tunísia")),
+    ("world-cup-turkey", "Turquia", ("Turkey", "Turquia")),
+    ("world-cup-ukraine", "Ucrânia", ("Ukraine", "Ucrânia")),
+    ("world-cup-united-arab-emirates", "Emirados Árabes Unidos", ("United Arab Emirates", "Emirados Árabes Unidos")),
+    ("world-cup-united-states", "Estados Unidos", ("United States", "Estados Unidos")),
+    ("world-cup-uruguay", "Uruguai", ("Uruguay", "Uruguai")),
+    ("world-cup-wales", "País de Gales", ("Wales", "País de Gales")),
+    ("world-cup-yugoslavia", "Iugoslávia", ("Yugoslavia", "Iugoslávia")),
+    ("world-cup-zaire", "Zaire", ("Zaire",)),
+)
+
 WORLD_CUP_CANONICAL_DISPLAY_TEAMS = {
-    "germany": {
-        "display_team_id": "world-cup-germany",
-        "display_team_name": "Alemanha",
-    },
-    "west germany": {
-        "display_team_id": "world-cup-germany",
-        "display_team_name": "Alemanha",
-    },
-    "alemanha": {
-        "display_team_id": "world-cup-germany",
-        "display_team_name": "Alemanha",
-    },
-    "alemanha ocidental": {
-        "display_team_id": "world-cup-germany",
-        "display_team_name": "Alemanha",
-    },
+    alias.casefold(): {
+        "display_team_id": display_team_id,
+        "display_team_name": display_team_name,
+    }
+    for display_team_id, display_team_name, aliases in WORLD_CUP_CANONICAL_TEAM_VARIANTS
+    for alias in aliases
 }
 
 VENUE_NAME_OVERRIDES = {
@@ -160,18 +235,6 @@ def serialize_world_cup_display_team(team_id: int | str | None, team_name: str |
         "teamId": display_team_id,
         "teamName": display_team_name,
     }
-
-
-def build_world_cup_country_key(value: str | None) -> str | None:
-    translated_value = translate_world_cup_display_name(value)
-    normalized_value = _normalize_compare_key(translated_value)
-    if normalized_value is None:
-        return None
-
-    ascii_normalized = (
-        unicodedata.normalize("NFKD", normalized_value).encode("ascii", "ignore").decode("ascii")
-    )
-    return re.sub(r"[^a-z0-9]+", "_", ascii_normalized).strip("_") or None
 
 
 def build_world_cup_edition_name(season_label: str) -> str:

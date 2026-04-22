@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
 
-type VisualAssetCategory = "clubs" | "competitions" | "countries" | "players";
+type VisualAssetCategory = "clubs" | "competitions" | "players";
 
 type ProfileMediaProps = {
   alt: string;
