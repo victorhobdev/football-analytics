@@ -23,7 +23,7 @@ import type {
   WorldCupHubEdition,
 } from "@/features/world-cup/types/world-cup.types";
 
-const WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens";
+const WORLD_CUP_COMPETITION_KEY = "wc_mens";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -229,8 +229,8 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
             <div className="flex items-center gap-3">
               <ProfileMedia
                 alt={`País-sede ${hostCountryName}`}
-                assetId={edition.hostCountryKey}
-                category="countries"
+                assetId={null}
+                category="clubs"
                 className="h-10 w-10 rounded-full"
                 fallback={buildFallbackLabel(hostCountryName)}
                 imageClassName="p-1.5"

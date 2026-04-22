@@ -188,10 +188,6 @@ export function WorldCupTeamsContent() {
         </div>
       </ProfilePanel>
 
-      <ProfileAlert title="Exibição da vertical" tone="info">
-        Alemanha aparece de forma canônica nesta vertical. As demais seleções seguem a modelagem atual do contrato.
-      </ProfileAlert>
-
       <ProfilePanel className="space-y-5" tone="base">
         <header className="space-y-2">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">Grade de selecoes</p>

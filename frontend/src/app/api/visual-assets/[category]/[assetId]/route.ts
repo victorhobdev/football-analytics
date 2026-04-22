@@ -270,6 +270,38 @@ function findManifestEntry(entries: ManifestEntry[], assetId: string): ManifestE
   return null;
 }
 
+function buildOverlayRelativePath(category: string, assetId: string): string {
+  return `data/visual_assets/wc_overlay/${category}/${assetId}.png`;
+}
+
+function isOverlayLocalPath(localPath: string): boolean {
+  const normalizedLocalPath = localPath.replaceAll("\\", "/");
+  return normalizedLocalPath.startsWith("data/visual_assets/wc_overlay/");
+}
+
+async function resolveOverlayEntry(category: string, assetId: string): Promise<ManifestEntry | null> {
+  const localPath = buildOverlayRelativePath(category, assetId);
+  const assetPath = resolveAssetPath(localPath);
+
+  if (!assetPath) {
+    return null;
+  }
+
+  try {
+    await fs.access(assetPath);
+    return {
+      entity_key: assetId,
+      local_path: localPath,
+      content_type: "image/png",
+    };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ category: string; assetId: string }> },
@@ -290,13 +322,15 @@ export async function GET(
     throw error;
   }
 
-  const entry = findManifestEntry(entries, assetId);
+  const entry = findManifestEntry(entries, assetId) ?? (await resolveOverlayEntry(category, assetId));
 
   if (!entry?.local_path) {
     return NextResponse.json({ message: "Asset não encontrado." }, { status: 404 });
   }
 
-  const publicAssetUrl = resolvePublicAssetUrl(entry.local_path);
+  const publicAssetUrl = isOverlayLocalPath(entry.local_path)
+    ? null
+    : resolvePublicAssetUrl(entry.local_path);
   if (publicAssetUrl) {
     return fetchPublicAsset(publicAssetUrl, entry.content_type);
   }
