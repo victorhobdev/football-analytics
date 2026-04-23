@@ -301,25 +301,25 @@ export function MarketPageContent() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={seasonHubHref}
               >
                 Voltar para temporada
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={playersHref}
               >
                 Abrir jogadores
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={teamsHref}
               >
                 Abrir times
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={matchesHref}
               >
                 Abrir partidas
@@ -403,7 +403,7 @@ export function MarketPageContent() {
               <div className="mt-5 flex flex-wrap gap-2">
                 {playerHref ? (
                   <Link
-                    className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                    className="button-pill button-pill-primary"
                     href={playerHref}
                   >
                     Abrir jogador
@@ -411,7 +411,7 @@ export function MarketPageContent() {
                 ) : null}
                 {fromTeamHref ? (
                   <Link
-                    className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40] shadow-[0_18px_40px_-36px_rgba(17,28,45,0.25)]"
+                    className="button-pill button-pill-secondary"
                     href={fromTeamHref}
                   >
                     Time de origem
@@ -419,7 +419,7 @@ export function MarketPageContent() {
                 ) : null}
                 {toTeamHref ? (
                   <Link
-                    className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40] shadow-[0_18px_40px_-36px_rgba(17,28,45,0.25)]"
+                    className="button-pill button-pill-secondary"
                     href={toTeamHref}
                   >
                     Time de destino

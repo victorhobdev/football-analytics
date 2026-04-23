@@ -272,19 +272,19 @@ export function CoachesPageContent() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={seasonHubHref}
               >
                 Voltar para temporada
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={matchesHref}
               >
                 Abrir partidas
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={playersHref}
               >
                 Abrir jogadores
@@ -368,14 +368,14 @@ export function CoachesPageContent() {
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                  className="button-pill button-pill-primary"
                   href={coachHref}
                 >
                   Abrir perfil
                 </Link>
                 {teamHref ? (
                   <Link
-                    className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40] shadow-[0_18px_40px_-36px_rgba(17,28,45,0.25)]"
+                    className="button-pill button-pill-secondary"
                     href={teamHref}
                   >
                     Abrir time

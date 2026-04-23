@@ -281,13 +281,13 @@ export function HeadToHeadPageContent() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#003526]"
+              className="button-pill button-pill-inverse"
               href="/competitions"
             >
               Abrir competições
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-on-dark"
               href={buildTeamsPath(sharedFilters)}
             >
               Abrir times
@@ -402,13 +402,13 @@ export function HeadToHeadPageContent() {
 
           <div className="flex flex-wrap gap-2">
             <Link
-              className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+              className="button-pill button-pill-soft"
               href={buildTeamsPath(sharedFilters)}
             >
               Abrir times
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+              className="button-pill button-pill-soft"
               href={buildMatchesPath(sharedFilters)}
             >
               Abrir partidas
@@ -491,7 +491,7 @@ export function HeadToHeadPageContent() {
                 <div className="flex flex-wrap gap-2">
                   {selectedTeamA ? (
                     <Link
-                      className="inline-flex items-center gap-2 rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                      className="button-pill button-pill-soft gap-2"
                       href={`${buildCanonicalTeamPath(resolvedContext, selectedTeamA.teamId)}${canonicalExtraQuery}`}
                     >
                       <ProfileMedia
@@ -509,7 +509,7 @@ export function HeadToHeadPageContent() {
                   ) : null}
                   {selectedTeamB ? (
                     <Link
-                      className="inline-flex items-center gap-2 rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                      className="button-pill button-pill-soft gap-2"
                       href={`${buildCanonicalTeamPath(resolvedContext, selectedTeamB.teamId)}${canonicalExtraQuery}`}
                     >
                       <ProfileMedia
@@ -597,7 +597,7 @@ export function HeadToHeadPageContent() {
                 </h2>
               </div>
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={buildMatchesPath({
                   ...sharedFilters,
                   competitionId: resolvedContext.competitionId,
@@ -637,7 +637,7 @@ export function HeadToHeadPageContent() {
 
                 <div className="flex items-center justify-end">
                   <Link
-                    className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                    className="button-pill button-pill-primary"
                     href={buildMatchCenterPath(match.matchId, {
                       ...sharedFilters,
                       competitionId: resolvedContext.competitionId,

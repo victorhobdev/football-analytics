@@ -1,6 +1,14 @@
 import type { VenueFilter } from "@/shared/types/filters.types";
 import type { CoverageState } from "@/shared/types/coverage.types";
 
+export type PlayersSortBy = "playerName" | "minutesPlayed" | "goals" | "assists" | "rating";
+export type PlayersSortDirection = "asc" | "desc";
+
+export interface PlayerRecentTeam {
+  teamId: string;
+  teamName?: string | null;
+}
+
 export interface Player {
   playerId: string;
   playerName: string;
@@ -12,6 +20,9 @@ export interface Player {
 }
 
 export interface PlayerListItem extends Player {
+  teamCount?: number | null;
+  teamContextLabel?: string | null;
+  recentTeams?: PlayerRecentTeam[] | null;
   matchesPlayed?: number | null;
   minutesPlayed?: number | null;
   goals?: number | null;
@@ -113,9 +124,35 @@ export interface PlayerProfileSectionCoverage {
   stats?: CoverageState;
 }
 
+export type PlayerProfileType =
+  | "sportmonks_with_history"
+  | "sportmonks_without_history"
+  | "world_cup_local";
+
+export type PlayerHistoryAvailability = "available" | "unavailable";
+
+export interface PlayerWorldCupSummary {
+  teamNames: string[];
+  teamCount: number;
+  editionLabels: string[];
+  editionCount: number;
+  goalCount: number;
+  primaryPosition?: string | null;
+}
+
+export interface PlayerProfileMeta {
+  profileType: PlayerProfileType;
+  dataSource: "sportmonks" | "world_cup_local";
+  hasHistoricalStats: boolean;
+  historyAvailability: PlayerHistoryAvailability;
+  isWorldCupLinked: boolean;
+  worldCup?: PlayerWorldCupSummary | null;
+}
+
 export interface PlayerProfile {
   player: Player;
   summary: PlayerStatsSummary;
+  profileMeta: PlayerProfileMeta;
   recentMatches?: PlayerMatchStatsPoint[];
   history?: PlayerHistoryEntry[];
   stats?: PlayerProfileStats | null;
@@ -141,14 +178,20 @@ export interface PlayersListLocalFilters {
   minMinutes?: number | null;
   teamId?: string | null;
   position?: string | null;
+  stageId?: string | null;
+  stageFormat?: string | null;
   page?: number;
   pageSize?: number;
+  sortBy?: PlayersSortBy;
+  sortDirection?: PlayersSortDirection;
 }
 
 export interface PlayerProfileLocalFilters {
   includeRecentMatches?: boolean;
   includeHistory?: boolean;
   includeStats?: boolean;
+  stageId?: string | null;
+  stageFormat?: string | null;
 }
 
 export type PlayersListFilters = PlayersGlobalFilters & PlayersListLocalFilters;

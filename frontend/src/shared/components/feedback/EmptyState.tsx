@@ -28,7 +28,7 @@ export function EmptyState({
       <p className="mt-2 text-sm leading-6 text-[#57657a]">{description}</p>
       {actionLabel && onAction ? (
         <button
-          className="mt-4 inline-flex items-center rounded-full border border-[rgba(112,121,116,0.28)] bg-white/92 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+          className="button-pill button-pill-secondary mt-4"
           onClick={onAction}
           type="button"
         >

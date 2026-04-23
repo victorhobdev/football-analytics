@@ -92,6 +92,33 @@ function getPlayerMonogram(playerName: string): string {
   return initials.length > 0 ? initials : "PLY";
 }
 
+function getProfileTypeLabel(profileType: string): string {
+  if (profileType === "world_cup_local") {
+    return "Perfil local Copa";
+  }
+
+  if (profileType === "sportmonks_without_history") {
+    return "Perfil SportMonks";
+  }
+
+  return "Perfil com histórico";
+}
+
+function getProfileDescription(
+  hasHistoricalStats: boolean,
+  profileType: string,
+): string {
+  if (hasHistoricalStats) {
+    return "Resumo, histórico, partidas e tendência do atleta em uma leitura única dentro da temporada selecionada.";
+  }
+
+  if (profileType === "world_cup_local") {
+    return "Perfil local da Copa com identidade preservada, mesmo sem histórico estatístico consolidado na plataforma.";
+  }
+
+  return "Perfil SportMonks disponível sem histórico estatístico consolidado, tratado como estado válido do produto.";
+}
+
 export function PlayerProfileContent({
   playerId,
   contextOverride = null,
@@ -99,6 +126,8 @@ export function PlayerProfileContent({
 }: PlayerProfileContentProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const stageId = searchParams.get("stageId")?.trim() || null;
+  const stageFormat = searchParams.get("stageFormat")?.trim() || null;
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
   const activeTab = resolvePlayerProfileTab(searchParams.get("tab"));
@@ -108,6 +137,8 @@ export function PlayerProfileContent({
       includeRecentMatches: true,
       includeHistory: true,
       includeStats: true,
+      stageId,
+      stageFormat,
     },
     contextOverride,
   );
@@ -125,6 +156,8 @@ export function PlayerProfileContent({
     competitionId: contextOverride?.competitionId ?? competitionId,
     seasonId: contextOverride?.seasonId ?? seasonId,
     roundId,
+    stageId,
+    stageFormat,
     venue,
     lastN,
     dateRangeStart,
@@ -197,7 +230,9 @@ export function PlayerProfileContent({
     );
   }
 
-  const { history, player, recentMatches, sectionCoverage, stats, summary } = profileQuery.data;
+  const { history, player, profileMeta, recentMatches, sectionCoverage, stats, summary } = profileQuery.data;
+  const hasHistoricalStats = profileMeta.hasHistoricalStats;
+  const worldCup = profileMeta.worldCup ?? null;
   const teamHref = player.teamId
     ? contextOverride
       ? appendFilterQueryString(
@@ -244,8 +279,12 @@ export function PlayerProfileContent({
       badge: `${stats?.trend?.length ?? 0} períodos`,
     },
   ];
+  const visibleTabLinks = hasHistoricalStats
+    ? tabLinks
+    : tabLinks.filter((tabLink) => tabLink.key === "overview");
+  const effectiveActiveTab: PlayerProfileTab = hasHistoricalStats ? activeTab : "overview";
   const activeTabLabel =
-    tabLinks.find((tabLink) => tabLink.key === activeTab)?.label ?? "Resumo";
+    visibleTabLinks.find((tabLink) => tabLink.key === effectiveActiveTab)?.label ?? "Resumo";
 
   return (
     <ProfileShell className="space-y-6">
@@ -294,7 +333,15 @@ export function PlayerProfileContent({
                 Jogador
               </p>
               <div className="flex flex-wrap items-center gap-2">
-                <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
+                {hasHistoricalStats ? (
+                  <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
+                ) : null}
+                <ProfileTag className="bg-white/12 text-white/82">
+                  {getProfileTypeLabel(profileMeta.profileType)}
+                </ProfileTag>
+                {!hasHistoricalStats ? (
+                  <ProfileTag className="bg-white/12 text-white/82">Sem histórico</ProfileTag>
+                ) : null}
                 {contextOverride ? (
                   <ProfileTag className="bg-white/12 text-white/82">
                     {contextOverride.competitionName}
@@ -316,48 +363,83 @@ export function PlayerProfileContent({
                 {player.playerName}
               </h1>
               <p className="max-w-3xl text-sm leading-6 text-white/74">
-                Resumo, histórico, partidas e tendência do atleta em uma leitura única dentro da
-                temporada selecionada.
+                {getProfileDescription(hasHistoricalStats, profileMeta.profileType)}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {teamHref ? (
+            {teamHref && hasHistoricalStats ? (
               <Link
-                className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-on-dark"
                 href={teamHref}
               >
                 Time
               </Link>
             ) : null}
-            {rankingsHref ? (
+            {rankingsHref && hasHistoricalStats ? (
               <Link
-                className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-on-dark"
                 href={rankingsHref}
               >
                 Rankings
               </Link>
             ) : null}
-            <Link
-              className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#003526]"
-              href={matchesHref}
-            >
-              Abrir partidas
-            </Link>
+            {seasonHubHref && !hasHistoricalStats ? (
+              <Link
+                className="button-pill button-pill-on-dark"
+                href={seasonHubHref}
+              >
+                Contexto
+              </Link>
+            ) : null}
+            {hasHistoricalStats ? (
+              <Link
+                className="button-pill button-pill-inverse"
+                href={matchesHref}
+              >
+                Abrir partidas
+              </Link>
+            ) : null}
           </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-4">
-          <ProfileKpi hint="Na temporada selecionada" invert label="Jogos" value={summary.matchesPlayed ?? "-"} />
-          <ProfileKpi
-            hint={`${summary.goals ?? 0} gols · ${summary.assists ?? 0} assistências`}
-            invert
-            label="Gols + assistências"
-            value={(summary.goals ?? 0) + (summary.assists ?? 0)}
-          />
-          <ProfileKpi hint="Nota consolidada" invert label="Nota" value={summary.rating?.toFixed(2) ?? "-"} />
-          <ProfileKpi hint="Contextos disponíveis" invert label="Histórico" value={history?.length ?? 0} />
+          {hasHistoricalStats ? (
+            <>
+              <ProfileKpi hint="Na temporada selecionada" invert label="Jogos" value={summary.matchesPlayed ?? "-"} />
+              <ProfileKpi
+                hint={`${summary.goals ?? 0} gols · ${summary.assists ?? 0} assistências`}
+                invert
+                label="Gols + assistências"
+                value={(summary.goals ?? 0) + (summary.assists ?? 0)}
+              />
+              <ProfileKpi hint="Nota consolidada" invert label="Nota" value={summary.rating?.toFixed(2) ?? "-"} />
+              <ProfileKpi hint="Contextos disponíveis" invert label="Histórico" value={history?.length ?? 0} />
+            </>
+          ) : (
+            <>
+              <ProfileKpi
+                hint={worldCup?.editionLabels?.length ? worldCup.editionLabels.join(" · ") : "Sem edições detalhadas"}
+                invert
+                label="Edições"
+                value={worldCup?.editionCount ?? "-"}
+              />
+              <ProfileKpi
+                hint={worldCup?.teamNames?.length ? worldCup.teamNames.join(" · ") : "Sem seleção detalhada"}
+                invert
+                label="Seleções"
+                value={worldCup?.teamCount ?? "-"}
+              />
+              <ProfileKpi hint="Contexto preservado da Copa" invert label="Gols em Copas" value={worldCup?.goalCount ?? "-"} />
+              <ProfileKpi
+                hint={profileMeta.profileType === "world_cup_local" ? "Perfil local válido" : "Identidade consolidada"}
+                invert
+                label="Posição"
+                value={worldCup?.primaryPosition ?? player.position ?? "-"}
+              />
+            </>
+          )}
         </div>
       </ProfilePanel>
 
@@ -367,19 +449,27 @@ export function PlayerProfileContent({
         </ProfileAlert>
       ) : null}
 
-      <ProfileTabs
-        ariaLabel="Abas do perfil do jogador"
-        aside={<ProfileTag>{activeTabLabel}</ProfileTag>}
-        items={tabLinks.map((tabLink) => ({
-          key: tabLink.key,
-          label: tabLink.label,
-          href: buildPlayerProfileTabHref(pathname, searchParams, tabLink.key),
-          isActive: activeTab === tabLink.key,
-          badge: tabLink.badge,
-        }))}
-      />
+      {!hasHistoricalStats ? (
+        <ProfileAlert title="Sem histórico consolidado" tone="info">
+          <p>Histórico é enriquecimento, não pré-requisito para a existência deste perfil.</p>
+        </ProfileAlert>
+      ) : null}
 
-      {activeTab === "overview" ? (
+      {visibleTabLinks.length > 1 ? (
+        <ProfileTabs
+          ariaLabel="Abas do perfil do jogador"
+          aside={<ProfileTag>{activeTabLabel}</ProfileTag>}
+          items={visibleTabLinks.map((tabLink) => ({
+            key: tabLink.key,
+            label: tabLink.label,
+            href: buildPlayerProfileTabHref(pathname, searchParams, tabLink.key),
+            isActive: effectiveActiveTab === tabLink.key,
+            badge: tabLink.badge,
+          }))}
+        />
+      ) : null}
+
+      {effectiveActiveTab === "overview" ? (
         <PlayerOverviewSection
           coverage={overviewCoverage}
           insights={{
@@ -390,29 +480,40 @@ export function PlayerProfileContent({
             isPartial: insightsQuery.isPartial,
             items: insightsQuery.data ?? [],
           }}
-          matchesHref={matchesHref}
+          matchesHref={hasHistoricalStats ? matchesHref : null}
           profile={profileQuery.data}
-          rankingsHref={rankingsHref}
+          rankingsHref={hasHistoricalStats ? rankingsHref : null}
           seasonHubHref={seasonHubHref}
-          teamHref={teamHref}
+          teamHref={hasHistoricalStats ? teamHref : null}
         />
       ) : null}
 
-      {activeTab === "history" ? (
-        <PlayerHistorySection coverage={historyCoverage} filters={sharedFilters} history={history} />
+      {effectiveActiveTab === "history" ? (
+        <PlayerHistorySection
+          coverage={historyCoverage}
+          filters={sharedFilters}
+          history={history}
+          profileMeta={profileMeta}
+        />
       ) : null}
 
-      {activeTab === "matches" ? (
+      {effectiveActiveTab === "matches" ? (
         <PlayerMatchesSection
           competitionContext={contextOverride}
           coverage={matchesCoverage}
           filters={sharedFilters}
           matches={recentMatches}
+          profileMeta={profileMeta}
         />
       ) : null}
 
-      {activeTab === "stats" ? (
-        <PlayerStatsSection coverage={statsCoverage} stats={stats} summary={summary} />
+      {effectiveActiveTab === "stats" ? (
+        <PlayerStatsSection
+          coverage={statsCoverage}
+          profileMeta={profileMeta}
+          stats={stats}
+          summary={summary}
+        />
       ) : null}
     </ProfileShell>
   );

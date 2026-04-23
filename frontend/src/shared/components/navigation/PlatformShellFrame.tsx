@@ -50,10 +50,8 @@ export function PlatformShellFrame({
               {shellState.surfaceLinks.map((link) => (
                 <Link
                   className={joinClasses(
-                    "inline-flex items-center rounded-full px-4 py-2 text-[0.72rem] font-bold uppercase tracking-[0.16em] transition-[transform,background-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.985]",
-                    link.isActive
-                      ? "bg-[#003526] !text-white shadow-[0_12px_32px_-16px_rgba(0,53,38,0.7)]"
-                      : "bg-[rgba(240,243,255,0.96)] text-[#1f2d40] hover:-translate-y-0.5 hover:bg-white border border-[rgba(191,201,195,0.5)]",
+                    "button-pill",
+                    link.isActive ? "button-pill-primary" : "button-pill-secondary hover:-translate-y-0.5",
                   )}
                   href={link.href}
                   key={link.href}

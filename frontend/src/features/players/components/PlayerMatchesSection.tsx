@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { formatMetricValue } from "@/config/metrics.registry";
-import type { PlayerMatchStatsPoint } from "@/features/players/types";
+import type { PlayerMatchStatsPoint, PlayerProfileMeta } from "@/features/players/types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
@@ -34,6 +34,7 @@ type PlayerMatchesSectionProps = {
     dateRangeEnd?: string | null;
   };
   matches: PlayerMatchStatsPoint[] | undefined;
+  profileMeta?: PlayerProfileMeta | null;
 };
 
 function formatResultLabel(result: PlayerMatchStatsPoint["result"]): string {
@@ -73,6 +74,7 @@ export function PlayerMatchesSection({
   coverage,
   filters,
   matches,
+  profileMeta,
 }: PlayerMatchesSectionProps) {
   const items = matches ?? [];
   const canonicalExtraQuery = buildFilterQueryString(filters, ["competitionId", "seasonId"]);
@@ -82,8 +84,12 @@ export function PlayerMatchesSection({
       <div className="space-y-4">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
-          title="Partidas indisponíveis"
-          description="Não há partidas suficientes para montar esta leitura do jogador agora."
+          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem partidas consolidadas" : "Partidas indisponíveis"}
+          description={
+            profileMeta && !profileMeta.hasHistoricalStats
+              ? "Este perfil não possui histórico de partidas consolidado para navegação detalhada."
+              : "Não há partidas suficientes para montar esta leitura do jogador agora."
+          }
         />
       </div>
     );
@@ -110,7 +116,7 @@ export function PlayerMatchesSection({
           <div className="flex flex-wrap items-center gap-2">
             <ProfileCoveragePill coverage={coverage} />
             <Link
-              className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-primary"
               href={buildMatchesPath(filters)}
             >
               Abrir calendário
@@ -199,7 +205,7 @@ export function PlayerMatchesSection({
               <div className="flex items-center justify-end">
                 <Link
                   aria-label={`Abrir central da partida de ${match.teamName ?? "Time"} contra ${match.opponentName ?? "adversário"}`}
-                  className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                  className="button-pill button-pill-primary"
                   href={buildMatchCenterPath(matchId, {
                     ...filters,
                     competitionId:

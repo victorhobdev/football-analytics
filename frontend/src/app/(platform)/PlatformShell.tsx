@@ -4,14 +4,11 @@ import Link from "next/link";
 import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { SUPPORTED_COMPETITIONS } from "@/config/competitions.registry";
-import { SUPPORTED_SEASON_COVERAGE_COUNT } from "@/config/seasons.registry";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
 import { PlayerComparisonPanel } from "@/features/players/components/PlayerComparisonPanel";
 import { GlobalSearchOverlay } from "@/features/search/components/GlobalSearchOverlay";
 import { GlobalErrorBoundary } from "@/shared/components/feedback/GlobalErrorBoundary";
 import { GlobalFilterBar } from "@/shared/components/filters/GlobalFilterBar";
-import { PlatformShellFrame } from "@/shared/components/navigation/PlatformShellFrame";
 import { PLATFORM_SEARCH_OPEN_EVENT } from "@/shared/components/navigation/platform-search.events";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import {
@@ -20,7 +17,7 @@ import {
   buildMarketPath,
   buildMatchesPath,
   buildPlayersPath,
-  buildRankingPath,
+  buildRankingsHubPath,
   buildTeamsPath,
 } from "@/shared/utils/context-routing";
 
@@ -270,8 +267,6 @@ export function PlatformShell({ children }: PlatformShellProps) {
     useGlobalFiltersState();
   const homeQuery = useHomePage();
   const archiveSummary = homeQuery.data?.archiveSummary;
-  const canonicalCompetitionsCount = SUPPORTED_COMPETITIONS.length;
-  const canonicalSeasonCoverageCount = SUPPORTED_SEASON_COVERAGE_COUNT;
   const isHomeRoute = pathname === "/";
   const isCompetitionsIndexRoute = pathname === "/competitions";
   const isCanonicalSeasonRoute =
@@ -295,7 +290,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
     { href: "/", icon: "analytics" as const, label: "Início" },
     { href: "/copa-do-mundo", icon: "worldCup" as const, label: "Copa do Mundo" },
     { href: "/competitions", icon: "competition" as const, label: "Competições" },
-    { href: buildRankingPath("player-goals", sharedFilters), icon: "analytics" as const, label: "Rankings" },
+    { href: buildRankingsHubPath(sharedFilters), icon: "analytics" as const, label: "Rankings" },
     { href: buildMatchesPath(sharedFilters), icon: "match" as const, label: "Partidas" },
     { href: buildPlayersPath(sharedFilters), icon: "player" as const, label: "Jogadores" },
     { href: buildTeamsPath(sharedFilters), icon: "team" as const, label: "Times" },
@@ -304,7 +299,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const topNavLinks = [
     { href: "/copa-do-mundo", label: "Copa do Mundo" },
     { href: "/competitions", label: "Competições" },
-    { href: buildRankingPath("player-goals", sharedFilters), label: "Rankings" },
+    { href: buildRankingsHubPath(sharedFilters), label: "Rankings" },
     { href: buildMatchesPath(sharedFilters), label: "Partidas" },
   ] as const;
   const secondaryPublicLinks = [
@@ -459,7 +454,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
                 Competições
               </p>
               <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(canonicalCompetitionsCount)}
+                {formatArchiveValue(archiveSummary?.competitions)}
               </p>
             </div>
             <div className="text-center">
@@ -467,7 +462,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
                 Temporadas
               </p>
               <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(canonicalSeasonCoverageCount)}
+                {formatArchiveValue(archiveSummary?.seasons)}
               </p>
             </div>
             <div className="text-center">
@@ -513,7 +508,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </button>
           <Link
             className="flex items-center gap-3 px-4 py-2 text-xs text-slate-400 transition-colors hover:text-emerald-100"
-            href={buildRankingPath("player-goals", sharedFilters)}
+            href={buildRankingsHubPath(sharedFilters)}
             onClick={() => {
               setIsSidebarOpen(false);
             }}
@@ -592,13 +587,6 @@ export function PlatformShell({ children }: PlatformShellProps) {
         </header>
 
         <div className="pt-16 lg:pt-24">
-          {shouldRenderSurfaceChrome ? (
-            <PlatformShellFrame
-              compact={isCanonicalSeasonRoute}
-              contentWidthClassName={surfaceContentWidthClassName}
-            />
-          ) : null}
-
           {shouldRenderSurfaceChrome ? (
             <section
               aria-label="Filtros globais"

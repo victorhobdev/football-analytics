@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useQuery, type QueryKey, type UseQueryOptions } from "@tanstack/react-query";
 
-import type { ApiResponse } from "@/shared/types/api-response.types";
+import type { ApiResponse, ApiResponseMeta } from "@/shared/types/api-response.types";
 import type { CoverageState } from "@/shared/types/coverage.types";
 import type { ApiError } from "@/shared/types/error.types";
 
@@ -18,6 +18,7 @@ type UseQueryWithCoverageOptions<TData, TQueryKey extends QueryKey = QueryKey> =
 
 export type QueryWithCoverageResult<TData> = {
   data: TData | undefined;
+  meta: ApiResponseMeta | undefined;
   isLoading: boolean;
   isError: boolean;
   error: ApiError | null;
@@ -70,6 +71,7 @@ export function useQueryWithCoverage<TData, TQueryKey extends QueryKey = QueryKe
 
     return {
       data,
+      meta: query.data?.meta,
       isLoading: query.isLoading,
       isError: query.isError,
       error: normalizeError(query.error),

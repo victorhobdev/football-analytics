@@ -983,7 +983,7 @@ function SeasonsGrid({
           </p>
         </div>
         <Link
-          className="inline-flex items-center justify-center rounded-full border border-[rgba(191,201,195,0.56)] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#455468] transition-[transform,border-color,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:border-[#8bd6b6] hover:bg-[#f7fbf8] active:scale-[0.985]"
+          className="button-pill button-pill-secondary hover:-translate-y-0.5"
           href="/competitions"
         >
           Voltar ao catálogo

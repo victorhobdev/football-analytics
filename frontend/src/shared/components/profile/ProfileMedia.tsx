@@ -61,6 +61,7 @@ export function ProfileMedia({
   const [hasError, setHasError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
   const assetUrl = buildVisualAssetUrl(category, assetId);
+  const isCircularPlayerAvatar = category === "players" && shape === "circle";
   const resolvedAssetUrl = useMemo(
     () => (assetUrl ? appendRetryQueryParam(assetUrl, retryAttempt) : null),
     [assetUrl, retryAttempt],
@@ -99,7 +100,11 @@ export function ProfileMedia({
       {resolvedAssetUrl && !hasError ? (
         <Image
           alt={alt}
-          className={joinClasses("object-contain p-2", imageClassName)}
+          className={
+            isCircularPlayerAvatar
+              ? "object-cover object-[center_20%] !p-0"
+              : joinClasses("object-contain p-2", imageClassName)
+          }
           fill
           key={resolvedAssetUrl}
           onError={handleError}

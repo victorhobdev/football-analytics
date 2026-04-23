@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import type { PlayerHistoryEntry } from "@/features/players/types";
+import type { PlayerHistoryEntry, PlayerProfileMeta } from "@/features/players/types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
@@ -29,6 +29,7 @@ type PlayerHistorySectionProps = {
     dateRangeEnd?: string | null;
   };
   history: PlayerHistoryEntry[] | undefined;
+  profileMeta?: PlayerProfileMeta | null;
 };
 
 function buildEntryContext(entry: PlayerHistoryEntry): CompetitionSeasonContext | null {
@@ -49,6 +50,7 @@ export function PlayerHistorySection({
   coverage,
   filters,
   history,
+  profileMeta,
 }: PlayerHistorySectionProps) {
   const items = history ?? [];
 
@@ -57,8 +59,12 @@ export function PlayerHistorySection({
       <div className="space-y-4">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
-          title="Histórico indisponível"
-          description="Não há histórico suficiente para montar esta visão do jogador agora."
+          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem histórico consolidado" : "Histórico indisponível"}
+          description={
+            profileMeta && !profileMeta.hasHistoricalStats
+              ? "Este perfil permanece disponível, mas sem histórico competitivo consolidado na plataforma."
+              : "Não há histórico suficiente para montar esta visão do jogador agora."
+          }
         />
       </div>
     );
@@ -151,7 +157,7 @@ export function PlayerHistorySection({
               <div className="flex flex-col items-stretch gap-2 xl:min-w-[220px]">
                 {seasonHubHref ? (
                   <Link
-                    className="inline-flex items-center justify-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                    className="button-pill button-pill-soft"
                     href={seasonHubHref}
                   >
                     Abrir temporada
@@ -159,7 +165,7 @@ export function PlayerHistorySection({
                 ) : null}
                 {teamHref ? (
                   <Link
-                    className="inline-flex items-center justify-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                    className="button-pill button-pill-primary"
                     href={teamHref}
                   >
                     Abrir time

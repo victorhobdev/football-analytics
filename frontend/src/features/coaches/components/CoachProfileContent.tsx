@@ -267,7 +267,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             <div className="flex flex-wrap gap-2">
               {seasonHubHref ? (
                 <Link
-                  className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                  className="button-pill button-pill-primary"
                   href={seasonHubHref}
                 >
                   Abrir temporada
@@ -275,20 +275,20 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
               ) : null}
               {teamHref ? (
                 <Link
-                  className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                  className="button-pill button-pill-secondary"
                   href={teamHref}
                 >
                   Abrir time
                 </Link>
               ) : null}
               <Link
-                className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={matchesHref}
               >
                 Abrir partidas
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={playersHref}
               >
                 Abrir jogadores
@@ -387,7 +387,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                   {tenureTeamHref ? (
                     <div className="mt-4">
                       <Link
-                        className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                        className="button-pill button-pill-primary"
                         href={tenureTeamHref}
                       >
                         Abrir time

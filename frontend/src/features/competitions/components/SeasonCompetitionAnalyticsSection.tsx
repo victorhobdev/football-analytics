@@ -219,7 +219,7 @@ export function SeasonCompetitionAnalyticsSection({
 
                 <div className="flex flex-wrap gap-2">
                   <Link
-                    className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#003526]"
+                    className="button-pill button-pill-soft"
                     href={buildRankingPath("player-goals", {
                       competitionId: context.competitionId,
                       seasonId: context.seasonId,
@@ -230,7 +230,7 @@ export function SeasonCompetitionAnalyticsSection({
                     Artilharia da fase
                   </Link>
                   <Link
-                    className="inline-flex items-center rounded-full bg-[rgba(166,242,209,0.82)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#00513b]"
+                    className="button-pill button-pill-secondary"
                     href={buildRankingPath("team-possession", {
                       competitionId: context.competitionId,
                       seasonId: context.seasonId,
