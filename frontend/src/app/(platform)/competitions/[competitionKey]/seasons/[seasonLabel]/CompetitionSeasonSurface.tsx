@@ -2296,7 +2296,7 @@ function PlayerPhoto({
       {src && !hasError ? (
         <img
           alt={playerName}
-          className="absolute inset-0 h-full w-full object-cover bg-[#003526]"
+          className="absolute inset-0 h-full w-full object-cover object-[center_20%] bg-[#003526]"
           key={src}
           onError={handleError}
           src={src}
@@ -2840,14 +2840,20 @@ function KnockoutBracketPanel({
                                 className={team.isWinner ? "rounded-[1rem] border border-[rgba(166,242,209,0.24)] bg-[rgba(255,255,255,0.08)] px-3 py-3" : "rounded-[1rem] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-3"}
                                 key={`final-${team.teamId ?? team.teamName}`}
                               >
-                                <div className="flex items-center justify-between gap-2.5">
-                                  <div className="flex min-w-0 items-center gap-2.5">
+                                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+                                  <div className="flex min-w-0 items-center gap-2">
                                     <TeamBadge size={32} teamId={team.teamId} teamName={team.teamName} />
-                                    <span className={team.isWinner ? "truncate text-[1rem] font-extrabold text-white" : "truncate text-[1rem] font-semibold text-white/88"}>
+                                    <span
+                                      className={
+                                        team.isWinner
+                                          ? "min-w-0 flex-1 break-words text-[0.95rem] font-extrabold leading-tight text-white"
+                                          : "min-w-0 flex-1 break-words text-[0.95rem] font-semibold leading-tight text-white/88"
+                                      }
+                                    >
                                       {team.teamName}
                                     </span>
                                   </div>
-                                  <span className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none text-white">
+                                  <span className="flex min-w-[2rem] justify-end text-right font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold leading-none text-white">
                                     {team.goals}
                                   </span>
                                 </div>
@@ -4822,7 +4828,7 @@ function RoundPickerDropdown({
   return (
     <div className="relative inline-block">
       <button 
-        className="flex items-center gap-2 rounded-lg bg-[#003526] px-4 py-2 cursor-pointer shadow-sm transition-transform active:scale-95"
+        className="button-pill button-pill-primary gap-2"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >

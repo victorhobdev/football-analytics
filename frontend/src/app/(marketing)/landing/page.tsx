@@ -46,7 +46,7 @@ const PRODUCT_ENTRIES = [
     description: "Exploração individual, comparação e entrada para perfis canônicos.",
   },
   {
-    href: "/rankings/player-goals",
+    href: "/rankings",
     title: "Rankings",
     description: "Família viva de rankings com entrada pública clara no produto atual.",
   },
@@ -68,13 +68,13 @@ export default function MarketingLandingPage() {
 
           <div className="flex flex-wrap gap-2">
             <Link
-              className="inline-flex items-center rounded-full border border-[rgba(17,28,45,0.08)] bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+              className="button-pill button-pill-secondary"
               href="/competitions"
             >
               Explorar acervo
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-primary"
               href="/"
             >
               Abrir página inicial
@@ -107,13 +107,13 @@ export default function MarketingLandingPage() {
 
             <div className="flex flex-wrap gap-3">
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href="/"
               >
                 Entrar no produto
               </Link>
               <Link
-                className="inline-flex items-center rounded-full border border-[rgba(17,28,45,0.08)] bg-white/92 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href="/matches"
               >
                 Ver partidas
@@ -209,7 +209,7 @@ export default function MarketingLandingPage() {
               continua organizado em competições, partidas, rankings, times e jogadores.
             </p>
             <Link
-              className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-primary"
               href="/competitions"
             >
               Começar por competições

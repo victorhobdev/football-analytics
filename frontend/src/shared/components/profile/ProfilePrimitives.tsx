@@ -116,12 +116,14 @@ export function ProfileTabs({
   aside,
   className,
   density = "default",
+  navClassName,
 }: {
   ariaLabel: string;
   items: ProfileTabItem[];
   aside?: ReactNode;
   className?: string;
   density?: "compact" | "default";
+  navClassName?: string;
 }) {
   const isCompact = density === "compact";
 
@@ -135,7 +137,14 @@ export function ProfileTabs({
       )}
       tone="soft"
     >
-      <nav aria-label={ariaLabel} className={joinClasses("flex flex-wrap items-center", isCompact ? "gap-1.5" : "gap-2")}>
+      <nav
+        aria-label={ariaLabel}
+        className={joinClasses(
+          "flex flex-wrap items-center",
+          isCompact ? "gap-1.5" : "gap-2",
+          navClassName,
+        )}
+      >
         {items.map((item) => {
           if (item.customComponent) {
             return <div key={item.key}>{item.customComponent}</div>;
@@ -145,21 +154,10 @@ export function ProfileTabs({
             <Link
               aria-current={item.isActive ? "page" : undefined}
               aria-label={typeof item.label === "string" ? item.label : undefined}
-              className={
-                item.isActive
-                  ? joinClasses(
-                      "inline-flex items-center gap-2 rounded-full bg-[#003526] font-bold uppercase !text-white shadow-[0_12px_32px_-16px_rgba(0,53,38,0.7)]",
-                      isCompact
-                        ? "px-3 py-1.5 text-[0.68rem] tracking-[0.14em]"
-                        : "px-4 py-2 text-xs tracking-[0.18em]",
-                    )
-                  : joinClasses(
-                      "inline-flex items-center gap-2 rounded-full border border-[rgba(191,201,195,0.5)] bg-white font-semibold uppercase text-[#404944] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]",
-                      isCompact
-                        ? "px-3 py-1.5 text-[0.68rem] tracking-[0.14em]"
-                        : "px-4 py-2 text-xs tracking-[0.18em]",
-                    )
-              }
+              className={joinClasses(
+                "button-pill gap-2",
+                item.isActive ? "button-pill-primary" : "button-pill-secondary hover:border-[#8bd6b6] hover:bg-[#f0faf6]",
+              )}
               href={item.href}
               key={item.key}
             >
@@ -277,13 +275,13 @@ export function ProfileMetricTile({
   return (
     <article
       className={joinClasses(
-        "rounded-[1.25rem] border px-4 py-4",
+        "flex flex-col items-center rounded-[1.25rem] border px-4 py-4 text-center",
         tone === "soft"
           ? "border-[rgba(216,227,251,0.7)] bg-[rgba(240,243,255,0.76)]"
           : "border-white/70 bg-[rgba(255,255,255,0.78)]",
       )}
     >
-      <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
+      <p className="whitespace-nowrap text-[0.68rem] uppercase tracking-[0.12em] text-[#57657a]">{label}</p>
       <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
         {value}
       </p>

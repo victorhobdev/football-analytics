@@ -65,6 +65,7 @@ function resolveDisplayContext(
 function buildTeamResultHref(result: TeamSearchResult): string {
   return buildTeamResolverPath(result.teamId, {
     competitionId: result.defaultContext.competitionId,
+    competitionKey: result.defaultContext.competitionKey,
     seasonId: result.defaultContext.seasonId,
   });
 }

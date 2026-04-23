@@ -242,13 +242,13 @@ export function TeamsPageContent() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={seasonHubHref}
               >
                 Voltar para temporada
               </Link>
               <Link
-                className="inline-flex items-center rounded-full bg-white/88 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                className="button-pill button-pill-secondary"
                 href={matchesHref}
               >
                 Abrir partidas
@@ -322,7 +322,7 @@ export function TeamsPageContent() {
 
           return (
             <ProfilePanel className="space-y-5" key={team.teamId}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start gap-4">
                 <div className="flex min-w-0 items-start gap-4">
                   <ProfileMedia
                     alt={`Escudo de ${team.teamName}`}
@@ -348,14 +348,14 @@ export function TeamsPageContent() {
                         ? `${resolvedContext.competitionName} · ${resolvedContext.seasonLabel}`
                         : "Catálogo guiado pelos filtros atuais"}
                     </p>
+                    <Link
+                      className="button-pill button-pill-primary"
+                      href={profileHref}
+                    >
+                      Abrir perfil de {team.teamName}
+                    </Link>
                   </div>
                 </div>
-                <Link
-                  className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
-                  href={profileHref}
-                >
-                  Abrir perfil de {team.teamName}
-                </Link>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-4">

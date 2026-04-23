@@ -112,7 +112,7 @@ export function TeamOverviewSection({
             <div className="flex flex-wrap gap-2">
               {seasonHubHref ? (
                 <Link
-                  className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                  className="button-pill button-pill-soft"
                   href={seasonHubHref}
                 >
                   Temporada
@@ -120,14 +120,14 @@ export function TeamOverviewSection({
               ) : null}
               {rankingsHref ? (
                 <Link
-                  className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.76)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+                  className="button-pill button-pill-soft"
                   href={rankingsHref}
                 >
                   Rankings
                 </Link>
               ) : null}
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={matchesHref}
               >
                 Ver partidas do time

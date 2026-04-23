@@ -246,14 +246,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.9rem;
   border: none;
-  border-radius: 0.95rem;
+  border-radius: 9999px;
   background: linear-gradient(135deg, #003526 0%, #004e39 100%);
-  padding: 0.7rem 1rem;
-  font-size: 0.76rem;
   font-weight: 800;
-  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #ffffff;
   box-shadow: 0 16px 34px -28px rgba(0, 53, 38, 0.45);

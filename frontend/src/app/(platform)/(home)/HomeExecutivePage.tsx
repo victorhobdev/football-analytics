@@ -7,25 +7,24 @@ import { useMemo, useState } from "react";
 import {
   SUPPORTED_COMPETITIONS,
   getCompetitionById,
+  getCompetitionVisualAssetId,
   type CompetitionDef,
 } from "@/config/competitions.registry";
-import { SUPPORTED_SEASON_COVERAGE_COUNT } from "@/config/seasons.registry";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
-import type { HomeCompetitionCard, HomeEditorialHighlight } from "@/features/home/types/home.types";
+import type { HomeCompetitionCard } from "@/features/home/types/home.types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import type { CoverageState } from "@/shared/types/coverage.types";
 import {
-  buildCanonicalPlayerPath,
   buildCoachesPath,
   buildCompetitionHubPath,
   buildHeadToHeadPath,
   buildMarketPath,
   buildMatchesPath,
   buildPlayersPath,
-  buildRankingPath,
+  buildRankingsHubPath,
   buildTeamsPath,
 } from "@/shared/utils/context-routing";
 
@@ -57,14 +56,6 @@ function formatWholeNumber(value: number | null | undefined): string {
   }
 
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
-}
-
-function formatRating(value: number | null | undefined): string {
-  if (typeof value !== "number" || Number.isNaN(value)) {
-    return "-";
-  }
-
-  return value.toFixed(2);
 }
 
 function shouldDisplayCompleteCoverage(coverage: CoverageState): boolean {
@@ -112,13 +103,15 @@ function buildCoverageBadgeClasses(coverage: CoverageState): string {
 }
 
 function buildCompetitionOrder(items: HomeCompetitionCard[]): HomeCompetitionCard[] {
-  const order = new Map(
-    SUPPORTED_COMPETITIONS.map((competition, index) => [competition.id, index]),
+  const order = new Map<string, number>(
+    SUPPORTED_COMPETITIONS.map(
+      (competition, index): [string, number] => [competition.key, index],
+    ),
   );
 
   return [...items].sort((left, right) => {
-    const leftOrder = order.get(left.competitionId) ?? 999;
-    const rightOrder = order.get(right.competitionId) ?? 999;
+    const leftOrder = order.get(left.competitionKey) ?? 999;
+    const rightOrder = order.get(right.competitionKey) ?? 999;
 
     return leftOrder - rightOrder;
   });
@@ -147,6 +140,7 @@ function buildCompetitionGroups(competitions: HomeCompetitionCard[]) {
   const orderedCompetitions = buildCompetitionOrder(competitions);
   const domestic: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
   const continental: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
+  const world: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
 
   for (const competition of orderedCompetitions) {
     const meta = getCompetitionById(competition.competitionId);
@@ -154,7 +148,12 @@ function buildCompetitionGroups(competitions: HomeCompetitionCard[]) {
       continue;
     }
 
-    if (meta.type === "international_cup") {
+    if (meta.scope === "global") {
+      world.push({ ...competition, meta });
+      continue;
+    }
+
+    if (meta.scope === "continental") {
       continental.push({ ...competition, meta });
       continue;
     }
@@ -162,7 +161,7 @@ function buildCompetitionGroups(competitions: HomeCompetitionCard[]) {
     domestic.push({ ...competition, meta });
   }
 
-  return { continental, domestic };
+  return { continental, domestic, world };
 }
 
 function ArrowRightIcon({ className }: { className?: string }) {
@@ -365,40 +364,6 @@ function QuickLinkCard({
   return <div className={classes}>{content}</div>;
 }
 
-function SecondarySurfaceCard({
-  href,
-  shortLabel,
-  title,
-}: {
-  href: string;
-  shortLabel: string;
-  title: string;
-}) {
-  return (
-    <Link
-      className={joinClasses(styles.competitionCard, styles.secondarySurfaceCard, styles.interactiveCard)}
-      href={href}
-    >
-      <div className={styles.competitionCardContent}>
-        <div className={styles.secondarySurfaceCardHeader}>
-          <div className={styles.competitionLogoFrame}>
-            <span className={styles.secondarySurfaceMark}>{shortLabel}</span>
-          </div>
-        </div>
-
-        <div className={styles.secondarySurfaceCardBody}>
-          <h3 className={styles.secondarySurfaceTitle}>{title}</h3>
-        </div>
-
-        <div className={joinClasses(styles.cardFooter, styles.secondarySurfaceCardFooter)}>
-          <span className={styles.cardFooterLabel}>Abrir área</span>
-          <ArrowRightIcon className={styles.cardFooterArrow} />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 function CompetitionCard({
   competition,
   meta,
@@ -407,7 +372,10 @@ function CompetitionCard({
   meta: CompetitionDef;
 }) {
   const [hasCompetitionLogoError, setHasCompetitionLogoError] = useState(false);
-  const assetUrl = buildVisualAssetUrl("competitions", competition.assetId);
+  const assetUrl = buildVisualAssetUrl(
+    "competitions",
+    getCompetitionVisualAssetId(meta) ?? competition.assetId,
+  );
 
   return (
     <Link
@@ -478,78 +446,6 @@ function CompetitionCard({
   );
 }
 
-function EditorialMetricPill({ label, value }: { label: string; value: string }) {
-  return (
-    <span className={styles.editorialMetricPill}>
-      <span className={styles.editorialMetricValue}>{value}</span>
-      <span className={styles.editorialMetricLabel}>{label}</span>
-    </span>
-  );
-}
-
-function EditorialCard({ highlight }: { highlight: HomeEditorialHighlight }) {
-  const assetUrl = buildVisualAssetUrl("players", highlight.imageAssetId);
-
-  return (
-    <Link
-      className={joinClasses(styles.editorialCard, styles.interactiveCard)}
-      href={buildCanonicalPlayerPath(highlight.context, highlight.playerId)}
-    >
-      {assetUrl ? (
-        <Image
-          alt={`Foto de ${highlight.playerName}`}
-          className={joinClasses("object-cover", styles.editorialImage)}
-          fill
-          sizes="(min-width: 1280px) 560px, (min-width: 1024px) 50vw, 100vw"
-          src={assetUrl}
-          unoptimized
-        />
-      ) : (
-        <div className={styles.editorialFallback} />
-      )}
-
-      <div className={styles.editorialOverlay} />
-
-      <div className={styles.editorialContent}>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={styles.editorialBadgeStrong}>Dados reais</span>
-          <span className={styles.editorialBadgeSoft}>{highlight.competitionLabel}</span>
-        </div>
-
-        <div className="space-y-4">
-          <p className={styles.editorialEyebrow}>{highlight.eyebrow}</p>
-          <h3 className="font-[family:var(--font-app-headline)] text-[2rem] font-extrabold leading-tight tracking-[-0.045em] text-white md:text-[2.3rem]">
-            {highlight.title}
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-[#ecfff4]/84 md:text-base">
-            {highlight.description}
-          </p>
-        </div>
-
-        <div className={styles.editorialFooter}>
-          <div className={styles.editorialMetricList}>
-            <EditorialMetricPill
-              label="jogos"
-              value={formatWholeNumber(highlight.metrics.matchesPlayed)}
-            />
-            <EditorialMetricPill label="gols" value={formatWholeNumber(highlight.metrics.goals)} />
-            <EditorialMetricPill
-              label="assistências"
-              value={formatWholeNumber(highlight.metrics.assists)}
-            />
-            <EditorialMetricPill label="nota" value={formatRating(highlight.metrics.rating)} />
-          </div>
-
-          <div className={styles.editorialCta}>
-            <span>Abrir jogador</span>
-            <ArrowRightIcon className={styles.editorialArrow} />
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 export function HomeExecutivePage() {
   const homeQuery = useHomePage();
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
@@ -569,31 +465,6 @@ export function HomeExecutivePage() {
       dateRangeEnd,
     }),
     [competitionId, dateRangeEnd, dateRangeStart, lastN, roundId, seasonId, venue],
-  );
-  const secondarySurfaceCards = useMemo(
-    () => [
-      {
-        shortLabel: "CD",
-        title: "Confronto direto",
-        href: buildHeadToHeadPath(sharedFilters),
-      },
-      {
-        shortLabel: "MER",
-        title: "Mercado",
-        href: buildMarketPath(sharedFilters),
-      },
-      {
-        shortLabel: "TEC",
-        title: "Técnicos",
-        href: buildCoachesPath(sharedFilters),
-      },
-      {
-        shortLabel: "SOB",
-        title: "Sobre o produto",
-        href: "/landing",
-      },
-    ],
-    [sharedFilters],
   );
 
   if (homeQuery.isLoading && !homeQuery.data) {
@@ -634,18 +505,16 @@ export function HomeExecutivePage() {
   }
 
   const archiveSummary = homeQuery.data.archiveSummary;
-  const canonicalCompetitionsCount = SUPPORTED_COMPETITIONS.length;
-  const canonicalSeasonCoverageCount = SUPPORTED_SEASON_COVERAGE_COUNT;
   const archiveMetrics = [
     {
       label: "Competições",
-      value: formatWholeNumber(canonicalCompetitionsCount),
-      detail: "cobertura canônica pública",
+      value: formatWholeNumber(archiveSummary.competitions),
+      detail: "campeonatos no acervo",
     },
     {
-      label: "Temporadas fechadas",
-      value: formatWholeNumber(canonicalSeasonCoverageCount),
-      detail: "últimas 5 por competição",
+      label: "Temporadas",
+      value: formatWholeNumber(archiveSummary.seasons),
+      detail: "edições no acervo",
     },
     {
       label: "Partidas",
@@ -679,7 +548,7 @@ export function HomeExecutivePage() {
                     <span>Explorar competições</span>
                     <ArrowRightIcon className={styles.inlineArrow} />
                   </Link>
-                  <Link className={styles.secondaryCta} href={buildRankingPath("player-goals", sharedFilters)}>
+                  <Link className={styles.secondaryCta} href={buildRankingsHubPath(sharedFilters)}>
                     <span>Ver rankings</span>
                   </Link>
                 </div>
@@ -706,7 +575,7 @@ export function HomeExecutivePage() {
                 </div>
 
                 <p className={styles.panelNote}>
-                  Nacionais, continentais e curadoria editorial no mesmo fluxo de navegação.
+                  Nacionais, continentais e exploração histórica no mesmo fluxo de navegação.
                 </p>
               </aside>
             </div>
@@ -729,7 +598,7 @@ export function HomeExecutivePage() {
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <QuickLinkCard
                   description="Artilharia, criação e eficiência no mesmo ponto de entrada."
-                  href={buildRankingPath("player-goals", sharedFilters)}
+                  href={buildRankingsHubPath(sharedFilters)}
                   icon="rankings"
                   label="Rankings"
                 />
@@ -766,7 +635,7 @@ export function HomeExecutivePage() {
               countLabel={`${competitionGroups.domestic.length} competições`}
               description="Cobertura prioritária do acervo com acesso direto à temporada mais recente em cada item."
               eyebrow="Catálogo"
-              title="Competições nacionais"
+              title="Competições Nacionais"
             />
 
             {competitionGroups.domestic.length > 0 ? (
@@ -814,54 +683,29 @@ export function HomeExecutivePage() {
               />
             )}
           </div>
-        </div>
-      </section>
 
-      <section className="px-6 pb-12 md:px-10 md:pb-14 xl:px-12">
-        <div className="mx-auto max-w-6xl">
           <div className={styles.sectionPanel}>
             <SectionHeader
-              eyebrow="Exploração complementar"
-              title="Superfícies públicas secundárias"
+              countLabel={`${competitionGroups.world.length} competições`}
+              description="Torneios globais com acesso direto ao hub da Copa do Mundo e ao acervo do Intercontinental."
+              eyebrow="Catálogo"
+              title="Mundiais"
             />
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {secondarySurfaceCards.map((item) => (
-                <SecondarySurfaceCard
-                  href={item.href}
-                  key={item.href}
-                  shortLabel={item.shortLabel}
-                  title={item.title}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 pb-12 md:px-10 md:pb-14 xl:px-12">
-        <div className="mx-auto max-w-6xl">
-          <div className={styles.editorialShell}>
-            <div className={styles.editorialHeader}>
-              <p className={styles.sectionEyebrow}>Curadoria</p>
-              <h2 className="font-[family:var(--font-app-headline)] text-[2.2rem] font-extrabold tracking-[-0.045em] text-[#003526] md:text-[2.7rem]">
-                Curadoria de temporadas em destaque
-              </h2>
-              <p className="max-w-2xl text-sm leading-7 text-[#57657a] md:text-base">
-                Narrativas editoriais montadas sobre dados reais hoje disponíveis no acervo.
-              </p>
-            </div>
-
-            {homeQuery.data.editorialHighlights.length > 0 ? (
-              <div className="grid gap-6 lg:grid-cols-2">
-                {homeQuery.data.editorialHighlights.map((highlight) => (
-                  <EditorialCard highlight={highlight} key={highlight.id} />
+            {competitionGroups.world.length > 0 ? (
+              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+                {competitionGroups.world.map((competition) => (
+                  <CompetitionCard
+                    competition={competition}
+                    key={competition.competitionId}
+                    meta={competition.meta}
+                  />
                 ))}
               </div>
             ) : (
               <EmptyState
-                description="A página inicial não recebeu destaques editoriais suficientes para montar a curadoria."
-                title="Curadoria indisponível"
+                description="A página inicial não recebeu competições mundiais suficientes agora."
+                title="Sem competições mundiais"
               />
             )}
           </div>

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query, Request
 from ..core.context_registry import (
     build_canonical_context,
     get_canonical_competition,
+    get_canonical_competition_by_key,
     list_supported_competition_source_ids,
 )
 from ..core.contracts import build_api_response, build_coverage_from_counts
@@ -21,6 +22,9 @@ SearchType = Literal["competition", "team", "player", "match"]
 
 SEARCH_TYPES: tuple[SearchType, ...] = ("competition", "team", "player", "match")
 SUPPORTED_COMPETITION_SOURCE_IDS = list_supported_competition_source_ids()
+WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens"
+WORLD_CUP_COMPETITION_ID = 0
+WORLD_CUP_COMPETITION_NAME = "Copa do Mundo FIFA"
 ACCENT_SOURCE = "áàâãäéèêëíìîïóòôõöúùûüçñ"
 ACCENT_TARGET = "aaaaaeeeeiiiiooooouuuucn"
 
@@ -90,6 +94,25 @@ def _competition_result_payload(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _control_competition_result_payload(row: dict[str, Any]) -> dict[str, Any] | None:
+    competition_key = row.get("competition_key")
+    if not isinstance(competition_key, str):
+        return None
+
+    canonical_competition = get_canonical_competition_by_key(competition_key)
+    if canonical_competition is None:
+        return None
+
+    competition_name = row.get("competition_name")
+    return {
+        "competitionId": str(canonical_competition.competition_id),
+        "competitionKey": canonical_competition.competition_key,
+        "competitionName": competition_name.strip()
+        if isinstance(competition_name, str) and competition_name.strip()
+        else canonical_competition.default_name,
+    }
+
+
 def _context_payload(
     competition_id: int | None,
     competition_name: str | None,
@@ -125,20 +148,21 @@ def _search_competitions(query: str, *, limit_per_type: int) -> tuple[list[dict[
     normalized_query = _normalize_search_query(query)
     search_pattern = f"%{_escape_like(normalized_query)}%"
     prefix_pattern = f"{_escape_like(normalized_query)}%"
-    normalized_name = _normalized_sql("dc.league_name")
+    normalized_sportmonks_name = _normalized_sql("dc.league_name")
+    normalized_control_name = _normalized_sql("c.competition_name")
 
     rows = db_client.fetch_all(
         f"""
         select
             dc.league_id as competition_id,
             case
-                when {normalized_name} = %s then 0
-                when {normalized_name} like %s escape '\\' then 1
+                when {normalized_sportmonks_name} = %s then 0
+                when {normalized_sportmonks_name} like %s escape '\\' then 1
                 else 2
             end as search_rank
         from mart.dim_competition dc
         where dc.league_id = any(%s)
-          and {normalized_name} like %s escape '\\'
+          and {normalized_sportmonks_name} like %s escape '\\'
         order by search_rank asc, lower(dc.league_name) asc, dc.league_id asc
         limit %s;
         """,
@@ -146,6 +170,30 @@ def _search_competitions(query: str, *, limit_per_type: int) -> tuple[list[dict[
             normalized_query,
             prefix_pattern,
             list(SUPPORTED_COMPETITION_SOURCE_IDS),
+            search_pattern,
+            limit_per_type,
+        ],
+    )
+    control_rows = db_client.fetch_all(
+        f"""
+        select
+            c.competition_key,
+            c.competition_name,
+            case
+                when {normalized_control_name} = %s then 0
+                when {normalized_control_name} like %s escape '\\' then 1
+                else 2
+            end as search_rank
+        from control.competitions c
+        where c.competition_key = %s
+          and {normalized_control_name} like %s escape '\\'
+        order by search_rank asc, lower(c.competition_name) asc, c.competition_key asc
+        limit %s;
+        """,
+        [
+            normalized_query,
+            prefix_pattern,
+            WORLD_CUP_COMPETITION_KEY,
             search_pattern,
             limit_per_type,
         ],
@@ -161,6 +209,18 @@ def _search_competitions(query: str, *, limit_per_type: int) -> tuple[list[dict[
                 continue
             seen_competitions.add(competition_id)
             results.append(payload)
+
+    for row in control_rows:
+        payload = _control_competition_result_payload(row)
+        if payload is None:
+            continue
+
+        competition_id = payload["competitionId"]
+        if competition_id in seen_competitions:
+            continue
+
+        seen_competitions.add(competition_id)
+        results.append(payload)
 
     return results, 0
 
@@ -205,8 +265,14 @@ def _search_teams(
                 mt.team_id,
                 mt.team_name,
                 mt.search_rank,
-                dc.league_id,
-                dc.league_name,
+                case
+                    when fm.competition_key = %s then %s
+                    else dc.league_id
+                end as competition_id,
+                case
+                    when fm.competition_key = %s then %s
+                    else dc.league_name
+                end as competition_name,
                 fm.season,
                 max(fm.date_day) as last_match_date,
                 count(*)::int as matches_played
@@ -217,12 +283,13 @@ def _search_teams(
             inner join mart.dim_competition dc
               on dc.competition_sk = fm.competition_sk
             where dc.league_id = any(%s)
+               or fm.competition_key = %s
             group by
                 mt.team_id,
                 mt.team_name,
                 mt.search_rank,
-                dc.league_id,
-                dc.league_name,
+                competition_id,
+                competition_name,
                 fm.season
         ),
         ranked_contexts as (
@@ -231,10 +298,10 @@ def _search_teams(
                 case
                     when %s::boolean
                       and %s::int is not null
-                      and ac.league_id = any(%s)
+                      and ac.competition_id = any(%s)
                       and ac.season = %s then 0
                     when %s::boolean
-                      and ac.league_id = any(%s) then 1
+                      and ac.competition_id = any(%s) then 1
                     when %s::int is not null
                       and ac.season = %s then 2
                     else 3
@@ -245,10 +312,10 @@ def _search_teams(
                         case
                             when %s::boolean
                               and %s::int is not null
-                              and ac.league_id = any(%s)
+                              and ac.competition_id = any(%s)
                               and ac.season = %s then 0
                             when %s::boolean
-                              and ac.league_id = any(%s) then 1
+                              and ac.competition_id = any(%s) then 1
                             when %s::int is not null
                               and ac.season = %s then 2
                             else 3
@@ -256,15 +323,15 @@ def _search_teams(
                         ac.last_match_date desc nulls last,
                         ac.matches_played desc,
                         ac.season desc,
-                        ac.league_id asc
+                        ac.competition_id asc
                 ) as context_rank
             from aggregated_contexts ac
         )
         select
             team_id,
             team_name,
-            league_id,
-            league_name,
+            competition_id,
+            competition_name,
             season,
             last_match_date,
             matches_played,
@@ -289,7 +356,12 @@ def _search_teams(
             prefix_pattern,
             token_prefix_pattern,
             search_pattern,
+            WORLD_CUP_COMPETITION_KEY,
+            WORLD_CUP_COMPETITION_ID,
+            WORLD_CUP_COMPETITION_KEY,
+            WORLD_CUP_COMPETITION_NAME,
             list(SUPPORTED_COMPETITION_SOURCE_IDS),
+            WORLD_CUP_COMPETITION_KEY,
             has_preferred_competition,
             preferred_season_id,
             list(preferred_competition_ids),
@@ -314,8 +386,8 @@ def _search_teams(
     skipped_count = 0
     for row in rows:
         default_context = _context_payload(
-            competition_id=row.get("league_id"),
-            competition_name=row.get("league_name"),
+            competition_id=row.get("competition_id"),
+            competition_name=row.get("competition_name"),
             season_id=row.get("season"),
         )
         if default_context is None:

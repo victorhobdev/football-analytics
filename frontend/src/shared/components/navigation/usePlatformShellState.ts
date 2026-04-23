@@ -23,7 +23,7 @@ import {
   buildCompetitionHubPath,
   buildMatchesPath,
   buildPlayersPath,
-  buildRankingPath,
+  buildRankingsHubPath,
   buildSeasonHubPath,
   buildSeasonHubTabPath,
   buildTeamsPath,
@@ -121,6 +121,10 @@ function isPathActive(
 
   if (/^\/competitions\/[^/]+$/.test(hrefPathname)) {
     return pathname === hrefPathname;
+  }
+
+  if (hrefPathname === "/rankings") {
+    return pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
   }
 
   if (hrefPathname.startsWith("/rankings/")) {
@@ -420,7 +424,7 @@ export function usePlatformShellState(): PlatformShellState {
             pathname,
             searchParams,
             "Rankings",
-            buildRankingPath("player-goals", sharedFilterInput),
+            buildRankingsHubPath(sharedFilterInput),
           ),
           buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
           buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
@@ -583,6 +587,15 @@ export function usePlatformShellState(): PlatformShellState {
         "Resumo, linha do tempo, escalações e estatísticas do jogo.";
       helperText =
         "Volte para partidas, times, jogadores e rankings mantendo o mesmo recorte.";
+    } else if (pathname === "/rankings") {
+      surfaceLabel = "Rankings";
+      surfaceTitle = context
+        ? `Hub de rankings · ${context.competitionName} ${context.seasonLabel}`
+        : "Hub de rankings";
+      description =
+        "Abra o catálogo completo de rankings disponíveis e escolha entre leituras de jogadores e times.";
+      helperText =
+        "Os cards mantêm o recorte ativo enquanto você navega entre os rankings.";
     } else if (pathname.startsWith("/rankings/")) {
       surfaceLabel = "Rankings";
       surfaceTitle = rankingDefinition
@@ -608,7 +621,7 @@ export function usePlatformShellState(): PlatformShellState {
           pathname,
           searchParams,
           "Rankings",
-          buildRankingPath("player-goals", sharedFilterInput),
+          buildRankingsHubPath(sharedFilterInput),
         ),
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
@@ -632,7 +645,7 @@ export function usePlatformShellState(): PlatformShellState {
           pathname,
           searchParams,
           "Rankings",
-          buildRankingPath("player-goals", sharedFilterInput),
+          buildRankingsHubPath(sharedFilterInput),
         ),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
       );

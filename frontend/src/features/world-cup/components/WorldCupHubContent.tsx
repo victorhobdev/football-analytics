@@ -11,6 +11,7 @@ import {
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 
+import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupHub } from "@/features/world-cup/hooks/useWorldCupHub";
 import {
   buildWorldCupEditionPath,
@@ -181,6 +182,8 @@ function QuickLinkCard({
 function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
   const championName = edition.champion?.teamName ?? "Campeão não identificado";
   const hostCountryName = edition.hostCountry ?? "País-sede não identificado";
+  const hostCountryAssetId =
+    edition.hostCountryTeam?.teamId ?? (hostCountryName === "Coreia do Sul e Japão" ? "world-cup-japan" : null);
 
   return (
     <Link
@@ -229,7 +232,7 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
             <div className="flex items-center gap-3">
               <ProfileMedia
                 alt={`País-sede ${hostCountryName}`}
-                assetId={null}
+                assetId={hostCountryAssetId}
                 category="clubs"
                 className="h-10 w-10 rounded-full"
                 fallback={buildFallbackLabel(hostCountryName)}
@@ -327,32 +330,10 @@ export function WorldCupHubContent() {
         <span>Copa do Mundo</span>
       </div>
 
-      <ProfilePanel className="world-cup-hero space-y-6" tone="accent">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] xl:items-start">
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/72">
-                Copa do Mundo FIFA
-              </p>
-              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.95rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-white md:text-[3.7rem]">
-                Arquivo histórico da Copa do Mundo
-              </h1>
-            </div>
-
-            <p className="max-w-2xl text-sm/7 text-[#d7efe4] md:text-[0.98rem]/7">
-              Edições, seleções, rankings e finais em uma navegação única do arquivo histórico.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <ProfileTag className="world-cup-hero-tag">Arquivo histórico</ProfileTag>
-              <ProfileTag className="world-cup-hero-tag">Edições</ProfileTag>
-              <ProfileTag className="world-cup-hero-tag">Seleções</ProfileTag>
-              <ProfileTag className="world-cup-hero-tag">Finais</ProfileTag>
-            </div>
-          </div>
-
-          <aside className="space-y-4 rounded-[1.7rem] border border-white/12 bg-white/10 p-4 shadow-[0_24px_54px_-42px_rgba(2,12,9,0.55)] backdrop-blur-xl">
-            <div className="flex items-center gap-4 rounded-[1.3rem] border border-white/10 bg-white/8 p-4">
+      <WorldCupArchiveHero
+        aside={
+          <>
+            <div className="flex items-center gap-4 rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4">
               <ProfileMedia
                 alt="Identidade visual da Copa do Mundo"
                 assetId={WORLD_CUP_COMPETITION_KEY}
@@ -369,7 +350,7 @@ export function WorldCupHubContent() {
                   Entrada dedicada
                 </p>
                 <p className="font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold leading-none tracking-[-0.05em] text-white">
-                  {formatWholeNumber(summary.editionsCount)} edições no arquivo
+                  {formatWholeNumber(summary.editionsCount)} edições
                 </p>
                 <p className="text-sm/6 text-white/70">
                   {latestEdition ? `Última edição disponível: ${latestEdition.year}.` : "Linha do tempo em atualização."}
@@ -377,9 +358,9 @@ export function WorldCupHubContent() {
               </div>
             </div>
 
-            <div className="rounded-[1.3rem] border border-white/10 bg-white/8 p-4">
+            <div className="rounded-[1.3rem] border border-white/10 bg-white/[0.05] p-4">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/70">
-                Maior artilheiro do arquivo
+                Maior artilheiro de todas as copas
               </p>
               <div className="mt-3 flex items-center gap-3">
                 <ProfileMedia
@@ -402,48 +383,34 @@ export function WorldCupHubContent() {
                 </div>
               </div>
             </div>
-          </aside>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <ProfileKpi
-            hint="edições disponíveis no banco"
-            invert
-            label="Edições"
-            value={formatWholeNumber(summary.editionsCount)}
-          />
-          <ProfileKpi
-            hint="partidas no arquivo"
-            invert
-            label="Partidas"
-            value={formatWholeNumber(summary.matchesCount)}
-          />
-          <ProfileKpi
-            hint="seleções diferentes já campeãs"
-            invert
-            label="Campeões distintos"
-            value={formatWholeNumber(summary.distinctChampionsCount)}
-          />
-          <ProfileKpi
-            hint="edições decididas em final única"
-            invert
-            label="Finais únicas"
-            value={formatWholeNumber(registeredFinalsCount)}
-          />
-        </div>
-      </ProfilePanel>
+          </>
+        }
+        asideClassName="space-y-4"
+        description="Edições, seleções, rankings e finais em uma navegação única do arquivo histórico."
+        footer={
+          <>
+            <ProfileTag className="world-cup-hero-tag">Arquivo histórico</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Edições</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Seleções</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Finais</ProfileTag>
+          </>
+        }
+        kicker="Copa do Mundo FIFA"
+        metrics={
+          <>
+            <ProfileKpi invert label="Edições" value={formatWholeNumber(summary.editionsCount)} />
+            <ProfileKpi invert label="Partidas" value={formatWholeNumber(summary.matchesCount)} />
+            <ProfileKpi invert label="Campeões distintos" value={formatWholeNumber(summary.distinctChampionsCount)} />
+            <ProfileKpi invert label="Finais únicas" value={formatWholeNumber(registeredFinalsCount)} />
+          </>
+        }
+        title="Arquivo histórico da Copa do Mundo"
+      />
 
       <ProfilePanel className="space-y-5" tone="soft">
         <div>
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
             Navegação principal
-          </p>
-          <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2.1rem] font-extrabold tracking-[-0.05em] text-[#111c2d]">
-            Quatro portas de entrada do MVP
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
-            Acesse as rotas centrais da vertical para navegar por seleções, rankings históricos e
-            finais da Copa.
           </p>
         </div>
 

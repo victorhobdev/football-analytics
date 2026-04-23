@@ -1,52 +1,64 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import type { ColumnDef } from "@tanstack/react-table";
-
 import { getCompetitionById } from "@/config/competitions.registry";
-import { getMetric, formatMetricValue } from "@/config/metrics.registry";
-import { listRankingsByEntity } from "@/config/ranking.registry";
+import { formatMetricValue, getMetric } from "@/config/metrics.registry";
+import { RANKING_DEFINITIONS } from "@/config/ranking.registry";
 import type { RankingDefinition, RankingSortDirection } from "@/config/ranking.types";
 import { getSeasonById } from "@/config/seasons.registry";
 import { useRankingTable } from "@/features/rankings/hooks";
-import type { RankingQueryFilters, RankingTableRow } from "@/features/rankings/types";
-import { DataTable } from "@/shared/components/data-display/DataTable";
+import type { RankingScopeSample, RankingTableRow } from "@/features/rankings/types";
+import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import {
   ProfileAlert,
-  ProfileCoveragePill,
-  ProfileKpi,
-  ProfileMetricTile,
   ProfilePanel,
   ProfileShell,
+  ProfileTabs,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
-import { ProfileRouteCard } from "@/shared/components/profile/ProfileRouteCard";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
-import type { CompetitionSeasonContext } from "@/shared/types/context.types";
-import type { CoverageState } from "@/shared/types/coverage.types";
+import { useTimeRange } from "@/shared/hooks/useTimeRange";
 import {
   buildCanonicalPlayerPath,
   buildCanonicalTeamPath,
-  buildMatchesPath,
   buildPlayerResolverPath,
-  buildPlayersPath,
-  buildSeasonHubTabPath,
-  buildTeamsPath,
   buildTeamResolverPath,
 } from "@/shared/utils/context-routing";
 
 type RankingTableProps = {
   rankingDefinition: RankingDefinition;
 };
+
+type RankingRowRecentTeam = {
+  teamId: string;
+  teamName?: string | null;
+};
+
+const INTEGER_FORMATTER = new Intl.NumberFormat("pt-BR", {
+  maximumFractionDigits: 0,
+});
+
+const DECIMAL_FORMATTER = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+function joinClasses(...classes: Array<string | false | null | undefined>): string {
+  return classes.filter(Boolean).join(" ");
+}
 
 function parseMinSample(value: string): number | null {
   const normalizedValue = value.trim();
@@ -73,92 +85,46 @@ function parseNullableQueryValue(value: string | null): string | null {
   return normalizedValue.length > 0 ? normalizedValue : null;
 }
 
-function formatStageFormatLabel(stageFormat: string | null): string | null {
-  switch (stageFormat) {
-    case "league_table":
-      return "Fase classificatória";
-    case "group_table":
-      return "Fase de grupos";
-    case "knockout":
-      return "Mata-mata";
-    case "qualification_knockout":
-      return "Eliminatória preliminar";
-    case "placement_match":
-      return "Disputa de colocação";
-    default:
-      return null;
+function formatInteger(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
   }
+
+  return INTEGER_FORMATTER.format(value);
 }
 
-function resolveEntityHref(
-  entity: RankingDefinition["entity"],
-  entityId: string,
-  context: CompetitionSeasonContext | null,
-  competitionId: string | null,
-  seasonId: string | null,
-): string | null {
-  if (entity === "player") {
-    return context
-      ? buildCanonicalPlayerPath(context, entityId)
-      : buildPlayerResolverPath(entityId, { competitionId, seasonId });
+function formatDecimal(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
   }
 
-  if (entity === "team") {
-    return context
-      ? buildCanonicalTeamPath(context, entityId)
-      : buildTeamResolverPath(entityId, { competitionId, seasonId });
-  }
-
-  if (entity === "coach") {
-    return `/coaches/${entityId}`;
-  }
-
-  return null;
+  return DECIMAL_FORMATTER.format(value);
 }
 
-function resolveRowMetricValue(row: RankingTableRow, metricKey: string): number | null {
-  if (typeof row.metricValue === "number" && Number.isFinite(row.metricValue)) {
-    return row.metricValue;
+function formatUpdatedAt(value: string | null | undefined): string {
+  if (!value) {
+    return "-";
   }
 
-  const fallbackValue = row[metricKey];
+  const parsedValue = new Date(value);
 
-  if (typeof fallbackValue === "number" && Number.isFinite(fallbackValue)) {
-    return fallbackValue;
+  if (Number.isNaN(parsedValue.getTime())) {
+    return "-";
   }
 
-  return null;
+  return DATE_TIME_FORMATTER.format(parsedValue);
 }
 
-function resolveRowCaption(row: RankingTableRow, entity: RankingDefinition["entity"]): string {
-  const teamName = typeof row.teamName === "string" ? row.teamName.trim() : "";
-  const position = typeof row.position === "string" ? row.position.trim() : "";
-
-  if (entity === "player" && teamName.length > 0) {
-    return teamName;
+function formatSampleValue(sample: RankingScopeSample | null | undefined): string {
+  if (!sample || sample.appliedValue === null || sample.appliedValue === undefined) {
+    return "Sem mínimo";
   }
 
-  if (position.length > 0) {
-    return position;
+  if (sample.unitLabel) {
+    return `${formatInteger(sample.appliedValue)} ${sample.unitLabel}`;
   }
 
-  return entity === "team" ? "Equipe" : entity === "player" ? "Jogador" : "Entidade";
-}
-
-function resolveTimeScopeLabel(filters: RankingQueryFilters): string {
-  if (typeof filters.lastN === "number" && Number.isFinite(filters.lastN)) {
-    return `Últimas ${filters.lastN}`;
-  }
-
-  if (filters.dateRangeStart || filters.dateRangeEnd) {
-    return "Janela personalizada";
-  }
-
-  if (filters.roundId?.trim()) {
-    return `Rodada ${filters.roundId}`;
-  }
-
-  return "Temporada";
+  return formatInteger(sample.appliedValue);
 }
 
 function getEntityMonogram(entityName: string): string {
@@ -187,250 +153,287 @@ function resolveEntityMediaCategory(
   return null;
 }
 
+function resolveEntityHref(
+  entity: RankingDefinition["entity"],
+  entityId: string,
+  context: ReturnType<typeof useResolvedCompetitionContext>,
+  competitionId: string | null,
+  seasonId: string | null,
+): string | null {
+  if (entity === "player") {
+    return context
+      ? buildCanonicalPlayerPath(context, entityId)
+      : buildPlayerResolverPath(entityId, { competitionId, seasonId });
+  }
+
+  if (entity === "team") {
+    return context
+      ? buildCanonicalTeamPath(context, entityId)
+      : buildTeamResolverPath(entityId, { competitionId, seasonId });
+  }
+
+  return null;
+}
+
+function resolveTeamHref(
+  teamId: string,
+  context: ReturnType<typeof useResolvedCompetitionContext>,
+  competitionId: string | null,
+  seasonId: string | null,
+): string | null {
+  return context
+    ? buildCanonicalTeamPath(context, teamId)
+    : buildTeamResolverPath(teamId, { competitionId, seasonId });
+}
+
+function resolveRecentTeams(row: RankingTableRow): RankingRowRecentTeam[] {
+  const recentTeams = (row as RankingTableRow & { recentTeams?: RankingRowRecentTeam[] | null })
+    .recentTeams;
+
+  if (Array.isArray(recentTeams) && recentTeams.length > 0) {
+    return recentTeams
+      .filter((team) => typeof team.teamId === "string" && team.teamId.trim().length > 0)
+      .slice(0, 5);
+  }
+
+  if (row.teamId) {
+    return [{ teamId: row.teamId, teamName: row.teamName ?? null }];
+  }
+
+  return [];
+}
+
+function shouldShowCoverageNotice(status: string, percentage?: number): boolean {
+  if (status !== "partial") {
+    return false;
+  }
+
+  if (typeof percentage === "number") {
+    return percentage < 95;
+  }
+
+  return true;
+}
+
+function resolveCoverageMessage(percentage?: number): string {
+  if (typeof percentage === "number") {
+    return `Cobertura parcial no recorte atual (${percentage.toFixed(0)}% coberto). Use o ranking como leitura comparativa, não como retrato exaustivo.`;
+  }
+
+  return "Cobertura parcial no recorte atual. Use o ranking como leitura comparativa, não como retrato exaustivo.";
+}
+
 function buildRankingHref(rankingId: string, currentSearch: string): string {
   return currentSearch.length > 0
     ? `/rankings/${rankingId}?${currentSearch}`
     : `/rankings/${rankingId}`;
 }
 
-function resolveMetricProgress(currentValue: number | null, leaderValue: number | null): number {
-  if (
-    typeof currentValue !== "number" ||
-    !Number.isFinite(currentValue) ||
-    typeof leaderValue !== "number" ||
-    !Number.isFinite(leaderValue) ||
-    leaderValue === 0
-  ) {
-    return 0;
-  }
-
-  return Math.max(0, Math.min(100, (currentValue / leaderValue) * 100));
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={joinClasses("h-4 w-4", className)}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m16 16 4 4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
 }
 
-function resolveGapLabel(
-  currentValue: number | null,
-  nextValue: number | null,
-  metricKey: string,
+function RankingSummaryCard({
+  detail,
+  highlight = false,
+  label,
+  value,
+}: {
+  detail: ReactNode;
+  highlight?: boolean;
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <article
+      className={joinClasses(
+        "flex min-h-[6.6rem] flex-col items-center justify-center rounded-[1.25rem] px-4 py-4 text-center shadow-[0_18px_38px_-34px_rgba(17,28,45,0.2)]",
+        highlight
+          ? "bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] text-white"
+          : "bg-[linear-gradient(180deg,rgba(240,243,255,0.94),rgba(248,251,255,0.88))] text-[#111c2d]",
+      )}
+    >
+      <p
+        className={joinClasses(
+          "break-words text-center font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold leading-none tracking-[-0.05em] md:text-[1.85rem]",
+          highlight ? "text-white" : "text-[#0f2035]",
+        )}
+      >
+        {value}
+      </p>
+      <p
+        className={joinClasses(
+          "mt-3 text-center text-[0.66rem] font-semibold uppercase tracking-[0.18em]",
+          highlight ? "text-white/86" : "text-[#69778d]",
+        )}
+      >
+        {label}
+      </p>
+      <p
+        className={joinClasses(
+          "mt-1 text-center text-[0.82rem]/5",
+          highlight ? "text-white/78" : "text-[#6b7890]",
+        )}
+      >
+        {detail}
+      </p>
+    </article>
+  );
+}
+
+function resolveSampleFilterLabel(
+  rankingDefinition: RankingDefinition,
+  sample: RankingScopeSample | null | undefined,
 ): string {
-  if (typeof currentValue !== "number" || typeof nextValue !== "number") {
-    return "-";
+  const sampleField = sample?.field ?? rankingDefinition.minSample?.field;
+
+  if (sampleField === "minutes_played" || sampleField === "minutesPlayed") {
+    return "Minutos mínimos";
   }
 
-  return formatMetricValue(metricKey, currentValue - nextValue);
+  if (sampleField === "matches_played" || sampleField === "matchesPlayed") {
+    return "Jogos mínimos";
+  }
+
+  return "Mínimo";
 }
 
-function shouldShowCoverageNotice(coverage: CoverageState): boolean {
-  if (coverage.status !== "partial") {
-    return false;
+function resolveEntityCopy(entity: RankingDefinition["entity"]) {
+  if (entity === "team") {
+    return {
+      singular: "time",
+      plural: "times",
+      singularTitle: "Time",
+      title: "Times",
+    };
   }
 
-  if (typeof coverage.percentage === "number") {
-    return coverage.percentage < 95;
-  }
-
-  return true;
-}
-
-function resolveCoverageMessage(coverage: CoverageState): string {
-  if (typeof coverage.percentage === "number") {
-    return `Cobertura parcial nesta temporada (${coverage.percentage.toFixed(0)}% coberto). Use o ranking como referência, não como leitura exaustiva.`;
-  }
-
-  return "Cobertura parcial nesta temporada. Use o ranking como referência, não como leitura exaustiva.";
+  return {
+    singular: "jogador",
+    plural: "jogadores",
+    singularTitle: "Jogador",
+    title: "Jogadores",
+  };
 }
 
 export function RankingTable({ rankingDefinition }: RankingTableProps) {
-  const [search, setSearch] = useState("");
-  const [sortDirection, setSortDirection] = useState<RankingSortDirection>(
-    rankingDefinition.defaultSort,
-  );
-  const [minSampleInput, setMinSampleInput] = useState(
-    rankingDefinition.minSample?.min?.toString() ?? "",
-  );
-  const minSampleValue = useMemo(() => parseMinSample(minSampleInput), [minSampleInput]);
-
+  const metric = getMetric(rankingDefinition.metricKey);
   const searchParams = useSearchParams();
   const currentSearch = searchParams.toString();
   const selectedStageId = parseNullableQueryValue(searchParams.get("stageId"));
   const selectedStageFormat = parseNullableQueryValue(searchParams.get("stageFormat"));
   const { competitionId, seasonId } = useGlobalFiltersState();
   const resolvedContext = useResolvedCompetitionContext();
-  const competitionName = getCompetitionById(competitionId)?.name ?? null;
-  const seasonLabel = getSeasonById(seasonId)?.label ?? null;
-  const contextLabel =
-    competitionName && seasonLabel
-      ? `${competitionName} · ${seasonLabel}`
-      : (competitionName ?? seasonLabel ?? null);
+  const { params: timeRangeParams } = useTimeRange();
 
-  const metric = getMetric(rankingDefinition.metricKey);
+  const defaultMinSampleInput = rankingDefinition.minSample?.min?.toString() ?? "";
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortDirection, setSortDirection] = useState<RankingSortDirection>(
+    rankingDefinition.defaultSort,
+  );
+  const [minSampleInput, setMinSampleInput] = useState(defaultMinSampleInput);
+
+  const deferredSearch = useDeferredValue(search);
+  const minSampleValue = useMemo(() => parseMinSample(minSampleInput), [minSampleInput]);
+
+  useEffect(() => {
+    setSearch("");
+    setPage(1);
+    setSortDirection(rankingDefinition.defaultSort);
+    setMinSampleInput(defaultMinSampleInput);
+  }, [defaultMinSampleInput, rankingDefinition.defaultSort, rankingDefinition.id]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [
+    competitionId,
+    seasonId,
+    deferredSearch,
+    minSampleValue,
+    pageSize,
+    selectedStageFormat,
+    selectedStageId,
+    sortDirection,
+    timeRangeParams.dateRangeEnd,
+    timeRangeParams.dateRangeStart,
+    timeRangeParams.lastN,
+    timeRangeParams.roundId,
+  ]);
+
   const rankingQuery = useRankingTable(rankingDefinition, {
     localFilters: {
-      search,
+      search: deferredSearch,
       sortDirection,
       minSampleValue,
       stageId: selectedStageId,
       stageFormat: selectedStageFormat,
+      page,
+      pageSize,
     },
   });
 
   const rows = rankingQuery.data?.rows ?? [];
-  const resolvedStage = rankingQuery.data?.stage ?? null;
-  const selectedStageLabel =
-    typeof resolvedStage?.stageName === "string" && resolvedStage.stageName.trim().length > 0
-      ? resolvedStage.stageName.trim()
-      : null;
-  const selectedStageFormatLabel = formatStageFormatLabel(
-    resolvedStage?.stageFormat ?? selectedStageFormat,
-  );
-  const topRows = rows.slice(0, 3);
-  const leaderRow = rows[0] ?? null;
-  const leaderValue = leaderRow
-    ? resolveRowMetricValue(leaderRow, rankingDefinition.metricKey)
-    : null;
-  const runnerUpValue = rows[1]
-    ? resolveRowMetricValue(rows[1], rankingDefinition.metricKey)
-    : null;
-  const relatedRankings = useMemo(
+  const pagination = rankingQuery.meta?.pagination;
+  const totalCount = pagination?.totalCount ?? rows.length;
+  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  const currentPage = pagination?.page ?? page;
+  const currentRangeStart = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const currentRangeEnd = totalCount === 0 ? 0 : currentRangeStart + rows.length - 1;
+  const scope = rankingQuery.data?.scope;
+  const showPer90Column =
+    rankingDefinition.metricKey === "goals" &&
+    rows.some((row) => typeof row.metricPer90 === "number");
+  const entityCopy = resolveEntityCopy(rankingDefinition.entity);
+
+  const fallbackCompetitionName = getCompetitionById(competitionId)?.name ?? null;
+  const fallbackSeasonLabel = getSeasonById(seasonId)?.label ?? null;
+  const competitionName = scope?.competitionName ?? fallbackCompetitionName;
+  const seasonLabel = scope?.seasonLabel ?? fallbackSeasonLabel;
+  const sampleFilterLabel = resolveSampleFilterLabel(rankingDefinition, scope?.sample);
+  const contextSummary = competitionName && seasonLabel
+    ? `${competitionName} · ${seasonLabel}`
+    : competitionName ?? seasonLabel ?? "Todas as competições";
+  const leaderRow = currentPage === 1 ? rows[0] ?? null : null;
+  const leaderMetricValue =
+    currentPage === 1 && leaderRow
+      ? formatMetricValue(rankingDefinition.metricKey, leaderRow.metricValue)
+      : `Página ${currentPage}`;
+  const leaderSummary = currentPage === 1 && leaderRow
+    ? (leaderRow.entityName ?? leaderRow.entityId)
+    : "Primeira página do ranking";
+  const updatedAtLabel = formatUpdatedAt(rankingQuery.data?.updatedAt);
+  const hasLocalFilters =
+    search.trim().length > 0 ||
+    sortDirection !== rankingDefinition.defaultSort ||
+    minSampleInput.trim() !== defaultMinSampleInput;
+  const rankingTabs = useMemo(
     () =>
-      listRankingsByEntity(rankingDefinition.entity)
-        .filter((candidate) => candidate.id !== rankingDefinition.id)
-        .slice(0, 4),
-    [rankingDefinition.entity, rankingDefinition.id],
+      RANKING_DEFINITIONS.map((ranking) => ({
+        href: buildRankingHref(ranking.id, currentSearch),
+        isActive: ranking.id === rankingDefinition.id,
+        key: ranking.id,
+        label: ranking.label,
+      })),
+    [currentSearch, rankingDefinition.id],
   );
-  const seasonHubHref = resolvedContext
-    ? buildSeasonHubTabPath(resolvedContext, "rankings", {
-        competitionId,
-        seasonId,
-        roundId: rankingQuery.mergedFilters.roundId,
-        stageId: selectedStageId,
-        stageFormat: selectedStageFormat,
-        venue: rankingQuery.mergedFilters.venue,
-        lastN: rankingQuery.mergedFilters.lastN,
-        dateRangeStart: rankingQuery.mergedFilters.dateRangeStart,
-        dateRangeEnd: rankingQuery.mergedFilters.dateRangeEnd,
-      })
-    : "/competitions";
-  const teamsHref = buildTeamsPath({
-    competitionId,
-    seasonId,
-    roundId: rankingQuery.mergedFilters.roundId,
-    stageId: selectedStageId,
-    stageFormat: selectedStageFormat,
-    venue: rankingQuery.mergedFilters.venue,
-    lastN: rankingQuery.mergedFilters.lastN,
-    dateRangeStart: rankingQuery.mergedFilters.dateRangeStart,
-    dateRangeEnd: rankingQuery.mergedFilters.dateRangeEnd,
-  });
-  const playersHref = buildPlayersPath({
-    competitionId,
-    seasonId,
-    roundId: rankingQuery.mergedFilters.roundId,
-    stageId: selectedStageId,
-    stageFormat: selectedStageFormat,
-    venue: rankingQuery.mergedFilters.venue,
-    lastN: rankingQuery.mergedFilters.lastN,
-    dateRangeStart: rankingQuery.mergedFilters.dateRangeStart,
-    dateRangeEnd: rankingQuery.mergedFilters.dateRangeEnd,
-  });
-  const matchesHref = buildMatchesPath({
-    competitionId,
-    seasonId,
-    roundId: rankingQuery.mergedFilters.roundId,
-    stageId: selectedStageId,
-    stageFormat: selectedStageFormat,
-    venue: rankingQuery.mergedFilters.venue,
-    lastN: rankingQuery.mergedFilters.lastN,
-    dateRangeStart: rankingQuery.mergedFilters.dateRangeStart,
-    dateRangeEnd: rankingQuery.mergedFilters.dateRangeEnd,
-  });
-
-  const columns = useMemo<Array<ColumnDef<RankingTableRow, unknown>>>(
-    () => [
-      {
-        accessorFn: (row) => row.rank ?? null,
-        id: "rank",
-        header: "#",
-        cell: ({ row }) => (
-          <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003526]">
-            {row.original.rank ?? "-"}
-          </span>
-        ),
-      },
-      {
-        accessorFn: (row) => row.entityName ?? row.entityId,
-        id: "entity",
-        header: rankingDefinition.entity === "player" ? "Jogador" : "Entidade",
-        cell: ({ row }) => {
-          const entityName = row.original.entityName ?? row.original.entityId;
-          const entityHref = resolveEntityHref(
-            rankingDefinition.entity,
-            row.original.entityId,
-            resolvedContext,
-            competitionId,
-            seasonId,
-          );
-          const caption = resolveRowCaption(row.original, rankingDefinition.entity);
-          const mediaCategory = resolveEntityMediaCategory(rankingDefinition.entity);
-          const content = (
-            <div className="flex items-center gap-3">
-              {mediaCategory ? (
-                <ProfileMedia
-                  alt={entityName}
-                  assetId={row.original.entityId}
-                  category={mediaCategory}
-                  className="h-10 w-10 border-0 bg-[rgba(216,227,251,0.82)]"
-                  fallback={getEntityMonogram(entityName)}
-                  imageClassName="p-1.5"
-                  shape="circle"
-                />
-              ) : null}
-              <div className="space-y-1">
-                <p className="font-semibold text-[#111c2d]">{entityName}</p>
-                <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">{caption}</p>
-              </div>
-            </div>
-          );
-
-          if (!entityHref) {
-            return content;
-          }
-
-          return (
-            <Link className="block transition-colors hover:text-[#00513b]" href={entityHref}>
-              {content}
-            </Link>
-          );
-        },
-      },
-      {
-        accessorFn: (row) => resolveRowMetricValue(row, rankingDefinition.metricKey),
-        id: "metric",
-        header: metric?.label ?? rankingDefinition.metricKey,
-        cell: ({ row }) => {
-          const metricValue = resolveRowMetricValue(row.original, rankingDefinition.metricKey);
-
-          return (
-            <div className="space-y-1 text-right">
-              <p className="font-[family:var(--font-profile-headline)] text-lg font-extrabold text-[#111c2d]">
-                {formatMetricValue(rankingDefinition.metricKey, metricValue)}
-              </p>
-              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
-                {row.original.rank === 1 ? "Líder" : "Na disputa"}
-              </p>
-            </div>
-          );
-        },
-      },
-    ],
-    [
-      competitionId,
-      metric?.label,
-      rankingDefinition.entity,
-      rankingDefinition.metricKey,
-      resolvedContext,
-      seasonId,
-    ],
-  );
+  const resetLocalFilters = () => {
+    setSearch("");
+    setPage(1);
+    setSortDirection(rankingDefinition.defaultSort);
+    setMinSampleInput(defaultMinSampleInput);
+  };
 
   if (!metric) {
     return (
@@ -450,19 +453,11 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
     );
   }
 
-  if (rankingQuery.isLoading) {
+  if (rankingQuery.isLoading && !rankingQuery.data) {
     return (
-      <ProfileShell className="space-y-6">
-        <header className="space-y-2">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#57657a]">
-            Rankings
-          </p>
-          <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-tight text-[#111c2d]">
-            {rankingDefinition.label}
-          </h1>
-        </header>
+      <ProfileShell className="space-y-5">
         <LoadingSkeleton height={220} />
-        <LoadingSkeleton height={160} />
+        <LoadingSkeleton height={120} />
         <LoadingSkeleton height={420} />
       </ProfileShell>
     );
@@ -470,15 +465,7 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
 
   if (rankingQuery.isError && rows.length === 0) {
     return (
-      <ProfileShell className="space-y-6">
-        <header className="space-y-2">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#57657a]">
-            Rankings
-          </p>
-          <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-tight text-[#111c2d]">
-            {rankingDefinition.label}
-          </h1>
-        </header>
+      <ProfileShell className="space-y-5">
         <ProfileAlert title="Falha ao carregar ranking" tone="critical">
           <p>{rankingQuery.error?.message}</p>
         </ProfileAlert>
@@ -487,441 +474,376 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
   }
 
   return (
-    <ProfileShell className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-        <Link className="transition-colors hover:text-[#003526]" href="/competitions">
-          Competições
-        </Link>
-        {contextLabel ? (
-          <>
-            <span className="text-[#8fa097]">/</span>
-            <span>{contextLabel}</span>
-          </>
-        ) : null}
-        <span className="text-[#8fa097]">/</span>
-        <span>Rankings</span>
-      </div>
+    <ProfileShell className="space-y-5" variant="plain">
+      <section className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold text-[#7d889e]">
+          <Link className="transition-colors hover:text-[#003526]" href="/">
+            Início
+          </Link>
+          <span className="text-[#b1bccf]">/</span>
+          <span className="text-[#0b6a56]">Rankings</span>
+        </div>
 
-      <ProfilePanel className="space-y-5" tone="accent">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
-          <div className="flex items-start gap-5">
-            {leaderRow ? (
-              (() => {
-                const leaderName = leaderRow.entityName ?? leaderRow.entityId;
-                const mediaCategory = resolveEntityMediaCategory(rankingDefinition.entity);
-
-                if (!mediaCategory) {
-                  return (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/12 bg-white/12 text-xl font-black tracking-[0.08em] text-white">
-                      {getEntityMonogram(leaderName)}
-                    </div>
-                  );
-                }
-
-                return (
-                  <ProfileMedia
-                    alt={leaderName}
-                    assetId={leaderRow.entityId}
-                    category={mediaCategory}
-                    className="h-20 w-20 border-white/12 bg-white/12"
-                    fallback={getEntityMonogram(leaderName)}
-                    fallbackClassName="text-xl tracking-[0.08em] text-white"
-                    imageClassName="p-2.5"
-                    shape="circle"
-                    tone="contrast"
-                  />
-                );
-              })()
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/12 bg-white/12 text-xl font-black tracking-[0.08em] text-white">
-                RK
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/65">
-                Rankings
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <ProfileCoveragePill coverage={rankingQuery.coverage} className="bg-white/16 text-white" />
-                <ProfileTag className="bg-white/12 text-white/82">
-                  {resolveTimeScopeLabel(rankingQuery.mergedFilters)}
-                </ProfileTag>
-                {contextLabel ? (
-                  <ProfileTag className="bg-white/12 text-white/82">{contextLabel}</ProfileTag>
-                ) : null}
-                {selectedStageLabel ? (
-                  <ProfileTag className="bg-white/12 text-white/82">{selectedStageLabel}</ProfileTag>
-                ) : null}
-                {selectedStageFormatLabel ? (
-                  <ProfileTag className="bg-white/12 text-white/82">{selectedStageFormatLabel}</ProfileTag>
-                ) : null}
-                <ProfileTag className="bg-white/12 text-white/82">{metric.label}</ProfileTag>
-              </div>
-              <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-                {rankingDefinition.label}
-              </h1>
-              <p className="max-w-3xl text-sm leading-6 text-white/74">
-                {rankingDefinition.description}
-              </p>
-              {leaderRow ? (
-                <p className="text-sm font-semibold text-white/82">
-                  Líder atual: {leaderRow.entityName ?? leaderRow.entityId}
-                </p>
-              ) : null}
-            </div>
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] md:items-start">
+          <div className="max-w-3xl space-y-3">
+            <p className="text-[0.68rem] font-bold uppercase leading-none tracking-[0.2em] text-[#69778d]">
+              Ranking atual
+            </p>
+            <h1 className="font-[family:var(--font-profile-headline)] text-[2.35rem] font-extrabold leading-[0.98] tracking-[-0.055em] text-[#003526] md:text-[3.05rem]">
+              {rankingDefinition.label} de {entityCopy.plural}
+            </h1>
+            <p className="max-w-2xl text-base/7 text-[#57657a]">
+              {rankingDefinition.description} Use os filtros para ajustar competição, temporada e
+              janela.
+            </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <ProfileKpi
-              hint="Entidades com linha no ranking"
-              invert
-              label="Entidades"
-              value={rows.length}
+            <RankingSummaryCard
+              detail={`${entityCopy.plural} no recorte`}
+              label="Resultados"
+              value={formatInteger(totalCount)}
             />
-            <ProfileKpi
-              hint={metric.label}
-              invert
-              label="Topo"
-              value={formatMetricValue(rankingDefinition.metricKey, leaderValue)}
+            <RankingSummaryCard
+              detail={leaderSummary}
+              highlight
+              label={currentPage === 1 ? "Líder" : "Página"}
+              value={leaderMetricValue}
             />
-            <ProfileKpi
-              hint="Sobre o vice-líder"
-              invert
-              label="Vantagem"
-              value={resolveGapLabel(leaderValue, runnerUpValue, rankingDefinition.metricKey)}
+            <RankingSummaryCard
+              detail={competitionName ?? "Todas as competições"}
+              label="Competição"
+              value={competitionName ?? "Competição"}
             />
-            <ProfileKpi
-              hint="Filtro local"
-              invert
-              label="Amostra mínima"
-              value={minSampleValue ?? rankingDefinition.minSample?.min ?? "-"}
+            <RankingSummaryCard
+              detail={scope?.window.label ?? "Todos os jogos"}
+              label="Temporada"
+              value={seasonLabel ?? "Todas"}
             />
           </div>
         </div>
+      </section>
+
+      <ProfileTabs
+        ariaLabel="Tipos de ranking"
+        className="mx-auto w-full max-w-6xl"
+        density="compact"
+        items={rankingTabs}
+        navClassName="w-full justify-center md:flex-1 md:justify-center"
+        aside={<ProfileTag>{contextSummary}</ProfileTag>}
+      />
+
+      <section className="mx-auto grid w-full max-w-6xl gap-3 rounded-[1.35rem] bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)] lg:grid-cols-[minmax(18rem,1.2fr)_220px_220px_auto] lg:items-end">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[#1f2d40]">
+          <span className="text-[0.68rem] font-bold uppercase leading-none tracking-[0.2em] text-[#69778d]">
+            Buscar
+          </span>
+          <div className="relative flex min-h-[3.35rem] items-center rounded-[1rem] bg-white/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)]">
+            <SearchIcon className="pointer-events-none absolute left-4 text-[#8d9ab0]" />
+            <input
+              className="w-full border-0 bg-transparent py-3 pl-11 pr-4 text-[0.96rem] text-[#162235] outline-none placeholder:text-[#97a4b7]"
+              onChange={(event) => {
+                setSearch(event.target.value);
+              }}
+              placeholder={`Buscar ${entityCopy.singular}`}
+              type="search"
+              value={search}
+            />
+          </div>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[#1f2d40]">
+          <span className="text-[0.68rem] font-bold uppercase leading-none tracking-[0.2em] text-[#69778d]">
+            Ordenar
+          </span>
+          <select
+            className="min-h-[3.35rem] rounded-[1rem] border-0 bg-white/94 px-4 text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none"
+            onChange={(event) => {
+              setSortDirection(event.target.value as RankingSortDirection);
+            }}
+            value={sortDirection}
+          >
+            <option value="desc">Maior para menor</option>
+            <option value="asc">Menor para maior</option>
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[#1f2d40]">
+          <span className="text-[0.68rem] font-bold uppercase leading-none tracking-[0.2em] text-[#69778d]">
+            {sampleFilterLabel}
+          </span>
+          <input
+            className="min-h-[3.35rem] rounded-[1rem] border-0 bg-white/94 px-4 text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none placeholder:text-[#97a4b7]"
+            min={0}
+            onChange={(event) => {
+              setMinSampleInput(event.target.value);
+            }}
+            placeholder={defaultMinSampleInput || "Opcional"}
+            type="number"
+            value={minSampleInput}
+          />
+        </label>
+
+        <button
+          className={joinClasses("button-pill", hasLocalFilters ? "button-pill-primary" : "button-pill-secondary")}
+          disabled={!hasLocalFilters}
+          onClick={resetLocalFilters}
+          type="button"
+        >
+          Limpar filtros
+        </button>
+      </section>
+
+      <ProfilePanel className="mx-auto w-full max-w-6xl overflow-hidden p-0">
+        <div className="flex flex-col gap-3 px-5 py-5 md:px-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+              Ranking atual
+            </p>
+            <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
+              {rankingDefinition.label}
+            </h2>
+            <p className="mt-2 text-sm/6 text-[#57657a]">
+              Mostrando {formatInteger(currentRangeStart)}-{formatInteger(currentRangeEnd)} de{" "}
+              {formatInteger(totalCount)} {entityCopy.plural}. {contextSummary}.
+              {updatedAtLabel !== "-" ? ` Atualização: ${updatedAtLabel}.` : ""}
+              {rankingDefinition.entity === "player"
+                ? " Quando um jogador aparece por mais de um time, o detalhe indica o vínculo exibido."
+                : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ProfileTag>{metric.label}</ProfileTag>
+            {showPer90Column ? <ProfileTag>Gols por 90</ProfileTag> : null}
+          </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <div className="px-5 pb-5 md:px-6">
+            <EmptyState
+              description={
+                search.trim().length > 0
+                  ? `Nenhum ${entityCopy.singular} encontrado para "${search.trim()}" no recorte atual.`
+                  : `Não há ${entityCopy.plural} suficientes para os filtros atuais.`
+              }
+              title="Ranking vazio"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto border-t border-[rgba(222,228,237,0.86)]">
+              <table className="min-w-full border-collapse text-left text-sm text-[#1f2d40]">
+                <thead className="bg-[rgba(240,243,255,0.92)] text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
+                  <tr>
+                    <th className="w-16 px-4 py-3 font-semibold">#</th>
+                    <th className="min-w-[280px] px-4 py-3 font-semibold">{entityCopy.singularTitle}</th>
+                    {rankingDefinition.entity === "player" ? (
+                      <th className="min-w-[240px] px-4 py-3 font-semibold">Time</th>
+                    ) : null}
+                    <th className="w-24 px-4 py-3 text-right font-semibold">Jogos</th>
+                    {rankingDefinition.entity === "player" ? (
+                      <th className="w-28 px-4 py-3 text-right font-semibold">Minutos</th>
+                    ) : null}
+                    <th className="w-24 px-4 py-3 text-right font-semibold whitespace-nowrap">{metric.label}</th>
+                    {showPer90Column ? (
+                      <th className="w-24 px-4 py-3 text-right font-semibold">Gols/90</th>
+                    ) : null}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[rgba(191,201,195,0.38)]">
+                  {rows.map((row) => {
+                    const entityName = row.entityName ?? row.entityId;
+                    const entityHref = resolveEntityHref(
+                      rankingDefinition.entity,
+                      row.entityId,
+                      resolvedContext,
+                      competitionId,
+                      seasonId,
+                    );
+                    const recentTeams = resolveRecentTeams(row);
+
+                    return (
+                      <tr className="align-top hover:bg-[rgba(240,243,255,0.42)]" key={row.entityId}>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003526]">
+                            {row.rank ?? "-"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <ProfileMedia
+                              alt={entityName}
+                              assetId={row.entityId}
+                              category={resolveEntityMediaCategory(rankingDefinition.entity) ?? "players"}
+                              className="h-11 w-11 border-0 bg-[rgba(216,227,251,0.82)]"
+                              fallback={getEntityMonogram(entityName)}
+                              imageClassName="p-1.5"
+                              shape="circle"
+                            />
+                            <div className="min-w-0">
+                              {entityHref ? (
+                                <Link
+                                  className="block truncate font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+                                  href={entityHref}
+                                >
+                                  {entityName}
+                                </Link>
+                              ) : (
+                                <p className="truncate font-semibold text-[#111c2d]">{entityName}</p>
+                              )}
+                              <p className="mt-1 text-xs text-[#57657a]">
+                                {row.rank === 1 ? "Líder" : "Posição no ranking"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        {rankingDefinition.entity === "player" ? (
+                          <td className="px-4 py-3">
+                            <div className="flex min-h-[2.5rem] items-center gap-1.5 whitespace-nowrap">
+                              {recentTeams.length > 0 ? (
+                                recentTeams.map((team, index) => {
+                                  const teamHref = resolveTeamHref(
+                                    team.teamId,
+                                    resolvedContext,
+                                    competitionId,
+                                    seasonId,
+                                  );
+                                  const teamAsset = (
+                                    <ProfileMedia
+                                      alt={team.teamName ?? "Time"}
+                                      assetId={team.teamId}
+                                      category="clubs"
+                                      className="h-10 w-10 border border-white/70 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_12px_24px_-20px_rgba(17,28,45,0.24)]"
+                                      fallback={getEntityMonogram(team.teamName ?? "Time")}
+                                      fallbackClassName="text-[0.62rem]"
+                                      imageClassName="p-1.25"
+                                      shape="rounded"
+                                    />
+                                  );
+
+                                  if (teamHref) {
+                                    return (
+                                      <Link
+                                        aria-label={team.teamName ?? "Time"}
+                                        className="transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                                        href={teamHref}
+                                        key={`${row.entityId}-${team.teamId}-${index}`}
+                                        title={team.teamName ?? "Time"}
+                                      >
+                                        {teamAsset}
+                                      </Link>
+                                    );
+                                  }
+
+                                  return (
+                                    <div
+                                      aria-label={team.teamName ?? "Time"}
+                                      key={`${row.entityId}-${team.teamId}-${index}`}
+                                      title={team.teamName ?? "Time"}
+                                    >
+                                      {teamAsset}
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                <span className="text-sm text-[#93a0b4]">-</span>
+                              )}
+                            </div>
+                          </td>
+                        ) : null}
+                        <td className="px-4 py-3 text-right font-medium tabular-nums text-[#1f2d40]">
+                          {formatInteger(row.matchesPlayed)}
+                        </td>
+                        {rankingDefinition.entity === "player" ? (
+                          <td className="px-4 py-3 text-right font-medium tabular-nums text-[#1f2d40]">
+                            {formatMetricValue("minutes_played", row.minutesPlayed)}
+                          </td>
+                        ) : null}
+                        <td className="px-4 py-3 text-right">
+                          <p className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                            {formatMetricValue(rankingDefinition.metricKey, row.metricValue)}
+                          </p>
+                          <p className="mt-1 whitespace-nowrap text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
+                            {metric.label}
+                          </p>
+                        </td>
+                        {showPer90Column ? (
+                          <td className="px-4 py-3 text-right font-medium tabular-nums text-[#1f2d40]">
+                            {formatDecimal(row.metricPer90)}
+                          </td>
+                        ) : null}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-[rgba(191,201,195,0.4)] bg-[rgba(240,243,255,0.52)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-[#57657a]">
+                Página {formatInteger(currentPage)} de {formatInteger(totalPages)}.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-[#57657a]">
+                  Linhas
+                  <select
+                    className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 px-3 py-1.5 text-[#1f2d40]"
+                    onChange={(event) => {
+                      const nextSize = Number(event.target.value);
+                      setPageSize(nextSize);
+                    }}
+                    value={pageSize}
+                  >
+                    {[10, 25, 50, 100].map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <button
+                  className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={currentPage <= 1}
+                  onClick={() => {
+                    setPage((currentValue) => Math.max(currentValue - 1, 1));
+                  }}
+                  type="button"
+                >
+                  Anterior
+                </button>
+                <button
+                  className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => {
+                    setPage((currentValue) => Math.min(currentValue + 1, totalPages));
+                  }}
+                  type="button"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </ProfilePanel>
 
       {rankingQuery.isError ? (
-        <ProfileAlert title="Dados carregados com alerta" tone="warning">
+        <ProfileAlert className="mx-auto w-full max-w-6xl" title="Dados carregados com alerta" tone="warning">
           <p>{rankingQuery.error?.message}</p>
         </ProfileAlert>
       ) : null}
 
-      {shouldShowCoverageNotice(rankingQuery.coverage) ? (
+      {shouldShowCoverageNotice(
+        rankingQuery.coverage.status,
+        rankingQuery.coverage.percentage,
+      ) ? (
         <PartialDataBanner
+          className="mx-auto w-full max-w-6xl"
           coverage={rankingQuery.coverage}
-          message={resolveCoverageMessage(rankingQuery.coverage)}
+          message={resolveCoverageMessage(rankingQuery.coverage.percentage)}
         />
       ) : null}
-
-      <section className="grid gap-4 xl:grid-cols-4">
-        <ProfileRouteCard
-          description="Volte para a temporada e releia a mesma competição antes de trocar de profundidade."
-          href={seasonHubHref}
-          label="Contexto canônico"
-          title="Temporada"
-        />
-        <ProfileRouteCard
-          description="Abra atletas ligados ao ranking sem perder competição, temporada e janela."
-          href={playersHref}
-          label="Saída canônica"
-          title="Jogadores"
-        />
-        <ProfileRouteCard
-          description="Cruze o ranking com a lista de times para aprofundar campanha, elenco e perfil."
-          href={teamsHref}
-          label="Saída canônica"
-          title="Times"
-        />
-        <ProfileRouteCard
-          description="Use a disputa do ranking como entrada para o calendário completo da temporada."
-          href={matchesHref}
-          label="Calendário"
-          title="Partidas"
-        />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {topRows.length > 0 ? (
-            topRows.map((row, index) => {
-              const metricValue = resolveRowMetricValue(row, rankingDefinition.metricKey);
-              const metricProgress = resolveMetricProgress(metricValue, leaderValue);
-              const entityHref = resolveEntityHref(
-                rankingDefinition.entity,
-                row.entityId,
-                resolvedContext,
-                competitionId,
-                seasonId,
-              );
-              const entityName = row.entityName ?? row.entityId;
-              const mediaCategory = resolveEntityMediaCategory(rankingDefinition.entity);
-              const cardTone = index === 0 ? "accent" : "base";
-              const cardMetaClassName = cardTone === "accent" ? "text-white/70" : "text-[#57657a]";
-              const content = (
-                <>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      {mediaCategory ? (
-                        <ProfileMedia
-                          alt={entityName}
-                          assetId={row.entityId}
-                          category={mediaCategory}
-                          className={
-                            cardTone === "accent"
-                              ? "h-14 w-14 border-white/12 bg-white/12"
-                              : "h-14 w-14 border-[rgba(191,201,195,0.45)] bg-white"
-                          }
-                          fallback={getEntityMonogram(entityName)}
-                          fallbackClassName={cardTone === "accent" ? "text-sm text-white" : "text-sm"}
-                          imageClassName="p-2"
-                          shape="circle"
-                          tone={cardTone === "accent" ? "contrast" : "base"}
-                        />
-                      ) : null}
-                      <p
-                        className={`text-[0.72rem] font-semibold uppercase tracking-[0.18em] ${cardMetaClassName}`}
-                      >
-                        #{row.rank ?? index + 1}
-                      </p>
-                      <div>
-                        <p className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-inherit">
-                          {entityName}
-                        </p>
-                        <p
-                          className={`mt-1 text-xs uppercase tracking-[0.16em] ${cardMetaClassName}`}
-                        >
-                          {resolveRowCaption(row, rankingDefinition.entity)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-inherit">
-                        {formatMetricValue(rankingDefinition.metricKey, metricValue)}
-                      </p>
-                      <p
-                        className={`mt-1 text-[0.68rem] uppercase tracking-[0.18em] ${cardMetaClassName}`}
-                      >
-                        {metric.label}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/20">
-                    <div
-                      className={
-                        cardTone === "accent"
-                          ? "h-full rounded-full bg-white"
-                          : "h-full rounded-full bg-[#003526]"
-                      }
-                      style={{ width: `${metricProgress}%` }}
-                    />
-                  </div>
-                </>
-              );
-
-              return (
-                <ProfilePanel className="space-y-4" key={row.entityId} tone={cardTone}>
-                  {entityHref ? (
-                    <Link className="block" href={entityHref}>
-                      {content}
-                    </Link>
-                  ) : (
-                    content
-                  )}
-                </ProfilePanel>
-              );
-            })
-          ) : (
-            <ProfilePanel className="md:col-span-2 xl:col-span-3">
-              <EmptyState
-                description="Não há entidades para os filtros globais e locais atuais."
-                title="Ranking vazio"
-              />
-            </ProfilePanel>
-          )}
-        </div>
-
-        <ProfilePanel className="space-y-5" tone="soft">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                Leitura do ranking
-              </p>
-              <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-                Como está a disputa
-              </h2>
-            </div>
-            <ProfileTag>{resolveTimeScopeLabel(rankingQuery.mergedFilters)}</ProfileTag>
-            {selectedStageLabel ? <ProfileTag>{selectedStageLabel}</ProfileTag> : null}
-            {selectedStageFormatLabel ? <ProfileTag>{selectedStageFormatLabel}</ProfileTag> : null}
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ProfileMetricTile label="Entidades avaliadas" value={rows.length} />
-            <ProfileMetricTile
-              label="Amostra mínima"
-              value={minSampleValue ?? rankingDefinition.minSample?.min ?? "-"}
-            />
-            <ProfileMetricTile
-              label="Líder"
-              value={leaderRow ? (leaderRow.entityName ?? leaderRow.entityId) : "-"}
-            />
-            <ProfileMetricTile
-              label="Vantagem sobre o vice"
-              value={resolveGapLabel(leaderValue, runnerUpValue, rankingDefinition.metricKey)}
-            />
-          </div>
-
-          {rankingDefinition.coverageWarning ? (
-            <ProfileAlert title="Leitura importante" tone="info">
-              {rankingDefinition.coverageWarning}
-            </ProfileAlert>
-          ) : null}
-
-          <div className="space-y-3">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-              Outros rankings relacionados
-            </p>
-            <div className="grid gap-2">
-              {relatedRankings.map((relatedRanking) => (
-                <Link
-                  className="rounded-[1.2rem] border border-[rgba(191,201,195,0.55)] bg-white/80 px-4 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
-                  href={buildRankingHref(relatedRanking.id, currentSearch)}
-                  key={relatedRanking.id}
-                >
-                  <p className="font-semibold text-[#111c2d]">{relatedRanking.label}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#57657a]">
-                    {getMetric(relatedRanking.metricKey)?.label ?? relatedRanking.metricKey}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </ProfilePanel>
-      </section>
-
-      <ProfilePanel className="space-y-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-2">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-              Ajustes da tabela
-            </p>
-            <h2 className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-              Refine o recorte sem sair da página
-            </h2>
-            <p className="text-sm text-[#57657a]">
-              Use busca, ordenação e amostra mínima para comparar o ranking sem perder a mesma
-              temporada.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <ProfileTag>{metric.label}</ProfileTag>
-            <ProfileTag>{resolveTimeScopeLabel(rankingQuery.mergedFilters)}</ProfileTag>
-            {selectedStageLabel ? <ProfileTag>{selectedStageLabel}</ProfileTag> : null}
-            {selectedStageFormatLabel ? <ProfileTag>{selectedStageFormatLabel}</ProfileTag> : null}
-          </div>
-        </div>
-
-        <section className="grid gap-3 md:grid-cols-3">
-          <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
-            Buscar{" "}
-            {rankingDefinition.entity === "player"
-              ? "jogador"
-              : rankingDefinition.entity === "coach"
-                ? "técnico"
-                : "time"}
-            <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,227,251,0.82)] text-xs font-semibold text-[#003526]">
-                Q
-              </span>
-              <input
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none placeholder:text-[#76859a]"
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                }}
-                placeholder={`Buscar ${
-                  rankingDefinition.entity === "player"
-                    ? "jogador"
-                    : rankingDefinition.entity === "coach"
-                      ? "técnico"
-                      : "time"
-                }`}
-                type="text"
-                value={search}
-              />
-            </div>
-          </label>
-
-          <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
-            Ordenar ranking
-            <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,227,251,0.82)] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-                Ord
-              </span>
-              <select
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none ring-0"
-                onChange={(event) => {
-                  setSortDirection(event.target.value as RankingSortDirection);
-                }}
-                value={sortDirection}
-              >
-                <option value="desc">Descendente</option>
-                <option value="asc">Ascendente</option>
-              </select>
-            </div>
-          </label>
-
-          <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
-            Amostra mínima
-            <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,227,251,0.82)] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-                Min
-              </span>
-              <input
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none ring-0 placeholder:text-[#76859a]"
-                onChange={(event) => {
-                  setMinSampleInput(event.target.value);
-                }}
-                placeholder={rankingDefinition.minSample?.min?.toString() ?? "Opcional"}
-                type="number"
-                value={minSampleInput}
-              />
-            </div>
-          </label>
-
-        </section>
-      </ProfilePanel>
-
-      <ProfilePanel className="space-y-5" tone="soft">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-              Ranking detalhado
-            </p>
-            <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-              Tabela completa
-            </h2>
-          </div>
-          {rankingQuery.data?.updatedAt ? (
-            <ProfileTag>
-              Atualizado em {new Date(rankingQuery.data.updatedAt).toLocaleDateString("pt-BR")}
-            </ProfileTag>
-          ) : null}
-        </div>
-
-        <DataTable<RankingTableRow>
-          columns={columns}
-          data={rows}
-          emptyDescription="Não há linhas para os filtros atuais."
-          emptyTitle="Ranking vazio"
-          enableVirtualization
-          initialPageSize={50}
-          loading={false}
-          pageSizeOptions={[25, 50, 100]}
-          variant="profile"
-          virtualizerMaxHeight={520}
-        />
-      </ProfilePanel>
     </ProfileShell>
   );
 }

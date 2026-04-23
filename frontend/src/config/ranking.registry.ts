@@ -16,7 +16,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "goals",
     endpoint: "/api/v1/rankings/player-goals",
     defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
   {
@@ -27,7 +27,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "assists",
     endpoint: "/api/v1/rankings/player-assists",
     defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
   {
@@ -38,7 +38,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "shots_total",
     endpoint: "/api/v1/rankings/player-shots-total",
     defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
   {
@@ -49,18 +49,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "shots_on_target",
     endpoint: "/api/v1/rankings/player-shots-on-target",
     defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
-    availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
-  },
-  {
-    id: "player-pass-accuracy",
-    label: "Precisão de passe",
-    description: "Jogadores com maior percentual de acerto de passe.",
-    entity: "player",
-    metricKey: "pass_accuracy_pct",
-    endpoint: "/api/v1/rankings/player-pass-accuracy",
-    defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
   {
@@ -71,18 +60,19 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "player_rating",
     endpoint: "/api/v1/rankings/player-rating",
     defaultSort: "desc",
-    minSample: { field: "minutes_played", min: 180 },
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
     coverageWarning: "A nota depende da disponibilidade da fonte de origem.",
   },
   {
-    id: "player-yellow-cards",
-    label: "Cartões amarelos",
-    description: "Jogadores com mais cartões amarelos.",
+    id: "player-cards",
+    label: "Cartões",
+    description: "Jogadores com mais cartões no recorte (amarelos + vermelhos).",
     entity: "player",
-    metricKey: "yellow_cards",
-    endpoint: "/api/v1/rankings/player-yellow-cards",
+    metricKey: "cards_total",
+    endpoint: "/api/v1/rankings/player-cards",
     defaultSort: "desc",
+    minSample: { field: "minutes_played", min: 1800 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
     coverageWarning: "A cobertura de cartões pode variar conforme a fonte.",
   },
@@ -94,6 +84,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "team_possession_pct",
     endpoint: "/api/v1/rankings/team-possession",
     defaultSort: "desc",
+    minSample: { field: "matches_played", min: 20 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
   {
@@ -104,6 +95,7 @@ const RANKINGS_LIST: RegistryRankingDefinition[] = [
     metricKey: "team_pass_accuracy_pct",
     endpoint: "/api/v1/rankings/team-pass-accuracy",
     defaultSort: "desc",
+    minSample: { field: "matches_played", min: 20 },
     availableFilters: ["competitionId", "seasonId", "roundId", "venue", "lastN", "dateRange"],
   },
 ];
@@ -132,12 +124,20 @@ function createRankingRegistry(rankings: RegistryRankingDefinition[]): RankingRe
   }, {});
 }
 
+const LEGACY_RANKING_ALIASES: Record<string, string> = {
+  "player-yellow-cards": "player-cards",
+};
+
+export function normalizeRankingType(rankingType: string): string {
+  return LEGACY_RANKING_ALIASES[rankingType] ?? rankingType;
+}
+
 export const RANKING_REGISTRY: Readonly<RankingRegistry> = Object.freeze(createRankingRegistry(RANKINGS_LIST));
 
 export const RANKING_DEFINITIONS: ReadonlyArray<RankingDefinition> = Object.freeze(Object.values(RANKING_REGISTRY));
 
 export function getRankingDefinition(rankingType: string): RankingDefinition | undefined {
-  return RANKING_REGISTRY[rankingType];
+  return RANKING_REGISTRY[normalizeRankingType(rankingType)];
 }
 
 export function listRankingsByEntity(entity: RankingEntity): RankingDefinition[] {

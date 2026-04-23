@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from fastapi import APIRouter, Query, Request
@@ -16,6 +16,35 @@ router = APIRouter(prefix="/api/v1/rankings", tags=["rankings"])
 SortDirection = Literal["asc", "desc"]
 FreshnessClass = Literal["season", "fast"]
 
+SEARCH_NORMALIZATION_SOURCE = "áàâãäéèêëíìîïóòôõöúùûüçñ"
+SEARCH_NORMALIZATION_TARGET = "aaaaaeeeeiiiiooooouuuucn"
+LEGACY_RANKING_ALIASES = {
+    "player-yellow-cards": "player-cards",
+}
+
+
+def _normalize_recent_teams(value: Any) -> list[dict[str, str | None]]:
+    if not isinstance(value, list):
+        return []
+
+    items: list[dict[str, str | None]] = []
+    for entry in value[:5]:
+        if not isinstance(entry, dict):
+            continue
+
+        team_id = entry.get("teamId")
+        if team_id is None:
+            continue
+
+        items.append(
+            {
+                "teamId": str(team_id),
+                "teamName": str(entry["teamName"]) if entry.get("teamName") is not None else None,
+            }
+        )
+
+    return items
+
 
 @dataclass(frozen=True)
 class RankingStageScope:
@@ -23,33 +52,90 @@ class RankingStageScope:
     stage_name: str | None
     stage_format: str | None
 
+
+@dataclass(frozen=True)
+class RankingContextScope:
+    competition_id: int | None
+    competition_name: str | None
+    season_id: int | None
+    season_label: str | None
+
 RANKING_CONFIG: dict[str, dict[str, Any]] = {
-    "player-goals": {"metricKey": "goals", "domain": "player", "valueColumn": "goals", "defaultSort": "desc"},
-    "player-assists": {"metricKey": "assists", "domain": "player", "valueColumn": "assists", "defaultSort": "desc"},
+    "player-goals": {
+        "metricKey": "goals",
+        "domain": "player",
+        "valueColumn": "goals",
+        "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
+    },
+    "player-assists": {
+        "metricKey": "assists",
+        "domain": "player",
+        "valueColumn": "assists",
+        "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
+    },
     "player-shots-total": {
         "metricKey": "shots_total",
         "domain": "player",
         "valueColumn": "shots_total",
         "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
     },
     "player-shots-on-target": {
         "metricKey": "shots_on_target",
         "domain": "player",
         "valueColumn": "shots_on_goal",
         "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
     },
     "player-pass-accuracy": {
         "metricKey": "pass_accuracy_pct",
         "domain": "player",
         "unsupported": True,
         "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
     },
-    "player-rating": {"metricKey": "player_rating", "domain": "player", "valueColumn": "rating", "defaultSort": "desc"},
-    "player-yellow-cards": {
-        "metricKey": "yellow_cards",
+    "player-rating": {
+        "metricKey": "player_rating",
         "domain": "player",
-        "valueColumn": "yellow_cards",
+        "valueColumn": "rating",
         "defaultSort": "desc",
+        "defaultMinSample": 180,
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
+    },
+    "player-cards": {
+        "metricKey": "cards_total",
+        "domain": "player",
+        "valueColumn": "cards_total",
+        "defaultSort": "desc",
+        "sampleField": "minutesPlayed",
+        "sampleLabel": "Amostra mínima",
+        "sampleUnit": "minutes",
+        "sampleUnitLabel": "minutos",
     },
     "team-possession": {
         "metricKey": "team_possession_pct",
@@ -62,6 +148,10 @@ RANKING_CONFIG: dict[str, dict[str, Any]] = {
         "defaultSort": "desc",
     },
 }
+
+
+def _normalize_ranking_type(ranking_type: str) -> str:
+    return LEGACY_RANKING_ALIASES.get(ranking_type, ranking_type)
 
 
 def _request_id(request: Request) -> str | None:
@@ -138,7 +228,7 @@ def _validate_ranking_stage_scope(filters: GlobalFilters) -> RankingStageScope |
 
 
 def _get_ranking_config(ranking_type: str) -> dict[str, Any]:
-    config = RANKING_CONFIG.get(ranking_type)
+    config = RANKING_CONFIG.get(_normalize_ranking_type(ranking_type))
     if config is None:
         raise AppError(
             message="Invalid ranking type.",
@@ -147,6 +237,189 @@ def _get_ranking_config(ranking_type: str) -> dict[str, Any]:
             details={"rankingType": ranking_type},
         )
     return config
+
+
+def _format_stage_format_label(stage_format: str | None) -> str | None:
+    if stage_format == "league_table":
+        return "Fase classificatória"
+    if stage_format == "group_table":
+        return "Fase de grupos"
+    if stage_format == "knockout":
+        return "Mata-mata"
+    if stage_format == "qualification_knockout":
+        return "Eliminatória preliminar"
+    if stage_format == "placement_match":
+        return "Disputa de colocação"
+    return None
+
+
+def _format_venue_label(venue: VenueFilter) -> str:
+    if venue == VenueFilter.home:
+        return "Somente mandante"
+    if venue == VenueFilter.away:
+        return "Somente visitante"
+    return "Todos os mandos"
+
+
+def _normalize_search_value(search: str | None) -> str | None:
+    if not search:
+        return None
+
+    normalized_search = search.strip().lower().translate(
+        str.maketrans(SEARCH_NORMALIZATION_SOURCE, SEARCH_NORMALIZATION_TARGET)
+    )
+    return normalized_search or None
+
+
+def _normalized_search_sql(expression: str) -> str:
+    return (
+        f"translate(lower(coalesce({expression}, '')), "
+        f"'{SEARCH_NORMALIZATION_SOURCE}', '{SEARCH_NORMALIZATION_TARGET}')"
+    )
+
+
+def _resolve_ranking_context_scope(filters: GlobalFilters) -> RankingContextScope:
+    where_clauses = ["1=1"]
+    params: list[Any] = []
+    append_fact_match_filters(where_clauses, params, alias="fm", filters=filters)
+
+    row = db_client.fetch_one(
+        f"""
+        select
+            case when count(distinct dc.league_id) = 1 then max(dc.league_id) end as competition_id,
+            case when count(distinct dc.league_name) = 1 then max(dc.league_name) end as competition_name,
+            case when count(distinct fm.season) = 1 then max(fm.season) end as season_id,
+            case when count(distinct fm.season_label) = 1 then max(fm.season_label) end as season_label
+        from mart.fact_matches fm
+        left join mart.dim_competition dc
+          on dc.competition_sk = fm.competition_sk
+        where {" and ".join(where_clauses)};
+        """,
+        params,
+    ) or {}
+
+    return RankingContextScope(
+        competition_id=int(row["competition_id"]) if row.get("competition_id") is not None else None,
+        competition_name=row.get("competition_name"),
+        season_id=int(row["season_id"]) if row.get("season_id") is not None else None,
+        season_label=row.get("season_label"),
+    )
+
+
+def _resolve_scope_kind(scope: RankingContextScope) -> str:
+    if scope.competition_id is not None and scope.season_id is not None:
+        return "competitionSeason"
+    if scope.competition_id is not None:
+        return "competition"
+    if scope.season_id is not None:
+        return "season"
+    return "catalog"
+
+
+def _resolve_scope_label(scope: RankingContextScope) -> str:
+    if scope.competition_name and scope.season_label:
+        return f"{scope.competition_name} · {scope.season_label}"
+    if scope.competition_name:
+        return scope.competition_name
+    if scope.season_label:
+        return f"Temporada {scope.season_label}"
+    return "Acervo publicado"
+
+
+def _build_window_payload(filters: GlobalFilters, *, entity_label: str) -> dict[str, Any]:
+    if filters.last_n is not None:
+        return {
+            "kind": "lastN",
+            "label": f"Últimos {filters.last_n} jogos por {entity_label}",
+            "lastN": filters.last_n,
+            "appliesPerEntity": True,
+        }
+
+    if filters.date_start is not None and filters.date_end is not None:
+        return {
+            "kind": "dateRange",
+            "label": "Janela personalizada",
+            "dateStart": filters.date_start.isoformat(),
+            "dateEnd": filters.date_end.isoformat(),
+            "appliesPerEntity": False,
+        }
+
+    if filters.round_id is not None:
+        return {
+            "kind": "round",
+            "label": f"Rodada {filters.round_id}",
+            "roundId": str(filters.round_id),
+            "appliesPerEntity": False,
+        }
+
+    return {
+        "kind": "all",
+        "label": "Todos os jogos do recorte",
+        "appliesPerEntity": False,
+    }
+
+
+def _build_sample_payload(
+    ranking_config: dict[str, Any],
+    min_sample_value: int | None,
+) -> dict[str, Any] | None:
+    sample_field = ranking_config.get("sampleField")
+    default_sample = ranking_config.get("defaultMinSample")
+
+    if sample_field is None and default_sample is None and min_sample_value is None:
+        return None
+
+    applied_value = min_sample_value if min_sample_value is not None else default_sample
+
+    return {
+        "field": sample_field,
+        "label": ranking_config.get("sampleLabel") or "Amostra mínima",
+        "unit": ranking_config.get("sampleUnit"),
+        "unitLabel": ranking_config.get("sampleUnitLabel"),
+        "defaultValue": default_sample,
+        "appliedValue": applied_value,
+        "isDefault": min_sample_value is None,
+    }
+
+
+def _build_scope_payload(
+    *,
+    ranking_config: dict[str, Any],
+    filters: GlobalFilters,
+    stage_scope: RankingStageScope | None,
+    min_sample_value: int | None,
+) -> dict[str, Any]:
+    context_scope = _resolve_ranking_context_scope(filters)
+    entity_label = "jogador" if ranking_config["domain"] == "player" else "time"
+
+    return {
+        "kind": _resolve_scope_kind(context_scope),
+        "label": _resolve_scope_label(context_scope),
+        "competitionId": str(context_scope.competition_id) if context_scope.competition_id is not None else None,
+        "competitionName": context_scope.competition_name,
+        "seasonId": str(context_scope.season_id) if context_scope.season_id is not None else None,
+        "seasonLabel": context_scope.season_label,
+        "venue": {
+            "value": filters.venue.value,
+            "label": _format_venue_label(filters.venue),
+        },
+        "window": _build_window_payload(filters, entity_label=entity_label),
+        "sample": _build_sample_payload(ranking_config, min_sample_value),
+        "stage": (
+            {
+                "stageId": str(stage_scope.stage_id),
+                "stageName": stage_scope.stage_name,
+                "stageFormat": stage_scope.stage_format,
+                "stageFormatLabel": _format_stage_format_label(stage_scope.stage_format),
+            }
+            if stage_scope is not None
+            else None
+        ),
+    }
+
+
+def _resolve_entity_key(ranking_config: dict[str, Any]) -> str:
+    return "player" if ranking_config["domain"] == "player" else "team"
 
 
 def _player_scope_filters_sql(filters: GlobalFilters) -> tuple[str, list[Any]]:
@@ -276,7 +549,7 @@ def _fetch_player_ranking_rows(
     page: int,
     page_size: int,
     sort_direction: str,
-) -> tuple[list[dict[str, Any]], int]:
+) -> tuple[list[dict[str, Any]], int, str | None]:
     where_sql, where_params = _player_scope_filters_sql(filters)
     value_column = ranking_config["valueColumn"]
     metric_expression = {
@@ -286,18 +559,15 @@ def _fetch_player_ranking_rows(
         "shots_total": "sum(fs.shots_total)::numeric",
         "shots_on_goal": "sum(fs.shots_on_goal)::numeric",
         "yellow_cards": "sum(fs.yellow_cards)::numeric",
+        "cards_total": "sum(fs.yellow_cards + fs.red_cards)::numeric",
     }[value_column]
 
-    search_pattern = f"%{search.strip()}%" if search and search.strip() else None
+    normalized_search = _normalize_search_value(search)
+    search_pattern = f"%{normalized_search}%" if normalized_search else None
     offset = (page - 1) * page_size
     order_dir = "asc" if sort_direction == "asc" else "desc"
-    rank_order_sql = f"c.metric_value {order_dir} nulls last"
-    final_order_sql = "r.rank asc, r.player_id asc"
-
-    if value_column == "goals":
-        final_order_sql = (
-            "r.rank asc, r.minutes_played asc nulls last, lower(r.player_name) asc nulls last, r.player_id asc"
-        )
+    rank_order_sql = f"c.metric_value {order_dir} nulls last, lower(c.player_name) asc nulls last, c.player_id asc"
+    final_order_sql = "r.rank asc, lower(r.player_name) asc nulls last, r.player_id asc"
 
     query = f"""
         with scoped as (
@@ -314,7 +584,9 @@ def _fetch_player_ranking_rows(
                 coalesce(pms.shots_total, 0) as shots_total,
                 coalesce(pms.shots_on_goal, 0) as shots_on_goal,
                 coalesce(pms.yellow_cards, 0) as yellow_cards,
+                coalesce(pms.red_cards, 0) as red_cards,
                 pms.rating,
+                pms.updated_at,
                 row_number() over (
                     partition by pms.player_id
                     order by pms.match_date desc, pms.match_id desc
@@ -333,18 +605,87 @@ def _fetch_player_ranking_rows(
             select
                 fs.player_id,
                 max(fs.player_name) as player_name,
-                max(fs.team_id) as team_id,
-                max(fs.team_name) as team_name,
                 count(distinct fs.match_id) as matches_played,
+                count(distinct fs.team_id) filter (where fs.team_id is not null)::int as team_count,
                 sum(fs.minutes_played)::numeric as minutes_played,
-                {metric_expression} as metric_value
+                {metric_expression} as metric_value,
+                max(fs.updated_at) as data_updated_at
             from filtered_scoped fs
             group by fs.player_id
         ),
+        latest_context as (
+            select distinct on (fs.player_id)
+                fs.player_id,
+                fs.team_id,
+                fs.team_name
+            from filtered_scoped fs
+            order by fs.player_id, fs.match_date desc, fs.match_id desc
+        ),
+        recent_teams as (
+            select
+                ranked_teams.player_id,
+                json_agg(
+                    json_build_object(
+                        'teamId', ranked_teams.team_id::text,
+                        'teamName', ranked_teams.team_name
+                    )
+                    order by ranked_teams.last_match_date desc, ranked_teams.last_match_id desc
+                ) as recent_teams
+            from (
+                select
+                    team_context.player_id,
+                    team_context.team_id,
+                    team_context.team_name,
+                    team_context.last_match_date,
+                    team_context.last_match_id,
+                    row_number() over (
+                        partition by team_context.player_id
+                        order by team_context.last_match_date desc, team_context.last_match_id desc
+                    ) as recent_team_rank
+                from (
+                    select
+                        fs.player_id,
+                        fs.team_id,
+                        coalesce(max(fs.team_name), max(dt.team_name)) as team_name,
+                        max(fs.match_date) as last_match_date,
+                        max(fs.match_id) as last_match_id
+                    from filtered_scoped fs
+                    left join mart.dim_team dt
+                      on dt.team_id = fs.team_id
+                    where fs.team_id is not null
+                    group by fs.player_id, fs.team_id
+                ) team_context
+            ) ranked_teams
+            where ranked_teams.recent_team_rank <= 5
+            group by ranked_teams.player_id
+        ),
+        enriched as (
+            select
+                a.player_id,
+                a.player_name,
+                lc.team_id,
+                lc.team_name,
+                a.team_count,
+                rt.recent_teams,
+                a.matches_played,
+                a.minutes_played,
+                a.metric_value,
+                case
+                    when a.minutes_played > 0 and a.metric_value is not null
+                        then round((a.metric_value * 90) / a.minutes_played, 2)
+                    else null
+                end as metric_per90,
+                a.data_updated_at
+            from aggregated a
+            left join latest_context lc
+              on lc.player_id = a.player_id
+            left join recent_teams rt
+              on rt.player_id = a.player_id
+        ),
         constrained as (
             select *
-            from aggregated
-            where (%s::text is null or player_name ilike %s)
+            from enriched
+            where (%s::text is null or {_normalized_search_sql("player_name")} like %s)
               and (%s::numeric is null or minutes_played >= %s)
         ),
         ranked as (
@@ -353,15 +694,20 @@ def _fetch_player_ranking_rows(
                 c.player_name,
                 c.team_id,
                 c.team_name,
+                c.team_count,
+                c.recent_teams,
                 c.matches_played,
                 c.minutes_played,
                 c.metric_value,
+                c.metric_per90,
+                c.data_updated_at,
                 dense_rank() over (order by {rank_order_sql}) as rank
             from constrained c
         )
         select
             r.*,
-            count(*) over() as _total_count
+            count(*) over() as _total_count,
+            max(r.data_updated_at) over() as _max_updated_at
         from ranked r
         order by {final_order_sql}
         limit %s offset %s;
@@ -382,7 +728,8 @@ def _fetch_player_ranking_rows(
         ],
     )
     total_count = int(rows[0]["_total_count"]) if rows else 0
-    return rows, total_count
+    max_updated_at = rows[0].get("_max_updated_at") if rows else None
+    return rows, total_count, max_updated_at.isoformat() if isinstance(max_updated_at, datetime) else max_updated_at
 
 
 def _fetch_team_possession_rows(
@@ -393,11 +740,12 @@ def _fetch_team_possession_rows(
     page: int,
     page_size: int,
     sort_direction: str,
-) -> tuple[list[dict[str, Any]], int]:
+) -> tuple[list[dict[str, Any]], int, str | None]:
     where_clauses = ["1=1"]
     params: list[Any] = []
     append_fact_match_filters(where_clauses, params, alias="fm", filters=filters)
-    search_pattern = f"%{search.strip()}%" if search and search.strip() else None
+    normalized_search = _normalize_search_value(search)
+    search_pattern = f"%{normalized_search}%" if normalized_search else None
     offset = (page - 1) * page_size
     order_dir = "asc" if sort_direction == "asc" else "desc"
 
@@ -463,7 +811,7 @@ def _fetch_team_possession_rows(
         constrained as (
             select *
             from aggregated
-            where (%s::text is null or team_name ilike %s)
+            where (%s::text is null or {_normalized_search_sql("team_name")} like %s)
               and (%s::int is null or matches_played >= %s)
         ),
         ranked as (
@@ -494,7 +842,7 @@ def _fetch_team_possession_rows(
         ],
     )
     total_count = int(rows[0]["_total_count"]) if rows else 0
-    return rows, total_count
+    return rows, total_count, None
 
 
 def _fetch_team_pass_accuracy_rows(
@@ -505,7 +853,7 @@ def _fetch_team_pass_accuracy_rows(
     page: int,
     page_size: int,
     sort_direction: str,
-) -> tuple[list[dict[str, Any]], int]:
+) -> tuple[list[dict[str, Any]], int, str | None]:
     where_clauses = ["1=1"]
     params: list[Any] = []
     append_fact_match_filters(where_clauses, params, alias="fm", filters=filters)
@@ -514,7 +862,8 @@ def _fetch_team_pass_accuracy_rows(
     elif filters.venue == VenueFilter.away:
         where_clauses.append("ms.team_id = fm.away_team_id")
 
-    search_pattern = f"%{search.strip()}%" if search and search.strip() else None
+    normalized_search = _normalize_search_value(search)
+    search_pattern = f"%{normalized_search}%" if normalized_search else None
     offset = (page - 1) * page_size
     order_dir = "asc" if sort_direction == "asc" else "desc"
 
@@ -556,7 +905,7 @@ def _fetch_team_pass_accuracy_rows(
         constrained as (
             select *
             from aggregated
-            where (%s::text is null or team_name ilike %s)
+            where (%s::text is null or {_normalized_search_sql("team_name")} like %s)
               and (%s::int is null or matches_played >= %s)
         ),
         ranked as (
@@ -587,7 +936,7 @@ def _fetch_team_pass_accuracy_rows(
         ],
     )
     total_count = int(rows[0]["_total_count"]) if rows else 0
-    return rows, total_count
+    return rows, total_count, None
 
 
 @router.get("/{rankingType}")
@@ -612,7 +961,8 @@ def get_ranking(
     pageSize: int = Query(default=20, ge=1, le=100),
     sortDirection: SortDirection | None = None,
 ) -> dict[str, Any]:
-    ranking_config = _get_ranking_config(rankingType)
+    normalized_ranking_type = _normalize_ranking_type(rankingType)
+    ranking_config = _get_ranking_config(normalized_ranking_type)
     global_filters = validate_and_build_global_filters(
         competition_id=competitionId,
         season_id=seasonId,
@@ -629,6 +979,12 @@ def get_ranking(
     stage_scope = _validate_ranking_stage_scope(global_filters)
 
     effective_sort = sortDirection or ranking_config["defaultSort"]
+    scope_payload = _build_scope_payload(
+        ranking_config=ranking_config,
+        filters=global_filters,
+        stage_scope=stage_scope,
+        min_sample_value=minSampleValue,
+    )
 
     if ranking_config.get("unsupported"):
         coverage = {
@@ -637,19 +993,13 @@ def get_ranking(
         }
         return build_api_response(
             {
-                "rankingId": rankingType,
+                "rankingId": normalized_ranking_type,
                 "metricKey": ranking_config["metricKey"],
-                "stage": (
-                    {
-                        "stageId": str(stage_scope.stage_id),
-                        "stageName": stage_scope.stage_name,
-                        "stageFormat": stage_scope.stage_format,
-                    }
-                    if stage_scope is not None
-                    else None
-                ),
+                "entity": _resolve_entity_key(ranking_config),
+                "scope": scope_payload,
                 "rows": [],
                 "updatedAt": None,
+                "freshnessClass": freshnessClass,
             },
             request_id=_request_id(request),
             pagination=build_pagination(page, pageSize, 0),
@@ -658,8 +1008,9 @@ def get_ranking(
 
     rows: list[dict[str, Any]]
     total_count: int
+    data_updated_at: str | None
     if ranking_config["domain"] == "player":
-        rows, total_count = _fetch_player_ranking_rows(
+        rows, total_count, data_updated_at = _fetch_player_ranking_rows(
             ranking_config=ranking_config,
             filters=global_filters,
             search=search,
@@ -670,7 +1021,7 @@ def get_ranking(
         )
         coverage = _player_ranking_coverage(global_filters)
     elif ranking_config["domain"] == "team_possession":
-        rows, total_count = _fetch_team_possession_rows(
+        rows, total_count, data_updated_at = _fetch_team_possession_rows(
             filters=global_filters,
             search=search,
             min_sample_value=minSampleValue,
@@ -680,7 +1031,7 @@ def get_ranking(
         )
         coverage = _team_possession_coverage(global_filters)
     elif ranking_config["domain"] == "team_pass_accuracy":
-        rows, total_count = _fetch_team_pass_accuracy_rows(
+        rows, total_count, data_updated_at = _fetch_team_pass_accuracy_rows(
             filters=global_filters,
             search=search,
             min_sample_value=minSampleValue,
@@ -694,7 +1045,7 @@ def get_ranking(
             message="Invalid ranking domain configuration.",
             code="INTERNAL_ERROR",
             status=500,
-            details={"rankingType": rankingType},
+            details={"rankingType": normalized_ranking_type},
         )
 
     normalized_rows = [
@@ -705,28 +1056,34 @@ def get_ranking(
             "metricValue": float(row["metric_value"]) if row.get("metric_value") is not None else None,
             "matchesPlayed": int(row.get("matches_played") or 0),
             "minutesPlayed": float(row["minutes_played"]) if row.get("minutes_played") is not None else None,
+            "metricPer90": float(row["metric_per90"]) if row.get("metric_per90") is not None else None,
             "teamId": str(row["team_id"]) if row.get("team_id") is not None else None,
             "teamName": row.get("team_name"),
+            "teamCount": int(row.get("team_count") or 0) if row.get("team_count") is not None else None,
+            "recentTeams": _normalize_recent_teams(row.get("recent_teams")),
+            "teamContextLabel": (
+                f"{int(row['team_count'])} clubes no recorte"
+                if row.get("team_count") is not None and int(row["team_count"]) > 1
+                else row.get("team_name")
+            ),
         }
         for row in rows
     ]
 
     pagination = build_pagination(page, pageSize, total_count)
     data = {
-        "rankingId": rankingType,
+        "rankingId": normalized_ranking_type,
         "metricKey": ranking_config["metricKey"],
-        "stage": (
-            {
-                "stageId": str(stage_scope.stage_id),
-                "stageName": stage_scope.stage_name,
-                "stageFormat": stage_scope.stage_format,
-            }
-            if stage_scope is not None
-            else None
-        ),
+        "entity": _resolve_entity_key(ranking_config),
+        "scope": scope_payload,
         "rows": normalized_rows,
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": data_updated_at,
         "freshnessClass": freshnessClass,
+        "sort": {
+            "direction": effective_sort,
+            "label": "Maior para menor" if effective_sort == "desc" else "Menor para maior",
+            "serverSide": True,
+        },
     }
     return build_api_response(
         data,
