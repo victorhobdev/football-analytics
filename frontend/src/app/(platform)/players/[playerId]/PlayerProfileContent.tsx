@@ -17,7 +17,6 @@ import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import {
   ProfileAlert,
   ProfileCoveragePill,
-  ProfileKpi,
   ProfilePanel,
   ProfileShell,
   ProfileTag,
@@ -29,11 +28,13 @@ import type { CoverageState } from "@/shared/types/coverage.types";
 import {
   appendFilterQueryString,
   buildCanonicalTeamPath,
+  buildMatchCenterPath,
   buildMatchesPath,
   buildPlayersPath,
   buildSeasonHubTabPath,
   buildTeamResolverPath,
 } from "@/shared/utils/context-routing";
+import { formatDate } from "@/shared/utils/formatters";
 
 type PlayerProfileContentProps = {
   playerId: string;
@@ -117,6 +118,259 @@ function getProfileDescription(
   }
 
   return "Perfil SportMonks disponível sem histórico estatístico consolidado, tratado como estado válido do produto.";
+}
+
+const INTEGER_FORMATTER = new Intl.NumberFormat("pt-BR", {
+  maximumFractionDigits: 0,
+});
+
+const DECIMAL_FORMATTER = new Intl.NumberFormat("pt-BR", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+});
+
+function formatInteger(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return INTEGER_FORMATTER.format(value);
+}
+
+function formatDecimal(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return DECIMAL_FORMATTER.format(value);
+}
+
+function formatPercentage(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return `${Math.round(value)}%`;
+}
+
+function formatResultLabel(result: string | null | undefined): string {
+  if (result === "win") {
+    return "V";
+  }
+
+  if (result === "draw") {
+    return "E";
+  }
+
+  if (result === "loss") {
+    return "D";
+  }
+
+  return "-";
+}
+
+function getResultTone(result: string | null | undefined): string {
+  if (result === "win") {
+    return "bg-[#a6f2d1] text-[#003526]";
+  }
+
+  if (result === "draw") {
+    return "bg-[#d8e3fb] text-[#0d2240]";
+  }
+
+  if (result === "loss") {
+    return "bg-[#ffdad6] text-[#93000a]";
+  }
+
+  return "bg-white/14 text-white/70";
+}
+
+type PlayerProfileIconName =
+  | "assist"
+  | "chart"
+  | "clock"
+  | "match"
+  | "player"
+  | "ranking"
+  | "shield"
+  | "star"
+  | "target"
+  | "timeline";
+
+function PlayerProfileIcon({
+  className,
+  icon,
+}: {
+  className?: string;
+  icon: PlayerProfileIconName;
+}) {
+  const sharedClassName = className ?? "h-4 w-4";
+
+  if (icon === "player") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path
+          d="M12 11.2a3.35 3.35 0 1 0 0-6.7 3.35 3.35 0 0 0 0 6.7Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+        <path
+          d="M5.2 19.4c.8-3.5 3.2-5.2 6.8-5.2s6 1.7 6.8 5.2"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
+      </svg>
+    );
+  }
+
+  if (icon === "assist") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path d="M5 12h9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+        <path
+          d="m11 8 4 4-4 4M18.5 6.5v11"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.8"
+        />
+      </svg>
+    );
+  }
+
+  if (icon === "chart") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path d="M5 18V10h4v8M10 18V5h4v13M15 18v-6h4v6" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 18.5h16" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (icon === "clock") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M12 8v4.4l2.8 1.7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (icon === "match") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="m12 8.2 2.6 1.9-1 3.1h-3.2l-1-3.1L12 8.2Z"
+          stroke="currentColor"
+          strokeLinejoin="round"
+          strokeWidth="1.5"
+        />
+      </svg>
+    );
+  }
+
+  if (icon === "ranking") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path d="M6 18V11h4v7M10 18V6h4v12M14 18v-5h4v5" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4.5 18.5h15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (icon === "shield") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path
+          d="M12 4.5 18 7v5.4c0 3.3-2 5.8-6 7.1-4-1.3-6-3.8-6-7.1V7l6-2.5Z"
+          stroke="currentColor"
+          strokeLinejoin="round"
+          strokeWidth="1.8"
+        />
+      </svg>
+    );
+  }
+
+  if (icon === "target") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M12 2.8v3M21.2 12h-3M12 21.2v-3M2.8 12h3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+
+  if (icon === "timeline") {
+    return (
+      <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+        <path d="M6 7h12M6 12h8M6 17h11" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+        <path d="M4 7h.01M4 12h.01M4 17h.01" stroke="currentColor" strokeLinecap="round" strokeWidth="2.4" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg aria-hidden="true" className={sharedClassName} fill="none" viewBox="0 0 24 24">
+      <path
+        d="m12 4.6 1.9 4 4.4.6-3.2 3.1.8 4.4-3.9-2.1-3.9 2.1.8-4.4-3.2-3.1 4.4-.6 1.9-4Z"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function PlayerProfileMetric({
+  hint,
+  icon,
+  label,
+  value,
+}: {
+  hint: string;
+  icon: PlayerProfileIconName;
+  label: string;
+  value: string;
+}) {
+  return (
+    <article className="flex min-h-[9.2rem] flex-col justify-between rounded-[1.35rem] border border-white/12 bg-white/10 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/14">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/12 text-white">
+          <PlayerProfileIcon className="h-5 w-5" icon={icon} />
+        </span>
+        <p className="text-right text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/58">
+          {label}
+        </p>
+      </div>
+      <p className="mt-4 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-none tracking-[-0.03em]">
+        {value}
+      </p>
+      <p className="mt-2 text-sm text-white/62">{hint}</p>
+    </article>
+  );
+}
+
+function PlayerProfileLinkButton({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: PlayerProfileIconName;
+  label: string;
+}) {
+  return (
+    <Link
+      className="group inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18"
+      href={href}
+    >
+      <PlayerProfileIcon className="h-4 w-4 transition-transform group-hover:scale-110" icon={icon} />
+      {label}
+    </Link>
+  );
 }
 
 export function PlayerProfileContent({
@@ -285,6 +539,77 @@ export function PlayerProfileContent({
   const effectiveActiveTab: PlayerProfileTab = hasHistoricalStats ? activeTab : "overview";
   const activeTabLabel =
     visibleTabLinks.find((tabLink) => tabLink.key === effectiveActiveTab)?.label ?? "Resumo";
+  const historyItems = history ?? [];
+  const recentMatchItems = recentMatches ?? [];
+  const goalContribution = (summary.goals ?? 0) + (summary.assists ?? 0);
+  const minutesPerMatch =
+    stats?.minutesPerMatch ??
+    (summary.matchesPlayed && summary.matchesPlayed > 0
+      ? (summary.minutesPlayed ?? 0) / summary.matchesPlayed
+      : null);
+  const shotsOnTargetPct =
+    stats?.shotsOnTargetPct ??
+    (summary.shotsTotal && summary.shotsTotal > 0
+      ? ((summary.shotsOnTarget ?? 0) / summary.shotsTotal) * 100
+      : null);
+  const bestRecentMatch =
+    [...recentMatchItems].sort((left, right) => {
+      const rightScore =
+        (right.rating ?? -1) * 100 +
+        (right.goals ?? 0) * 10 +
+        (right.assists ?? 0) * 8 +
+        (right.minutesPlayed ?? 0) / 100;
+      const leftScore =
+        (left.rating ?? -1) * 100 +
+        (left.goals ?? 0) * 10 +
+        (left.assists ?? 0) * 8 +
+        (left.minutesPlayed ?? 0) / 100;
+
+      return rightScore - leftScore;
+    })[0] ?? null;
+  const bestTrendPeriod =
+    [...(stats?.trend ?? [])].sort((left, right) => {
+      const rightContribution = (right.goals ?? 0) + (right.assists ?? 0);
+      const leftContribution = (left.goals ?? 0) + (left.assists ?? 0);
+
+      if (rightContribution !== leftContribution) {
+        return rightContribution - leftContribution;
+      }
+
+      if ((right.rating ?? -1) !== (left.rating ?? -1)) {
+        return (right.rating ?? -1) - (left.rating ?? -1);
+      }
+
+      return (right.minutesPlayed ?? 0) - (left.minutesPlayed ?? 0);
+    })[0] ?? null;
+  const bestTrendContribution = (bestTrendPeriod?.goals ?? 0) + (bestTrendPeriod?.assists ?? 0);
+  const recentForm = recentMatchItems.slice(0, 5);
+  const teamHistoryLabels = Array.from(
+    new Set(historyItems.map((entry) => entry.teamName).filter((teamName): teamName is string => Boolean(teamName))),
+  ).slice(0, 4);
+  const contextHistoryLabels = Array.from(
+    new Set(
+      historyItems
+        .map((entry) =>
+          entry.competitionName && entry.seasonLabel
+            ? `${entry.competitionName} ${entry.seasonLabel}`
+            : entry.competitionName ?? entry.seasonLabel ?? null,
+        )
+        .filter((label): label is string => Boolean(label)),
+    ),
+  ).slice(0, 3);
+  const matchesTabHref = buildPlayerProfileTabHref(pathname, searchParams, "matches");
+  const historyTabHref = buildPlayerProfileTabHref(pathname, searchParams, "history");
+  const statsTabHref = buildPlayerProfileTabHref(pathname, searchParams, "stats");
+  const bestRecentMatchId = bestRecentMatch?.matchId ?? bestRecentMatch?.fixtureId ?? null;
+  const bestRecentMatchHref = bestRecentMatchId
+    ? buildMatchCenterPath(bestRecentMatchId, {
+        ...sharedFilters,
+        competitionId: bestRecentMatch?.competitionId ?? sharedFilters.competitionId,
+        seasonId: bestRecentMatch?.seasonId ?? sharedFilters.seasonId,
+        roundId: bestRecentMatch?.roundId ?? sharedFilters.roundId,
+      })
+    : null;
 
   return (
     <ProfileShell className="space-y-6">
@@ -314,132 +639,353 @@ export function PlayerProfileContent({
         <span>{player.playerName}</span>
       </div>
 
-      <ProfilePanel className="space-y-6" tone="accent">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="flex items-start gap-5">
-            <ProfileMedia
-              alt={player.playerName}
-              assetId={player.playerId}
-              category="players"
-              className="h-20 w-20 border-white/10 bg-white/12"
-              fallback={getPlayerMonogram(player.playerName)}
-              fallbackClassName="text-xl tracking-[0.08em] text-white"
-              imageClassName="p-2.5"
-              shape="circle"
-              tone="contrast"
-            />
-            <div className="space-y-2">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/65">
-                Jogador
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                {hasHistoricalStats ? (
-                  <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
-                ) : null}
-                <ProfileTag className="bg-white/12 text-white/82">
-                  {getProfileTypeLabel(profileMeta.profileType)}
-                </ProfileTag>
-                {!hasHistoricalStats ? (
-                  <ProfileTag className="bg-white/12 text-white/82">Sem histórico</ProfileTag>
-                ) : null}
-                {contextOverride ? (
-                  <ProfileTag className="bg-white/12 text-white/82">
+      <ProfilePanel className="profile-hero-clean relative overflow-hidden p-0" tone="accent">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(166,242,209,0.24),transparent_30%),radial-gradient(circle_at_88%_0%,rgba(216,227,251,0.2),transparent_34%)]" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-white/10" />
+        <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
+
+        <div className="relative grid gap-6 p-5 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.42fr)] xl:items-stretch">
+          <div className="flex min-h-full flex-col gap-5">
+            <div className="flex flex-wrap items-center gap-2">
+              {hasHistoricalStats ? (
+                <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
+              ) : null}
+              <ProfileTag className="bg-white/10 text-white/82">
+                {getProfileTypeLabel(profileMeta.profileType)}
+              </ProfileTag>
+              {!hasHistoricalStats ? (
+                <ProfileTag className="bg-white/10 text-white/82">Sem histórico</ProfileTag>
+              ) : null}
+              {contextOverride ? (
+                <>
+                  <ProfileTag className="bg-white/10 text-white/82">
                     {contextOverride.competitionName}
                   </ProfileTag>
-                ) : null}
-                {contextOverride ? (
-                  <ProfileTag className="bg-white/12 text-white/82">
+                  <ProfileTag className="bg-white/10 text-white/82">
                     {contextOverride.seasonLabel}
                   </ProfileTag>
-                ) : null}
-                {player.teamName ? (
-                  <ProfileTag className="bg-white/12 text-white/82">{player.teamName}</ProfileTag>
-                ) : null}
-                {player.nationality ? (
-                  <ProfileTag className="bg-white/12 text-white/82">{player.nationality}</ProfileTag>
-                ) : null}
+                </>
+              ) : (
+                <ProfileTag className="bg-white/10 text-white/82">Modo direto</ProfileTag>
+              )}
+              {player.teamName ? (
+                <ProfileTag className="bg-white/10 text-white/82">{player.teamName}</ProfileTag>
+              ) : null}
+              {player.nationality ? (
+                <ProfileTag className="bg-white/10 text-white/82">{player.nationality}</ProfileTag>
+              ) : null}
+            </div>
+
+            <div className="flex min-w-0 flex-col items-start gap-5 sm:flex-row">
+              <ProfileMedia
+                alt={player.playerName}
+                assetId={player.playerId}
+                category="players"
+                className="h-24 w-24 shrink-0 border border-white/18 bg-white/12"
+                fallback={getPlayerMonogram(player.playerName)}
+                fallbackClassName="text-xl tracking-[0.08em] text-white"
+                imageClassName="p-2"
+                shape="circle"
+                tone="contrast"
+              />
+              <div className="min-w-0">
+                <p className="flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white/58">
+                  <PlayerProfileIcon className="h-4 w-4" icon="player" />
+                  Perfil do jogador
+                </p>
+                <h1 className="mt-3 max-w-3xl break-words font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
+                  {player.playerName}
+                </h1>
+                <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">
+                  {getProfileDescription(hasHistoricalStats, profileMeta.profileType)}
+                </p>
               </div>
-              <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-                {player.playerName}
-              </h1>
-              <p className="max-w-3xl text-sm leading-6 text-white/74">
-                {getProfileDescription(hasHistoricalStats, profileMeta.profileType)}
-              </p>
+            </div>
+
+            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {hasHistoricalStats ? (
+                <>
+                  <PlayerProfileMetric
+                    hint={`${formatInteger(summary.minutesPlayed)} minutos`}
+                    icon="match"
+                    label="Jogos"
+                    value={formatInteger(summary.matchesPlayed)}
+                  />
+                  <PlayerProfileMetric
+                    hint={`${formatInteger(summary.goals)} gols · ${formatInteger(summary.assists)} assists`}
+                    icon="assist"
+                    label="G+A"
+                    value={formatInteger(goalContribution)}
+                  />
+                  <PlayerProfileMetric
+                    hint="nota média do recorte"
+                    icon="star"
+                    label="Nota"
+                    value={formatDecimal(summary.rating)}
+                  />
+                  <PlayerProfileMetric
+                    hint={`assistências/90 ${formatDecimal(stats?.assistsPer90)}`}
+                    icon="ranking"
+                    label="Gols/90"
+                    value={formatDecimal(stats?.goalsPer90)}
+                  />
+                  <PlayerProfileMetric
+                    hint={`${formatDecimal(minutesPerMatch)} por jogo`}
+                    icon="clock"
+                    label="Minutos"
+                    value={formatInteger(summary.minutesPlayed)}
+                  />
+                  <PlayerProfileMetric
+                    hint={`${formatInteger(summary.shotsOnTarget)} no alvo`}
+                    icon="target"
+                    label="Finaliz."
+                    value={formatInteger(summary.shotsTotal)}
+                  />
+                  <PlayerProfileMetric
+                    hint="precisão nas finalizações"
+                    icon="chart"
+                    label="No alvo"
+                    value={formatPercentage(shotsOnTargetPct)}
+                  />
+                  <PlayerProfileMetric
+                    hint="contextos mapeados"
+                    icon="timeline"
+                    label="Histórico"
+                    value={formatInteger(historyItems.length)}
+                  />
+                </>
+              ) : (
+                <>
+                  <PlayerProfileMetric
+                    hint={worldCup?.editionLabels?.length ? worldCup.editionLabels.join(" · ") : "Sem edições detalhadas"}
+                    icon="timeline"
+                    label="Edições"
+                    value={formatInteger(worldCup?.editionCount)}
+                  />
+                  <PlayerProfileMetric
+                    hint={worldCup?.teamNames?.length ? worldCup.teamNames.join(" · ") : "Sem seleção detalhada"}
+                    icon="shield"
+                    label="Seleções"
+                    value={formatInteger(worldCup?.teamCount)}
+                  />
+                  <PlayerProfileMetric
+                    hint="contexto preservado da Copa"
+                    icon="match"
+                    label="Gols"
+                    value={formatInteger(worldCup?.goalCount)}
+                  />
+                  <PlayerProfileMetric
+                    hint={profileMeta.profileType === "world_cup_local" ? "perfil local válido" : "identidade consolidada"}
+                    icon="player"
+                    label="Posição"
+                    value={worldCup?.primaryPosition ?? player.position ?? "-"}
+                  />
+                </>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <PlayerProfileLinkButton href={playersHref} icon="player" label="Lista de jogadores" />
+              {teamHref && hasHistoricalStats ? (
+                <PlayerProfileLinkButton href={teamHref} icon="shield" label="Time" />
+              ) : null}
+              {rankingsHref && hasHistoricalStats ? (
+                <PlayerProfileLinkButton href={rankingsHref} icon="ranking" label="Rankings" />
+              ) : null}
+              {hasHistoricalStats ? (
+                <>
+                  <PlayerProfileLinkButton href={matchesTabHref} icon="match" label="Partidas" />
+                  <PlayerProfileLinkButton href={statsTabHref} icon="chart" label="Estatísticas" />
+                </>
+              ) : null}
+              {seasonHubHref ? (
+                <PlayerProfileLinkButton href={seasonHubHref} icon="timeline" label="Contexto" />
+              ) : null}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {teamHref && hasHistoricalStats ? (
-              <Link
-                className="button-pill button-pill-on-dark"
-                href={teamHref}
-              >
-                Time
-              </Link>
-            ) : null}
-            {rankingsHref && hasHistoricalStats ? (
-              <Link
-                className="button-pill button-pill-on-dark"
-                href={rankingsHref}
-              >
-                Rankings
-              </Link>
-            ) : null}
-            {seasonHubHref && !hasHistoricalStats ? (
-              <Link
-                className="button-pill button-pill-on-dark"
-                href={seasonHubHref}
-              >
-                Contexto
-              </Link>
-            ) : null}
+          <aside className="grid content-start gap-3 xl:pt-14">
             {hasHistoricalStats ? (
-              <Link
-                className="button-pill button-pill-inverse"
-                href={matchesHref}
-              >
-                Abrir partidas
-              </Link>
-            ) : null}
-          </div>
-        </div>
+              <>
+                <div className="flex min-h-[12rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
+                        Melhor partida recente
+                      </p>
+                      <h2 className="mt-1 truncate font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-white">
+                        {bestRecentMatch?.opponentName ?? "Sem partida destacada"}
+                      </h2>
+                      <p className="mt-1 text-sm text-white/60">
+                        {bestRecentMatch
+                          ? `${formatDate(bestRecentMatch.playedAt)} · ${bestRecentMatch.teamName ?? player.teamName ?? "Time"}`
+                          : "Ainda sem partidas suficientes para destacar."}
+                      </p>
+                    </div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/12 text-white">
+                      <PlayerProfileIcon className="h-5 w-5" icon="star" />
+                    </span>
+                  </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
-          {hasHistoricalStats ? (
-            <>
-              <ProfileKpi hint="Na temporada selecionada" invert label="Jogos" value={summary.matchesPlayed ?? "-"} />
-              <ProfileKpi
-                hint={`${summary.goals ?? 0} gols · ${summary.assists ?? 0} assistências`}
-                invert
-                label="Gols + assistências"
-                value={(summary.goals ?? 0) + (summary.assists ?? 0)}
-              />
-              <ProfileKpi hint="Nota consolidada" invert label="Nota" value={summary.rating?.toFixed(2) ?? "-"} />
-              <ProfileKpi hint="Contextos disponíveis" invert label="Histórico" value={history?.length ?? 0} />
-            </>
-          ) : (
-            <>
-              <ProfileKpi
-                hint={worldCup?.editionLabels?.length ? worldCup.editionLabels.join(" · ") : "Sem edições detalhadas"}
-                invert
-                label="Edições"
-                value={worldCup?.editionCount ?? "-"}
-              />
-              <ProfileKpi
-                hint={worldCup?.teamNames?.length ? worldCup.teamNames.join(" · ") : "Sem seleção detalhada"}
-                invert
-                label="Seleções"
-                value={worldCup?.teamCount ?? "-"}
-              />
-              <ProfileKpi hint="Contexto preservado da Copa" invert label="Gols em Copas" value={worldCup?.goalCount ?? "-"} />
-              <ProfileKpi
-                hint={profileMeta.profileType === "world_cup_local" ? "Perfil local válido" : "Identidade consolidada"}
-                invert
-                label="Posição"
-                value={worldCup?.primaryPosition ?? player.position ?? "-"}
-              />
-            </>
-          )}
+                  <div className="mt-5 grid grid-cols-3 gap-2">
+                    <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                      <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Nota</p>
+                      <p className="mt-1 text-2xl font-extrabold">
+                        {formatDecimal(bestRecentMatch?.rating)}
+                      </p>
+                    </div>
+                    <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                      <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">G+A</p>
+                      <p className="mt-1 text-2xl font-extrabold">
+                        {bestRecentMatch
+                          ? formatInteger((bestRecentMatch.goals ?? 0) + (bestRecentMatch.assists ?? 0))
+                          : "-"}
+                      </p>
+                    </div>
+                    <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                      <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Min</p>
+                      <p className="mt-1 text-2xl font-extrabold">
+                        {formatInteger(bestRecentMatch?.minutesPlayed)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {bestRecentMatchHref ? (
+                    <Link className="button-pill button-pill-on-dark mt-4 w-full" href={bestRecentMatchHref}>
+                      Abrir central da partida
+                    </Link>
+                  ) : null}
+                </div>
+
+                <div className="min-h-[5.9rem] rounded-[1.3rem] border border-white/10 bg-white/8 p-4 text-white">
+                  <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
+                    Forma recente
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {recentForm.length > 0 ? (
+                      recentForm.map((match, index) => (
+                        <span
+                          className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold ${getResultTone(match.result)}`}
+                          key={`${match.fixtureId}-${index}`}
+                          title={match.opponentName ?? undefined}
+                        >
+                          {formatResultLabel(match.result)}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-white/62">Sem sequência suficiente no recorte.</span>
+                    )}
+                  </div>
+                </div>
+
+                {bestTrendPeriod ? (
+                  <div className="rounded-[1.3rem] border border-white/10 bg-white/8 p-4 text-white">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
+                          Pico mensal
+                        </p>
+                        <h3 className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-white">
+                          {bestTrendPeriod.label ?? bestTrendPeriod.periodKey ?? "Período"}
+                        </h3>
+                      </div>
+                      <Link className="button-pill button-pill-on-dark" href={statsTabHref}>
+                        Ver série
+                      </Link>
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                        <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">G+A</p>
+                        <p className="mt-1 text-2xl font-extrabold">{formatInteger(bestTrendContribution)}</p>
+                      </div>
+                      <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                        <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Jogos</p>
+                        <p className="mt-1 text-2xl font-extrabold">
+                          {formatInteger(bestTrendPeriod.matchesPlayed)}
+                        </p>
+                      </div>
+                      <div className="rounded-[1rem] bg-white/10 px-3 py-3">
+                        <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Nota</p>
+                        <p className="mt-1 text-2xl font-extrabold">
+                          {formatDecimal(bestTrendPeriod.rating)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {contextHistoryLabels.length > 0 || teamHistoryLabels.length > 0 ? (
+                  <div className="rounded-[1.3rem] border border-white/10 bg-white/8 p-4 text-white">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
+                        Contextos mapeados
+                      </p>
+                      <Link className="button-pill button-pill-on-dark" href={historyTabHref}>
+                        Histórico
+                      </Link>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[...contextHistoryLabels, ...teamHistoryLabels].map((label) => (
+                        <ProfileTag className="bg-white/10 text-white/82" key={label}>
+                          {label}
+                        </ProfileTag>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
+                      Contexto preservado
+                    </p>
+                    <h2 className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-white">
+                      {profileMeta.profileType === "world_cup_local" ? "Perfil local da Copa" : "Identidade ativa"}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-white/68">
+                      A página continua navegável mesmo quando o jogador não possui histórico
+                      estatístico consolidado.
+                    </p>
+                  </div>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/12 text-white">
+                    <PlayerProfileIcon className="h-5 w-5" icon="shield" />
+                  </span>
+                </div>
+
+                {worldCup?.teamNames?.length ? (
+                  <div className="mt-5 space-y-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white/52">
+                      Seleções
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {worldCup.teamNames.map((teamName) => (
+                        <ProfileTag className="bg-white/10 text-white/82" key={teamName}>
+                          {teamName}
+                        </ProfileTag>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {worldCup?.editionLabels?.length ? (
+                  <div className="mt-5 space-y-2">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white/52">
+                      Edições
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {worldCup.editionLabels.map((editionLabel) => (
+                        <ProfileTag className="bg-white/10 text-white/82" key={editionLabel}>
+                          {editionLabel}
+                        </ProfileTag>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </aside>
         </div>
       </ProfilePanel>
 

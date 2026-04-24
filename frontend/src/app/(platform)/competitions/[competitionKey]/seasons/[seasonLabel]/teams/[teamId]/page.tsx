@@ -1,6 +1,7 @@
 import { CanonicalRouteContextSync } from "@/shared/components/routing/CanonicalRouteContextSync";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { TeamProfileContent } from "@/features/teams/components/TeamProfileContent";
+import { loadTeamHonorsPreview } from "@/features/teams/server/teamHonorsPreview";
 import { resolveCompetitionSeasonContext } from "@/shared/utils/context-routing";
 
 type CanonicalTeamProfilePageProps = {
@@ -13,6 +14,7 @@ type CanonicalTeamProfilePageProps = {
 
 export default async function CanonicalTeamProfilePage({ params }: CanonicalTeamProfilePageProps) {
   const { competitionKey, seasonLabel, teamId } = await params;
+  const honorsPreview = await loadTeamHonorsPreview(teamId);
   const context = resolveCompetitionSeasonContext({
     competitionKey,
     seasonLabel,
@@ -33,7 +35,7 @@ export default async function CanonicalTeamProfilePage({ params }: CanonicalTeam
 
   return (
     <CanonicalRouteContextSync context={context}>
-      <TeamProfileContent contextOverride={context} teamId={teamId} />
+      <TeamProfileContent contextOverride={context} honorsPreview={honorsPreview} teamId={teamId} />
     </CanonicalRouteContextSync>
   );
 }

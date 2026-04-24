@@ -22,7 +22,6 @@ import {
   buildCompetitionHubPath,
   buildHeadToHeadPath,
   buildMarketPath,
-  buildMatchesPath,
   buildPlayersPath,
   buildRankingsHubPath,
   buildTeamsPath,
@@ -245,7 +244,7 @@ function HeroMetricCard({
   );
 }
 
-type QuickLinkIconName = "rankings" | "headToHead" | "clubs" | "matches";
+type QuickLinkIconName = "rankings" | "headToHead" | "clubs";
 
 function QuickLinkIcon({ icon }: { icon: QuickLinkIconName }) {
   const classes = "h-7 w-7 stroke-[1.9] text-[#003526]";
@@ -286,24 +285,6 @@ function QuickLinkIcon({ icon }: { icon: QuickLinkIconName }) {
           d="M12 4.5 18 7v5.3c0 3.2-2 5.8-6 7.2-4-1.4-6-4-6-7.2V7l6-2.5Z"
           stroke="currentColor"
           strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  if (icon === "matches") {
-    return (
-      <svg aria-hidden="true" className={classes} fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="7.8" stroke="currentColor" />
-        <path
-          d="m12 8.2 2.6 1.9-1 3.1h-3.2l-1-3.1L12 8.2Z"
-          stroke="currentColor"
-          strokeLinejoin="round"
-        />
-        <path
-          d="m9.4 10.1-2.9.3m8.1-.3 2.9.3M10.4 13.2l-1.8 2.4m4.9-2.4 1.9 2.4"
-          stroke="currentColor"
-          strokeLinecap="round"
         />
       </svg>
     );
@@ -595,7 +576,7 @@ export function HomeExecutivePage() {
                 </p>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <QuickLinkCard
                   description="Artilharia, criação e eficiência no mesmo ponto de entrada."
                   href={buildRankingsHubPath(sharedFilters)}
@@ -613,12 +594,6 @@ export function HomeExecutivePage() {
                   href={buildTeamsPath(sharedFilters)}
                   icon="clubs"
                   label="Times"
-                />
-                <QuickLinkCard
-                  description="Calendário, filtros e aprofundamento direto na central da partida."
-                  href={buildMatchesPath(sharedFilters)}
-                  icon="matches"
-                  label="Partidas"
                 />
               </div>
             </div>
@@ -727,9 +702,6 @@ export function HomeExecutivePage() {
           <div className="flex flex-wrap gap-3 text-sm font-semibold text-[#57657a]">
             <Link className={styles.footerLink} href="/competitions">
               Competições
-            </Link>
-            <Link className={styles.footerLink} href={buildMatchesPath(sharedFilters)}>
-              Partidas
             </Link>
             <Link className={styles.footerLink} href={buildPlayersPath(sharedFilters)}>
               Jogadores

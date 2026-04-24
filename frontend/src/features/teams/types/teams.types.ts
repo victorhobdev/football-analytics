@@ -173,6 +173,27 @@ export interface TeamProfile {
   sectionCoverage?: TeamProfileSectionCoverage;
 }
 
+export type TeamHonorScope = "mundial" | "continental" | "nacional" | "estadual";
+
+export interface TeamHonorItem {
+  label: string;
+  count: number;
+}
+
+export interface TeamHonorScopeSummary {
+  scope: TeamHonorScope;
+  label: string;
+  total: number;
+  items: TeamHonorItem[];
+}
+
+export interface TeamHonorsPreview {
+  teamSlug: string;
+  teamName: string;
+  criterionLabel: string;
+  scopes: TeamHonorScopeSummary[];
+}
+
 export interface TeamsListData {
   items: TeamListItem[];
 }

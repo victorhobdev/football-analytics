@@ -15,7 +15,6 @@ import {
   buildCoachesPath,
   buildHeadToHeadPath,
   buildMarketPath,
-  buildMatchesPath,
   buildPlayersPath,
   buildRankingsHubPath,
   buildTeamsPath,
@@ -291,7 +290,6 @@ export function PlatformShell({ children }: PlatformShellProps) {
     { href: "/copa-do-mundo", icon: "worldCup" as const, label: "Copa do Mundo" },
     { href: "/competitions", icon: "competition" as const, label: "Competições" },
     { href: buildRankingsHubPath(sharedFilters), icon: "analytics" as const, label: "Rankings" },
-    { href: buildMatchesPath(sharedFilters), icon: "match" as const, label: "Partidas" },
     { href: buildPlayersPath(sharedFilters), icon: "player" as const, label: "Jogadores" },
     { href: buildTeamsPath(sharedFilters), icon: "team" as const, label: "Times" },
   ] as const;
@@ -300,14 +298,13 @@ export function PlatformShell({ children }: PlatformShellProps) {
     { href: "/copa-do-mundo", label: "Copa do Mundo" },
     { href: "/competitions", label: "Competições" },
     { href: buildRankingsHubPath(sharedFilters), label: "Rankings" },
-    { href: buildMatchesPath(sharedFilters), label: "Partidas" },
   ] as const;
   const secondaryPublicLinks = [
     {
       href: buildHeadToHeadPath(sharedFilters),
       icon: "match" as const,
-      label: "Confronto direto",
-      summary: "Comparar times",
+      label: "Comparativos",
+      summary: "Clubes, jogadores e edições",
     },
     {
       href: buildMarketPath(sharedFilters),

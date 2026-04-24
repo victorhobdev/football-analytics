@@ -23,17 +23,12 @@ const PRODUCT_ENTRIES = [
     href: "/",
     title: "Página inicial executiva",
     description:
-      "Entrada operacional do produto para abrir competições, rankings, partidas, times e jogadores.",
+      "Entrada operacional do produto para abrir competições, rankings, times e jogadores.",
   },
   {
     href: "/competitions",
     title: "Competições",
     description: "Catálogo principal do acervo e ponto de entrada para hubs de temporada.",
-  },
-  {
-    href: "/matches",
-    title: "Partidas",
-    description: "Calendário transversal e porta canônica para a central da partida.",
   },
   {
     href: "/teams",
@@ -114,9 +109,9 @@ export default function MarketingLandingPage() {
               </Link>
               <Link
                 className="button-pill button-pill-secondary"
-                href="/matches"
+                href="/competitions"
               >
-                Ver partidas
+                Ver competições
               </Link>
             </div>
           </div>
@@ -206,7 +201,8 @@ export default function MarketingLandingPage() {
             <p className="text-sm/7 text-[#57657a]">
               A página institucional não apresenta aliases legados como destino principal e não desloca a
               navegação pública para rotas secundárias ainda em transição. O produto principal
-              continua organizado em competições, partidas, rankings, times e jogadores.
+              continua organizado em competições, rankings, times e jogadores, com partidas abertas
+              dentro dos contextos de competição e temporada.
             </p>
             <Link
               className="button-pill button-pill-primary"

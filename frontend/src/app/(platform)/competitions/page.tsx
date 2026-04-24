@@ -604,26 +604,6 @@ export default function CompetitionsIndexPage() {
           />
         )}
       </section>
-
-      <section className={styles.noteGrid}>
-        <article className={joinClasses(styles.noteCard, styles.noteCardPrimary)}>
-          <p className={styles.noteEyebrow}>Leitura operacional</p>
-          <h3 className={styles.noteTitle}>Entrada direta na edição mais recente</h3>
-          <p className={styles.noteDescription}>
-            Cada linha preserva o caminho mais curto para abrir a competição no recorte certo sem
-            reintroduzir o topo legado.
-          </p>
-        </article>
-
-        <article className={styles.noteCard}>
-          <p className={styles.noteEyebrow}>Catálogo canônico</p>
-          <h3 className={styles.noteTitle}>Filtros locais, navegação estável</h3>
-          <p className={styles.noteDescription}>
-            O recorte acima reorganiza apenas a leitura desta superfície. As rotas e os hubs
-            continuam abrindo pelo catálogo oficial de competições e temporadas suportadas.
-          </p>
-        </article>
-      </section>
     </div>
   );
 }
