@@ -1,5 +1,9 @@
 export type {
   TeamFormResult,
+  TeamHonorItem,
+  TeamHonorScope,
+  TeamHonorScopeSummary,
+  TeamHonorsPreview,
   Team,
   TeamMatchListItem,
   TeamMatchesListData,

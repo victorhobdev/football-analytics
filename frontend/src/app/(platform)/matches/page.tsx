@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { getCompetitionById } from "@/config/competitions.registry";
 import { getSeasonById } from "@/config/seasons.registry";
+import { MatchesEntrySurface } from "@/features/matches/components";
 import { useMatchesList } from "@/features/matches/hooks";
 import { matchesQueryKeys } from "@/features/matches/queryKeys";
 import { fetchMatchCenter } from "@/features/matches/services/matches.service";
@@ -133,12 +134,6 @@ function parseKickoffDate(value: string | null | undefined): Date | null {
   return parsedDate;
 }
 
-function resolveMatchTimestamp(match: MatchListItem): number {
-  const parsedDate = parseKickoffDate(match.kickoffAt);
-
-  return parsedDate?.getTime() ?? 0;
-}
-
 function normalizeStatus(status: string | null | undefined): MatchStatusKey {
   const normalizedStatus = status?.trim().toLowerCase();
 
@@ -170,10 +165,9 @@ function getMatchStatusMeta(status: string | null | undefined): MatchStatusMeta 
 
   if (statusKey === "live") {
     return {
-      label: "Ao vivo",
-      badgeClassName: "bg-[#a6f2d1] text-[#00513b]",
-      cardClassName:
-        "border-[rgba(139,214,182,0.62)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(244,250,247,0.92)_100%)] shadow-[0_24px_60px_-48px_rgba(0,53,38,0.35)]",
+      label: "Em aberto",
+      badgeClassName: "bg-[#f3f0df] text-[#6c5a00]",
+      cardClassName: "border-[#eadf9d] bg-[#fffdf1]",
     };
   }
 
@@ -187,7 +181,7 @@ function getMatchStatusMeta(status: string | null | undefined): MatchStatusMeta 
 
   if (statusKey === "scheduled") {
     return {
-      label: "Agendada",
+      label: "Sem placar",
       badgeClassName: "bg-[rgba(216,227,251,0.92)] text-[#1f2d40]",
       cardClassName:
         "border-[rgba(216,227,251,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(240,243,255,0.88)_100%)]",
@@ -260,10 +254,6 @@ function getTeamMonogram(teamName: string): string {
   return initials.length > 0 ? initials : "CLB";
 }
 
-function describeStatusFilter(status: string): string {
-  return status.trim().length > 0 ? getMatchStatusMeta(status).label : "Todos os status";
-}
-
 function buildDateGroupKey(value: string | null | undefined): string {
   const parsedDate = parseKickoffDate(value);
 
@@ -272,6 +262,39 @@ function buildDateGroupKey(value: string | null | undefined): string {
   }
 
   return parsedDate.toISOString().slice(0, 10);
+}
+
+function buildMatchGroupKey(match: MatchListItem): string {
+  const competitionType = match.competitionType ?? "league";
+
+  if (competitionType === "cup" && match.stageName) {
+    return `stage:${match.stageId ?? match.stageName}`;
+  }
+
+  if (match.roundId) {
+    return `round:${match.roundId}`;
+  }
+
+  return `date:${buildDateGroupKey(match.kickoffAt)}`;
+}
+
+function buildMatchGroupLabel(match: MatchListItem): string {
+  const competitionType = match.competitionType ?? "league";
+  const roundName = match.roundName?.trim();
+
+  if (competitionType === "cup" && match.stageName) {
+    return match.stageName;
+  }
+
+  if (roundName) {
+    return /^\d+$/.test(roundName) ? `Rodada ${roundName}` : roundName;
+  }
+
+  if (match.roundId) {
+    return `Rodada ${match.roundId}`;
+  }
+
+  return formatDateHeading(match.kickoffAt);
 }
 
 function MatchDiscoveryCard({
@@ -421,27 +444,27 @@ function MatchesSkeleton() {
 export default function MatchesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
   const [sortDirection, setSortDirection] = useState<MatchesListSortDirection>("desc");
   const queryClient = useQueryClient();
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
   const resolvedContext = useResolvedCompetitionContext();
   const { params: timeRangeParams } = useTimeRange();
+  const hasValidContext = Boolean(competitionId && seasonId);
 
   const matchesQuery = useMatchesList({
-    allPages: true,
+    allPages: false,
+    enabled: hasValidContext,
+    page,
+    pageSize: MATCHES_LIST_PAGE_SIZE,
     search,
-    status,
     sortBy: "kickoffAt",
     sortDirection,
   });
 
   const competitionName = getCompetitionById(competitionId)?.name;
   const seasonLabel = getSeasonById(seasonId)?.label;
-  const pageTitle = competitionName
-    ? `Partidas - ${competitionName}${seasonLabel ? ` (${seasonLabel})` : ""}`
-    : "Partidas gerais";
+  const contextLabel = [competitionName, seasonLabel].filter(Boolean).join(" · ");
 
   const detailPrefetchFilters = useMemo<MatchCenterFilters>(
     () => ({
@@ -498,21 +521,14 @@ export default function MatchesPage() {
     [competitionId, dateRangeEnd, dateRangeStart, lastN, roundId, seasonId, venue],
   );
 
-  const sortedMatches = useMemo(() => {
-    const items = [...(matchesQuery.data?.items ?? [])];
-
-    items.sort((left, right) => {
-      const timestampDelta = resolveMatchTimestamp(left) - resolveMatchTimestamp(right);
-
-      if (timestampDelta !== 0) {
-        return sortDirection === "asc" ? timestampDelta : -timestampDelta;
-      }
-
-      return (left.matchId ?? "").localeCompare(right.matchId ?? "");
-    });
-
-    return items;
-  }, [matchesQuery.data?.items, sortDirection]);
+  const currentPageMatches = matchesQuery.data?.items ?? [];
+  const matchesPagination = matchesQuery.meta?.pagination;
+  const totalMatches = matchesPagination?.totalCount ?? currentPageMatches.length;
+  const totalPages = Math.max(
+    1,
+    page,
+    matchesPagination?.totalPages ?? Math.ceil(totalMatches / MATCHES_LIST_PAGE_SIZE),
+  );
 
   useEffect(() => {
     setPage(1);
@@ -525,14 +541,8 @@ export default function MatchesPage() {
     search,
     seasonId,
     sortDirection,
-    status,
     venue,
   ]);
-
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(sortedMatches.length / MATCHES_LIST_PAGE_SIZE)),
-    [sortedMatches.length],
-  );
 
   useEffect(() => {
     if (page > totalPages) {
@@ -540,17 +550,11 @@ export default function MatchesPage() {
     }
   }, [page, totalPages]);
 
-  const paginatedMatches = useMemo(() => {
-    const startIndex = (page - 1) * MATCHES_LIST_PAGE_SIZE;
-
-    return sortedMatches.slice(startIndex, startIndex + MATCHES_LIST_PAGE_SIZE);
-  }, [page, sortedMatches]);
-
   const groupedMatches = useMemo<GroupedMatches[]>(() => {
     const groups = new Map<string, GroupedMatches>();
 
-    for (const match of paginatedMatches) {
-      const key = buildDateGroupKey(match.kickoffAt);
+    for (const match of currentPageMatches) {
+      const key = buildMatchGroupKey(match);
       const existingGroup = groups.get(key);
 
       if (existingGroup) {
@@ -560,16 +564,16 @@ export default function MatchesPage() {
 
       groups.set(key, {
         key,
-        label: formatDateHeading(match.kickoffAt),
+        label: buildMatchGroupLabel(match),
         matches: [match],
       });
     }
 
     return Array.from(groups.values());
-  }, [paginatedMatches]);
+  }, [currentPageMatches]);
 
   const currentPageRange = useMemo(() => {
-    if (sortedMatches.length === 0) {
+    if (totalMatches === 0 || currentPageMatches.length === 0) {
       return {
         start: 0,
         end: 0,
@@ -577,10 +581,10 @@ export default function MatchesPage() {
     }
 
     const start = (page - 1) * MATCHES_LIST_PAGE_SIZE + 1;
-    const end = Math.min(page * MATCHES_LIST_PAGE_SIZE, sortedMatches.length);
+    const end = Math.min(start + currentPageMatches.length - 1, totalMatches);
 
     return { start, end };
-  }, [page, sortedMatches.length]);
+  }, [currentPageMatches.length, page, totalMatches]);
 
   const visiblePageNumbers = useMemo(() => {
     const maxVisiblePages = 5;
@@ -594,44 +598,7 @@ export default function MatchesPage() {
     return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
   }, [page, totalPages]);
 
-  const summary = useMemo(() => {
-    const liveMatches = sortedMatches.filter((match) => normalizeStatus(match.status) === "live");
-    const scheduledMatches = sortedMatches.filter(
-      (match) => normalizeStatus(match.status) === "scheduled",
-    );
-    const finishedMatches = sortedMatches.filter(
-      (match) => normalizeStatus(match.status) === "finished",
-    );
-
-    return {
-      total: sortedMatches.length,
-      live: liveMatches.length,
-      scheduled: scheduledMatches.length,
-      finished: finishedMatches.length,
-    };
-  }, [sortedMatches]);
-
-  const featuredMatch = useMemo(() => {
-    const liveMatch = sortedMatches.find((match) => normalizeStatus(match.status) === "live");
-
-    if (liveMatch) {
-      return liveMatch;
-    }
-
-    const scheduledMatch = sortedMatches.find(
-      (match) => normalizeStatus(match.status) === "scheduled",
-    );
-
-    if (scheduledMatch) {
-      return scheduledMatch;
-    }
-
-    return sortedMatches[0] ?? null;
-  }, [sortedMatches]);
-
-  const featuredStatusMeta = featuredMatch ? getMatchStatusMeta(featuredMatch.status) : null;
   const activeWindowLabel = useMemo(() => describeTimeWindow(timeRangeParams), [timeRangeParams]);
-  const filterStatusLabel = describeStatusFilter(status);
   const sortLabel = sortDirection === "desc" ? "Mais recentes primeiro" : "Mais antigas primeiro";
   const seasonHubHref = resolvedContext
     ? buildSeasonHubTabPath(resolvedContext, "calendar", {
@@ -672,6 +639,10 @@ export default function MatchesPage() {
     dateRangeEnd,
   });
 
+  if (!hasValidContext) {
+    return <MatchesEntrySurface />;
+  }
+
   return (
     <main
       className={`${profileTypographyClassName} ${profileHeadlineVariableClassName} space-y-6 text-[#111c2d]`}
@@ -682,13 +653,10 @@ export default function MatchesPage() {
           <section className="overflow-hidden rounded-[1.85rem] bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] p-6 text-white shadow-[0_34px_90px_-58px_rgba(0,53,38,0.9)]">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/78">
-                Agenda
+                Acervo
               </span>
               <span className="rounded-full bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/78">
                 {activeWindowLabel}
-              </span>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/78">
-                {filterStatusLabel}
               </span>
             </div>
 
@@ -700,29 +668,23 @@ export default function MatchesPage() {
                 Partidas
               </h1>
               <p className="mt-3 max-w-2xl text-sm/6 text-white/74">
-                {pageTitle}. Acompanhe o calendário da temporada e entre direto na central de cada
+                {contextLabel}. Explore as partidas do recorte e entre direto na central de cada
                 jogo.
               </p>
+              <Link
+                className="mt-5 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/16"
+                href={seasonHubHref}
+              >
+                ← Temporada {seasonLabel ?? "selecionada"}
+              </Link>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
+            <div className="mt-6 grid gap-3 md:grid-cols-1">
               <ProfileKpi
                 hint="No recorte atual"
                 invert
                 label="Jogos no recorte"
-                value={matchesQuery.isLoading ? "..." : formatInteger(summary.total)}
-              />
-              <ProfileKpi
-                hint="Monitoradas nesta tela"
-                invert
-                label="Ao vivo"
-                value={matchesQuery.isLoading ? "..." : formatInteger(summary.live)}
-              />
-              <ProfileKpi
-                hint={`${formatInteger(summary.finished)} encerradas`}
-                invert
-                label="Agendadas"
-                value={matchesQuery.isLoading ? "..." : formatInteger(summary.scheduled)}
+                value={matchesQuery.isLoading ? "..." : formatInteger(totalMatches)}
               />
             </div>
           </section>
@@ -756,72 +718,6 @@ export default function MatchesPage() {
               </dl>
             </section>
 
-            <section className="rounded-[1.6rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] p-5 shadow-[0_20px_56px_-48px_rgba(17,28,45,0.28)]">
-              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
-                Partida em foco
-              </p>
-              {featuredMatch && featuredStatusMeta ? (
-                <div className="mt-4 space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${featuredStatusMeta.badgeClassName}`}
-                    >
-                      {featuredStatusMeta.label}
-                    </span>
-                    {featuredMatch.competitionName ? (
-                      <ProfileTag>{featuredMatch.competitionName}</ProfileTag>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <ProfileMedia
-                      alt={featuredMatch.homeTeamName ?? "Mandante"}
-                      assetId={featuredMatch.homeTeamId}
-                      category="clubs"
-                      className="h-11 w-11 border-[rgba(191,201,195,0.45)] bg-white"
-                      fallback={getTeamMonogram(featuredMatch.homeTeamName ?? "Mandante")}
-                      fallbackClassName="text-xs"
-                      imageClassName="p-1.5"
-                      shape="circle"
-                    />
-                    <p className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
-                      {featuredMatch.homeTeamName ?? "Mandante"} x{" "}
-                      {featuredMatch.awayTeamName ?? "Visitante"}
-                    </p>
-                    <ProfileMedia
-                      alt={featuredMatch.awayTeamName ?? "Visitante"}
-                      assetId={featuredMatch.awayTeamId}
-                      category="clubs"
-                      className="h-11 w-11 border-[rgba(191,201,195,0.45)] bg-white"
-                      fallback={getTeamMonogram(featuredMatch.awayTeamName ?? "Visitante")}
-                      fallbackClassName="text-xs"
-                      imageClassName="p-1.5"
-                      shape="circle"
-                    />
-                  </div>
-                  <p className="text-sm/6 text-[#57657a]">
-                    {formatDateHeading(featuredMatch.kickoffAt)} •{" "}
-                    {formatTimeLabel(featuredMatch.kickoffAt)}
-                    {featuredMatch.venueName ? ` • ${featuredMatch.venueName}` : ""}
-                  </p>
-                  <Link
-                    className="button-pill button-pill-primary"
-                    href={buildMatchHref(featuredMatch)}
-                    onFocus={() => {
-                      prefetchMatchDetail(featuredMatch.matchId);
-                    }}
-                    onMouseEnter={() => {
-                      prefetchMatchDetail(featuredMatch.matchId);
-                    }}
-                  >
-                    Abrir central da partida
-                  </Link>
-                </div>
-              ) : (
-                <p className="mt-4 text-sm/6 text-[#57657a]">
-                  Nenhuma partida em destaque com os filtros atuais.
-                </p>
-              )}
-            </section>
           </div>
         </div>
       </section>
@@ -829,9 +725,11 @@ export default function MatchesPage() {
       {matchesQuery.isError ? (
         <ProfileAlert
           title={
-            sortedMatches.length === 0 ? "Falha ao carregar a lista" : "Lista carregada com alerta"
+            currentPageMatches.length === 0
+              ? "Falha ao carregar a lista"
+              : "Lista carregada com alerta"
           }
-          tone={sortedMatches.length === 0 ? "critical" : "warning"}
+          tone={currentPageMatches.length === 0 ? "critical" : "warning"}
         >
           <p>{matchesQuery.error?.message}</p>
         </ProfileAlert>
@@ -851,13 +749,13 @@ export default function MatchesPage() {
           title="Times"
         />
         <ProfileRouteCard
-          description="Cruze o calendário com atletas e siga para perfis preservando o mesmo recorte."
+          description="Cruze as partidas com atletas e siga para perfis preservando o mesmo recorte."
           href={playersHref}
           label="Descoberta"
           title="Jogadores"
         />
         <ProfileRouteCard
-          description="Use a agenda como ponto de entrada e compare líderes da temporada sem mudar o contexto."
+          description="Compare líderes da temporada sem mudar o contexto das partidas."
           href={rankingsHref}
           label="Leitura comparativa"
           title="Rankings"
@@ -879,19 +777,17 @@ export default function MatchesPage() {
               Busca e refinamento local
             </p>
             <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
-              Combine busca, status e ordenação para encontrar a partida certa sem sair desta
-              temporada.
+              Combine busca e ordenação para encontrar a partida certa sem sair desta temporada.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <ProfileTag>{competitionName ?? "Todas as competições"}</ProfileTag>
             <ProfileTag>{seasonLabel ?? "Todas as temporadas"}</ProfileTag>
-            <ProfileTag>{filterStatusLabel}</ProfileTag>
             <ProfileTag>{sortLabel}</ProfileTag>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-3">
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
             Buscar partida
             <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
@@ -907,28 +803,6 @@ export default function MatchesPage() {
                 type="text"
                 value={search}
               />
-            </div>
-          </label>
-
-          <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
-            Status
-            <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,227,251,0.82)] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-                St
-              </span>
-              <select
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none"
-                onChange={(event) => {
-                  setStatus(event.target.value);
-                }}
-                value={status}
-              >
-                <option value="">Todos</option>
-                <option value="scheduled">Agendada</option>
-                <option value="live">Ao vivo</option>
-                <option value="finished">Finalizada</option>
-                <option value="cancelled">Cancelada</option>
-              </select>
             </div>
           </label>
 
@@ -958,7 +832,7 @@ export default function MatchesPage() {
           <div className="flex flex-col gap-4 border-b border-[rgba(191,201,195,0.55)] pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
-                Calendário
+                Acervo
               </p>
               <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] text-[#111c2d]">
                 Lista de partidas
@@ -992,14 +866,14 @@ export default function MatchesPage() {
           <div className="mt-6 space-y-8">
             {matchesQuery.isLoading ? <MatchesSkeleton /> : null}
 
-            {!matchesQuery.isLoading && sortedMatches.length === 0 ? (
+            {!matchesQuery.isLoading && currentPageMatches.length === 0 ? (
               <EmptyState
                 description="Nenhuma partida encontrada com os filtros atuais."
                 title="Sem partidas"
               />
             ) : null}
 
-            {!matchesQuery.isLoading && sortedMatches.length > 0 && totalPages > 1 ? (
+            {!matchesQuery.isLoading && currentPageMatches.length > 0 && totalPages > 1 ? (
               <div className="flex flex-col gap-4 rounded-[1.45rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(244,247,252,0.82)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
                   <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
@@ -1007,7 +881,7 @@ export default function MatchesPage() {
                   </p>
                   <p className="text-sm text-[#57657a]">
                     Mostrando {formatInteger(currentPageRange.start)} a{" "}
-                    {formatInteger(currentPageRange.end)} de {formatInteger(sortedMatches.length)}{" "}
+                    {formatInteger(currentPageRange.end)} de {formatInteger(totalMatches)}{" "}
                     partidas.
                   </p>
                 </div>
@@ -1082,34 +956,6 @@ export default function MatchesPage() {
         </section>
 
         <aside className="space-y-4">
-          <section className="rounded-[1.75rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] p-5 shadow-[0_22px_56px_-48px_rgba(17,28,45,0.28)]">
-            <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Panorama</p>
-            <div className="mt-4 grid gap-3">
-              <div className="rounded-[1.3rem] bg-white/90 px-4 py-4">
-                <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
-                  Jogos no recorte
-                </p>
-                <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-                  {matchesQuery.isLoading ? "..." : formatInteger(summary.total)}
-                </p>
-              </div>
-              <div className="rounded-[1.3rem] bg-white/90 px-4 py-4">
-                <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Ao vivo</p>
-                <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-                  {matchesQuery.isLoading ? "..." : formatInteger(summary.live)}
-                </p>
-              </div>
-              <div className="rounded-[1.3rem] bg-white/90 px-4 py-4">
-                <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
-                  Próximas
-                </p>
-                <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-                  {matchesQuery.isLoading ? "..." : formatInteger(summary.scheduled)}
-                </p>
-              </div>
-            </div>
-          </section>
-
           <section className="rounded-[1.75rem] border border-white/60 bg-[rgba(255,255,255,0.84)] p-5 shadow-[0_22px_56px_-48px_rgba(17,28,45,0.28)] backdrop-blur-xl">
             <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
               Como usar esta lista
@@ -1117,15 +963,10 @@ export default function MatchesPage() {
             <div className="mt-4 space-y-3 text-sm/6 text-[#57657a]">
               <p>
                 Abra uma partida para acompanhar linha do tempo, escalações e estatísticas no mesmo
-                contexto deste calendário.
+                contexto deste recorte.
               </p>
               <p>
-                Use o status para separar jogos ao vivo, concluídos ou agendados com menos ida e
-                volta.
-              </p>
-              <p>
-                O painel lateral destaca o jogo mais relevante da lista para acelerar a entrada
-                no detalhe.
+                Use a busca por time e a ordenação por data para ajustar a leitura do recorte.
               </p>
             </div>
           </section>
