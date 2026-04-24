@@ -22,6 +22,7 @@ import type {
   WorldCupKnockoutTie,
   WorldCupTeamReference,
 } from "@/features/world-cup/types/world-cup.types";
+import { resolveWorldCupPlayerImageAssetId } from "@/features/world-cup/utils/player-profile";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import {
@@ -197,7 +198,7 @@ function resolveResolutionBadge(tie: WorldCupKnockoutTie): string | null {
     case "replay_inferred":
       return "Replay";
     case "advanced_to_next_round":
-      return "Classificação inferida";
+      return null;
     default:
       return null;
   }
@@ -212,7 +213,7 @@ function describeResolutionType(resolutionType: string | null | undefined): stri
     case "replay_inferred":
       return "Replay inferido";
     case "advanced_to_next_round":
-      return "Classificado pela fase seguinte";
+      return null;
     case "final_round":
       return "Fase final";
     default:
@@ -788,7 +789,11 @@ function WorldCupEditionHero({
                 media={
                   <ProfileMedia
                     alt={topScorerName}
-                    assetId={edition.topScorer?.playerId}
+                    assetId={resolveWorldCupPlayerImageAssetId(
+                      edition.topScorer?.imageAssetId,
+                      edition.topScorer?.playerId,
+                    )}
+                    href={edition.topScorer?.profileUrl ?? null}
                     category="players"
                     className="h-10 w-10 border-[#d8e3fb] bg-[rgba(240,243,255,0.82)]"
                     fallback={buildFallbackLabel(topScorerName, "WC")}
@@ -1027,40 +1032,40 @@ function WorldCupSnapshotTieCard({
       data-tie-key={tie.tieKey}
       key={`${side}-${tie.tieKey}`}
     >
-      <div className="flex min-h-[0.85rem] items-center justify-center text-center text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[#6a7890]">
+      <div className="mb-2.5 flex min-h-[0.85rem] items-center justify-center text-center text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[#6a7890]">
         {resolutionLabel ? <span>{resolutionLabel}</span> : null}
       </div>
-      <div className="mt-2.5 space-y-2">
+      <div className="space-y-2">
         {scoreboard.map(({ goals, isWinner, team }) => {
           const teamName = team.teamName ?? "Não identificado";
 
           return (
-            <div className="grid grid-cols-[minmax(0,1fr)_1.75rem] items-center gap-2" key={`${side}-${tie.tieKey}-${team.teamId ?? teamName}`}>
+            <div
+              className="grid grid-cols-[minmax(0,1fr)_2.35rem] items-center gap-2"
+              key={`${side}-${tie.tieKey}-${team.teamId ?? teamName}`}
+            >
               <div className="flex min-w-0 items-center gap-2">
                 <WorldCupTeamBadge className="h-9 w-9 border-0 bg-white" team={team} />
                 <span
                   className={
                     isWinner
-                      ? "block min-w-0 text-[0.97rem] font-extrabold leading-[1.08rem] text-[#003526]"
-                      : "block min-w-0 text-[0.97rem] font-semibold leading-[1.08rem] text-[#111c2d]"
+                      ? "flex min-h-9 min-w-0 items-center text-[0.97rem] font-extrabold leading-[1.08rem] text-[#003526]"
+                      : "flex min-h-9 min-w-0 items-center text-[0.97rem] font-semibold leading-[1.08rem] text-[#111c2d]"
                   }
                 >
                   {teamName}
                 </span>
               </div>
-              <span className="w-7 text-right font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-none text-[#111c2d]">
+              <span className="flex w-9 justify-end justify-self-end pr-1 text-right font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-none text-[#111c2d] tabular-nums">
                 {formatScoreValue(goals)}
               </span>
             </div>
           );
         })}
       </div>
-      {shootout ? (
-        <p className="mt-2.5 text-[0.68rem] text-[#57657a]">
-          Pênaltis: {shootout.home} x {shootout.away}
-        </p>
-      ) : null}
-      {tie.resolutionNote ? <p className="mt-2.5 text-[0.68rem] text-[#57657a]">{tie.resolutionNote}</p> : null}
+      <p className="mt-2.5 min-h-[1rem] text-center text-[0.68rem] text-[#57657a]">
+        {shootout ? `Pênaltis: ${shootout.home} x ${shootout.away}` : null}
+      </p>
     </div>
   );
 }
@@ -1158,7 +1163,7 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
             )}
           </div>
 
-          <div className="rounded-[1rem] border border-[rgba(243,223,159,0.18)] bg-[rgba(255,255,255,0.06)] px-3 py-3">
+          <div className="rounded-[1rem] border border-[rgba(243,223,159,0.18)] bg-[rgba(255,255,255,0.06)] px-3 py-3 text-center">
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#f3df9f]">Campeão</p>
             <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.52rem] font-extrabold text-white">
               {championName}
@@ -1192,7 +1197,6 @@ function WorldCupKnockoutSection({
     <ProfilePanel className="space-y-5" tone="base">
       <SectionHeader
         align="center"
-        description="Mesmo modelo visual da Libertadores, preservando confrontos, replays e decisões por pênaltis."
         eyebrow="Chaveamento"
         title="Chaveamento até a final"
       />
@@ -1258,6 +1262,7 @@ function WorldCupEditionScorerCard({
           fallbackClassName="text-[0.58rem]"
           imageClassName="p-1"
           shape="circle"
+          linkBehavior="none"
         />
         <span className="truncate">{teamName}</span>
       </Link>
@@ -1286,7 +1291,8 @@ function WorldCupEditionScorerCard({
 
         <ProfileMedia
           alt={playerName}
-          assetId={scorer.playerId}
+          assetId={resolveWorldCupPlayerImageAssetId(scorer.imageAssetId, scorer.playerId)}
+          href={scorer.profileUrl ?? null}
           category="players"
           className="h-14 w-14 border-[#d8e3fb] bg-[rgba(255,255,255,0.95)]"
           fallback={buildFallbackLabel(playerName, "WC")}
@@ -1342,9 +1348,7 @@ function WorldCupEditionRankingSection({
             Ver ranking histórico
           </Link>
         </div>
-        <p className="max-w-3xl text-sm/6 text-[#57657a]">
-          Artilharia da edição com mídia do jogador, identidade da seleção e fallback seguro quando faltar asset.
-        </p>
+
       </header>
 
       {scorers.length === 0 ? (
@@ -1453,11 +1457,7 @@ export function WorldCupEditionContent({ seasonLabel }: { seasonLabel: string })
       {editionQuery.isPartial ? (
         <PartialDataBanner
           coverage={editionQuery.coverage}
-          message={
-            edition.coverageNotes.length > 0
-              ? edition.coverageNotes[0]
-              : "Alguns recortes desta edição dependem de fallback controlado."
-          }
+          message="Alguns recortes desta edição dependem de fallback controlado."
         />
       ) : null}
 
@@ -1499,16 +1499,6 @@ export function WorldCupEditionContent({ seasonLabel }: { seasonLabel: string })
           value={formatWholeNumber(edition.matchesCount)}
         />
       </div>
-
-      {edition.coverageNotes.length > 0 ? (
-        <ProfileAlert title="Notas de cobertura" tone="warning">
-          <div className="space-y-2">
-            {edition.coverageNotes.map((note) => (
-              <p key={note}>{note}</p>
-            ))}
-          </div>
-        </ProfileAlert>
-      ) : null}
 
       <WorldCupGroupPhaseSection groupStages={groupStages} knockoutRounds={knockoutRounds} />
 

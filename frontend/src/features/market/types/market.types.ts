@@ -1,8 +1,10 @@
 import type { VenueFilter } from "@/shared/types/filters.types";
 
-export type MarketTransfersSortBy = "transferDate" | "playerName";
+export type MarketTransfersSortBy = "transferDate" | "playerName" | "amount";
 
 export type MarketTransfersSortDirection = "asc" | "desc";
+
+export type MarketTeamDirection = "all" | "arrivals" | "departures";
 
 export interface MarketGlobalFilters {
   competitionId?: string | null;
@@ -18,6 +20,12 @@ export interface MarketGlobalFilters {
 
 export interface MarketTransfersLocalFilters {
   search?: string;
+  clubSearch?: string;
+  teamDirection?: MarketTeamDirection;
+  typeId?: number | null;
+  hasAmount?: boolean;
+  minAmount?: number;
+  maxAmount?: number;
   page?: number;
   pageSize?: number;
   sortBy?: MarketTransfersSortBy;
@@ -38,7 +46,10 @@ export interface MarketTransferItem {
   completed: boolean;
   careerEnded: boolean;
   typeId?: number | null;
+  typeName?: string | null;
   amount?: string | null;
+  amountValue?: number | null;
+  currency?: string | null;
 }
 
 export interface MarketTransfersData {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { usePlayerProfile } from "@/features/players/hooks";
+import type { Player, PlayerProfileMeta, PlayerWorldCupSummary } from "@/features/players/types";
 import { PlayerHistorySection } from "@/features/players/components/PlayerHistorySection";
 import { PlayerMatchesSection } from "@/features/players/components/PlayerMatchesSection";
 import { PlayerOverviewSection } from "@/features/players/components/PlayerOverviewSection";
@@ -95,11 +96,11 @@ function getPlayerMonogram(playerName: string): string {
 
 function getProfileTypeLabel(profileType: string): string {
   if (profileType === "world_cup_local") {
-    return "Perfil local Copa";
+    return "Perfil da Copa";
   }
 
   if (profileType === "sportmonks_without_history") {
-    return "Perfil SportMonks";
+    return "Perfil básico";
   }
 
   return "Perfil com histórico";
@@ -107,17 +108,98 @@ function getProfileTypeLabel(profileType: string): string {
 
 function getProfileDescription(
   hasHistoricalStats: boolean,
-  profileType: string,
+  playerName: string,
+  worldCup: PlayerWorldCupSummary | null,
 ): string {
   if (hasHistoricalStats) {
     return "Resumo, histórico, partidas e tendência do atleta em uma leitura única dentro da temporada selecionada.";
   }
 
-  if (profileType === "world_cup_local") {
-    return "Perfil local da Copa com identidade preservada, mesmo sem histórico estatístico consolidado na plataforma.";
+  if (worldCup?.editionCount) {
+    const editionLabel = worldCup.editionCount === 1 ? "Copa" : "Copas";
+    const teamLabel =
+      worldCup.teamNames.length === 1
+        ? `pela seleção ${worldCup.teamNames[0]}`
+        : `por ${worldCup.teamCount} seleções`;
+    const goalsLabel =
+      typeof worldCup.goalCount === "number"
+        ? `, com ${formatInteger(worldCup.goalCount)} ${worldCup.goalCount === 1 ? "gol" : "gols"}`
+        : "";
+
+    return `${playerName} tem registro em ${worldCup.editionCount} ${editionLabel} ${teamLabel}${goalsLabel}.`;
   }
 
-  return "Perfil SportMonks disponível sem histórico estatístico consolidado, tratado como estado válido do produto.";
+  return "Informações básicas disponíveis para consulta neste perfil.";
+}
+
+const POSITION_LABELS: Record<string, string> = {
+  goalkeeper: "Goleiro",
+  defender: "Defensor",
+  midfielder: "Meio-campista",
+  forward: "Atacante",
+  "center forward": "Centroavante",
+  "right winger": "Ponta direita",
+  "left winger": "Ponta esquerda",
+  "attacking midfielder": "Meia ofensivo",
+  "defensive midfielder": "Volante",
+  "left back": "Lateral esquerdo",
+  "right back": "Lateral direito",
+};
+
+function formatPositionLabel(position: string | null | undefined): string | null {
+  const normalizedPosition = position?.trim();
+
+  if (!normalizedPosition) {
+    return null;
+  }
+
+  return POSITION_LABELS[normalizedPosition.toLowerCase()] ?? normalizedPosition;
+}
+
+function normalizeTagKey(value: string): string {
+  return value.trim().toLocaleLowerCase("pt-BR");
+}
+
+function buildProfileTagLabels({
+  contextOverride,
+  displayPosition,
+  hasHistoricalStats,
+  player,
+  profileMeta,
+}: {
+  contextOverride: CompetitionSeasonContext | null;
+  displayPosition: string | null;
+  hasHistoricalStats: boolean;
+  player: Player;
+  profileMeta: PlayerProfileMeta;
+}): string[] {
+  const labels = [
+    hasHistoricalStats
+      ? getProfileTypeLabel(profileMeta.profileType)
+      : profileMeta.isWorldCupLinked
+        ? "Copa do Mundo"
+        : "Perfil básico",
+    contextOverride?.competitionName,
+    contextOverride?.seasonLabel,
+    displayPosition,
+    player.teamName,
+    player.nationality,
+  ];
+  const seenLabels = new Set<string>();
+
+  return labels.filter((label): label is string => {
+    if (!label) {
+      return false;
+    }
+
+    const key = normalizeTagKey(label);
+    if (seenLabels.has(key)) {
+      return false;
+    }
+
+    seenLabels.add(key);
+    return true;
+  });
 }
 
 const INTEGER_FORMATTER = new Intl.NumberFormat("pt-BR", {
@@ -487,6 +569,15 @@ export function PlayerProfileContent({
   const { history, player, profileMeta, recentMatches, sectionCoverage, stats, summary } = profileQuery.data;
   const hasHistoricalStats = profileMeta.hasHistoricalStats;
   const worldCup = profileMeta.worldCup ?? null;
+  const displayPosition = formatPositionLabel(worldCup?.primaryPosition ?? player.position);
+  const profileImageAssetId = worldCup?.imageAssetId ?? player.playerId;
+  const profileTagLabels = buildProfileTagLabels({
+    contextOverride,
+    displayPosition,
+    hasHistoricalStats,
+    player,
+    profileMeta,
+  });
   const teamHref = player.teamId
     ? contextOverride
       ? appendFilterQueryString(
@@ -650,40 +741,22 @@ export function PlayerProfileContent({
               {hasHistoricalStats ? (
                 <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
               ) : null}
-              <ProfileTag className="bg-white/10 text-white/82">
-                {getProfileTypeLabel(profileMeta.profileType)}
-              </ProfileTag>
-              {!hasHistoricalStats ? (
-                <ProfileTag className="bg-white/10 text-white/82">Sem histórico</ProfileTag>
-              ) : null}
-              {contextOverride ? (
-                <>
-                  <ProfileTag className="bg-white/10 text-white/82">
-                    {contextOverride.competitionName}
-                  </ProfileTag>
-                  <ProfileTag className="bg-white/10 text-white/82">
-                    {contextOverride.seasonLabel}
-                  </ProfileTag>
-                </>
-              ) : (
-                <ProfileTag className="bg-white/10 text-white/82">Modo direto</ProfileTag>
-              )}
-              {player.teamName ? (
-                <ProfileTag className="bg-white/10 text-white/82">{player.teamName}</ProfileTag>
-              ) : null}
-              {player.nationality ? (
-                <ProfileTag className="bg-white/10 text-white/82">{player.nationality}</ProfileTag>
-              ) : null}
+              {profileTagLabels.map((label) => (
+                <ProfileTag className="bg-white/10 text-white/82" key={label}>
+                  {label}
+                </ProfileTag>
+              ))}
             </div>
 
             <div className="flex min-w-0 flex-col items-start gap-5 sm:flex-row">
               <ProfileMedia
                 alt={player.playerName}
-                assetId={player.playerId}
+                assetId={profileImageAssetId}
                 category="players"
                 className="h-24 w-24 shrink-0 border border-white/18 bg-white/12"
                 fallback={getPlayerMonogram(player.playerName)}
                 fallbackClassName="text-xl tracking-[0.08em] text-white"
+                href={pathname}
                 imageClassName="p-2"
                 shape="circle"
                 tone="contrast"
@@ -697,7 +770,7 @@ export function PlayerProfileContent({
                   {player.playerName}
                 </h1>
                 <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">
-                  {getProfileDescription(hasHistoricalStats, profileMeta.profileType)}
+                  {getProfileDescription(hasHistoricalStats, player.playerName, worldCup)}
                 </p>
               </div>
             </div>
@@ -757,28 +830,28 @@ export function PlayerProfileContent({
               ) : (
                 <>
                   <PlayerProfileMetric
-                    hint={worldCup?.editionLabels?.length ? worldCup.editionLabels.join(" · ") : "Sem edições detalhadas"}
+                    hint={worldCup?.editionLabels?.length ? worldCup.editionLabels.join(" · ") : "Sem edições registradas"}
                     icon="timeline"
                     label="Edições"
                     value={formatInteger(worldCup?.editionCount)}
                   />
                   <PlayerProfileMetric
-                    hint={worldCup?.teamNames?.length ? worldCup.teamNames.join(" · ") : "Sem seleção detalhada"}
+                    hint={worldCup?.teamNames?.length ? worldCup.teamNames.join(" · ") : "Seleção não informada"}
                     icon="shield"
-                    label="Seleções"
+                    label={worldCup?.teamCount === 1 ? "Seleção" : "Seleções"}
                     value={formatInteger(worldCup?.teamCount)}
                   />
                   <PlayerProfileMetric
-                    hint="contexto preservado da Copa"
+                    hint="Total registrado em Copas"
                     icon="match"
                     label="Gols"
                     value={formatInteger(worldCup?.goalCount)}
                   />
                   <PlayerProfileMetric
-                    hint={profileMeta.profileType === "world_cup_local" ? "perfil local válido" : "identidade consolidada"}
+                    hint="Posição registrada"
                     icon="player"
                     label="Posição"
-                    value={worldCup?.primaryPosition ?? player.position ?? "-"}
+                    value={displayPosition ?? "-"}
                   />
                 </>
               )}
@@ -939,14 +1012,15 @@ export function PlayerProfileContent({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
-                      Contexto preservado
+                      Recorte disponível
                     </p>
                     <h2 className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-white">
-                      {profileMeta.profileType === "world_cup_local" ? "Perfil local da Copa" : "Identidade ativa"}
+                      {worldCup?.goalCount ? `${formatInteger(worldCup.goalCount)} gols em Copas` : "Dados básicos"}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-white/68">
-                      A página continua navegável mesmo quando o jogador não possui histórico
-                      estatístico consolidado.
+                      {worldCup?.editionCount
+                        ? `Participações registradas em ${formatInteger(worldCup.editionCount)} ${worldCup.editionCount === 1 ? "edição" : "edições"} da Copa do Mundo.`
+                        : "Informações principais do jogador reunidas em uma visão simples."}
                     </p>
                   </div>
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/12 text-white">
@@ -992,12 +1066,6 @@ export function PlayerProfileContent({
       {profileQuery.isError ? (
         <ProfileAlert title="Perfil carregado com alerta" tone="warning">
           <p>{profileQuery.error?.message}</p>
-        </ProfileAlert>
-      ) : null}
-
-      {!hasHistoricalStats ? (
-        <ProfileAlert title="Sem histórico consolidado" tone="info">
-          <p>Histórico é enriquecimento, não pré-requisito para a existência deste perfil.</p>
         </ProfileAlert>
       ) : null}
 

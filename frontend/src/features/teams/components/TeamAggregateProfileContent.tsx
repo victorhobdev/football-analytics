@@ -158,7 +158,7 @@ function AggregateMetricTile({ icon, label, value }: AggregateMetricTileProps) {
           <AggregateMetricIcon className="h-4 w-4" name={icon} />
         </span>
       </div>
-      <p className="font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold leading-none tracking-[-0.04em]">
+      <p className="w-full text-center font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold leading-none tracking-[-0.04em]">
         {value}
       </p>
     </article>

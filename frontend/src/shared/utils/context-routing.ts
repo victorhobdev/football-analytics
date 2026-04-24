@@ -91,6 +91,17 @@ function encodePathSegment(value: string): string {
   return encodeURIComponent(value.trim());
 }
 
+function encodeSeasonPathSegment(value: string): string {
+  const normalizedValue = value.trim();
+  const splitYearMatch = normalizedValue.match(/^(\d{4})\/(\d{4})$/);
+
+  if (splitYearMatch) {
+    return encodePathSegment(`${splitYearMatch[1]}_${splitYearMatch[2].slice(-2)}`);
+  }
+
+  return encodePathSegment(normalizedValue);
+}
+
 function normalizePathname(pathname: string): string {
   const trimmedValue = pathname.trim();
 
@@ -195,7 +206,7 @@ export function resolveCompetitionSeasonContextFromPathname(
 }
 
 export function buildCompetitionSeasonBasePath(context: CompetitionSeasonContext): string {
-  return `/competitions/${encodePathSegment(context.competitionKey)}/seasons/${encodePathSegment(context.seasonLabel)}`;
+  return `/competitions/${encodePathSegment(context.competitionKey)}/seasons/${encodeSeasonPathSegment(context.seasonLabel)}`;
 }
 
 export function buildCompetitionHubPath(competitionKey: string): string {
@@ -218,7 +229,7 @@ export function buildSeasonHubPath(input: CompetitionSeasonPathInput): string {
     return buildWorldCupEditionPath(seasonLabel);
   }
 
-  return `/competitions/${encodePathSegment(competitionKey)}/seasons/${encodePathSegment(seasonLabel)}`;
+  return `/competitions/${encodePathSegment(competitionKey)}/seasons/${encodeSeasonPathSegment(seasonLabel)}`;
 }
 
 export function isSeasonHubTab(value: string | null | undefined): value is SeasonHubTab {

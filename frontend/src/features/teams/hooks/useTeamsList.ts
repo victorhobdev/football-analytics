@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
+
 import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -56,6 +58,7 @@ export function useTeamsList(
   return useQueryWithCoverage<TeamsListData>({
     queryKey: teamsQueryKeys.list(mergedFilters),
     queryFn: () => fetchTeamsList(mergedFilters),
+    placeholderData: keepPreviousData,
     staleTime: TEAMS_LIST_STALE_TIME_MS,
     gcTime: TEAMS_LIST_GC_TIME_MS,
     isDataEmpty: (data) => data.items.length === 0,

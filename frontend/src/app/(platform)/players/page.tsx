@@ -896,6 +896,7 @@ export default function PlayersPage() {
                       fallback={getInitials(featuredPlayer.playerName)}
                       imageClassName="p-1"
                       shape="circle"
+                      linkBehavior="none"
                     />
                     <div className="min-w-0">
                       <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
@@ -966,6 +967,7 @@ export default function PlayersPage() {
                         fallback={getInitials(player.playerName)}
                         imageClassName="p-1"
                         shape="circle"
+                        linkBehavior="none"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold">{player.playerName}</p>
@@ -1173,7 +1175,7 @@ export default function PlayersPage() {
                     const isDisabled = !isSelected && !canAddMore;
 
                     return (
-                      <tr className="align-top hover:bg-[rgba(240,243,255,0.42)]" key={player.playerId}>
+                      <tr className="align-middle hover:bg-[rgba(240,243,255,0.42)]" key={player.playerId}>
                         <td className="px-2 py-3 text-center">
                           <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003526]">
                             {formatInteger(currentRangeStart + index)}
@@ -1225,6 +1227,7 @@ export default function PlayersPage() {
                                     fallback={getInitials(team.teamName ?? "Time")}
                                     fallbackClassName="text-[0.64rem]"
                                     imageClassName="p-1"
+                                    linkBehavior="none"
                                     shape="circle"
                                   />
                                 );
