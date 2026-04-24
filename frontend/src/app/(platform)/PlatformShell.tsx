@@ -310,7 +310,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
       href: buildMarketPath(sharedFilters),
       icon: "analytics" as const,
       label: "Mercado",
-      summary: "Cobertura pública",
+      summary: "Transferências de jogadores",
     },
     {
       href: buildCoachesPath(sharedFilters),
@@ -409,14 +409,14 @@ export function PlatformShell({ children }: PlatformShellProps) {
         </div>
 
         <nav aria-label="Navegação principal" className="flex-1 px-3">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {sidebarNavLinks.map((item) => {
               const isActive = isActiveNavLink(pathname, item.href);
 
               return (
                 <Link
                   className={joinClasses(
-                    "flex items-center gap-3 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
+                    "flex items-center gap-3 px-4 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
                     isActive
                       ? item.href === "/copa-do-mundo"
                         ? "border-r-4 border-[var(--wc-accent)] bg-[rgba(138,109,24,0.18)] text-[var(--wc-accent-soft)]"

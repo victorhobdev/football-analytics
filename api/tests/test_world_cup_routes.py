@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from api.src.routers.world_cup import (
     _build_world_cup_edition_rankings,
+    _build_world_cup_match_rankings,
     _build_world_cup_squad_appearance_rankings,
     _build_world_cup_team_stat_rankings,
     _build_world_cup_team_catalog,
@@ -24,6 +25,26 @@ class WorldCupRouteHelpersTests(unittest.TestCase):
         self.assertEqual(germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
         self.assertEqual(west_germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
         self.assertEqual(east_germany, {"teamId": "world-cup-east-germany", "teamName": "Alemanha Oriental"})
+
+    def test_biggest_wins_include_translated_venue_name(self) -> None:
+        rankings = _build_world_cup_match_rankings(
+            [
+                {
+                    "fixture_id": 1,
+                    "season_label": "1970",
+                    "home_team_id": 1,
+                    "home_team_name": "Brazil",
+                    "away_team_id": 2,
+                    "away_team_name": "Mexico",
+                    "home_goals": 4,
+                    "away_goals": 1,
+                    "venue_name": "Estadio Azteca",
+                }
+            ],
+            [],
+        )
+
+        self.assertEqual(rankings["biggestWins"]["items"][0]["venueName"], "Estádio Azteca")
 
     @patch("api.src.routers.world_cup._fetch_team_top_scorers_by_season")
     @patch("api.src.routers.world_cup._fetch_team_knockout_presence_rows")
@@ -230,6 +251,45 @@ class WorldCupRouteHelpersTests(unittest.TestCase):
             [edition["year"] for edition in rankings["squadAppearances"]["items"][0]["editions"]],
             [1982, 1986, 1990, 1994],
         )
+
+    def test_squad_appearance_rankings_use_sportmonks_profile_id_when_mapped(self) -> None:
+        squad_rows = [
+            {
+                "player_id": 7040928914210329456,
+                "player_name": "Lionel Messi",
+                "season_label": "2006",
+                "team_id": 7030991384093091376,
+                "team_name": "Argentina",
+            },
+            {
+                "player_id": 7040928914210329456,
+                "player_name": "Lionel Messi",
+                "season_label": "2010",
+                "team_id": 7030991384093091376,
+                "team_name": "Argentina",
+            },
+            {
+                "player_id": 7040928914210329456,
+                "player_name": "Lionel Messi",
+                "season_label": "2014",
+                "team_id": 7030991384093091376,
+                "team_name": "Argentina",
+            },
+        ]
+
+        rankings = _build_world_cup_squad_appearance_rankings(
+            squad_rows,
+            {
+                7040928914210329456: {
+                    "playerId": "184798",
+                    "profileUrl": "/players/184798",
+                },
+            },
+        )
+
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["playerId"], "184798")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["imageAssetId"], "7040928914210329456")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["profileUrl"], "/players/184798")
 
 
 if __name__ == "__main__":

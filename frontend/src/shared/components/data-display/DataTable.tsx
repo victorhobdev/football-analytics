@@ -119,11 +119,11 @@ export function DataTable<TData extends object>({
     ? "border-b border-[rgba(216,227,251,0.76)] px-4 py-3 text-left text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]"
     : "border-b border-slate-200 px-3 py-2 text-left text-sm font-medium text-slate-700";
   const rowClasses = isProfileVariant
-    ? "border-b border-[rgba(216,227,251,0.68)] last:border-b-0 hover:bg-white/62"
-    : "border-b border-slate-100 last:border-b-0";
+    ? "align-middle border-b border-[rgba(216,227,251,0.68)] last:border-b-0 hover:bg-white/62"
+    : "align-middle border-b border-slate-100 last:border-b-0";
   const bodyCellClasses = isProfileVariant
-    ? "px-4 py-3 text-sm text-[#1f2d40]"
-    : "px-3 py-2 text-sm text-slate-700";
+    ? "px-4 py-3 align-middle text-sm text-[#1f2d40]"
+    : "px-3 py-2 align-middle text-sm text-slate-700";
   const footerClasses = isProfileVariant
     ? "flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(216,227,251,0.68)] bg-[rgba(240,243,255,0.7)] px-4 py-3 text-sm text-[#57657a]"
     : "flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-3 py-2 text-sm";

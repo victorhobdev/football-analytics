@@ -1383,9 +1383,6 @@ def _build_team_journey_coverage(seasons: list[dict[str, Any]]) -> dict[str, Any
 HISTORICAL_STATS_GROUP_KEYS = {
     "champions": "champions",
     "scorers": "scorers",
-    "team_records": "teamRecords",
-    "match_records": "matchRecords",
-    "player_records": "playerRecords",
 }
 
 def _normalize_historical_stats_competition_key(competition_key: str) -> str:
@@ -1396,51 +1393,167 @@ def _empty_historical_stats_payload(as_of_year: int) -> dict[str, Any]:
     return {
         "champions": {"items": [], "source": "wikipedia", "asOfYear": as_of_year},
         "scorers": {"items": [], "source": "wikipedia", "asOfYear": as_of_year},
-        "teamRecords": {"items": [], "source": "wikipedia", "asOfYear": as_of_year},
-        "matchRecords": {"items": [], "source": "wikipedia", "asOfYear": as_of_year},
-        "playerRecords": {"items": [], "source": "wikipedia", "asOfYear": as_of_year},
     }
 
 
 def _fetch_competition_historical_stats(competition_key: str, as_of_year: int) -> list[dict[str, Any]]:
     return db_client.fetch_all(
         """
+        with competition_lookup as (
+            select
+                dc.competition_sk,
+                min(ds.competition_key) as competition_key
+            from mart.dim_competition dc
+            join mart.dim_stage ds
+              on ds.league_id = dc.league_id
+            group by dc.competition_sk
+        ),
+        player_candidates as (
+            select
+                player_id,
+                player_name,
+                normalized_player_name,
+                row_number() over (
+                    partition by normalized_player_name
+                    order by
+                        competition_matches desc,
+                        last_match_date desc nulls last,
+                        player_id asc
+                ) as candidate_rank
+            from (
+                select
+                    dp.player_id,
+                    dp.player_name,
+                    regexp_replace(lower(trim(dp.player_name)), '\\s+', ' ', 'g') as normalized_player_name,
+                    (count(distinct pms.match_id) filter (where cl.competition_key = %s))::int as competition_matches,
+                    max(pms.match_date) filter (where cl.competition_key = %s) as last_match_date
+                from mart.dim_player dp
+                left join mart.player_match_summary pms
+                  on pms.player_id = dp.player_id
+                 and pms.season <= %s
+                left join competition_lookup cl
+                  on cl.competition_sk = pms.competition_sk
+                group by dp.player_id, dp.player_name
+            ) candidates
+            where normalized_player_name <> ''
+        ),
+        historical_source as (
+          select
+            h.stat_code,
+            h.stat_group,
+            h.entity_type,
+            coalesce(h.entity_id, pc.player_id) as entity_id,
+            h.entity_name,
+            h.value_numeric,
+            h.value_label,
+            h.rank,
+            h.season_label,
+            h.occurred_on,
+            h.source,
+            h.source_url,
+            h.as_of_year,
+            h.metadata || case
+                when h.entity_id is null and pc.player_id is not null then
+                    jsonb_build_object('resolvedEntityIdSource', 'dim_player_name_match')
+                else '{}'::jsonb
+            end as metadata
+          from mart.competition_historical_stats h
+          left join player_candidates pc
+            on h.entity_type = 'player'
+           and h.entity_id is null
+           and pc.candidate_rank = 1
+           and regexp_replace(lower(trim(coalesce(h.entity_name, ''))), '\\s+', ' ', 'g') = pc.normalized_player_name
+          where h.competition_key = %s
+            and h.as_of_year = %s
+            and h.stat_group in ('champions', 'scorers')
+        ),
+        ranked as (
+          select
+            historical_source.*,
+            row_number() over (
+              partition by historical_source.as_of_year, historical_source.stat_group
+              order by
+                coalesce(historical_source.rank, 999999) asc,
+                historical_source.value_numeric desc nulls last,
+                historical_source.entity_name asc nulls last,
+                historical_source.entity_id asc nulls last
+            ) as group_position
+          from historical_source
+        )
         select
-          h.stat_code,
-          h.stat_group,
+          r.stat_code,
+          r.stat_group,
           d.display_name,
-          h.entity_type,
-          h.entity_id,
-          h.entity_name,
-          h.value_numeric,
-          h.value_label,
-          h.rank,
-          h.season_label,
-          h.occurred_on,
-          h.source,
-          h.source_url,
-          h.as_of_year,
-          h.metadata
-        from mart.competition_historical_stats h
+          r.entity_type,
+          r.entity_id,
+          r.entity_name,
+          r.value_numeric,
+          r.value_label,
+          r.rank,
+          r.season_label,
+          r.occurred_on,
+          r.source,
+          r.source_url,
+          r.as_of_year,
+          r.metadata
+        from ranked r
         join control.historical_stat_definitions d
-          on d.stat_code = h.stat_code
-        where h.competition_key = %s
-          and h.as_of_year = %s
+          on d.stat_code = r.stat_code
+        where r.group_position <= 5
         order by
-          case h.stat_group
+          case r.stat_group
             when 'champions' then 1
             when 'scorers' then 2
-            when 'team_records' then 3
-            when 'match_records' then 4
-            when 'player_records' then 5
             else 99
           end,
-          h.stat_code,
-          h.rank nulls last,
-          h.value_numeric desc nulls last,
-          h.entity_name nulls last;
+          r.group_position asc,
+          r.stat_code,
+          r.value_numeric desc nulls last,
+          r.entity_name nulls last;
         """,
-        [competition_key, as_of_year],
+        [competition_key, competition_key, as_of_year, competition_key, as_of_year],
+    )
+
+
+def _fetch_competition_historical_scorers_fallback(
+    competition_key: str,
+    as_of_year: int,
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    return db_client.fetch_all(
+        """
+        with competition_lookup as (
+            select
+                dc.competition_sk,
+                min(ds.competition_key) as competition_key
+            from mart.dim_competition dc
+            join mart.dim_stage ds
+              on ds.league_id = dc.league_id
+            group by dc.competition_sk
+        ),
+        scorer_totals as (
+            select
+                fps.player_id,
+                max(fps.player_name) as player_name,
+                sum(coalesce(fps.goals, 0))::numeric as goals
+            from mart.player_season_summary fps
+            join competition_lookup cl
+              on cl.competition_sk = fps.competition_sk
+            where cl.competition_key = %s
+              and fps.season <= %s
+            group by fps.player_id
+        )
+        select
+            player_id,
+            player_name,
+            goals,
+            row_number() over (order by goals desc, player_name asc, player_id asc) as rank
+        from scorer_totals
+        where goals > 0
+        order by goals desc, player_name asc, player_id asc
+        limit %s;
+        """,
+        [competition_key, as_of_year, limit],
     )
 
 
@@ -1465,10 +1578,32 @@ def _serialize_historical_stat_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _build_historical_stats_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not rows:
+def _serialize_historical_scorer_fallback_row(row: dict[str, Any]) -> dict[str, Any]:
+    goals = row.get("goals")
+    if isinstance(goals, float) and goals.is_integer():
+        goals = int(goals)
+
+    return {
+        "statCode": "player_most_goals",
+        "label": "Mais gols",
+        "entityType": "player",
+        "entityId": str(row["player_id"]) if row.get("player_id") is not None else None,
+        "entityName": row.get("player_name") or "Jogador não identificado",
+        "value": goals,
+        "valueLabel": None,
+        "rank": int(row["rank"]) if row.get("rank") is not None else None,
+        "seasonLabel": None,
+        "occurredOn": None,
+        "sourceUrl": None,
+        "metadata": {"fallbackSource": "player_season_summary"},
+    }
+
+
+def _build_historical_stats_coverage(data: dict[str, Any]) -> dict[str, Any]:
+    total_rows = len(data["champions"]["items"]) + len(data["scorers"]["items"])
+    if total_rows <= 0:
         return {"status": "empty", "percentage": 0, "label": "Historical stats coverage"}
-    return build_coverage_from_counts(len(rows), len(rows), "Historical stats coverage")
+    return build_coverage_from_counts(total_rows, total_rows, "Dados Históricos")
 
 
 @router.get("/api/v1/competition-historical-stats")
@@ -1499,12 +1634,24 @@ def get_competition_historical_stats(
         data[group_key]["source"] = row.get("source") or "wikipedia"
         data[group_key]["asOfYear"] = row.get("as_of_year") or normalized_as_of_year
 
+    if len(data["scorers"]["items"]) == 0:
+        fallback_scorer_rows = _fetch_competition_historical_scorers_fallback(
+            resolved_competition_key,
+            normalized_as_of_year,
+        )
+        if fallback_scorer_rows:
+            data["scorers"]["items"] = [
+                _serialize_historical_scorer_fallback_row(row) for row in fallback_scorer_rows
+            ]
+            data["scorers"]["source"] = "player_season_summary"
+            data["scorers"]["asOfYear"] = normalized_as_of_year
+
     data["updatedAt"] = datetime.now(UTC).isoformat()
 
     return build_api_response(
         data,
         request_id=_request_id(request),
-        coverage=_build_historical_stats_coverage(rows),
+        coverage=_build_historical_stats_coverage(data),
     )
 
 

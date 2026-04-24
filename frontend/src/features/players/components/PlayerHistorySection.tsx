@@ -59,10 +59,10 @@ export function PlayerHistorySection({
       <div className="space-y-4">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
-          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem histórico consolidado" : "Histórico indisponível"}
+          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem histórico detalhado" : "Histórico indisponível"}
           description={
             profileMeta && !profileMeta.hasHistoricalStats
-              ? "Este perfil permanece disponível, mas sem histórico competitivo consolidado na plataforma."
+              ? "Ainda não há clubes, temporadas ou partidas detalhadas para este jogador."
               : "Não há histórico suficiente para montar esta visão do jogador agora."
           }
         />
@@ -84,8 +84,7 @@ export function PlayerHistorySection({
               Participação por contexto
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-[#57657a]">
-              Cada contexto reúne time, temporada e volume real de participação identificado pelo
-              produto.
+              Cada linha reúne time, temporada e participação registrada.
             </p>
           </div>
           <ProfileCoveragePill coverage={coverage} />

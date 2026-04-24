@@ -15,6 +15,7 @@ import {
   buildWorldCupTeamPath,
 } from "@/features/world-cup/routes";
 import type { WorldCupRankingBiggestWinRecord, WorldCupRankingFinalRecord } from "@/features/world-cup/types/world-cup.types";
+import { resolveWorldCupPlayerImageAssetId } from "@/features/world-cup/utils/player-profile";
 
 const PLAYER_CARD_PAGE_SIZE = 10;
 const FEATURED_CARD_LIMIT = 8;
@@ -117,7 +118,7 @@ function isBiggestWinRecord(
 function getMatchVenueMeta(
   match: WorldCupRankingFinalRecord | WorldCupRankingBiggestWinRecord,
 ): string | null {
-  return "venueName" in match && match.venueName ? `Estádio ${match.venueName}` : null;
+  return "venueName" in match && match.venueName ? match.venueName : null;
 }
 
 function formatFixtureLabel(params: {
@@ -231,21 +232,22 @@ function HeroHighlightCard({
       {media}
       <div className="flex min-w-0 flex-col justify-center">
         <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-white/62">{label}</p>
-        <p className="font-[family:var(--font-profile-headline)] text-[0.98rem] font-extrabold leading-5 tracking-[-0.03em] text-white">
-          {title}
-        </p>
+        {href ? (
+          <Link
+            className="font-[family:var(--font-profile-headline)] text-[0.98rem] font-extrabold leading-5 tracking-[-0.03em] text-white transition-colors hover:text-[#f3df9f]"
+            href={href}
+          >
+            {title}
+          </Link>
+        ) : (
+          <p className="font-[family:var(--font-profile-headline)] text-[0.98rem] font-extrabold leading-5 tracking-[-0.03em] text-white">
+            {title}
+          </p>
+        )}
         <p className="mt-1 text-[0.78rem]/5 text-white/72">{description}</p>
       </div>
     </div>
   );
-
-  if (href) {
-    return (
-      <Link className={className} href={href}>
-        {content}
-      </Link>
-    );
-  }
 
   return <article className={className}>{content}</article>;
 }
@@ -428,6 +430,7 @@ function MatchScoreVisual({
       <ProfileMedia
         alt={homeTeamName ?? "Seleção"}
         assetId={homeTeamId}
+        href={homeTeamId ? buildWorldCupTeamPath(homeTeamId) : null}
         category="clubs"
         className={`${mediaSizeClassName} rounded-full`}
         fallback={buildFallbackLabel(homeTeamName)}
@@ -449,6 +452,7 @@ function MatchScoreVisual({
       <ProfileMedia
         alt={awayTeamName ?? "Seleção"}
         assetId={awayTeamId}
+        href={awayTeamId ? buildWorldCupTeamPath(awayTeamId) : null}
         category="clubs"
         className={`${mediaSizeClassName} rounded-full`}
         fallback={buildFallbackLabel(awayTeamName)}
@@ -499,9 +503,18 @@ function EditorialLeadCard({
       {visual ? <div className="md:self-start">{visual}</div> : null}
 
       <div className="min-w-0">
-        <p className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none tracking-[-0.06em] text-[#1d160c] md:text-[2.2rem]">
-          {title}
-        </p>
+        {href ? (
+          <Link
+            className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none tracking-[-0.06em] text-[#1d160c] transition-colors group-hover:text-[#5f430a] md:text-[2.2rem]"
+            href={href}
+          >
+            {title}
+          </Link>
+        ) : (
+          <p className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none tracking-[-0.06em] text-[#1d160c] md:text-[2.2rem]">
+            {title}
+          </p>
+        )}
         {subtitle ? <div className="mt-2 text-[0.96rem]/6 text-[#6d5c3f]">{subtitle}</div> : null}
         {meta ? (
           <div className="mt-3 text-[0.68rem]/5 font-semibold uppercase tracking-[0.14em] text-[#8a785a]">{meta}</div>
@@ -517,10 +530,6 @@ function EditorialLeadCard({
       </div>
     </div>
   );
-
-  if (href) {
-    return <Link className={className} href={href}>{content}</Link>;
-  }
 
   return <article className={className}>{content}</article>;
 }
@@ -551,15 +560,14 @@ function EditorialCompactRow({
     visual ? "md:grid-cols-[auto_auto_minmax(0,1fr)_auto]" : "md:grid-cols-[auto_minmax(0,1fr)_auto]",
   );
 
-  const titleNode = (
-    <p
-      className={joinClasses(
-        "font-[family:var(--font-profile-headline)] text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1d160c]",
-        href ? "transition-colors group-hover:text-[#5f430a]" : null,
-      )}
-    >
+  const titleClassName =
+    "font-[family:var(--font-profile-headline)] text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1d160c] transition-colors group-hover:text-[#5f430a]";
+  const titleNode = href ? (
+    <Link className={titleClassName} href={href}>
       {title}
-    </p>
+    </Link>
+  ) : (
+    <p className={titleClassName}>{title}</p>
   );
 
   const content = (
@@ -586,10 +594,6 @@ function EditorialCompactRow({
       </div>
     </>
   );
-
-  if (href) {
-    return <Link className={className} href={href}>{content}</Link>;
-  }
 
   return <article className={className}>{content}</article>;
 }
@@ -670,13 +674,13 @@ function RankingListRow({
         </p>
       </div>
     ) : (
-      <div className="shrink-0 self-center md:border-l md:border-[rgba(191,201,195,0.24)] md:pl-3 md:text-right">
+      <div className="flex shrink-0 self-center flex-col items-center justify-center text-center md:border-l md:border-[rgba(191,201,195,0.24)] md:pl-3">
         <p className="text-[0.54rem] font-semibold uppercase tracking-[0.14em] text-[#6d5c3f]">{metricLabel}</p>
         <p className="mt-0.5 font-[family:var(--font-profile-headline)] text-[1.5rem] font-extrabold leading-none tracking-[-0.03em] text-[#1d160c]">
           {metricValue}
         </p>
       </div>
-    );
+  );
 
   return (
     <div className="flex items-start justify-between gap-3 rounded-[1rem] border border-[rgba(191,201,195,0.24)] bg-[rgba(246,248,252,0.82)] px-3 py-2.5">
@@ -857,6 +861,7 @@ export function WorldCupRankingsContent() {
                   <ProfileMedia
                     alt={heroChampion.teamName ?? "Seleção"}
                     assetId={heroChampion.teamId}
+                    href={buildWorldCupTeamPath(heroChampion.teamId)}
                     category="clubs"
                     className="h-14 w-14 rounded-full"
                     fallback={buildFallbackLabel(heroChampion.teamName)}
@@ -875,9 +880,16 @@ export function WorldCupRankingsContent() {
                 href={buildWorldCupEditionPath(heroEdition.seasonLabel)}
                 label="Copa mais artilheira"
                 media={
-                  <span className="inline-flex h-14 min-w-14 items-center justify-center rounded-[1rem] border border-white/10 bg-white/12 px-3 font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-white">
-                    {heroEdition.year}
-                  </span>
+                  <ProfileMedia
+                    alt="Copa do Mundo FIFA"
+                    assetId={WORLD_CUP_COMPETITION_KEY}
+                    category="competitions"
+                    className="h-14 w-14 rounded-[1rem]"
+                    fallback="FIFA"
+                    imageClassName="p-2"
+                    shape="rounded"
+                    tone="contrast"
+                  />
                 }
                 title={heroEdition.editionName}
               />
@@ -890,7 +902,8 @@ export function WorldCupRankingsContent() {
                 media={
                   <ProfileMedia
                     alt={heroScorer.playerName ?? "Jogador"}
-                    assetId={heroScorer.playerId}
+                    assetId={resolveWorldCupPlayerImageAssetId(heroScorer.imageAssetId, heroScorer.playerId)}
+                    href={heroScorer.profileUrl ?? null}
                     category="players"
                     className="h-14 w-14 rounded-[1rem]"
                     fallback={buildFallbackLabel(heroScorer.playerName)}
@@ -914,9 +927,16 @@ export function WorldCupRankingsContent() {
                 href={buildWorldCupEditionPath(heroFinal.seasonLabel)}
                 label="Final mais aberta"
                 media={
-                  <span className="inline-flex h-14 min-w-14 items-center justify-center rounded-[1rem] border border-white/10 bg-white/12 px-3 font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-white">
-                    {heroFinal.year}
-                  </span>
+                  <ProfileMedia
+                    alt="Copa do Mundo FIFA"
+                    assetId={WORLD_CUP_COMPETITION_KEY}
+                    category="competitions"
+                    className="h-14 w-14 rounded-[1rem]"
+                    fallback="FIFA"
+                    imageClassName="p-2"
+                    shape="rounded"
+                    tone="contrast"
+                  />
                 }
                 title="Decisão recordista"
               />
@@ -965,6 +985,7 @@ export function WorldCupRankingsContent() {
                   <ProfileMedia
                     alt={team.teamName ?? "Seleção"}
                     assetId={team.teamId}
+                    href={buildWorldCupTeamPath(team.teamId)}
                     category="clubs"
                     className="h-14 w-14 rounded-full"
                     fallback={buildFallbackLabel(team.teamName)}
@@ -997,6 +1018,7 @@ export function WorldCupRankingsContent() {
                     <ProfileMedia
                       alt={team.teamName ?? "Seleção"}
                       assetId={team.teamId}
+                      href={buildWorldCupTeamPath(team.teamId)}
                       category="clubs"
                       className="h-14 w-14 rounded-full"
                       fallback={buildFallbackLabel(team.teamName)}
@@ -1024,6 +1046,7 @@ export function WorldCupRankingsContent() {
                     <ProfileMedia
                       alt={team.teamName ?? "Seleção"}
                       assetId={team.teamId}
+                      href={buildWorldCupTeamPath(team.teamId)}
                       category="clubs"
                       className="h-14 w-14 rounded-full"
                       fallback={buildFallbackLabel(team.teamName)}
@@ -1053,6 +1076,7 @@ export function WorldCupRankingsContent() {
                     <ProfileMedia
                       alt={team.teamName ?? "Seleção"}
                       assetId={team.teamId}
+                      href={buildWorldCupTeamPath(team.teamId)}
                       category="clubs"
                       className="h-14 w-14 rounded-full"
                       fallback={buildFallbackLabel(team.teamName)}
@@ -1084,6 +1108,7 @@ export function WorldCupRankingsContent() {
                     <ProfileMedia
                       alt={team.teamName ?? "Seleção"}
                       assetId={team.teamId}
+                      href={buildWorldCupTeamPath(team.teamId)}
                       category="clubs"
                       className="h-14 w-14 rounded-full"
                       fallback={buildFallbackLabel(team.teamName)}
@@ -1140,7 +1165,7 @@ export function WorldCupRankingsContent() {
                 </p>
               </div>
 
-              <div className="rounded-[1rem] border border-[rgba(138,109,24,0.12)] bg-[rgba(255,251,240,0.74)] px-4 py-3">
+              <div className="flex flex-col items-center justify-center rounded-[1rem] border border-[rgba(138,109,24,0.12)] bg-[rgba(255,251,240,0.74)] px-4 py-3 text-center">
                 <p className="text-[0.56rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Leitura ativa</p>
                 <p className="mt-1 font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-none tracking-[-0.04em] text-[#1d160c]">
                   {selectedEditionView === "volume" ? "Volume" : "Média"}
@@ -1245,7 +1270,8 @@ export function WorldCupRankingsContent() {
                 media={
                   <ProfileMedia
                     alt={scorer.playerName ?? "Jogador"}
-                    assetId={scorer.playerId}
+                    assetId={resolveWorldCupPlayerImageAssetId(scorer.imageAssetId, scorer.playerId)}
+                    href={scorer.profileUrl ?? null}
                     category="players"
                     className="h-14 w-14 rounded-[1rem]"
                     fallback={buildFallbackLabel(scorer.playerName)}
@@ -1284,7 +1310,8 @@ export function WorldCupRankingsContent() {
                 media={
                   <ProfileMedia
                     alt={player.playerName ?? "Jogador"}
-                    assetId={player.playerId}
+                    assetId={resolveWorldCupPlayerImageAssetId(player.imageAssetId, player.playerId)}
+                    href={player.profileUrl ?? null}
                     category="players"
                     className="h-14 w-14 rounded-[1rem]"
                     fallback={buildFallbackLabel(player.playerName)}
@@ -1322,7 +1349,6 @@ export function WorldCupRankingsContent() {
                 value={selectedMatchView}
               />
             }
-            description="Finais mais abertas e goleadas mais largas do torneio"
             headingId="rankings-partidas"
             kicker="Partidas históricas"
             title="Partidas Históricas"
@@ -1340,8 +1366,8 @@ export function WorldCupRankingsContent() {
                   </h3>
                   <p className="max-w-3xl text-sm/6 text-[#6d5c3f]">
                     {selectedMatchView === "finais"
-                      ? "Decisões abertas pedem leitura de placar antes do resto. O contexto fica discreto, e o volume de gols passa a organizar a história."
-                      : "Nas goleadas, o saldo é a leitura dominante. O placar vem logo depois, com estádio e contexto só como apoio editorial."}
+                      ? "Decisões que escaparam do equilíbrio e se transformaram em festivais de gols, para o bem ou para o mal."
+                      : "Nas goleadas, o saldo é a leitura dominante."}
                   </p>
                 </div>
 

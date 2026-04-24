@@ -132,6 +132,7 @@ export type PlayerProfileType =
 export type PlayerHistoryAvailability = "available" | "unavailable";
 
 export interface PlayerWorldCupSummary {
+  imageAssetId?: string | null;
   teamNames: string[];
   teamCount: number;
   editionLabels: string[];

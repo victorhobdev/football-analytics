@@ -93,9 +93,6 @@ export interface CompetitionHistoricalStatGroup {
 export interface CompetitionHistoricalStatsData {
   champions: CompetitionHistoricalStatGroup;
   scorers: CompetitionHistoricalStatGroup;
-  teamRecords: CompetitionHistoricalStatGroup;
-  matchRecords: CompetitionHistoricalStatGroup;
-  playerRecords: CompetitionHistoricalStatGroup;
   updatedAt?: string | null;
 }
 

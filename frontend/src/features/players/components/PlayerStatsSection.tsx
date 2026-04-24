@@ -52,10 +52,10 @@ export function PlayerStatsSection({
       <div className="space-y-4">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
-          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem histórico estatístico" : "Estatísticas indisponíveis"}
+          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem estatísticas detalhadas" : "Estatísticas indisponíveis"}
           description={
             profileMeta && !profileMeta.hasHistoricalStats
-              ? "Este perfil segue válido, mas não possui histórico estatístico consolidado para esta seção."
+              ? "Ainda não há métricas avançadas para este jogador."
               : "Não há métricas suficientes para montar esta leitura do jogador agora."
           }
         />

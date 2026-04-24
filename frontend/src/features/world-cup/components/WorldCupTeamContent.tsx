@@ -10,6 +10,7 @@ import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArc
 import { useWorldCupTeam } from "@/features/world-cup/hooks/useWorldCupTeam";
 import { buildWorldCupEditionPath, buildWorldCupHubPath, buildWorldCupTeamsPath } from "@/features/world-cup/routes";
 import type { WorldCupTeamParticipation, WorldCupTeamSummary } from "@/features/world-cup/types/world-cup.types";
+import { resolveWorldCupPlayerImageAssetId } from "@/features/world-cup/utils/player-profile";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -170,7 +171,11 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
             <div className="flex items-center gap-3">
               <ProfileMedia
                 alt={topScorerName}
-                assetId={participation.topScorer?.playerId}
+                assetId={resolveWorldCupPlayerImageAssetId(
+                  participation.topScorer?.imageAssetId,
+                  participation.topScorer?.playerId,
+                )}
+                href={participation.topScorer?.profileUrl ?? null}
                 category="players"
                 className="h-14 w-14"
                 fallback={buildFallbackLabel(topScorerName)}
@@ -384,7 +389,7 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
               </thead>
               <tbody className="divide-y divide-[rgba(191,201,195,0.28)]">
                 {historicalScorers.map((scorer) => (
-                  <tr className="bg-white/72" key={`${scorer.rank}-${scorer.playerId ?? scorer.playerName ?? "scorer"}`}>
+                  <tr className="align-middle bg-white/72" key={`${scorer.rank}-${scorer.playerId ?? scorer.playerName ?? "scorer"}`}>
                     <td className="px-3 py-2 font-semibold text-[#111c2d]">{scorer.rank}</td>
                     <td className="px-3 py-2 font-semibold text-[#111c2d]">{scorer.playerName ?? "Não identificado"}</td>
                     <td className="px-3 py-2 text-right font-semibold text-[#111c2d]">{scorer.goals}</td>

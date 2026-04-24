@@ -1020,6 +1020,7 @@ function IdentityCard({
         imageClassName="p-2"
         shape={identity.shape}
         tone="contrast"
+        linkBehavior="none"
       />
       <div className="relative min-w-0 flex-1">
         <p className="text-[0.64rem] font-bold uppercase tracking-[0.2em] text-white/58">
@@ -1554,41 +1555,68 @@ export function HeadToHeadPageContent() {
               <ProfileTag>{MODE_OPTIONS.find((option) => option.value === mode)?.summary}</ProfileTag>
             </div>
 
-            <div className="min-w-0 max-w-4xl">
+            <div className="min-w-0 max-w-3xl">
               <p className="flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-[#57657a]">
                 <ComparisonIcon className="h-4 w-4" mode={mode} />
                 Head-to-head
               </p>
-              <h1 className="mt-3 break-words font-[family:var(--font-profile-headline)] text-[2.55rem] font-extrabold leading-[0.94] tracking-[-0.04em] text-[#111c2d] sm:text-5xl md:text-6xl md:tracking-[-0.055em]">
+              <h1 className="mt-3 break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[1] text-[#111c2d] sm:text-4xl md:text-[2.85rem]">
                 Compare clubes, jogadores e edições
               </h1>
             </div>
 
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Tipo de comparativo">
-              {MODE_OPTIONS.map((option) => {
-                const isActive = option.value === mode;
+            <div className="space-y-2">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#57657a]">
+                Tipo de comparativo
+              </p>
+              <div
+                className="grid gap-2 sm:grid-cols-3"
+                role="tablist"
+                aria-label="Tipo de comparativo"
+              >
+                {MODE_OPTIONS.map((option) => {
+                  const isActive = option.value === mode;
 
-                return (
-                  <button
-                    aria-selected={isActive}
-                    className={joinClasses(
-                      "button-pill gap-2",
-                      isActive ? "button-pill-primary" : "button-pill-secondary",
-                    )}
-                    key={option.value}
-                    onClick={() => {
-                      setMode(option.value);
-                      setLeftSide((current) => ({ ...current, entityId: "", search: "" }));
-                      setRightSide((current) => ({ ...current, entityId: "", search: "" }));
-                    }}
-                    role="tab"
-                    type="button"
-                  >
-                    <ComparisonIcon className="h-4 w-4" mode={option.value} />
-                    {option.label}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      aria-selected={isActive}
+                      className={joinClasses(
+                        "flex min-h-[4.35rem] min-w-0 items-center gap-3 rounded-[1rem] border px-3.5 py-3 text-left transition duration-200",
+                        isActive
+                          ? "border-[rgba(0,81,59,0.2)] bg-white/90 text-[#003526] shadow-[0_14px_34px_-24px_rgba(17,28,45,0.58)]"
+                          : "border-transparent bg-transparent text-[#45536a] hover:border-white/78 hover:bg-white/58 hover:text-[#00513b]",
+                      )}
+                      key={option.value}
+                      onClick={() => {
+                        setMode(option.value);
+                        setLeftSide((current) => ({ ...current, entityId: "", search: "" }));
+                        setRightSide((current) => ({ ...current, entityId: "", search: "" }));
+                      }}
+                      role="tab"
+                      type="button"
+                    >
+                      <span
+                        className={joinClasses(
+                          "grid h-9 w-9 shrink-0 place-items-center rounded-full border",
+                          isActive
+                            ? "border-[rgba(0,81,59,0.14)] bg-[rgba(0,81,59,0.07)] text-[#00513b]"
+                            : "border-[rgba(87,101,122,0.14)] bg-[rgba(216,227,251,0.44)] text-[#57657a]",
+                        )}
+                      >
+                        <ComparisonIcon className="h-4 w-4" mode={option.value} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[0.76rem] font-black uppercase tracking-[0.14em]">
+                          {option.label}
+                        </span>
+                        <span className="mt-1 block text-xs font-semibold leading-snug text-[#68778c]">
+                          {option.summary}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

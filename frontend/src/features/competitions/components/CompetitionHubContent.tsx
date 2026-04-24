@@ -54,7 +54,7 @@ type CompetitionHubContentProps = {
 };
 
 const HISTORICAL_STATS_AS_OF_YEAR = 2025;
-const HISTORICAL_TABLE_LIMIT = 6;
+const HISTORICAL_TABLE_LIMIT = 5;
 
 type EditionTopScorer = {
   entityId: string;
@@ -183,8 +183,19 @@ function useSeasonTopScorer(competition: CompetitionDef, season: SeasonDef) {
 }
 
 function formatHistoricalValue(item: CompetitionHistoricalStatItem): string {
+  const localizeHistoricalTerm = (value: string): string =>
+    value
+      .replace(/\btitles\b/gi, "títulos")
+      .replace(/\btitle\b/gi, "título")
+      .replace(/\bgoals\b/gi, "gols")
+      .replace(/\bgoal\b/gi, "gol")
+      .replace(/\btítulos\b/gi, "Títulos")
+      .replace(/\btítulo\b/gi, "Título")
+      .replace(/\bgols\b/gi, "Gols")
+      .replace(/\bgol\b/gi, "Gol");
+
   if (item.valueLabel && item.valueLabel.trim().length > 0) {
-    return item.valueLabel;
+    return localizeHistoricalTerm(item.valueLabel);
   }
 
   if (typeof item.value === "number") {
@@ -192,28 +203,10 @@ function formatHistoricalValue(item: CompetitionHistoricalStatItem): string {
   }
 
   if (typeof item.value === "string" && item.value.trim().length > 0) {
-    return item.value;
+    return localizeHistoricalTerm(item.value);
   }
 
   return "-";
-}
-
-function formatHistoricalRecordValue(
-  item: CompetitionHistoricalStatItem,
-  options?: { uppercase?: boolean },
-): string {
-  let value = formatHistoricalValue(item);
-
-  if (item.statCode === "player_most_appearances") {
-    const numericValue =
-      typeof item.value === "number" && Number.isFinite(item.value)
-        ? formatWholeNumber(item.value)
-        : value.replace(/\s*appearances?/i, "").trim();
-
-    value = `${numericValue} partidas`.trim();
-  }
-
-  return options?.uppercase ? value.toUpperCase() : value;
 }
 
 function isHistoricalStatsDataEmpty(data: ReturnType<typeof useCompetitionHistoricalStats>["data"]) {
@@ -221,13 +214,15 @@ function isHistoricalStatsDataEmpty(data: ReturnType<typeof useCompetitionHistor
     return true;
   }
 
-  return (
-    data.champions.items.length === 0 &&
-    data.scorers.items.length === 0 &&
-    data.teamRecords.items.length === 0 &&
-    data.matchRecords.items.length === 0 &&
-    data.playerRecords.items.length === 0
-  );
+  return data.champions.items.length === 0 && data.scorers.items.length === 0;
+}
+
+function resolveHistoricalRank(item: CompetitionHistoricalStatItem, index: number): number {
+  if (typeof item.rank === "number" && Number.isFinite(item.rank) && item.rank > 0) {
+    return item.rank;
+  }
+
+  return index + 1;
 }
 
 function buildHistoricalEntityHref(
@@ -257,38 +252,51 @@ function buildHistoricalEntityHref(
 function HistoricalEntityLabel({
   className,
   competition,
+  isLeader = false,
   item,
 }: {
   className?: string;
   competition: CompetitionDef;
+  isLeader?: boolean;
   item: CompetitionHistoricalStatItem;
 }) {
   const href = buildHistoricalEntityHref(item, competition);
+  const mediaCategory = item.entityType === "player" ? "players" : "clubs";
+  const isClubAsset = mediaCategory === "clubs";
+  const mediaSizeClass = isClubAsset
+    ? (isLeader ? "h-11 w-11 rounded-full" : "h-10 w-10 rounded-full")
+    : (isLeader ? "h-11 w-11 rounded-full" : "h-10 w-10 rounded-full");
+  const mediaNode = (
+    <ProfileMedia
+      alt={item.entityName}
+      assetId={item.entityId}
+      category={mediaCategory}
+      className={mediaSizeClass}
+      fallback={buildFallbackLabel(item.entityName)}
+      fallbackClassName={isClubAsset ? undefined : "text-[0.6rem]"}
+      imageClassName={isClubAsset ? "p-1" : "p-1.25"}
+      shape="circle"
+      linkBehavior="none"
+    />
+  );
 
   if (!href || !item.entityId) {
     return (
-      <span className={joinClasses("truncate font-semibold text-[#111c2d]", className)}>
-        {item.entityName}
+      <span className="inline-flex min-w-0 items-center gap-2.5">
+        {mediaNode}
+        <span className={joinClasses("truncate font-semibold text-[#111c2d]", className)}>
+          {item.entityName}
+        </span>
       </span>
     );
   }
 
-  const mediaCategory = item.entityType === "player" ? "players" : "clubs";
-
   return (
     <Link
-      className="inline-flex min-w-0 items-center gap-2 font-semibold text-[#111c2d] transition-colors hover:text-[#00513b]"
+      className="inline-flex min-w-0 items-center gap-2.5 font-semibold text-[#111c2d] transition-colors hover:text-[#0f2035]"
       href={href}
     >
-      <ProfileMedia
-        alt={item.entityName}
-        assetId={item.entityId}
-        category={mediaCategory}
-        className="h-7 w-7 rounded-full"
-        fallback={buildFallbackLabel(item.entityName)}
-        imageClassName="p-1"
-        shape="circle"
-      />
+      {mediaNode}
       <span className={joinClasses("truncate", className)}>{item.entityName}</span>
     </Link>
   );
@@ -312,109 +320,68 @@ function HistoricalStatsTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-white/82">
-      <div className="border-b border-[rgba(191,201,195,0.42)] px-4 py-3">
-        <h3 className="font-[family:var(--font-profile-headline)] text-[1.25rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
-          {title}
-        </h3>
+    <article className="overflow-hidden rounded-[1.2rem] border border-[rgba(191,201,195,0.52)] bg-white shadow-[0_18px_44px_-42px_rgba(17,28,45,0.28)]">
+      <div className="border-b border-[rgba(191,201,195,0.42)] px-4 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#6d7b90]">
+              Ranking histórico
+            </p>
+            <h3 className="mt-1 font-[family:var(--font-profile-headline)] text-[1.22rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
+              {title}
+            </h3>
+          </div>
+          <p className="text-[0.7rem] font-medium text-[#6d7b90]">{rows.length} registros</p>
+        </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[360px] text-left text-sm">
-          <thead className="bg-[rgba(240,243,255,0.66)] text-[0.66rem] uppercase tracking-[0.16em] text-[#57657a]">
-            <tr>
-              <th className="w-12 px-4 py-3 font-semibold">#</th>
-              <th className="px-4 py-3 font-semibold">Nome</th>
-              <th className="px-4 py-3 text-right font-semibold">{valueHeader}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[rgba(191,201,195,0.38)]">
-            {rows.map((item, index) => (
-              <tr key={`${item.statCode}-${item.entityName}-${item.rank ?? index}`}>
-                <td className="px-4 py-3 text-[#57657a]">{item.rank ?? index + 1}</td>
-                <td className="max-w-[16rem] px-4 py-3">
-                  <HistoricalEntityLabel competition={competition} item={item} />
-                </td>
-                <td className="px-4 py-3 text-right font-semibold text-[#111c2d]">
-                  {formatHistoricalValue(item)}
-                </td>
-              </tr>
-            ))}
+        <table className="w-full min-w-[360px] border-collapse text-left text-sm">
+          <tbody className="divide-y divide-[rgba(191,201,195,0.36)]">
+            {rows.map((item, index) => {
+              const rank = resolveHistoricalRank(item, index);
+              const isLeader = rank === 1;
+
+              return (
+                <tr
+                  className={joinClasses(
+                    "align-middle transition-colors",
+                    "h-[64px]",
+                    isLeader ? "bg-[rgba(248,250,252,0.88)]" : "hover:bg-[rgba(247,249,252,0.92)]",
+                  )}
+                  key={`${item.statCode}-${item.entityName}-${rank}`}
+                >
+                  <td className="px-4 py-2">
+                    <span
+                      className={joinClasses(
+                        "inline-flex h-7 min-w-7 items-center justify-center rounded-full border bg-white px-2 text-[0.68rem] font-semibold tabular-nums",
+                        rank === 1
+                          ? "border-[rgba(90,102,119,0.4)] text-[#111c2d]"
+                          : "border-[rgba(160,170,184,0.5)] text-[#57657a]",
+                      )}
+                    >
+                      {rank}
+                    </span>
+                  </td>
+                  <td className="max-w-[16rem] px-4 py-2">
+                    <HistoricalEntityLabel
+                      className={isLeader ? "text-[#0f2035]" : undefined}
+                      competition={competition}
+                      isLeader={isLeader}
+                      item={item}
+                    />
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <span className="font-[family:var(--font-profile-headline)] text-[1.02rem] font-extrabold tracking-[-0.02em] text-[#111c2d]">
+                      {formatHistoricalValue(item)}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
-    </div>
-  );
-}
-
-function HistoricalRecordCard({
-  uppercaseContent = false,
-  competition,
-  item,
-}: {
-  uppercaseContent?: boolean;
-  competition: CompetitionDef;
-  item: CompetitionHistoricalStatItem;
-}) {
-  return (
-    <article className="rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-white/82 px-4 py-4">
-      <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-        {item.label}
-      </p>
-      <p
-        className={joinClasses(
-          "mt-3 font-[family:var(--font-profile-headline)] text-[1.85rem] font-extrabold leading-none tracking-[-0.04em] text-[#111c2d]",
-          uppercaseContent && "uppercase",
-        )}
-      >
-        {formatHistoricalRecordValue(item, { uppercase: uppercaseContent })}
-      </p>
-      <div className="mt-4 flex min-w-0 items-center gap-2 text-sm">
-        <HistoricalEntityLabel
-          className={uppercaseContent ? "uppercase" : undefined}
-          competition={competition}
-          item={item}
-        />
-      </div>
-      {item.seasonLabel ? (
-        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-          Temporada {item.seasonLabel}
-        </p>
-      ) : null}
     </article>
-  );
-}
-
-function HistoricalRecordGroup({
-  competition,
-  group,
-  title,
-  uppercaseContent = false,
-}: {
-  competition: CompetitionDef;
-  group: CompetitionHistoricalStatGroup;
-  title: string;
-  uppercaseContent?: boolean;
-}) {
-  if (group.items.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="space-y-3">
-      <h3 className="font-[family:var(--font-profile-headline)] text-[1.25rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
-        {title}
-      </h3>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {group.items.map((item, index) => (
-          <HistoricalRecordCard
-            competition={competition}
-            item={item}
-            key={`${item.statCode}-${item.entityName}-${item.seasonLabel ?? index}`}
-            uppercaseContent={uppercaseContent}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -443,18 +410,23 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
 
   return (
     <ProfilePanel className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-            Histórico
-          </p>
-          <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold tracking-[-0.05em] text-[#111c2d]">
-            RECORDES DA COMPETIÇÃO
-          </h2>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <ProfileCoveragePill coverage={historicalStatsQuery.coverage} />
-          <ProfileTag>Base {HISTORICAL_STATS_AS_OF_YEAR}</ProfileTag>
+      <div className="rounded-[1.2rem] border border-[rgba(191,201,195,0.5)] bg-white px-5 py-5 md:px-6 md:py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+              Arquivo histórico
+            </p>
+            <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[1.88rem] font-extrabold tracking-[-0.04em] text-[#111c2d] md:text-[2.05rem]">
+              Recordes oficiais da competição
+            </h2>
+            <p className="mt-2 text-sm/6 text-[#57657a]">
+              Maiores campeões e artilheiros históricos da competição.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <ProfileCoveragePill coverage={historicalStatsQuery.coverage} />
+            <ProfileTag>Base {HISTORICAL_STATS_AS_OF_YEAR}</ProfileTag>
+          </div>
         </div>
       </div>
 
@@ -472,15 +444,6 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
           valueHeader="Gols"
         />
       </div>
-
-      <HistoricalRecordGroup competition={competition} group={data.teamRecords} title="Recordes de time" />
-      <HistoricalRecordGroup competition={competition} group={data.matchRecords} title="Recordes de jogo" />
-      <HistoricalRecordGroup
-        competition={competition}
-        group={data.playerRecords}
-        title="Recordes individuais"
-        uppercaseContent
-      />
     </ProfilePanel>
   );
 }
@@ -888,6 +851,7 @@ function SeasonCard({
               fallback={buildFallbackLabel(championName)}
               imageClassName="p-1.5"
               shape="circle"
+              linkBehavior="none"
             />
             <div className="min-w-0">
               <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
@@ -913,6 +877,7 @@ function SeasonCard({
                   fallback={buildFallbackLabel(topScorerName)}
                   imageClassName="p-1"
                   shape="circle"
+                  linkBehavior="none"
                 />
               )
             }
@@ -930,6 +895,7 @@ function SeasonCard({
                   fallback={buildFallbackLabel(runnerUpName)}
                   imageClassName="p-1"
                   shape="circle"
+                  linkBehavior="none"
                 />
               )
             }

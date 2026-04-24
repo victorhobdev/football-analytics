@@ -2351,7 +2351,7 @@ function LeagueStandingsTable({
             const sgNegative = row.goalDiff < 0;
             return (
               <tr
-                className="transition-colors hover:bg-[#f0f3ff]"
+                className="align-middle transition-colors hover:bg-[#f0f3ff]"
                 key={row.teamId ?? row.teamName}
               >
                 <td className={`border-l-4 py-3.5 px-4 text-center text-sm font-bold tabular-nums ${borderColor}`}>

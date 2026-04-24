@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
+
 import type { RankingDefinition } from "@/config/ranking.types";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -109,6 +111,7 @@ export function useRankingTable(rankingDefinition: RankingDefinition, options: U
         filters: mergedFilters,
       }),
     enabled,
+    placeholderData: keepPreviousData,
     staleTime: cacheProfile.staleTimeMs,
     gcTime: cacheProfile.gcTimeMs,
     isDataEmpty: (data) => data.rows.length === 0,
