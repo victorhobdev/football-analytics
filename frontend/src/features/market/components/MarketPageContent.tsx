@@ -19,12 +19,8 @@ import {
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
 import {
-  buildMatchesPath,
   buildPlayerResolverPath,
-  buildPlayersPath,
-  buildSeasonHubTabPath,
   buildTeamResolverPath,
-  buildTeamsPath,
   resolveCompetitionSeasonContextFromSearchParams,
 } from "@/shared/utils/context-routing";
 
@@ -33,16 +29,16 @@ const MARKET_PAGE_SIZE = 24;
 const TRANSFER_TYPE_LABELS: Record<number, string> = {
   219: "Transferência definitiva",
   218: "Empréstimo",
-  9688: "Livre / fim de contrato",
-  220: "Retorno de empréstimo",
+  220: "Transferência livre",
+  9688: "Retorno de empréstimo",
 };
 
 const TRANSFER_TYPE_FILTERS: Array<{ label: string; value: number | null }> = [
   { label: "Todas", value: null },
   { label: "Definitiva", value: 219 },
   { label: "Empréstimo", value: 218 },
-  { label: "Livre", value: 9688 },
-  { label: "Retorno", value: 220 },
+  { label: "Livre", value: 220 },
+  { label: "Retorno", value: 9688 },
 ];
 
 const MARKET_SORT_OPTIONS = [
@@ -108,20 +104,6 @@ function parseAmount(value: string | null | undefined): number | null {
   }
 
   return normalized;
-}
-
-function parseMillionsInput(value: string): number | undefined {
-  if (value.trim().length === 0) {
-    return undefined;
-  }
-
-  const normalized = Number(value.replace(",", "."));
-
-  if (!Number.isFinite(normalized) || normalized < 0) {
-    return undefined;
-  }
-
-  return Math.round(normalized * 1_000_000);
 }
 
 function getAmountValue(item: {
@@ -213,9 +195,8 @@ export function MarketPageContent() {
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("amountDesc");
   const [onlyValuedTransfers, setOnlyValuedTransfers] = useState(false);
-  const [minAmountMillions, setMinAmountMillions] = useState("");
-  const [maxAmountMillions, setMaxAmountMillions] = useState("");
   const deferredSearch = useDeferredValue(search);
+  const deferredClubSearch = useDeferredValue(clubSearch);
   const searchParams = useSearchParams();
   const resolvedGlobalContext = useResolvedCompetitionContext();
   const resolvedContext = useMemo(
@@ -226,20 +207,16 @@ export function MarketPageContent() {
     useGlobalFiltersState();
   const selectedSort =
     MARKET_SORT_OPTIONS.find((option) => option.key === sortKey) ?? MARKET_SORT_OPTIONS[0];
-  const minAmount = useMemo(() => parseMillionsInput(minAmountMillions), [minAmountMillions]);
-  const maxAmount = useMemo(() => parseMillionsInput(maxAmountMillions), [maxAmountMillions]);
 
   useEffect(() => {
     setPage(1);
   }, [
-    clubSearch,
     competitionId,
     dateRangeEnd,
     dateRangeStart,
+    deferredClubSearch,
     deferredSearch,
     lastN,
-    maxAmount,
-    minAmount,
     onlyValuedTransfers,
     roundId,
     seasonId,
@@ -252,12 +229,10 @@ export function MarketPageContent() {
   const marketQuery = useMarketTransfers(
     {
       search: deferredSearch,
-      clubSearch,
+      clubSearch: deferredClubSearch,
       teamDirection,
       typeId: selectedTypeId,
       hasAmount: onlyValuedTransfers ? true : undefined,
-      minAmount,
-      maxAmount,
       page,
       pageSize: MARKET_PAGE_SIZE,
       sortBy: selectedSort.sortBy,
@@ -277,12 +252,6 @@ export function MarketPageContent() {
     }),
     [competitionId, dateRangeEnd, dateRangeStart, lastN, roundId, seasonId, venue],
   );
-  const seasonHubHref = resolvedContext
-    ? buildSeasonHubTabPath(resolvedContext, "calendar", sharedFilters)
-    : "/competitions";
-  const playersHref = buildPlayersPath(sharedFilters);
-  const teamsHref = buildTeamsPath(sharedFilters);
-  const matchesHref = buildMatchesPath(sharedFilters);
   const activeWindowLabel = describeTransferWindow({
     roundId,
     lastN,
@@ -405,19 +374,19 @@ export function MarketPageContent() {
           </div>
         </ProfilePanel>
 
-        <ProfilePanel className="space-y-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(190px,1fr)_minmax(190px,1fr)_minmax(150px,0.65fr)_minmax(130px,0.5fr)_minmax(130px,0.5fr)_auto] lg:items-end">
+        <ProfilePanel className="space-y-5 border-white/80 bg-white/90 p-4 shadow-[0_18px_50px_-38px_rgba(17,28,45,0.42)] sm:p-5">
+          <div className="grid gap-3 lg:grid-cols-[minmax(240px,1.4fr)_minmax(220px,1fr)_180px_auto] lg:items-end">
             <label className="space-y-1.5">
               <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">
                 Jogador ou valor
               </span>
               <input
-                className="w-full rounded-xl border border-[rgba(191,201,195,0.65)] bg-white/92 px-3 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#8bd6b6]"
+                className="w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
                 onChange={(event) => {
                   setPage(1);
                   setSearch(event.target.value);
                 }}
-                placeholder="Neymar, 25M..."
+                placeholder="Everton Ribeiro, Neymar..."
                 value={search}
               />
             </label>
@@ -427,12 +396,12 @@ export function MarketPageContent() {
                 Clube
               </span>
               <input
-                className="w-full rounded-xl border border-[rgba(191,201,195,0.65)] bg-white/92 px-3 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#8bd6b6]"
+                className="w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
                 onChange={(event) => {
                   setPage(1);
                   setClubSearch(event.target.value);
                 }}
-                placeholder="Barcelona, Santos..."
+                placeholder="Flamengo, Bahia..."
                 value={clubSearch}
               />
             </label>
@@ -442,7 +411,7 @@ export function MarketPageContent() {
                 Ordenar
               </span>
               <select
-                className="w-full rounded-xl border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-2.5 text-sm font-medium text-[#1f2d40] outline-none focus:border-[#8bd6b6]"
+                className="w-full rounded-lg border border-[rgba(112,121,116,0.24)] bg-white px-3.5 py-2.5 text-sm font-medium text-[#1f2d40] outline-none focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
                 onChange={(event) => {
                   setPage(1);
                   setSortKey(event.target.value as (typeof MARKET_SORT_OPTIONS)[number]["key"]);
@@ -457,43 +426,7 @@ export function MarketPageContent() {
               </select>
             </label>
 
-            <label className="space-y-1.5">
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">
-                Mínimo mi €
-              </span>
-              <input
-                className="w-full rounded-xl border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-2.5 text-sm text-[#1f2d40] outline-none focus:border-[#8bd6b6]"
-                min="0"
-                onChange={(event) => {
-                  setPage(1);
-                  setMinAmountMillions(event.target.value);
-                }}
-                placeholder="25"
-                step="0.1"
-                type="number"
-                value={minAmountMillions}
-              />
-            </label>
-
-            <label className="space-y-1.5">
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">
-                Máximo mi €
-              </span>
-              <input
-                className="w-full rounded-xl border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-2.5 text-sm text-[#1f2d40] outline-none focus:border-[#8bd6b6]"
-                min="0"
-                onChange={(event) => {
-                  setPage(1);
-                  setMaxAmountMillions(event.target.value);
-                }}
-                placeholder="100"
-                step="0.1"
-                type="number"
-                value={maxAmountMillions}
-              />
-            </label>
-
-            <label className="flex min-h-[42px] items-center gap-3 rounded-xl border border-[rgba(112,121,116,0.18)] bg-white/72 px-3 py-2.5 text-sm font-semibold text-[#1f2d40]">
+            <label className="flex min-h-[42px] items-center gap-3 rounded-lg border border-[rgba(112,121,116,0.22)] bg-[#f8faf8] px-3.5 py-2.5 text-sm font-semibold text-[#1f2d40]">
               <input
                 checked={onlyValuedTransfers}
                 className="h-4 w-4 accent-[#003526]"
@@ -507,7 +440,7 @@ export function MarketPageContent() {
             </label>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[rgba(191,201,195,0.42)] pt-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">
                 Tipo
@@ -521,7 +454,7 @@ export function MarketPageContent() {
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
                       isActive
                         ? "border-[#003526] bg-[#003526] text-white"
-                        : "border-[rgba(112,121,116,0.24)] bg-white/88 text-[#1f2d40] hover:border-[#8bd6b6]"
+                        : "border-[rgba(112,121,116,0.24)] bg-white text-[#1f2d40] hover:border-[#00885f]"
                     }`}
                     key={option.label}
                     onClick={() => {
@@ -549,7 +482,7 @@ export function MarketPageContent() {
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
                       isActive
                         ? "border-[#003526] bg-[#003526] text-white"
-                        : "border-[rgba(112,121,116,0.24)] bg-white/88 text-[#1f2d40] hover:border-[#8bd6b6]"
+                        : "border-[rgba(112,121,116,0.24)] bg-white text-[#1f2d40] hover:border-[#00885f]"
                     }`}
                     key={option.value}
                     onClick={() => {
@@ -563,21 +496,6 @@ export function MarketPageContent() {
                 );
               })}
             </div>
-
-            <div className="ml-auto flex flex-wrap gap-2">
-              <Link className="button-pill button-pill-secondary" href={seasonHubHref}>
-                Temporada
-              </Link>
-              <Link className="button-pill button-pill-secondary" href={playersHref}>
-                Jogadores
-              </Link>
-              <Link className="button-pill button-pill-secondary" href={teamsHref}>
-                Times
-              </Link>
-              <Link className="button-pill button-pill-secondary" href={matchesHref}>
-                Partidas
-              </Link>
-            </div>
           </div>
         </ProfilePanel>
       </section>
@@ -587,7 +505,7 @@ export function MarketPageContent() {
           <div className="lg:col-span-2">
             <EmptyState
               title="Nenhuma transferência encontrada"
-              description="Ajuste a busca, o clube, a direção ou a faixa de valor para ampliar o recorte."
+              description="Ajuste a busca, o clube, o tipo ou a direção para ampliar o recorte."
             />
           </div>
         ) : items.map((item) => {

@@ -1,0 +1,266 @@
+{
+  "run_id": "external_coach_sources_1777082244",
+  "base_dir": "C:\\Users\\Vitinho\\Desktop\\Projetos\\football-analytics\\data\\external_coach_sources\\external_coach_sources_1777082244",
+  "total_facts": 157017,
+  "facts_with_coach_name": 155567,
+  "facts_with_team_name": 155567,
+  "facts_with_start_date": 19865,
+  "source_counts": {
+    "wikidata_P6087_person_to_team": 15676,
+    "wikidata_P286_team_to_person": 17838,
+    "dbpedia_managerClub": 121076,
+    "mediawiki": 2427
+  },
+  "source_distribution": {
+    "wikidata_P6087_person_to_team": 15676,
+    "wikidata_P286_team_to_person": 17838,
+    "dbpedia_managerClub": 121076,
+    "mediawiki_raw_line_en": 579,
+    "mediawiki_infobox_en": 977,
+    "mediawiki_raw_line_pt": 871
+  },
+  "source_errors": [],
+  "flamengo_related_facts": 336,
+  "top_coverage_rows": [
+    {
+      "competition_key": "brasileirao_b",
+      "season": 2025,
+      "team_id": 234948,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2020,
+      "team_id": 594,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2020,
+      "team_id": 2975,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2020,
+      "team_id": 13258,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2021,
+      "team_id": 594,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2021,
+      "team_id": 2975,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2021,
+      "team_id": 13258,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2022,
+      "team_id": 594,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2022,
+      "team_id": 13258,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2023,
+      "team_id": 594,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2023,
+      "team_id": 2975,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2023,
+      "team_id": 13258,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2024,
+      "team_id": 2975,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "la_liga",
+      "season": 2024,
+      "team_id": 13258,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2020,
+      "team_id": 79,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2020,
+      "team_id": 591,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2021,
+      "team_id": 79,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2021,
+      "team_id": 591,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2022,
+      "team_id": 79,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "ligue_1",
+      "season": 2022,
+      "team_id": 591,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "premier_league",
+      "season": 2022,
+      "team_id": 52,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "premier_league",
+      "season": 2023,
+      "team_id": 52,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "premier_league",
+      "season": 2024,
+      "team_id": 52,
+      "matches": 38,
+      "covered_by_external_dated_fact": 38,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 68,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 82,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 90,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 277,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 366,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 510,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    },
+    {
+      "competition_key": "bundesliga",
+      "season": 2020,
+      "team_id": 3317,
+      "matches": 34,
+      "covered_by_external_dated_fact": 34,
+      "coverage_pct": 100.0
+    }
+  ]
+}
