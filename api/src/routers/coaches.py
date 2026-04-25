@@ -9,12 +9,14 @@ from ..core.context_registry import build_canonical_context
 from ..core.contracts import build_api_response, build_coverage_from_counts, build_pagination
 from ..core.errors import AppError
 from ..core.filters import GlobalFilters, VenueFilter, append_fact_match_filters, validate_and_build_global_filters
+from ..core.config import get_settings
 from ..db.client import db_client
 
 router = APIRouter(prefix="/api/v1/coaches", tags=["coaches"])
 
 ADJUSTED_PPM_PRIOR_MATCHES = 10
-COACHES_DATA_CUTOFF_SQL = "date '2025-12-31'"
+PRODUCT_DATA_CUTOFF = get_settings().product_data_cutoff
+COACHES_DATA_CUTOFF_SQL = f"date '{PRODUCT_DATA_CUTOFF.isoformat()}'"
 
 CoachesSortBy = Literal["coachName", "teamName", "matches", "adjustedPpm", "pointsPerMatch", "wins", "startDate"]
 SortDirection = Literal["asc", "desc"]
