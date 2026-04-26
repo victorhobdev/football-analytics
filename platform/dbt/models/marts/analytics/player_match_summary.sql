@@ -1,6 +1,9 @@
 {{ config(
     indexes=[
-        {'columns': ['player_id', 'match_date desc', 'match_id desc'], 'type': 'btree'}
+        {'columns': ['player_id', 'match_date desc', 'match_id desc'], 'type': 'btree'},
+        {'columns': ['match_id'], 'type': 'btree'},
+        {'columns': ['match_id', 'match_date desc', 'player_id'], 'type': 'btree'},
+        {'columns': ['team_id', 'match_date desc', 'match_id desc'], 'type': 'btree'}
     ]
 ) }}
 

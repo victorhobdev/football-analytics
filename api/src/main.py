@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 
 from .core.config import get_settings
 from .core.errors import AppError, error_payload
+from .core.request_context import begin_request_context, get_query_stats, reset_request_context
 from .routers.coaches import router as coaches_router
 from .routers.competition_hub import router as competition_hub_router
 from .routers.health import router as health_router
@@ -60,6 +61,7 @@ async def request_logging_middleware(request: Request, call_next):  # type: igno
     request_id = f"req_{uuid.uuid4().hex[:12]}"
     request.state.request_id = request_id
     started_at = time.perf_counter()
+    request_id_token, query_stats_token = begin_request_context(request_id)
 
     try:
         response = await call_next(request)
@@ -84,24 +86,30 @@ async def request_logging_middleware(request: Request, call_next):  # type: igno
 
     response.headers["X-Request-Id"] = request_id
     elapsed_ms = (time.perf_counter() - started_at) * 1000
+    query_stats = get_query_stats()
     if response.status_code >= 500:
         logger.error(
-            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f",
+            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f db_queries=%s db_duration_ms=%.2f",
             request.method,
             request.url.path,
             response.status_code,
             request_id,
             elapsed_ms,
+            query_stats.count,
+            query_stats.duration_ms,
         )
     else:
         logger.info(
-            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f",
+            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f db_queries=%s db_duration_ms=%.2f",
             request.method,
             request.url.path,
             response.status_code,
             request_id,
             elapsed_ms,
+            query_stats.count,
+            query_stats.duration_ms,
         )
+    reset_request_context(request_id_token, query_stats_token)
     return response
 
 

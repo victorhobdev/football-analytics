@@ -1,3 +1,9 @@
+{{ config(
+    indexes=[
+        {'columns': ['league_id', 'season_id', 'stage_id', 'round_id'], 'type': 'btree'}
+    ]
+) }}
+
 with rounds as (
     select * from {{ ref('int_competition_round_calendar') }}
 )

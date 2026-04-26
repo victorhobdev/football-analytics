@@ -1,0 +1,42 @@
+entity_id,entity_name,status,source_ref,source_file_name,source_url,error
+5380628,Maurício Souza,missing_source_url,Q101424710,,,wikidata entity has no P18 image
+5380634,Kirill Keker,missing_source_url,Q106919375,,,wikidata entity has no P18 image
+5380636,Mick McElwee,missing_source_url,Q108296381,,,wikidata entity has no P18 image
+5380637,Felipe Conceição,missing_source_url,Q1086686,,,wikidata entity has no P18 image
+5380641,Javier Muñoz Arévalo,missing_source_url,Q11684582,,,wikidata entity has no P18 image
+5380642,Pablo Machín,missing_source_url,Q11697229,,,wikidata entity has no P18 image
+5380644,Rafael Paiva,missing_source_url,Q127256474,,,wikidata entity has no P18 image
+5380645,Enderson Moreira,missing_source_url,Q1284791,,,wikidata entity has no P18 image
+5380649,Jean-François Vulliez,missing_source_url,Q130914360,,,wikidata entity has no P18 image
+5380650,Rúnar Kristinsson,missing_source_url,Q1330190,,,wikidata entity has no P18 image
+5380663,Kakhaber Tskhadadze,missing_source_url,Q1720889,,,wikidata entity has no P18 image
+5380677,Heimir Guðjónsson,missing_source_url,Q24006864,,,wikidata entity has no P18 image
+5380682,Miguel Ángel Tena,missing_source_url,Q2551128,,,wikidata entity has no P18 image
+5380712,Alexander Medina,missing_source_url,Q371399,,,wikidata entity has no P18 image
+5380716,Ján Kozák,missing_source_url,Q381199,,,wikidata entity has no P18 image
+5380720,Giorgi Geguchadze,missing_source_url,Q4134702,,,wikidata entity has no P18 image
+5380721,Sergey Petrovich Kovalchuk,missing_source_url,Q4225548,,,wikidata entity has no P18 image
+5380729,Adolfo Baines Pilart,missing_source_url,Q4684203,,,wikidata entity has no P18 image
+5380730,Aleksey Shpilevsky,missing_source_url,Q4715999,,,wikidata entity has no P18 image
+5380732,Ardian Nuhiu,missing_source_url,Q4788060,,,wikidata entity has no P18 image
+5380740,Goran Simov,missing_source_url,Q5584479,,,wikidata entity has no P18 image
+5380741,Qatip Osmani,missing_source_url,Q56044765,,,wikidata entity has no P18 image
+5380747,David Campaña Piquer,missing_source_url,Q61108628,,,wikidata entity has no P18 image
+5380750,Eduardo Barroca,missing_source_url,Q63168936,,,wikidata entity has no P18 image
+5380753,Heiko Herrlich,download_failed,Q677546,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Heiko_Herrlich%2C_August_2018.jpg/960px-Heiko_Herrlich%2C_August_2018.jpg
+5380754,Arne Erlandsen,download_failed,Q692306,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/3/3b/Arne_erlandsen.jpg
+5380755,Miguel Ángel Ramírez,missing_source_url,Q69414067,,,wikidata entity has no P18 image
+5380756,Tayfun Korkut,download_failed,Q708808,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Tayfun_korkut.jpg/960px-Tayfun_korkut.jpg
+5380757,Pedro Martins,missing_source_url,Q7159755,,,wikidata entity has no P18 image
+5380758,Sergio Mantecón,missing_source_url,Q7454313,,,wikidata entity has no P18 image
+5380759,Philippe Montanier,download_failed,Q746357,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Lens_-_Sochaux_%2815-09-2018%29_79.jpg/960px-Lens_-_Sochaux_%2815-09-2018%29_79.jpg
+5380760,Steve Davis,download_failed,Q7612354,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/d/db/Davis%2C_Steve.jpg
+5380763,Anthony Limbrick,missing_source_url,Q85772586,,,wikidata entity has no P18 image
+5380764,Imanol Alguacil,download_failed,Q9008053,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/0/04/Imanol_Alguacil_2018.jpg
+5380765,Brian Priske,missing_source_url,Q912982,,,wikidata entity has no P18 image
+5380766,Rudi Garcia,download_failed,Q923131,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Rudi_Garcia_Troph%C3%A9e_des_champions_2011_%28cropped%29.jpg/960px-Rudi_Garcia_Troph%C3%A9e_des_champions_2011_%28cropped%29.jpg
+5380767,Pavel Vrba,download_failed,Q929118,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Pavel_Vrba_04.jpg/960px-Pavel_Vrba_04.jpg
+5380768,Alberto Gallego,missing_source_url,Q96624646,,,wikidata entity has no P18 image
+5380769,Carlos Fangueiro,missing_source_url,Q9697059,,,wikidata entity has no P18 image
+5380770,Giorgi Chiabrishvili,missing_source_url,Q97361028,,,wikidata entity has no P18 image
+5380771,Luís Freire,download_failed,Q99603611,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/7/78/Lu%C3%ADs_Freire%2C_treinador_do_Rio_Ave.png

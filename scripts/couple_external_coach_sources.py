@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ENV_PATH = ROOT / ".env"
 SUMMARY_PATH = ROOT / "quality" / "external_coach_sources_summary.json"
 MIGRATION_PATH = ROOT / "db" / "migrations" / "20260424150000_external_coach_coupling.sql"
+ALIAS_MIGRATION_PATH = ROOT / "db" / "migrations" / "20260425160000_coach_identity_alias_layer.sql"
 REPORT_PATH = ROOT / "quality" / "external_coach_coupling_report.md"
 SUMMARY_JSON_PATH = ROOT / "quality" / "external_coach_coupling_summary.json"
 PROMOTABLE_CSV_PATH = ROOT / "quality" / "external_coach_coupling_promotable_candidates.csv"
@@ -41,6 +42,24 @@ class LocalTeam:
     team_name: str
     norm: str
     tokens: frozenset[str]
+
+
+@dataclass(frozen=True)
+class TeamAlias:
+    team_id: int
+    team_name: str
+    alias_source: str
+    external_team_id: str | None
+    alias_name: str | None
+    alias_norm: str
+    confidence: float
+
+
+@dataclass(frozen=True)
+class CoachAliasIndex:
+    by_identity_id: dict[int, int]
+    by_source_person: dict[tuple[str, str], int]
+    by_name: dict[str, list[int]]
 
 
 @dataclass(frozen=True)
@@ -276,10 +295,37 @@ def valid_coach_name(name: str | None) -> bool:
     return norm not in INVALID_NAMES and len(norm) >= 3
 
 
-def resolve_team(team_name: str | None, local_teams: list[LocalTeam]) -> tuple[LocalTeam | None, str, float]:
+def resolve_team(
+    *,
+    source: str,
+    external_team_id: str | None,
+    team_name: str | None,
+    local_teams: list[LocalTeam],
+    team_aliases: list[TeamAlias],
+) -> tuple[LocalTeam | None, str, float]:
     norm = normalize(team_name)
     if not norm:
         return None, "missing_team_name", 0.0
+
+    alias_candidates: list[TeamAlias] = []
+    if external_team_id:
+        alias_candidates.extend(
+            alias
+            for alias in team_aliases
+            if alias.external_team_id == external_team_id
+            and alias.alias_source in {source, source.split("_", 1)[0], "manual_verified_external_id", "wikidata"}
+        )
+    if not alias_candidates:
+        alias_candidates.extend(alias for alias in team_aliases if alias.alias_norm and alias.alias_norm == norm)
+    alias_candidates.sort(key=lambda alias: alias.confidence, reverse=True)
+    if alias_candidates:
+        top = alias_candidates[0]
+        same_score = [alias for alias in alias_candidates if alias.confidence == top.confidence]
+        if len({alias.team_id for alias in same_score}) == 1:
+            local = next((team for team in local_teams if team.team_id == top.team_id), None)
+            if local:
+                method = "alias_external_id" if external_team_id and top.external_team_id == external_team_id else "alias_name"
+                return local, method, round(top.confidence, 4)
 
     exact = [team for team in local_teams if team.norm == norm]
     if len(exact) == 1:
@@ -372,9 +418,10 @@ def read_facts(path: Path, limit: int) -> list[dict[str, Any]]:
 
 
 def apply_schema(conn: psycopg.Connection[Any]) -> None:
-    sql = MIGRATION_PATH.read_text(encoding="utf-8")
-    up_sql = sql.split("-- migrate:down", 1)[0].replace("-- migrate:up", "", 1)
-    conn.execute(up_sql)
+    for migration_path in (MIGRATION_PATH, ALIAS_MIGRATION_PATH):
+        sql = migration_path.read_text(encoding="utf-8")
+        up_sql = sql.split("-- migrate:down", 1)[0].replace("-- migrate:up", "", 1)
+        conn.execute(up_sql)
 
 
 def load_local_teams(conn: psycopg.Connection[Any]) -> list[LocalTeam]:
@@ -387,6 +434,39 @@ def load_local_teams(conn: psycopg.Connection[Any]) -> list[LocalTeam]:
             team_name=str(row["team_name"]),
             norm=normalize(str(row["team_name"])),
             tokens=tokens(normalize(str(row["team_name"]))),
+        )
+        for row in rows
+    ]
+
+
+def load_team_aliases(conn: psycopg.Connection[Any]) -> list[TeamAlias]:
+    if conn.execute("select to_regclass('mart.team_identity_alias') as table_name").fetchone()["table_name"] is None:
+        return []
+    rows = conn.execute(
+        """
+        select
+          a.team_id,
+          t.team_name,
+          a.alias_source,
+          a.external_team_id,
+          a.alias_name,
+          a.confidence
+        from mart.team_identity_alias a
+        join mart.dim_team t
+          on t.team_id = a.team_id
+        where a.is_active
+          and a.status = 'active'
+        """
+    ).fetchall()
+    return [
+        TeamAlias(
+            team_id=int(row["team_id"]),
+            team_name=str(row["team_name"]),
+            alias_source=str(row["alias_source"]),
+            external_team_id=str(row["external_team_id"]) if row.get("external_team_id") else None,
+            alias_name=str(row["alias_name"]) if row.get("alias_name") else None,
+            alias_norm=normalize(row.get("alias_name")),
+            confidence=float(row["confidence"] or 0),
         )
         for row in rows
     ]
@@ -482,7 +562,52 @@ def load_identity_refs(conn: psycopg.Connection[Any]) -> dict[tuple[str, str], i
     }
 
 
-def load_canonical_name_index(conn: psycopg.Connection[Any]) -> dict[str, list[int]]:
+def load_coach_alias_index(conn: psycopg.Connection[Any]) -> CoachAliasIndex:
+    if conn.execute("select to_regclass('mart.coach_identity_alias') as table_name").fetchone()["table_name"] is None:
+        return CoachAliasIndex(by_identity_id={}, by_source_person={}, by_name={})
+    rows = conn.execute(
+        """
+        select
+          canonical_coach_identity_id,
+          alias_coach_identity_id,
+          alias_source,
+          external_person_id,
+          alias_name,
+          confidence
+        from mart.coach_identity_alias
+        where is_active
+          and status = 'active'
+        order by confidence desc, coach_identity_alias_id desc
+        """
+    ).fetchall()
+    by_identity_id: dict[int, int] = {}
+    by_source_person: dict[tuple[str, str], int] = {}
+    by_name: dict[str, list[int]] = defaultdict(list)
+    for row in rows:
+        canonical_id = int(row["canonical_coach_identity_id"])
+        if row.get("alias_coach_identity_id"):
+            by_identity_id[int(row["alias_coach_identity_id"])] = canonical_id
+        if row.get("external_person_id"):
+            by_source_person[(str(row["alias_source"]), str(row["external_person_id"]))] = canonical_id
+        alias_norm = normalize(row.get("alias_name"))
+        if alias_norm and canonical_id not in by_name[alias_norm]:
+            by_name[alias_norm].append(canonical_id)
+    return CoachAliasIndex(
+        by_identity_id=by_identity_id,
+        by_source_person=by_source_person,
+        by_name=dict(by_name),
+    )
+
+
+def canonicalize_identity_id(identity_id: int | None, aliases: CoachAliasIndex) -> int | None:
+    if identity_id is None:
+        return None
+    return aliases.by_identity_id.get(identity_id, identity_id)
+
+
+def load_canonical_name_index(
+    conn: psycopg.Connection[Any], aliases: CoachAliasIndex
+) -> dict[str, list[int]]:
     rows = conn.execute(
         """
         select coach_identity_id, coalesce(display_name, canonical_name) as coach_name
@@ -494,7 +619,14 @@ def load_canonical_name_index(conn: psycopg.Connection[Any]) -> dict[str, list[i
     for row in rows:
         norm = normalize(row.get("coach_name"))
         if norm and norm not in INVALID_NAMES:
-            index[norm].append(int(row["coach_identity_id"]))
+            identity_id = canonicalize_identity_id(int(row["coach_identity_id"]), aliases)
+            if identity_id is not None and identity_id not in index[norm]:
+                index[norm].append(identity_id)
+    for norm, identity_ids in aliases.by_name.items():
+        if norm and norm not in INVALID_NAMES:
+            for identity_id in identity_ids:
+                if identity_id not in index[norm]:
+                    index[norm].append(identity_id)
     return index
 
 
@@ -582,26 +714,35 @@ def resolve_identity(
     coach_norm: str,
     source_refs: dict[tuple[str, str], int],
     canonical_name_index: dict[str, list[int]],
+    aliases: CoachAliasIndex,
     same_coach_identity_counts: Counter[int],
 ) -> tuple[int | None, str | None, float]:
     if external_person_id:
+        for ref_source in (source, source.split("_", 1)[0], "wikidata" if source.startswith("wikidata") else source):
+            direct = aliases.by_source_person.get((ref_source, external_person_id))
+            if direct:
+                return direct, "coach_alias_external_id", 1.0
         direct = source_refs.get((source, external_person_id))
         if direct:
-            return direct, "source_ref_exact", 1.0
+            return canonicalize_identity_id(direct, aliases), "source_ref_exact", 1.0
         if source.startswith("wikidata"):
             for ref_source in ("wikidata_P286_team_to_person", "wikidata_P6087_person_to_team", "wikidata"):
                 direct = source_refs.get((ref_source, external_person_id))
                 if direct:
-                    return direct, "wikidata_source_ref", 0.98
+                    return canonicalize_identity_id(direct, aliases), "wikidata_source_ref", 0.98
 
     if same_coach_identity_counts:
         identity_id, count = same_coach_identity_counts.most_common(1)[0]
         if count > 0:
-            return identity_id, "same_team_assignment_name", 0.92
+            return canonicalize_identity_id(identity_id, aliases), "same_team_assignment_name", 0.92
 
     exact_name = canonical_name_index.get(coach_norm, [])
     if len(exact_name) == 1:
-        return exact_name[0], "global_exact_name_unique", 0.86
+        return canonicalize_identity_id(exact_name[0], aliases), "global_exact_name_unique", 0.86
+
+    alias_name = aliases.by_name.get(coach_norm, [])
+    if len(alias_name) == 1:
+        return alias_name[0], "coach_alias_name", 0.88
 
     return None, None, 0.0
 
@@ -609,11 +750,13 @@ def resolve_identity(
 def classify_fact(
     fact: dict[str, Any],
     local_teams: list[LocalTeam],
+    team_aliases: list[TeamAlias],
     match_teams_by_team: dict[int, list[MatchTeam]],
     existing_keys: set[tuple[int, int]],
     assignments_by_team: dict[int, list[ExistingAssignment]],
     source_refs: dict[tuple[str, str], int],
     canonical_name_index: dict[str, list[int]],
+    aliases: CoachAliasIndex,
     cutoff: date,
     run_id: str,
 ) -> dict[str, Any]:
@@ -623,7 +766,13 @@ def classify_fact(
     coach_name = fact.get("coach_name")
     coach_norm = normalize(coach_name)
     team_scope_block = blocked_external_team_scope(fact.get("team_name"))
-    team, team_method, team_score = resolve_team(fact.get("team_name"), local_teams)
+    team, team_method, team_score = resolve_team(
+        source=source,
+        external_team_id=fact.get("team_external_id"),
+        team_name=fact.get("team_name"),
+        local_teams=local_teams,
+        team_aliases=team_aliases,
+    )
     start_original = as_date(fact.get("start_date"))
     end_original = as_date(fact.get("end_date"))
     role = role_candidate(str(fact.get("role") or ""), source, payload)
@@ -709,18 +858,33 @@ def classify_fact(
     result["canonical_missing_matches_covered"] = len(missing)
     result["canonical_assigned_matches_covered"] = len(assigned)
 
+    preliminary_identity_id, _, _ = resolve_identity(
+        source=source,
+        external_person_id=fact.get("coach_external_id"),
+        coach_norm=coach_norm,
+        source_refs=source_refs,
+        canonical_name_index=canonical_name_index,
+        aliases=aliases,
+        same_coach_identity_counts=Counter(),
+    )
+
     same_coach = 0
     best_similarity = 0.0
     same_coach_identity_counts: Counter[int] = Counter()
     for assignment in assignments_by_team.get(team.team_id, []):
         if not (clipped_start <= assignment.match_date <= clipped_end):
             continue
+        assignment_identity_id = canonicalize_identity_id(assignment.coach_identity_id, aliases)
         score = similarity(coach_norm, assignment.coach_norm)
         best_similarity = max(best_similarity, score)
-        if score >= 0.86:
+        if preliminary_identity_id is not None and assignment_identity_id == preliminary_identity_id:
             same_coach += 1
-            if assignment.coach_identity_id:
-                same_coach_identity_counts[assignment.coach_identity_id] += 1
+            same_coach_identity_counts[preliminary_identity_id] += 1
+            best_similarity = max(best_similarity, 1.0)
+        elif score >= 0.86:
+            same_coach += 1
+            if assignment_identity_id:
+                same_coach_identity_counts[assignment_identity_id] += 1
     result["existing_same_coach_overlap_matches"] = same_coach
     result["best_existing_coach_similarity"] = round(best_similarity, 4)
 
@@ -730,6 +894,7 @@ def classify_fact(
         coach_norm=coach_norm,
         source_refs=source_refs,
         canonical_name_index=canonical_name_index,
+        aliases=aliases,
         same_coach_identity_counts=same_coach_identity_counts,
     )
     result["coach_identity_id"] = identity_id
@@ -1470,10 +1635,12 @@ def main() -> None:
             apply_schema(conn)
 
         local_teams = load_local_teams(conn)
+        team_aliases = load_team_aliases(conn)
         match_teams_by_team = load_match_teams(conn, cutoff)
         existing_keys, assignments_by_team = load_existing_assignments(conn, cutoff)
         source_refs = load_identity_refs(conn)
-        canonical_name_index = load_canonical_name_index(conn)
+        aliases = load_coach_alias_index(conn)
+        canonical_name_index = load_canonical_name_index(conn, aliases)
 
         reset_staging(conn)
         upsert_raw_facts(conn, facts, run_id, args.batch_size)
@@ -1482,11 +1649,13 @@ def main() -> None:
             classify_fact(
                 fact,
                 local_teams,
+                team_aliases,
                 match_teams_by_team,
                 existing_keys,
                 assignments_by_team,
                 source_refs,
                 canonical_name_index,
+                aliases,
                 cutoff,
                 run_id,
             )
