@@ -1,0 +1,3 @@
+sport_coach_identity_id,sportmonks_coach_id,sport_coach_name,sport_aliases,sport_team_count,wikidata_coach_identity_id,wikidata_id,wikidata_coach_name,wikidata_aliases,wikidata_team_count,shared_team_count,shared_team_ids,score,second_score,score_gap,classification,reasons
+31,37690429,Cledson Rafael de Paiva,"[""C. de Paiva""]",0,5380644,Q127256474,Rafael Paiva,"[""Cledson Rafael de Paiva""]",1,0,,0.32,0.0,0.32,weak_candidate,primary_alias_cross_match|alias_overlap
+54,474720,Adenor Bacchi,"[""A. Bacchi""]",0,5380719,Q40652,Tite,"[""Adenor Bacchi""]",1,0,,0.32,0.0,0.32,weak_candidate,primary_alias_cross_match|alias_overlap
