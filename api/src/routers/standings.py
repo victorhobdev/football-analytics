@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 import re
 from typing import Any
 
@@ -805,7 +805,7 @@ def get_standings(
             }
             for row in rows
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
     return build_api_response(
         data,

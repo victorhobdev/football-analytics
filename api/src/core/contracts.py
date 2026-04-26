@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from math import ceil
 from typing import Any
 
@@ -50,7 +50,7 @@ def build_api_response(
 ) -> dict[str, Any]:
     meta: dict[str, Any] = {
         "requestId": request_id,
-        "generatedAt": datetime.now(UTC).isoformat(),
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
     }
     if pagination is not None:
         meta["pagination"] = pagination

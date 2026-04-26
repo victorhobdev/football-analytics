@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 import re
 from typing import Any, Callable
 
@@ -2126,7 +2126,7 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
             "competition": _serialize_world_cup_competition(),
             "summary": summary,
             "editions": editions,
-            "updatedAt": datetime.now(UTC).isoformat(),
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
         },
         overall_coverage,
     )
@@ -2427,7 +2427,7 @@ def _build_world_cup_edition_payload(season_label: str) -> tuple[dict[str, Any],
             "groupStages": group_stage_payload,
             "knockoutRounds": knockout_round_payload,
             "scorers": filtered_edition_scorers,
-            "updatedAt": datetime.now(UTC).isoformat(),
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
         },
         edition_summary["coverage"],
     )
@@ -2635,7 +2635,7 @@ def _build_world_cup_team_list_payload() -> tuple[dict[str, Any], dict[str, Any]
                 }
                 for team in teams_payload
             ],
-            "updatedAt": datetime.now(UTC).isoformat(),
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
         },
         build_coverage_from_counts(len(teams_payload), len(teams_payload), "Seleções com participação"),
     )
@@ -2673,7 +2673,7 @@ def _build_world_cup_team_detail_payload(team_id: str) -> tuple[dict[str, Any], 
             },
             "participations": team_payload["participations"],
             "historicalScorers": historical_scorers,
-            "updatedAt": datetime.now(UTC).isoformat(),
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
         },
         {
             "status": "complete",
@@ -2833,7 +2833,7 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
                 "items": finals_payload,
                 "omittedEditions": omitted_editions,
             },
-            "updatedAt": datetime.now(UTC).isoformat(),
+            "updatedAt": datetime.now(timezone.utc).isoformat(),
         },
         {
             "status": "complete",
