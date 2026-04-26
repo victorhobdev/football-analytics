@@ -25,6 +25,7 @@ MANIFEST_PATH = VISUAL_ASSETS_ROOT / "manifests" / "coaches.json"
 
 WIKIDATA_ENTITY_URL = "https://www.wikidata.org/wiki/Special:EntityData/{entity_id}.json"
 COMMONS_FILEPATH_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/{file_name}?width=512"
+WIKIPEDIA_API_URL = "https://{lang}.wikipedia.org/w/api.php"
 TARGET_SIZE = 512
 REQUEST_TIMEOUT_SECONDS = 30
 USER_AGENT = "football-analytics/coach-assets-ingest (+local)"
@@ -371,6 +372,51 @@ def fetch_wikidata_image_filename_from_qid(session: requests.Session, wikidata_q
     return None
 
 
+def fetch_wikidata_entity(session: requests.Session, wikidata_qid: str) -> dict[str, Any]:
+    response = session.get(
+        WIKIDATA_ENTITY_URL.format(entity_id=wikidata_qid),
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    return payload.get("entities", {}).get(wikidata_qid, {})
+
+
+def fetch_wikipedia_thumbnail_url(session: requests.Session, wikidata_qid: str) -> str | None:
+    entity = fetch_wikidata_entity(session, wikidata_qid)
+    sitelinks = entity.get("sitelinks", {})
+    for site_key in ("enwiki", "ptwiki", "eswiki", "frwiki", "dewiki", "itwiki"):
+        site_entry = sitelinks.get(site_key)
+        title = site_entry.get("title") if isinstance(site_entry, dict) else None
+        if not title:
+            continue
+
+        lang = site_key.removesuffix("wiki")
+        response = session.get(
+            WIKIPEDIA_API_URL.format(lang=lang),
+            params={
+                "action": "query",
+                "format": "json",
+                "formatversion": "2",
+                "prop": "pageimages",
+                "titles": title,
+                "pithumbsize": 800,
+            },
+            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        pages = payload.get("query", {}).get("pages", [])
+        for page in pages:
+            thumb = page.get("thumbnail") if isinstance(page, dict) else None
+            source = thumb.get("source") if isinstance(thumb, dict) else None
+            if isinstance(source, str) and source.strip():
+                return source.strip()
+    return None
+
+
 def download_and_convert_png(session: requests.Session, file_name: str, target_path: Path) -> int:
     response = None
     last_error: Exception | None = None
@@ -390,6 +436,52 @@ def download_and_convert_png(session: requests.Session, file_name: str, target_p
             if status_code != 429 or attempt == MAX_DOWNLOAD_RETRIES:
                 raise
 
+            retry_after_header = (exc.response.headers.get("Retry-After") or "").strip() if exc.response is not None else ""
+            retry_after_seconds = float(retry_after_header) if retry_after_header.isdigit() else min(5.0 * attempt, 30.0)
+            time.sleep(retry_after_seconds)
+        except Exception as exc:
+            last_error = exc
+            if attempt == MAX_DOWNLOAD_RETRIES:
+                raise
+            time.sleep(min(2.0 * attempt, 10.0))
+
+    if response is None:
+        assert last_error is not None
+        raise last_error
+
+    with Image.open(BytesIO(response.content)) as image:
+        normalized = ImageOps.exif_transpose(image).convert("RGBA")
+        squared = ImageOps.pad(
+            normalized,
+            (TARGET_SIZE, TARGET_SIZE),
+            method=Image.Resampling.LANCZOS,
+            color=(0, 0, 0, 0),
+            centering=(0.5, 0.35),
+        )
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        squared.save(target_path, format="PNG", optimize=True)
+
+    return target_path.stat().st_size
+
+
+def download_raster_png(session: requests.Session, source_url: str, target_path: Path) -> int:
+    response = None
+    last_error: Exception | None = None
+    for attempt in range(1, MAX_DOWNLOAD_RETRIES + 1):
+        try:
+            response = session.get(
+                source_url,
+                headers={"User-Agent": USER_AGENT, "Accept": "image/*,*/*;q=0.8"},
+                timeout=REQUEST_TIMEOUT_SECONDS,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
+            break
+        except requests.HTTPError as exc:
+            last_error = exc
+            status_code = exc.response.status_code if exc.response is not None else None
+            if status_code != 429 or attempt == MAX_DOWNLOAD_RETRIES:
+                raise
             retry_after_header = (exc.response.headers.get("Retry-After") or "").strip() if exc.response is not None else ""
             retry_after_seconds = float(retry_after_header) if retry_after_header.isdigit() else min(5.0 * attempt, 30.0)
             time.sleep(retry_after_seconds)
@@ -493,17 +585,36 @@ def process_coach(session: requests.Session, manifest: dict[str, Any], conn: Any
             if coach.wikidata_qid
             else fetch_wikidata_image_filename(session, coach.provider_coach_id)
         )
-        if not file_name:
-            upsert_manifest_entry(manifest, build_error_entry(coach, "missing_source_url", "wikidata entity has no P18 image"))
+        source_url: str | None = None
+        source_file_name: str | None = None
+        source_kind = "wikimedia_commons_p18"
+
+        if file_name:
+            source_file_name = file_name
+            source_url = COMMONS_FILEPATH_URL.format(file_name=quote(file_name, safe=""))
+        elif coach.wikidata_qid:
+            source_url = fetch_wikipedia_thumbnail_url(session, coach.wikidata_qid)
+            source_kind = "wikipedia_pageimage"
+
+        if not source_url:
+            upsert_manifest_entry(manifest, build_error_entry(coach, "missing_source_url", "wikidata entity has no P18 image or wikipedia thumbnail"))
             return "missing_source_url", None
 
         status = "cached_local" if target_path.exists() else "downloaded"
         if not target_path.exists():
-            file_size_bytes = download_and_convert_png(session, file_name, target_path)
+            file_size_bytes = (
+                download_and_convert_png(session, source_file_name, target_path)
+                if source_file_name
+                else download_raster_png(session, source_url, target_path)
+            )
         else:
             file_size_bytes = target_path.stat().st_size
 
-        upsert_manifest_entry(manifest, build_success_entry(coach, file_name, file_size_bytes, status))
+        entry = build_success_entry(coach, source_file_name or coach.wikidata_qid or str(coach.provider_coach_id), file_size_bytes, status)
+        entry["source_kind"] = source_kind
+        entry["source_url"] = source_url
+        entry["source_file_name"] = source_file_name
+        upsert_manifest_entry(manifest, entry)
         update_coach_image_url(conn, coach.coach_identity_id)
         time.sleep(REQUEST_PAUSE_SECONDS)
         return status, None

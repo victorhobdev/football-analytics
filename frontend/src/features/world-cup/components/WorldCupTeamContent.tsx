@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useRef } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
@@ -8,6 +11,7 @@ import { ProfileAlert, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/c
 
 import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupTeam } from "@/features/world-cup/hooks/useWorldCupTeam";
+import { prefetchWorldCupEdition } from "@/features/world-cup/prefetch";
 import { buildWorldCupEditionPath, buildWorldCupHubPath, buildWorldCupTeamsPath } from "@/features/world-cup/routes";
 import type { WorldCupTeamParticipation, WorldCupTeamSummary } from "@/features/world-cup/types/world-cup.types";
 import { resolveWorldCupPlayerImageAssetId } from "@/features/world-cup/utils/player-profile";
@@ -136,7 +140,13 @@ function SummaryCard({
   );
 }
 
-function ParticipationCard({ participation }: { participation: WorldCupTeamParticipation }) {
+function ParticipationCard({
+  participation,
+  onPrefetch,
+}: {
+  participation: WorldCupTeamParticipation;
+  onPrefetch?: (seasonLabel: string) => void;
+}) {
   const topScorerName = participation.topScorer?.playerName ?? "Sem registro";
   const topScorerGoalsLabel = participation.topScorer
     ? `${participation.topScorer.goals} gol${participation.topScorer.goals === 1 ? "" : "s"}`
@@ -194,6 +204,12 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
           <Link
             className="button-pill button-pill-secondary"
             href={buildWorldCupEditionPath(participation.seasonLabel)}
+            onFocus={() => {
+              onPrefetch?.(participation.seasonLabel);
+            }}
+            onMouseEnter={() => {
+              onPrefetch?.(participation.seasonLabel);
+            }}
           >
             Abrir edição
           </Link>
@@ -205,6 +221,24 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
 
 export function WorldCupTeamContent({ teamId }: { teamId: string }) {
   const teamQuery = useWorldCupTeam(teamId);
+  const queryClient = useQueryClient();
+  const prefetchedEditionLabelsRef = useRef<Set<string>>(new Set());
+
+  const prefetchEdition = useCallback(
+    (seasonLabel: string) => {
+      const normalizedSeasonLabel = seasonLabel.trim();
+      if (
+        normalizedSeasonLabel.length === 0 ||
+        prefetchedEditionLabelsRef.current.has(normalizedSeasonLabel)
+      ) {
+        return;
+      }
+
+      prefetchedEditionLabelsRef.current.add(normalizedSeasonLabel);
+      void prefetchWorldCupEdition(queryClient, normalizedSeasonLabel);
+    },
+    [queryClient],
+  );
 
   if (teamQuery.isLoading && !teamQuery.data) {
     return (
@@ -360,7 +394,11 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
 
         <div className="space-y-4">
           {orderedParticipations.map((participation) => (
-            <ParticipationCard key={`${participation.seasonLabel}-${participation.resultLabel}`} participation={participation} />
+            <ParticipationCard
+              key={`${participation.seasonLabel}-${participation.resultLabel}`}
+              participation={participation}
+              onPrefetch={prefetchEdition}
+            />
           ))}
         </div>
       </ProfilePanel>

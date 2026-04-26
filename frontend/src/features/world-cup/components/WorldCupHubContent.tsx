@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useRef } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
@@ -13,6 +16,11 @@ import {
 
 import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupHub } from "@/features/world-cup/hooks/useWorldCupHub";
+import {
+  prefetchWorldCupEdition,
+  prefetchWorldCupRankings,
+  prefetchWorldCupTeams,
+} from "@/features/world-cup/prefetch";
 import {
   buildWorldCupEditionPath,
   buildWorldCupFinalsPath,
@@ -133,12 +141,14 @@ function QuickLinkCard({
   label,
   badge,
   icon,
+  onPrefetch,
 }: {
   description: string;
   href: string;
   label: string;
   badge: string;
   icon: "teams" | "rankings" | "finals";
+  onPrefetch?: () => void;
 }) {
   const iconToneClassName =
     icon === "teams"
@@ -151,6 +161,8 @@ function QuickLinkCard({
     <Link
       className="group flex h-full flex-col justify-between rounded-[1.45rem] border border-[rgba(191,201,195,0.46)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(248,250,253,0.96)_100%)] px-4 py-4 transition-[transform,border-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:border-[#8bd6b6] hover:shadow-[0_24px_58px_-42px_rgba(17,28,45,0.22)]"
       href={href}
+      onFocus={onPrefetch}
+      onMouseEnter={onPrefetch}
     >
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
@@ -180,7 +192,13 @@ function QuickLinkCard({
   );
 }
 
-function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
+function TimelineEditionCard({
+  edition,
+  onPrefetch,
+}: {
+  edition: WorldCupHubEdition;
+  onPrefetch?: (seasonLabel: string) => void;
+}) {
   const championName = edition.champion?.teamName ?? "Campeão não identificado";
   const hostCountryName = edition.hostCountry ?? "País-sede não identificado";
   const hostCountryAssetId =
@@ -193,6 +211,12 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
         "border-[rgba(191,201,195,0.48)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(248,250,253,0.95)_100%)]",
       )}
       href={buildWorldCupEditionPath(edition.seasonLabel)}
+      onFocus={() => {
+        onPrefetch?.(edition.seasonLabel);
+      }}
+      onMouseEnter={() => {
+        onPrefetch?.(edition.seasonLabel);
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -280,6 +304,42 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
 
 export function WorldCupHubContent() {
   const hubQuery = useWorldCupHub();
+  const queryClient = useQueryClient();
+  const prefetchedKeysRef = useRef<Set<string>>(new Set());
+
+  const runPrefetchOnce = useCallback(
+    (cacheKey: string, prefetcher: () => Promise<unknown>) => {
+      if (prefetchedKeysRef.current.has(cacheKey)) {
+        return;
+      }
+
+      prefetchedKeysRef.current.add(cacheKey);
+      void prefetcher();
+    },
+    [],
+  );
+
+  const prefetchTeams = useCallback(() => {
+    runPrefetchOnce("teams", () => prefetchWorldCupTeams(queryClient));
+  }, [queryClient, runPrefetchOnce]);
+
+  const prefetchRankings = useCallback(() => {
+    runPrefetchOnce("rankings", () => prefetchWorldCupRankings(queryClient));
+  }, [queryClient, runPrefetchOnce]);
+
+  const prefetchEdition = useCallback(
+    (seasonLabel: string) => {
+      const normalizedSeasonLabel = seasonLabel.trim();
+      if (normalizedSeasonLabel.length === 0) {
+        return;
+      }
+
+      runPrefetchOnce(`edition:${normalizedSeasonLabel}`, () =>
+        prefetchWorldCupEdition(queryClient, normalizedSeasonLabel),
+      );
+    },
+    [queryClient, runPrefetchOnce],
+  );
 
   if (hubQuery.isLoading && !hubQuery.data) {
     return (
@@ -428,6 +488,7 @@ export function WorldCupHubContent() {
             href={buildWorldCupTeamsPath()}
             icon="teams"
             label="Explorar por seleção"
+            onPrefetch={prefetchTeams}
           />
           <QuickLinkCard
             badge="Rankings"
@@ -435,6 +496,7 @@ export function WorldCupHubContent() {
             href={buildWorldCupRankingsPath()}
             icon="rankings"
             label="Rankings históricos"
+            onPrefetch={prefetchRankings}
           />
           <QuickLinkCard
             badge="Finais"
@@ -442,6 +504,7 @@ export function WorldCupHubContent() {
             href={buildWorldCupFinalsPath()}
             icon="finals"
             label="Finais"
+            onPrefetch={prefetchRankings}
           />
         </div>
       </ProfilePanel>
@@ -461,7 +524,7 @@ export function WorldCupHubContent() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {orderedEditions.map((edition) => (
-            <TimelineEditionCard edition={edition} key={edition.seasonLabel} />
+            <TimelineEditionCard edition={edition} key={edition.seasonLabel} onPrefetch={prefetchEdition} />
           ))}
         </div>
       </ProfilePanel>
