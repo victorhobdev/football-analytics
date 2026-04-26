@@ -46,13 +46,13 @@ const MIN_MATCH_OPTIONS = [0, 1, 5, 10, 20] as const;
 const DEFAULT_PAGE_SIZE: (typeof PAGE_SIZE_OPTIONS)[number] = 24;
 const DEFAULT_MIN_MATCHES: (typeof MIN_MATCH_OPTIONS)[number] = 1;
 const CAMPAIGN_INDEX_EXPLANATION =
-  "Índice de campanha = pontos por jogo ponderado pela amostra do recorte, para não premiar passagens muito curtas.";
+  "Pontos/Jogo = pontos por jogo ponderado pela amostra do recorte, para não premiar passagens muito curtas.";
 
 const SORT_OPTIONS: Array<{ label: string; value: CoachesListSortBy }> = [
-  { label: "Índice de campanha", value: "adjustedPpm" },
+  { label: "Pontos/Jogo", value: "adjustedPpm" },
   { label: "Jogos", value: "matches" },
   { label: "Vitórias", value: "wins" },
-  { label: "Pontos/jogo", value: "pointsPerMatch" },
+  { label: "Pontos/Jogo bruto", value: "pointsPerMatch" },
   { label: "Nome", value: "coachName" },
   { label: "Início da passagem", value: "startDate" },
 ];
@@ -498,7 +498,7 @@ export function CoachesPageContent() {
 
                 <div className="mt-5 grid grid-cols-3 gap-2">
                   <div className="rounded-[1rem] bg-white/10 px-3 py-3">
-                    <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Índice</p>
+                    <p className="text-[0.6rem] uppercase tracking-[0.16em] text-white/52">Pontos/Jogo</p>
                     <p className="mt-1 text-2xl font-extrabold">{formatDecimal(featuredCoach.adjustedPpm)}</p>
                   </div>
                   <div className="rounded-[1rem] bg-white/10 px-3 py-3">
@@ -729,7 +729,7 @@ export function CoachesPageContent() {
                     </div>
 
                     <div className="grid gap-2 sm:grid-cols-2">
-                      <StatTile label="Índice" value={formatDecimal(item.adjustedPpm)} />
+                      <StatTile label="Pontos/Jogo" value={formatDecimal(item.adjustedPpm)} />
                       <StatTile label="Jogos" value={formatInteger(item.matches)} />
                       <StatTile label="Aproveitamento" tone="soft" value={formatPercent(calculateWinRate(item))} />
                       <StatTile label="Campanha" tone="soft" value={formatRecord(item.wins, item.draws, item.losses)} />

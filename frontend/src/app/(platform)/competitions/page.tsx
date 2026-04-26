@@ -43,7 +43,7 @@ function describeCompetitionTypeLabel(competition: CompetitionDef): string {
     return "Copa";
   }
 
-  return competition.scope === "global" ? "Mundial" : "Internacional";
+  return competition.scope === "global" ? "Mundial" : "Intercontinental";
 }
 
 function describeCompetitionScopeLabel(competition: CompetitionDef): string {
@@ -60,38 +60,6 @@ function describeCompetitionScopeLabel(competition: CompetitionDef): string {
   }
 
   return "Liga doméstica";
-}
-
-function describeScopeFilterLabel(value: ScopeFilter): string {
-  if (value === "domestic") {
-    return "Nacionais";
-  }
-
-  if (value === "international") {
-    return "Internacionais";
-  }
-
-  if (value === "global") {
-    return "Mundiais";
-  }
-
-  return "Todas";
-}
-
-function describeTypeFilterLabel(value: TypeFilter): string {
-  if (value === "domestic_league") {
-    return "Ligas";
-  }
-
-  if (value === "domestic_cup") {
-    return "Copas";
-  }
-
-  if (value === "international_cup") {
-    return "Internacionais";
-  }
-
-  return "Todos";
 }
 
 function getCompetitionRegionLabel(competition: CompetitionDef): string {
@@ -118,9 +86,10 @@ function getCompetitionRegionLabel(competition: CompetitionDef): string {
 
 function buildCompetitionGroups(competitions: CompetitionDef[]) {
   const domestic = competitions.filter((competition) => competition.scope === "domestic");
-  const international = competitions.filter((competition) => competition.scope !== "domestic");
+  const international = competitions.filter((competition) => competition.scope === "continental");
+  const global = competitions.filter((competition) => competition.scope === "global");
 
-  return { domestic, international };
+  return { domestic, global, international };
 }
 
 function buildCompetitionCardHref(competition: CompetitionDef): string {
@@ -339,8 +308,7 @@ export default function CompetitionsIndexPage() {
     (total, competition) => total + listSeasonsForCompetition(competition).length,
     0,
   );
-  const { domestic, international } = buildCompetitionGroups(allCompetitions);
-  const globalCompetitions = allCompetitions.filter((competition) => competition.scope === "global");
+  const { domestic, global, international } = buildCompetitionGroups(allCompetitions);
   const normalizedSearchQuery = normalizeSearchValue(searchQuery);
 
   const regionOptions = useMemo(() => {
@@ -354,7 +322,7 @@ export default function CompetitionsIndexPage() {
         return false;
       }
 
-      if (scopeFilter === "international" && competition.scope === "domestic") {
+      if (scopeFilter === "international" && competition.scope !== "continental") {
         return false;
       }
 
@@ -392,12 +360,6 @@ export default function CompetitionsIndexPage() {
     typeFilter !== "all" ||
     regionFilter !== "all";
 
-  const activeContextSummary = [
-    `Escopo: ${describeScopeFilterLabel(scopeFilter)}`,
-    `Tipo: ${describeTypeFilterLabel(typeFilter)}`,
-    `Região: ${regionFilter === "all" ? "Todas" : regionFilter}`,
-  ].join(" · ");
-
   const emptyStateDescription = hasActiveFilters
     ? "Nenhuma competição atende ao recorte atual. Limpe os filtros ou tente outro termo."
     : "Não há competições disponíveis para exibir agora.";
@@ -425,27 +387,26 @@ export default function CompetitionsIndexPage() {
             <p className={styles.headerEyebrow}>Catálogo competitivo</p>
             <h1 className={styles.headerTitle}>Análise de competições</h1>
             <p className={styles.headerLead}>
-              Explore o arquivo histórico por competição, região e tipo, com entrada direta na página
-              da competição e na edição mais recente.
+              Explore o arquivo histórico por competição, região e tipo.
             </p>
 
             <div className={styles.headerTags}>
               <span className={styles.headerTag}>{formatWholeNumber(domestic.length)} nacionais</span>
               <span className={styles.headerTag}>
-                {formatWholeNumber(international.length)} internacionais
+                {formatWholeNumber(international.length)} intercontinentais
               </span>
-              <span className={styles.headerTag}>{formatWholeNumber(globalCompetitions.length)} mundiais</span>
+              <span className={styles.headerTag}>{formatWholeNumber(global.length)} mundiais</span>
             </div>
           </div>
 
           <div className={styles.metricsGrid}>
             <HeaderMetricCard
-              detail="catálogo ativo"
+              detail="catálogo"
               label="Competições"
               value={formatWholeNumber(allCompetitions.length)}
             />
             <HeaderMetricCard
-              detail="edições navegáveis"
+              detail="edições"
               label="Temporadas"
               value={formatWholeNumber(totalSeasonsTracked)}
             />
@@ -480,7 +441,7 @@ export default function CompetitionsIndexPage() {
             >
               <option value="all">Todas</option>
               <option value="domestic">Nacionais</option>
-              <option value="international">Internacionais</option>
+              <option value="international">Intercontinentais</option>
               <option value="global">Mundiais</option>
             </select>
           </label>
@@ -497,7 +458,7 @@ export default function CompetitionsIndexPage() {
               <option value="all">Todos</option>
               <option value="domestic_league">Ligas</option>
               <option value="domestic_cup">Copas</option>
-              <option value="international_cup">Internacionais</option>
+              <option value="international_cup">Intercontinentais</option>
             </select>
           </label>
 
@@ -521,7 +482,11 @@ export default function CompetitionsIndexPage() {
         </div>
 
         <button
-          className={joinClasses("button-pill", hasActiveFilters ? "button-pill-primary" : "button-pill-secondary")}
+          className={joinClasses(
+            "button-pill",
+            hasActiveFilters ? "button-pill-primary" : "button-pill-secondary",
+            styles.filtersResetButton,
+          )}
           disabled={!hasActiveFilters}
           onClick={resetFilters}
           type="button"
@@ -535,16 +500,13 @@ export default function CompetitionsIndexPage() {
           <div>
             <p className={styles.matrixEyebrow}>Catálogo ativo</p>
             <h2 className={styles.matrixTitle}>Competições disponíveis</h2>
-            <p className={styles.matrixDescription}>{activeContextSummary}</p>
           </div>
 
           <div className={styles.matrixSummary}>
             <span className={styles.matrixSummaryBadge}>
               {formatWholeNumber(filteredCompetitions.length)} competições
             </span>
-            <span className={styles.matrixSummaryText}>
-              {formatWholeNumber(filteredSeasonsCount)} temporadas no recorte atual
-            </span>
+            <span className={styles.matrixSummaryBadge}>{formatWholeNumber(filteredSeasonsCount)} temporadas</span>
           </div>
         </div>
 

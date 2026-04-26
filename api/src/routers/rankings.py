@@ -1088,6 +1088,18 @@ def get_ranking(
         date_range_start=dateRangeStart,
         date_range_end=dateRangeEnd,
     )
+    if ranking_config.get("unsupported"):
+        raise AppError(
+            message="Ranking metric is not implemented yet.",
+            code="RANKING_NOT_IMPLEMENTED",
+            status=501,
+            details={
+                "rankingType": normalized_ranking_type,
+                "metricKey": ranking_config["metricKey"],
+                "reason": "Metric currently not materialized in DW for ranking calculation.",
+            },
+        )
+
     stage_scope = _validate_ranking_stage_scope(global_filters)
 
     effective_sort = sortDirection or ranking_config["defaultSort"]
@@ -1097,26 +1109,6 @@ def get_ranking(
         stage_scope=stage_scope,
         min_sample_value=minSampleValue,
     )
-
-    if ranking_config.get("unsupported"):
-        coverage = {
-            "status": "unknown",
-            "label": "Metric currently not materialized in DW for ranking calculation.",
-        }
-        return build_api_response(
-            {
-                "rankingId": normalized_ranking_type,
-                "metricKey": ranking_config["metricKey"],
-                "entity": _resolve_entity_key(ranking_config),
-                "scope": scope_payload,
-                "rows": [],
-                "updatedAt": None,
-                "freshnessClass": freshnessClass,
-            },
-            request_id=_request_id(request),
-            pagination=build_pagination(page, pageSize, 0),
-            coverage=coverage,
-        )
 
     rows: list[dict[str, Any]]
     total_count: int

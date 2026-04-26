@@ -18,11 +18,8 @@ import { PlatformStateSurface } from "@/shared/components/feedback/PlatformState
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import type { CoverageState } from "@/shared/types/coverage.types";
 import {
-  buildCoachesPath,
   buildCompetitionHubPath,
   buildHeadToHeadPath,
-  buildMarketPath,
-  buildPlayersPath,
   buildRankingsHubPath,
   buildTeamsPath,
 } from "@/shared/utils/context-routing";
@@ -536,14 +533,6 @@ export function HomeExecutivePage() {
               </div>
 
               <aside className={styles.heroMetricsPanel}>
-                <div className={styles.heroMetricsHeader}>
-                  <div>
-                    <p className={styles.panelEyebrow}>Escala do acervo</p>
-                    <h2 className={styles.panelTitle}>Resumo pronto para exploração</h2>
-                  </div>
-                  <span className={styles.panelTag}>Dados reais</span>
-                </div>
-
                 <div className={styles.heroMetricsGrid}>
                   {archiveMetrics.map((metric) => (
                     <HeroMetricCard
@@ -555,9 +544,7 @@ export function HomeExecutivePage() {
                   ))}
                 </div>
 
-                <p className={styles.panelNote}>
-                  Nacionais, continentais e exploração histórica no mesmo fluxo de navegação.
-                </p>
+                
               </aside>
             </div>
 
@@ -569,14 +556,9 @@ export function HomeExecutivePage() {
                     Acessos rápidos
                   </h2>
                 </div>
-
-                <p className="max-w-xl text-sm leading-6 text-[#57657a]">
-                  Entradas diretas para os fluxos mais consultados da plataforma sem perder o
-                  contexto.
-                </p>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className={styles.quickLinksGrid}>
                 <QuickLinkCard
                   description="Artilharia, criação e eficiência no mesmo ponto de entrada."
                   href={buildRankingsHubPath(sharedFilters)}
@@ -608,7 +590,6 @@ export function HomeExecutivePage() {
               actionHref="/competitions"
               actionLabel="Ver tudo"
               countLabel={`${competitionGroups.domestic.length} competições`}
-              description="Cobertura prioritária do acervo com acesso direto à temporada mais recente em cada item."
               eyebrow="Catálogo"
               title="Competições Nacionais"
             />
@@ -636,7 +617,6 @@ export function HomeExecutivePage() {
               actionHref="/competitions"
               actionLabel="Ver tudo"
               countLabel={`${competitionGroups.continental.length} competições`}
-              description="Competições continentais com o mesmo nível de leitura de recorte, volume e profundidade."
               eyebrow="Catálogo"
               title="Continentais"
             />
@@ -662,7 +642,6 @@ export function HomeExecutivePage() {
           <div className={styles.sectionPanel}>
             <SectionHeader
               countLabel={`${competitionGroups.world.length} competições`}
-              description="Torneios globais com acesso direto ao hub da Copa do Mundo e ao acervo do Intercontinental."
               eyebrow="Catálogo"
               title="Mundiais"
             />
@@ -686,44 +665,6 @@ export function HomeExecutivePage() {
           </div>
         </div>
       </section>
-
-      <footer className="px-6 pb-12 md:px-10 xl:px-12">
-        <div className={joinClasses(styles.footerShell, "mx-auto max-w-6xl")}>
-          <div className="space-y-3">
-            <span className="font-[family:var(--font-app-headline)] text-xl font-bold tracking-[-0.03em] text-[#003526]">
-              Football Analytics
-            </span>
-            <p className="max-w-xl text-sm leading-7 text-[#57657a]">
-              Base visual editorial para o acervo histórico, competições e exploração analítica do
-              produto.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3 text-sm font-semibold text-[#57657a]">
-            <Link className={styles.footerLink} href="/competitions">
-              Competições
-            </Link>
-            <Link className={styles.footerLink} href={buildPlayersPath(sharedFilters)}>
-              Jogadores
-            </Link>
-            <Link className={styles.footerLink} href={buildTeamsPath(sharedFilters)}>
-              Times
-            </Link>
-            <Link className={styles.footerLink} href={buildHeadToHeadPath(sharedFilters)}>
-              Confronto direto
-            </Link>
-            <Link className={styles.footerLink} href={buildMarketPath(sharedFilters)}>
-              Mercado
-            </Link>
-            <Link className={styles.footerLink} href={buildCoachesPath(sharedFilters)}>
-              Técnicos
-            </Link>
-            <Link className={styles.footerLink} href="/landing">
-              Sobre o produto
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 {
-  "run_id": "external_coach_promotion_20260425T152525Z",
+  "run_id": "external_coach_promotion_20260426T152647Z",
   "executed": true,
   "blocked": false,
   "preflight": {
@@ -21,12 +21,12 @@
   },
   "before": {
     "coach_identity": 2103,
-    "coach_identity_source_ref": 560,
-    "coach_tenure": 340,
-    "fact_assignment": 19104,
-    "fact_public": 19104,
-    "external_fact_assignment": 8201,
-    "external_fact_coaches": 280
+    "coach_identity_source_ref": 562,
+    "coach_tenure": 341,
+    "fact_assignment": 19267,
+    "fact_public": 19267,
+    "external_fact_assignment": 8364,
+    "external_fact_coaches": 281
   },
   "after": {
     "coach_identity": 2103,

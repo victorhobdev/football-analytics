@@ -229,7 +229,7 @@
 .heroMetricsGrid {
   display: grid;
   gap: 0.8rem;
-  margin-top: 1.2rem;
+  margin-top: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -322,6 +322,13 @@
     0 30px 56px -44px rgba(17, 28, 45, 0.08);
 }
 
+.quickLinksGrid {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
 .quickLinkCard,
 .competitionCard,
 .interactiveCard {
@@ -348,7 +355,9 @@
 
 .quickLinkCard {
   border-radius: 1.4rem;
-  padding: 1.1rem;
+  padding: 1.2rem;
+  gap: 1rem;
+  min-height: 13.8rem;
 }
 
 .quickLinkTop,
@@ -662,22 +671,37 @@
   .quickActionsHeader {
     align-items: flex-end;
   }
+
+  .quickLinksGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .quickLinksGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
+  .heroShell {
+    --hero-image-opacity: 1;
+    --hero-image-contrast: 1.14;
+    --hero-image-brightness: 0.84;
+  }
+
   .heroShell::before {
     background-position: center 16%;
-    opacity: 0.8;
   }
 
   .heroShell::after {
     background:
-      radial-gradient(circle at 78% 12%, rgba(196, 220, 255, 0.12), transparent 24%),
+      radial-gradient(circle at 78% 12%, rgba(196, 220, 255, 0.06), transparent 24%),
       linear-gradient(
         180deg,
-        rgba(249, 251, 249, 0.18) 0%,
-        rgba(247, 250, 248, 0.06) 44%,
-        rgba(242, 247, 244, 0.18) 100%
+        rgba(249, 251, 249, 0.04) 0%,
+        rgba(247, 250, 248, 0.02) 44%,
+        rgba(7, 27, 21, 0.08) 100%
       );
   }
 
@@ -710,6 +734,15 @@
 }
 
 @media (max-width: 479px) {
+  .heroCtaRow {
+    width: 100%;
+  }
+
+  .primaryCta,
+  .secondaryCta {
+    width: 100%;
+  }
+
   .statsGrid {
     grid-template-columns: 1fr;
   }

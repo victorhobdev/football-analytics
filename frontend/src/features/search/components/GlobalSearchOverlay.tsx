@@ -245,6 +245,8 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim());
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const searchQuery = useGlobalSearch(deferredQuery, {
     enabled: isOpen,
   });
@@ -262,8 +264,22 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
       return;
     }
 
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
     inputRef.current?.focus();
     inputRef.current?.select();
+
+    return () => {
+      const previouslyFocusedElement = previouslyFocusedElementRef.current;
+
+      if (
+        previouslyFocusedElement?.isConnected &&
+        !previouslyFocusedElement.closest("[inert], [aria-hidden='true']")
+      ) {
+        previouslyFocusedElement.focus();
+      }
+
+      previouslyFocusedElementRef.current = null;
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -274,10 +290,67 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    const getFocusableElements = () => {
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return [];
+      }
+
+      return Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => {
+        const style = window.getComputedStyle(element);
+        return style.display !== "none" && style.visibility !== "hidden";
+      });
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = getFocusableElements();
+      const dialog = dialogRef.current;
+
+      if (!dialog || focusableElements.length === 0) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === firstElement || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        lastElement.focus();
+        return;
+      }
+
+      if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.body.style.overflow = originalOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -285,14 +358,18 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
 
   return (
     <div
+      aria-label="Busca global"
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(7,16,12,0.58)] px-4 pb-8 pt-24 backdrop-blur-md"
+      id="global-search-dialog"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
         }
       }}
+      ref={dialogRef}
       role="dialog"
+      tabIndex={-1}
     >
       <div className="w-full max-w-4xl overflow-hidden rounded-[1.9rem] border border-[rgba(191,201,195,0.45)] bg-[rgba(245,248,241,0.96)] shadow-[0_40px_120px_rgba(7,16,12,0.35)]">
         <div className="border-b border-[rgba(191,201,195,0.45)] px-5 py-5 md:px-6">
@@ -308,7 +385,8 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
               value={query}
             />
             <button
-              className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center rounded-full bg-[rgba(216,227,251,0.82)] px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#1f2d40] transition-colors hover:bg-[rgba(216,227,251,0.98)]"
+              aria-label="Fechar busca global"
+              className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center rounded-full bg-[rgba(216,227,251,0.82)] px-3 py-1.5 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#1f2d40] transition-colors hover:bg-[rgba(216,227,251,0.98)]"
               onClick={onClose}
               type="button"
             >

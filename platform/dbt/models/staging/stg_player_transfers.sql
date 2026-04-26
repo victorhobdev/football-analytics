@@ -12,6 +12,14 @@ select
     completed,
     career_ended,
     type_id,
+    case
+        when career_ended then 'career_end'
+        when type_id = 219 then 'permanent_transfer'
+        when type_id = 218 then 'loan_out'
+        when type_id = 9688 then 'loan_return'
+        when type_id = 220 then 'free_transfer'
+        else 'unknown'
+    end as movement_kind,
     position_id,
     amount,
     payload,

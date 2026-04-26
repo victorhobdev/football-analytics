@@ -6,6 +6,15 @@ export type MarketTransfersSortDirection = "asc" | "desc";
 
 export type MarketTeamDirection = "all" | "arrivals" | "departures";
 
+export type MarketTransferMovementKind =
+  | "permanent_transfer"
+  | "loan_out"
+  | "loan_return"
+  | "free_transfer"
+  | "contract_end"
+  | "career_end"
+  | "unknown";
+
 export interface MarketGlobalFilters {
   competitionId?: string | null;
   seasonId?: string | null;
@@ -47,6 +56,7 @@ export interface MarketTransferItem {
   careerEnded: boolean;
   typeId?: number | null;
   typeName?: string | null;
+  movementKind?: MarketTransferMovementKind | null;
   amount?: string | null;
   amountValue?: number | null;
   currency?: string | null;

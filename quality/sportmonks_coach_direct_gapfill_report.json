@@ -1,24 +1,26 @@
 {
-  "run_id": "sportmonks_coach_multi_gapfill_1777080703",
-  "fixtures_requested": 418,
-  "multi_requests_planned": 21,
+  "executed": true,
+  "run_id": "sportmonks_coach_multi_gapfill_1777217435",
+  "fixtures_requested": 332,
+  "multi_requests_planned": 17,
   "failed_chunks": 0,
-  "api_requests": 21,
-  "fixtures_seen_on_dates": 139,
-  "fixtures_with_payload": 139,
-  "fixtures_without_payload": 418,
-  "coach_rows_seen": 194,
-  "public_assignments_upserted": 194,
+  "api_requests": 17,
+  "fixtures_seen_on_dates": 129,
+  "fixtures_with_payload": 129,
+  "fixtures_without_payload": 332,
+  "coach_rows_seen": 184,
+  "public_assignments_upserted": 184,
   "blocked_conflicts_upserted": 0,
+  "protected_existing_skipped": 0,
   "coverage_before": {
     "total_match_teams": 9456,
-    "public_assignments": 8756,
-    "coverage_pct": 92.6
+    "public_assignments": 9046,
+    "coverage_pct": 95.66
   },
   "coverage_after": {
     "total_match_teams": 9456,
-    "public_assignments": 8756,
-    "coverage_pct": 92.6
+    "public_assignments": 9046,
+    "coverage_pct": 95.66
   },
   "flamengo_after": {
     "total_match_teams": 114,
@@ -28,14 +30,14 @@
   "table_counts_before": {
     "raw.sportmonks_coaches": 1959,
     "raw.sportmonks_fixture_coaches": 23559,
-    "mart.fact_coach_match_assignment": 10903
+    "mart.fact_coach_match_assignment": 19267
   },
   "table_counts_after": {
     "raw.sportmonks_coaches": 1959,
     "raw.sportmonks_fixture_coaches": 23559,
-    "mart.fact_coach_match_assignment": 10903
+    "mart.fact_coach_match_assignment": 19267
   },
   "message_counts": {
-    "No result(s) found matching your request. Either the query did not return any results or you don't have access to it via your current subscription.": 10
+    "No result(s) found matching your request. Either the query did not return any results or you don't have access to it via your current subscription.": 7
   }
 }

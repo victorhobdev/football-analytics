@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import re
 from typing import Any, Literal
 
 from fastapi import APIRouter, Query, Request
@@ -23,34 +24,11 @@ COACHES_DATA_CUTOFF_SQL = f"date '{PRODUCT_DATA_CUTOFF.isoformat()}'"
 CoachesSortBy = Literal["coachName", "teamName", "matches", "adjustedPpm", "pointsPerMatch", "wins", "startDate"]
 SortDirection = Literal["asc", "desc"]
 
-
-def _coach_name_sql(*, include_pending_placeholder: bool) -> str:
-    resolved_name_sql = """
-        coalesce(
-            nullif(trim(dc.coach_name), ''),
-            nullif(trim(rc.coach_name), ''),
-            case
-                when lower(trim(tc.coach_name)) like 'not applicable %%' then null
-                else nullif(trim(tc.coach_name), '')
-            end,
-            nullif(
-                trim(concat_ws(
-                    ' ',
-                    case
-                        when lower(trim(tc.payload->>'given_name')) in ('not applicable', 'n/a', 'na') then null
-                        else nullif(trim(tc.payload->>'given_name'), '')
-                    end,
-                    nullif(trim(tc.payload->>'family_name'), '')
-                )),
-                ''
-            )
-        )
-    """
-
-    if not include_pending_placeholder:
-        return resolved_name_sql
-
-    return f"coalesce({resolved_name_sql}, concat('Nome pendente #', tc.coach_id::text))"
+TECHNICAL_FALLBACK_LABEL_PATTERN = re.compile(
+    r"^(?:Unknown (?:Coach|Team) #\d+|(?:Coach|Team) #\d+|T[eé]cnico #\d+|\d+)$",
+    re.IGNORECASE,
+)
+PLACEHOLDER_IMAGE_PATTERN = re.compile(r"placeholder", re.IGNORECASE)
 
 
 def _request_id(request: Request) -> str | None:
@@ -88,21 +66,65 @@ def _to_text(value: Any) -> str | None:
     return text_value or None
 
 
-def _coach_match_scope_filters_sql(
-    filters: GlobalFilters,
-    *,
-    tenure_alias: str,
-) -> tuple[str, list[Any]]:
-    where_clauses = ["1=1"]
-    params: list[Any] = []
-    append_fact_match_filters(where_clauses, params, alias="fm", filters=filters)
+def _is_technical_fallback_label(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
 
-    if filters.venue == VenueFilter.home:
-        where_clauses.append(f"fm.home_team_id = {tenure_alias}.team_id")
-    elif filters.venue == VenueFilter.away:
-        where_clauses.append(f"fm.away_team_id = {tenure_alias}.team_id")
+    return bool(TECHNICAL_FALLBACK_LABEL_PATTERN.match(value.strip()))
 
-    return " and ".join(where_clauses), params
+
+def _is_placeholder_image(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+
+    return bool(PLACEHOLDER_IMAGE_PATTERN.search(value))
+
+
+def _public_coach_name(value: Any) -> str:
+    text_value = _to_text(value)
+    if text_value is not None and not _is_technical_fallback_label(text_value):
+        return text_value
+
+    return "Nome indisponível"
+
+
+def _public_team_name(value: Any) -> str:
+    text_value = _to_text(value)
+    if text_value is not None and not _is_technical_fallback_label(text_value):
+        return text_value
+
+    return "Time indisponível"
+
+
+def _public_photo_url(row: dict[str, Any]) -> str | None:
+    photo_url = _to_text(row.get("photo_url"))
+    if photo_url is None or _is_placeholder_image(photo_url):
+        return None
+
+    return photo_url
+
+
+def _has_public_photo(row: dict[str, Any]) -> bool:
+    return bool(row.get("has_real_photo")) and _public_photo_url(row) is not None
+
+
+def _media_status(row: dict[str, Any]) -> str:
+    if _has_public_photo(row):
+        return "real"
+
+    if bool(row.get("is_placeholder_image")) or _is_placeholder_image(row.get("photo_url")):
+        return "provider_placeholder"
+
+    return "editorial_fallback"
+
+
+def _coach_data_status(*, coach_name: Any, team_name: Any) -> str:
+    if _is_technical_fallback_label(coach_name) or _is_technical_fallback_label(team_name):
+        return "partial"
+    if _to_text(coach_name) is None or _to_text(team_name) is None:
+        return "partial"
+
+    return "confirmed"
 
 
 def _coach_assignment_scope_filters_sql(
@@ -123,121 +145,6 @@ def _coach_assignment_scope_filters_sql(
         where_clauses.append(f"fm.away_team_id = {assignment_alias}.team_id")
 
     return " and ".join(where_clauses), params
-
-
-def _build_match_scope_ctes(where_sql: str, *, tenure_source: str = "filtered_tenures") -> str:
-    return f"""
-        match_candidate_tenures as (
-            select
-                ft.*,
-                exists (
-                    select 1
-                    from {tenure_source} peer
-                    where peer.team_id = ft.team_id
-                      and peer.coach_tenure_id <> ft.coach_tenure_id
-                      and peer.position_id = 221
-                      and daterange(coalesce(peer.start_date, date '1900-01-01'), coalesce(peer.end_date, {COACHES_DATA_CUTOFF_SQL}), '[]')
-                          && daterange(coalesce(ft.start_date, date '1900-01-01'), coalesce(ft.end_date, {COACHES_DATA_CUTOFF_SQL}), '[]')
-                ) as has_head_coach_overlap
-            from {tenure_source} ft
-        ),
-        base_scoped_matches as (
-            select
-                ft.coach_id,
-                ft.coach_tenure_id,
-                ft.team_id,
-                ft.position_id,
-                ft.active,
-                ft.temporary,
-                ft.start_date,
-                ft.end_date,
-                ft.payload,
-                fm.match_id,
-                fm.date_day,
-                fm.league_id,
-                null::text as league_name,
-                fm.season,
-                case
-                    when fm.home_team_id = ft.team_id and coalesce(fm.home_goals, 0) > coalesce(fm.away_goals, 0) then 'W'
-                    when fm.away_team_id = ft.team_id and coalesce(fm.away_goals, 0) > coalesce(fm.home_goals, 0) then 'W'
-                    when coalesce(fm.home_goals, 0) = coalesce(fm.away_goals, 0) then 'D'
-                    else 'L'
-                end as result,
-                case
-                    when fm.home_team_id = ft.team_id and coalesce(fm.home_goals, 0) > coalesce(fm.away_goals, 0) then 3
-                    when fm.away_team_id = ft.team_id and coalesce(fm.away_goals, 0) > coalesce(fm.home_goals, 0) then 3
-                    when coalesce(fm.home_goals, 0) = coalesce(fm.away_goals, 0) then 1
-                    else 0
-                end as points,
-                case
-                    when fm.home_team_id = ft.team_id then coalesce(fm.home_goals, 0)
-                    else coalesce(fm.away_goals, 0)
-                end as goals_for,
-                case
-                    when fm.home_team_id = ft.team_id then coalesce(fm.away_goals, 0)
-                    else coalesce(fm.home_goals, 0)
-                end as goals_against
-            from match_candidate_tenures ft
-            inner join mart.fact_matches fm
-              on (fm.home_team_id = ft.team_id or fm.away_team_id = ft.team_id)
-             and fm.date_day >= coalesce(ft.start_date, date '1900-01-01')
-             and fm.date_day <= coalesce(ft.end_date, date '2999-12-31')
-             and fm.date_day <= {COACHES_DATA_CUTOFF_SQL}
-            where {where_sql}
-              and (
-                ft.payload->>'edition_key' is null
-                or (
-                    fm.competition_key = split_part(ft.payload->>'edition_key', '__', 1)
-                    and fm.season::text = split_part(ft.payload->>'edition_key', '__', 2)
-                )
-              )
-              and (
-                ft.position_id is null
-                or ft.position_id <> 560
-                or coalesce(ft.active, false)
-                or coalesce(ft.temporary, false)
-                or not ft.has_head_coach_overlap
-              )
-        ),
-        ranked_match_candidates as (
-            select
-                bsm.*,
-                row_number() over (
-                    partition by bsm.match_id, bsm.team_id
-                    order by
-                        case
-                            when bsm.position_id = 221 then 0
-                            when bsm.payload->>'coach_tenure_scope' = 'edition_scoped_manager_appointment' then 0
-                            when coalesce(bsm.temporary, false) then 1
-                            when coalesce(bsm.active, false) then 2
-                            else 3
-                        end,
-                        coalesce(bsm.start_date, date '1900-01-01') desc,
-                        coalesce(bsm.end_date, {COACHES_DATA_CUTOFF_SQL}) asc,
-                        bsm.coach_tenure_id desc
-                ) as rn_match_owner
-            from base_scoped_matches bsm
-        ),
-        owned_scoped_matches as (
-            select *
-            from ranked_match_candidates
-            where rn_match_owner = 1
-        ),
-        ranked_matches as (
-            select
-                bsm.*,
-                row_number() over (
-                    partition by bsm.coach_id
-                    order by bsm.date_day desc, bsm.match_id desc
-                ) as rn_recent
-            from owned_scoped_matches bsm
-        ),
-        filtered_matches as (
-            select *
-            from ranked_matches
-            where (%s::int is null or rn_recent <= %s)
-        )
-    """
 
 
 def _serialize_context(
@@ -335,23 +242,46 @@ def get_coaches(
                 f.coach_identity_id as coach_id,
                 coalesce(
                     nullif(trim(ci.display_name), ''),
-                    nullif(trim(ci.canonical_name), ''),
-                    concat('Tecnico #', f.coach_identity_id::text)
+                    nullif(trim(ci.canonical_name), '')
                 ) as coach_name,
                 coalesce(
-                    nullif(trim(ci.image_url), ''),
-                    nullif(trim(dc.image_path), ''),
-                    nullif(trim(rc.image_path), '')
+                    case
+                        when nullif(trim(coalesce(ci.image_url, '')), '') is not null
+                         and ci.image_url not ilike '%%placeholder%%'
+                            then nullif(trim(ci.image_url), '')
+                    end,
+                    case
+                        when nullif(trim(coalesce(dc.image_path, '')), '') is not null
+                         and coalesce(dc.has_real_photo, false)
+                         and dc.image_path not ilike '%%placeholder%%'
+                            then nullif(trim(dc.image_path), '')
+                    end,
+                    case
+                        when nullif(trim(coalesce(rc.image_path, '')), '') is not null
+                         and rc.image_path not ilike '%%placeholder%%'
+                            then nullif(trim(rc.image_path), '')
+                    end
                 ) as photo_url,
                 (
-                    nullif(trim(coalesce(ci.image_url, '')), '') is not null
-                    or coalesce(dc.has_real_photo, false)
+                    (
+                        nullif(trim(coalesce(ci.image_url, '')), '') is not null
+                        and ci.image_url not ilike '%%placeholder%%'
+                    )
+                    or (
+                        coalesce(dc.has_real_photo, false)
+                        and coalesce(dc.image_path, '') not ilike '%%placeholder%%'
+                    )
                     or (
                         nullif(trim(coalesce(rc.image_path, '')), '') is not null
                         and rc.image_path not ilike '%%placeholder%%'
                     )
                 ) as has_real_photo,
-                coalesce(nullif(trim(dt.team_name), ''), concat('Unknown Team #', f.team_id::text)) as team_name,
+                (
+                    coalesce(ci.image_url, '') ilike '%%placeholder%%'
+                    or coalesce(dc.is_placeholder_image, false)
+                    or coalesce(rc.image_path, '') ilike '%%placeholder%%'
+                ) as is_placeholder_image,
+                nullif(trim(dt.team_name), '') as team_name,
                 coalesce(ct.role = 'interim_head_coach', false) as temporary,
                 (
                     ct.start_date is not null
@@ -444,6 +374,7 @@ def get_coaches(
                 coach_name,
                 max(photo_url) filter (where photo_url is not null) as photo_url,
                 bool_or(has_real_photo) as has_real_photo,
+                bool_or(is_placeholder_image) as is_placeholder_image,
                 team_id,
                 team_name,
                 bool_or(active) as active,
@@ -493,6 +424,7 @@ def get_coaches(
                 max(ts.coach_name) as coach_name,
                 max(ts.photo_url) filter (where ts.photo_url is not null) as photo_url,
                 bool_or(ts.has_real_photo) as has_real_photo,
+                bool_or(ts.is_placeholder_image) as is_placeholder_image,
                 count(*) as tenure_count,
                 coalesce(sum(case when ts.active then 1 else 0 end), 0) as active_tenures,
                 coalesce(sum(ts.matches), 0) as matches,
@@ -557,6 +489,7 @@ def get_coaches(
             coach_name,
             photo_url,
             has_real_photo,
+            is_placeholder_image,
             tenure_count,
             active_tenures,
             matches,
@@ -605,11 +538,13 @@ def get_coaches(
     items = [
         {
             "coachId": str(row["coach_id"]),
-            "coachName": row.get("coach_name"),
-            "photoUrl": _to_text(row.get("photo_url")),
-            "hasRealPhoto": bool(row.get("has_real_photo")),
+            "coachName": _public_coach_name(row.get("coach_name")),
+            "photoUrl": _public_photo_url(row),
+            "hasRealPhoto": _has_public_photo(row),
+            "mediaStatus": _media_status(row),
             "teamId": str(row["team_id"]) if row.get("team_id") is not None else None,
-            "teamName": row.get("team_name"),
+            "teamName": _public_team_name(row.get("team_name")),
+            "dataStatus": _coach_data_status(coach_name=row.get("coach_name"), team_name=row.get("team_name")),
             "active": bool(row.get("active")),
             "temporary": bool(row.get("temporary")),
             "tenureCount": _to_int(row.get("tenure_count")),
@@ -689,23 +624,46 @@ def get_coach_profile(
                 f.coach_identity_id as coach_id,
                 coalesce(
                     nullif(trim(ci.display_name), ''),
-                    nullif(trim(ci.canonical_name), ''),
-                    concat('Tecnico #', f.coach_identity_id::text)
+                    nullif(trim(ci.canonical_name), '')
                 ) as coach_name,
                 coalesce(
-                    nullif(trim(ci.image_url), ''),
-                    nullif(trim(dc.image_path), ''),
-                    nullif(trim(rc.image_path), '')
+                    case
+                        when nullif(trim(coalesce(ci.image_url, '')), '') is not null
+                         and ci.image_url not ilike '%%placeholder%%'
+                            then nullif(trim(ci.image_url), '')
+                    end,
+                    case
+                        when nullif(trim(coalesce(dc.image_path, '')), '') is not null
+                         and coalesce(dc.has_real_photo, false)
+                         and dc.image_path not ilike '%%placeholder%%'
+                            then nullif(trim(dc.image_path), '')
+                    end,
+                    case
+                        when nullif(trim(coalesce(rc.image_path, '')), '') is not null
+                         and rc.image_path not ilike '%%placeholder%%'
+                            then nullif(trim(rc.image_path), '')
+                    end
                 ) as photo_url,
                 (
-                    nullif(trim(coalesce(ci.image_url, '')), '') is not null
-                    or coalesce(dc.has_real_photo, false)
+                    (
+                        nullif(trim(coalesce(ci.image_url, '')), '') is not null
+                        and ci.image_url not ilike '%%placeholder%%'
+                    )
+                    or (
+                        coalesce(dc.has_real_photo, false)
+                        and coalesce(dc.image_path, '') not ilike '%%placeholder%%'
+                    )
                     or (
                         nullif(trim(coalesce(rc.image_path, '')), '') is not null
                         and rc.image_path not ilike '%%placeholder%%'
                     )
                 ) as has_real_photo,
-                coalesce(nullif(trim(dt.team_name), ''), concat('Unknown Team #', f.team_id::text)) as team_name,
+                (
+                    coalesce(ci.image_url, '') ilike '%%placeholder%%'
+                    or coalesce(dc.is_placeholder_image, false)
+                    or coalesce(rc.image_path, '') ilike '%%placeholder%%'
+                ) as is_placeholder_image,
+                nullif(trim(dt.team_name), '') as team_name,
                 coalesce(ct.role = 'interim_head_coach', false) as temporary,
                 (
                     ct.start_date is not null
@@ -805,6 +763,7 @@ def get_coach_profile(
                 coach_name,
                 max(photo_url) filter (where photo_url is not null) as photo_url,
                 bool_or(has_real_photo) as has_real_photo,
+                bool_or(is_placeholder_image) as is_placeholder_image,
                 team_id,
                 team_name,
                 bool_or(active) as active,
@@ -849,6 +808,7 @@ def get_coach_profile(
                 max(ts.coach_name) as coach_name,
                 max(ts.photo_url) filter (where ts.photo_url is not null) as photo_url,
                 bool_or(ts.has_real_photo) as has_real_photo,
+                bool_or(ts.is_placeholder_image) as is_placeholder_image,
                 count(*) as tenure_count,
                 coalesce(sum(case when ts.active then 1 else 0 end), 0) as active_tenures,
                 count(distinct ts.team_id) as teams_count,
@@ -877,6 +837,7 @@ def get_coach_profile(
             cs.coach_name,
             cs.photo_url,
             cs.has_real_photo,
+            cs.is_placeholder_image,
             cs.tenure_count,
             cs.active_tenures,
             cs.teams_count,
@@ -958,7 +919,8 @@ def get_coach_profile(
         {
             "coachTenureId": str(row["coach_tenure_id"]),
             "teamId": str(row["team_id"]) if row.get("team_id") is not None else None,
-            "teamName": row.get("team_name"),
+            "teamName": _public_team_name(row.get("team_name")),
+            "dataStatus": _coach_data_status(coach_name=first_row.get("coach_name"), team_name=row.get("team_name")),
             "active": bool(row.get("active")),
             "temporary": bool(row.get("temporary")),
             "startDate": row.get("start_date"),
@@ -981,11 +943,16 @@ def get_coach_profile(
     profile = {
         "coach": {
             "coachId": str(first_row["coach_id"]),
-            "coachName": first_row.get("coach_name"),
-            "photoUrl": _to_text(first_row.get("photo_url")),
-            "hasRealPhoto": bool(first_row.get("has_real_photo")),
+            "coachName": _public_coach_name(first_row.get("coach_name")),
+            "photoUrl": _public_photo_url(first_row),
+            "hasRealPhoto": _has_public_photo(first_row),
+            "mediaStatus": _media_status(first_row),
             "teamId": str(first_row["current_team_id"]) if first_row.get("current_team_id") is not None else None,
-            "teamName": first_row.get("current_team_name"),
+            "teamName": _public_team_name(first_row.get("current_team_name")),
+            "dataStatus": _coach_data_status(
+                coach_name=first_row.get("coach_name"),
+                team_name=first_row.get("current_team_name"),
+            ),
             "active": bool(first_row.get("current_active")),
             "temporary": bool(first_row.get("current_temporary")),
             "startDate": first_row.get("current_start_date"),

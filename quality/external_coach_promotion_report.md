@@ -33,10 +33,10 @@
 ## Antes e depois
 
 - `coach_identity`: `2103` -> `2103` (`+0`)
-- `coach_identity_source_ref`: `560` -> `562` (`+2`)
-- `coach_tenure`: `340` -> `341` (`+1`)
-- `fact_assignment`: `19104` -> `19267` (`+163`)
-- `fact_public`: `19104` -> `19267` (`+163`)
+- `coach_identity_source_ref`: `562` -> `562` (`+0`)
+- `coach_tenure`: `341` -> `341` (`+0`)
+- `fact_assignment`: `19267` -> `19267` (`+0`)
+- `fact_public`: `19267` -> `19267` (`+0`)
 
 ## Qualidade pos-promocao
 

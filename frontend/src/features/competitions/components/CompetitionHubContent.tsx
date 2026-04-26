@@ -109,7 +109,7 @@ function describeCompetitionType(competition: CompetitionDef): string {
     return "Copa nacional";
   }
 
-  return "Copa internacional";
+  return "Copa intercontinental";
 }
 
 function formatWholeNumber(value: number | null | undefined): string {
@@ -419,9 +419,6 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
             <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[1.88rem] font-extrabold tracking-[-0.04em] text-[#111c2d] md:text-[2.05rem]">
               Recordes oficiais da competição
             </h2>
-            <p className="mt-2 text-sm/6 text-[#57657a]">
-              Maiores campeões e artilheiros históricos da competição.
-            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <ProfileCoveragePill coverage={historicalStatsQuery.coverage} />
@@ -621,7 +618,7 @@ function CompetitionHero({
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
+            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4 text-center">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
                 Temporadas
               </p>
@@ -629,7 +626,7 @@ function CompetitionHero({
                 {formatWholeNumber(seasonsCount)}
               </p>
             </div>
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
+            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4 text-center">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
                 Última edição
               </p>
@@ -637,11 +634,11 @@ function CompetitionHero({
                 {latestSeason?.label ?? "-"}
               </p>
             </div>
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
+            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4 text-center">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
                 Maior campeão
               </p>
-              <div className="mt-3 flex min-w-0 items-center gap-3">
+              <div className="mt-3 flex min-w-0 items-center justify-center gap-3">
                 {historicalStatsQuery.isLoading ? null : (
                   <ProfileMedia
                     alt={`Maior campeão ${allTimeChampionName}`}
@@ -653,7 +650,7 @@ function CompetitionHero({
                     shape="circle"
                   />
                 )}
-                <div className="min-w-0">
+                <div className="min-w-0 text-left">
                   <p className="truncate font-[family:var(--font-profile-headline)] text-[1.2rem] font-extrabold leading-tight tracking-[-0.04em] text-[#111c2d]">
                     {allTimeChampionName}
                   </p>
@@ -943,10 +940,7 @@ function SeasonsGrid({
           <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold tracking-[-0.05em] text-[#111c2d]">
             Escolha a temporada
           </h2>
-          <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
-            Cada edição abre uma página específica, preservando o contexto correto para partidas,
-            tabela, mata-mata, rankings, times e jogadores.
-          </p>
+          
         </div>
         <Link
           className="button-pill button-pill-secondary hover:-translate-y-0.5"

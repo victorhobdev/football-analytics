@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import time
@@ -26,6 +27,16 @@ from scripts.ingest_sportmonks_reliability_pilot import (
 REPORT_PATH = ROOT / "quality" / "sportmonks_coach_direct_gapfill_report.md"
 JSON_PATH = ROOT / "quality" / "sportmonks_coach_direct_gapfill_report.json"
 PROVIDER_YEARS = [2024, 2025]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Preenche lacunas de tecnico por partida usando fixtures/coaches da SportMonks."
+    )
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="Executa as escritas em transacao e desfaz no final.")
+    mode.add_argument("--execute", action="store_true", help="Grava o gapfill no banco.")
+    return parser.parse_args()
 
 
 def _missing_fixture_ids() -> list[dict[str, Any]]:
@@ -128,10 +139,10 @@ def _flamengo_coverage() -> dict[str, Any]:
     }
 
 
-def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -> tuple[int, int, int]:
+def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -> tuple[int, int, int, int]:
     fixture_id = fixture.get("id")
     if fixture_id is None:
-        return (0, 0, 0)
+        return (0, 0, 0, 0)
     fixture_id_int = int(fixture_id)
     fixture_date = _date(fixture.get("starting_at"))
     coaches = fixture.get("coaches") if isinstance(fixture.get("coaches"), list) else []
@@ -368,8 +379,23 @@ def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -
 
     public_assignments = 0
     blocked_conflicts = 0
+    protected_existing_skipped = 0
     for team_id, candidates_by_coach in grouped.items():
         candidates = list(candidates_by_coach.values())
+        cursor.execute(
+            """
+            select source
+            from mart.fact_coach_match_assignment
+            where match_id = %s
+              and team_id = %s
+            """,
+            (fixture_id_int, team_id),
+        )
+        existing_assignment = cursor.fetchone()
+        if existing_assignment and existing_assignment.get("source") != "sportmonks_fixture_coaches":
+            protected_existing_skipped += 1
+            continue
+
         if len(candidates) == 1 and candidates[0]["name"]:
             candidate = candidates[0]
             cursor.execute(
@@ -396,10 +422,13 @@ def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -
                   source = excluded.source,
                   source_record_id = excluded.source_record_id,
                   updated_at = now()
+                where mart.fact_coach_match_assignment.source = 'sportmonks_fixture_coaches'
+                returning 1
                 """,
                 (fixture_id_int, team_id, candidate["source_record_id"], candidate["coach_id"]),
             )
-            public_assignments += 1
+            if cursor.fetchone() is not None:
+                public_assignments += 1
         elif candidates:
             cursor.execute(
                 """
@@ -418,6 +447,8 @@ def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -
                   source = excluded.source,
                   source_record_id = excluded.source_record_id,
                   updated_at = now()
+                where mart.fact_coach_match_assignment.source = 'sportmonks_fixture_coaches'
+                returning 1
                 """,
                 (
                     fixture_id_int,
@@ -426,9 +457,10 @@ def _upsert_fixture_payload(cursor: Any, fixture: dict[str, Any], run_id: str) -
                     f"fixture:{fixture_id_int}:team:{team_id}:blocked_conflict",
                 ),
             )
-            blocked_conflicts += 1
+            if cursor.fetchone() is not None:
+                blocked_conflicts += 1
 
-    return (len(coaches), public_assignments, blocked_conflicts)
+    return (len(coaches), public_assignments, blocked_conflicts, protected_existing_skipped)
 
 
 def _write_report(summary: dict[str, Any]) -> None:
@@ -438,6 +470,7 @@ def _write_report(summary: dict[str, Any]) -> None:
     lines = [
         "# SportMonks coach direct gapfill report",
         "",
+        f"- Mode: `{'EXECUCAO' if summary['executed'] else 'DRY-RUN'}`",
         f"- Run id: `{summary['run_id']}`",
         f"- Missing fixtures targeted: `{summary['fixtures_requested']}`",
         f"- Multi requests planned: `{summary['multi_requests_planned']}`",
@@ -447,8 +480,9 @@ def _write_report(summary: dict[str, Any]) -> None:
         f"- Fixtures with payload: `{summary['fixtures_with_payload']}`",
         f"- Fixtures still missing after gapfill: `{summary['fixtures_without_payload']}`",
         f"- Coach rows seen: `{summary['coach_rows_seen']}`",
-        f"- Public assignments upserted: `{summary['public_assignments_upserted']}`",
+        f"- Public assignments inserted/refreshed: `{summary['public_assignments_upserted']}`",
         f"- Blocked conflicts upserted: `{summary['blocked_conflicts_upserted']}`",
+        f"- Protected existing assignments skipped: `{summary['protected_existing_skipped']}`",
         "",
         "## Coverage",
         "",
@@ -469,6 +503,8 @@ def _chunks(values: list[int], size: int) -> list[list[int]]:
 
 
 def main() -> None:
+    args = parse_args()
+    execute = not args.dry_run
     run_id = f"sportmonks_coach_multi_gapfill_{int(time.time())}"
     client = SportMonksClient()
     missing = _missing_fixture_ids()
@@ -487,6 +523,7 @@ def main() -> None:
     coach_rows_seen = 0
     public_assignments = 0
     blocked_conflicts = 0
+    protected_existing_skipped = 0
     message_counts: dict[str, int] = defaultdict(int)
 
     chunks = _chunks(missing_ids, 20)
@@ -502,7 +539,10 @@ def main() -> None:
                 except RuntimeError as exc:
                     failed_chunks += 1
                     message_counts[str(exc)[:240]] += 1
-                    conn.commit()
+                    if execute:
+                        conn.commit()
+                    else:
+                        conn.rollback()
                     continue
                 rows = payload.get("data") if isinstance(payload.get("data"), list) else []
                 if payload.get("message"):
@@ -513,12 +553,16 @@ def main() -> None:
                     fixture_id = fixture.get("id")
                     if fixture_id is None or int(fixture_id) not in fixture_id_set:
                         continue
-                    seen, assigned, blocked = _upsert_fixture_payload(cursor, fixture, run_id)
+                    seen, assigned, blocked, protected_skipped = _upsert_fixture_payload(cursor, fixture, run_id)
                     fixtures_matched += 1
                     coach_rows_seen += seen
                     public_assignments += assigned
                     blocked_conflicts += blocked
-            conn.commit()
+                    protected_existing_skipped += protected_skipped
+            if execute:
+                conn.commit()
+            else:
+                conn.rollback()
 
     after = _provider_window_coverage()
     remaining_ids = {int(row["match_id"]) for row in _missing_fixture_ids()}
@@ -529,6 +573,7 @@ def main() -> None:
         "mart.fact_coach_match_assignment": _table_count("mart.fact_coach_match_assignment"),
     }
     summary = {
+        "executed": execute,
         "run_id": run_id,
         "fixtures_requested": len(missing),
         "multi_requests_planned": len(chunks),
@@ -540,6 +585,7 @@ def main() -> None:
         "coach_rows_seen": coach_rows_seen,
         "public_assignments_upserted": public_assignments,
         "blocked_conflicts_upserted": blocked_conflicts,
+        "protected_existing_skipped": protected_existing_skipped,
         "coverage_before": before,
         "coverage_after": after,
         "flamengo_after": _flamengo_coverage(),

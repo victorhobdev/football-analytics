@@ -25,6 +25,10 @@ def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
 
 
+def _to_int_count(value: Any) -> int:
+    return int(value or 0)
+
+
 def _normalize_search_value(value: str | None) -> str | None:
     if value is None:
         return None
@@ -607,14 +611,14 @@ def get_players(
             "recentTeams": _normalize_recent_teams(row.get("recent_teams")),
             "position": row.get("position_name"),
             "nationality": row.get("nationality"),
-            "matchesPlayed": int(row.get("matches_played") or 0),
-            "minutesPlayed": float(row.get("minutes_played") or 0),
-            "goals": float(row.get("goals") or 0),
-            "assists": float(row.get("assists") or 0),
-            "shotsTotal": float(row.get("shots_total") or 0),
+            "matchesPlayed": _to_int_count(row.get("matches_played")),
+            "minutesPlayed": _to_int_count(row.get("minutes_played")),
+            "goals": _to_int_count(row.get("goals")),
+            "assists": _to_int_count(row.get("assists")),
+            "shotsTotal": _to_int_count(row.get("shots_total")),
             "passAccuracyPct": None,
-            "yellowCards": float(row.get("yellow_cards") or 0),
-            "redCards": float(row.get("red_cards") or 0),
+            "yellowCards": _to_int_count(row.get("yellow_cards")),
+            "redCards": _to_int_count(row.get("red_cards")),
             "rating": float(row["rating"]) if row.get("rating") is not None else None,
         }
         for row in rows
@@ -1071,12 +1075,12 @@ def get_player_profile(
                     int(row.get("goals_for") or 0),
                     int(row.get("goals_against") or 0),
                 ),
-                "minutesPlayed": float(row.get("minutes_played") or 0),
-                "goals": float(row.get("goals") or 0),
-                "assists": float(row.get("assists") or 0),
-                "shotsTotal": float(row.get("shots_total") or 0),
-                "shotsOnTarget": float(row.get("shots_on_goal") or 0),
-                "passesAttempted": float(row.get("passes_total") or 0),
+                "minutesPlayed": _to_int_count(row.get("minutes_played")),
+                "goals": _to_int_count(row.get("goals")),
+                "assists": _to_int_count(row.get("assists")),
+                "shotsTotal": _to_int_count(row.get("shots_total")),
+                "shotsOnTarget": _to_int_count(row.get("shots_on_goal")),
+                "passesAttempted": _to_int_count(row.get("passes_total")),
                 "rating": float(row["rating"]) if row.get("rating") is not None else None,
             }
             for row in recent_rows
@@ -1166,10 +1170,10 @@ def get_player_profile(
                     else None,
                     "teamId": str(row["team_id"]) if row.get("team_id") is not None else None,
                     "teamName": row.get("team_name"),
-                    "matchesPlayed": int(row.get("matches_played") or 0),
-                    "minutesPlayed": float(row.get("minutes_played") or 0),
-                    "goals": float(row.get("goals") or 0),
-                    "assists": float(row.get("assists") or 0),
+                    "matchesPlayed": _to_int_count(row.get("matches_played")),
+                    "minutesPlayed": _to_int_count(row.get("minutes_played")),
+                    "goals": _to_int_count(row.get("goals")),
+                    "assists": _to_int_count(row.get("assists")),
                     "rating": float(row["rating"]) if row.get("rating") is not None else None,
                     "lastMatchAt": row.get("last_match_date"),
                 }
@@ -1259,13 +1263,13 @@ def get_player_profile(
                 {
                     "periodKey": row.get("period_key"),
                     "label": f"{int(row.get('period_month') or 0):02d}/{int(row.get('period_year') or 0)}",
-                    "matchesPlayed": int(row.get("matches_played") or 0),
-                    "minutesPlayed": float(row.get("minutes_played") or 0),
-                    "goals": float(row.get("goals") or 0),
-                    "assists": float(row.get("assists") or 0),
-                    "shotsTotal": float(row.get("shots_total") or 0),
-                    "shotsOnTarget": float(row.get("shots_on_target") or 0),
-                    "passesAttempted": float(row.get("passes_attempted") or 0),
+                    "matchesPlayed": _to_int_count(row.get("matches_played")),
+                    "minutesPlayed": _to_int_count(row.get("minutes_played")),
+                    "goals": _to_int_count(row.get("goals")),
+                    "assists": _to_int_count(row.get("assists")),
+                    "shotsTotal": _to_int_count(row.get("shots_total")),
+                    "shotsOnTarget": _to_int_count(row.get("shots_on_target")),
+                    "passesAttempted": _to_int_count(row.get("passes_attempted")),
                     "rating": float(row["rating"]) if row.get("rating") is not None else None,
                 }
                 for row in stats_rows
@@ -1293,17 +1297,17 @@ def get_player_profile(
         "lastMatchAt": summary_row.get("last_match_date"),
     }
     summary_payload = {
-        "matchesPlayed": int(summary_row.get("matches_played") or 0),
-        "minutesPlayed": float(summary_row.get("minutes_played") or 0),
-        "goals": float(summary_row.get("goals") or 0),
-        "assists": float(summary_row.get("assists") or 0),
-        "shotsTotal": float(summary_row.get("shots_total") or 0),
-        "shotsOnTarget": float(summary_row.get("shots_on_target") or 0),
+        "matchesPlayed": _to_int_count(summary_row.get("matches_played")),
+        "minutesPlayed": _to_int_count(summary_row.get("minutes_played")),
+        "goals": _to_int_count(summary_row.get("goals")),
+        "assists": _to_int_count(summary_row.get("assists")),
+        "shotsTotal": _to_int_count(summary_row.get("shots_total")),
+        "shotsOnTarget": _to_int_count(summary_row.get("shots_on_target")),
         "passesCompleted": None,
-        "passesAttempted": float(summary_row.get("passes_attempted") or 0),
+        "passesAttempted": _to_int_count(summary_row.get("passes_attempted")),
         "passAccuracyPct": None,
-        "yellowCards": float(summary_row.get("yellow_cards") or 0),
-        "redCards": float(summary_row.get("red_cards") or 0),
+        "yellowCards": _to_int_count(summary_row.get("yellow_cards")),
+        "redCards": _to_int_count(summary_row.get("red_cards")),
         "rating": float(summary_row["rating"]) if summary_row.get("rating") is not None else None,
     }
 

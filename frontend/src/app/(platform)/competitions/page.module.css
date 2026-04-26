@@ -117,7 +117,9 @@
   display: flex;
   min-height: 7rem;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  text-align: center;
   border-radius: 1.25rem;
   background: linear-gradient(180deg, rgba(240, 243, 255, 0.94), rgba(248, 251, 255, 0.88));
   padding: 1rem 1.15rem;
@@ -204,6 +206,10 @@
 .filterGroup {
   display: grid;
   gap: 0.75rem;
+}
+
+.filtersResetButton {
+  align-self: center;
 }
 
 .filterField {
@@ -316,12 +322,6 @@
   color: #33425b;
 }
 
-.matrixSummaryText {
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #687790;
-}
-
 .desktopMatrix {
   display: none;
   border-top: 1px solid rgba(222, 228, 237, 0.86);
@@ -338,15 +338,9 @@
   font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.18em;
-  text-align: left;
+  text-align: center;
   text-transform: uppercase;
   color: #6a778e;
-}
-
-.matrixTable thead th:nth-child(5),
-.matrixTable thead th:nth-child(6),
-.matrixTable thead th:nth-child(7) {
-  text-align: center;
 }
 
 .matrixRow {
@@ -359,6 +353,7 @@
 .matrixCellAction {
   padding: 1.05rem 1.2rem;
   font-size: 0.92rem;
+  text-align: center;
   vertical-align: middle;
 }
 
@@ -380,6 +375,18 @@
 
 .matrixCellAction {
   text-align: center;
+}
+
+.matrixTable .competitionIdentity {
+  justify-content: flex-start;
+}
+
+.matrixTable .competitionLead {
+  text-align: left;
+}
+
+.matrixTable tbody td:first-child {
+  text-align: left;
 }
 
 .competitionIdentity {

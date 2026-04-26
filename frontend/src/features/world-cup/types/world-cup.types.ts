@@ -1,17 +1,37 @@
 import type { CoverageState } from "@/shared/types/coverage.types";
 
+export interface WorldCupEntityIdentity {
+  entityType: "competition" | "team" | "player" | string;
+  competitionKey: string;
+  canonicalId: string | null;
+  displayName?: string | null;
+  sourceId?: string | null;
+  sourceSystem?: string | null;
+  confidence?: string | null;
+  editorialStatus?: string | null;
+}
+
+export interface WorldCupCompetitionReference {
+  competitionKey: string;
+  competitionName: string;
+  identity: WorldCupEntityIdentity;
+}
+
 export interface WorldCupTeamReference {
   teamId: string | null;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
 }
 
 export interface WorldCupHistoricalTopScorer {
   playerId: string | null;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
+  teamIdentity?: WorldCupEntityIdentity | null;
   goals: number;
 }
 
@@ -40,6 +60,7 @@ export interface WorldCupHubEdition {
 }
 
 export interface WorldCupHubData {
+  competition: WorldCupCompetitionReference;
   summary: WorldCupHubSummary;
   editions: WorldCupHubEdition[];
   updatedAt: string;
@@ -54,11 +75,13 @@ export interface WorldCupEditionNavigationItem {
 export interface WorldCupEditionScorer {
   rank: number;
   playerId: string | null;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
+  teamIdentity?: WorldCupEntityIdentity | null;
   goals: number;
 }
 
@@ -66,6 +89,7 @@ export interface WorldCupEditionStandingRow {
   position: number;
   teamId: string | null;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   matchesPlayed: number;
   wins: number;
   draws: number;
@@ -129,6 +153,7 @@ export interface WorldCupEditionSummary extends WorldCupHubEdition {
 }
 
 export interface WorldCupEditionData {
+  competition: WorldCupCompetitionReference;
   edition: WorldCupEditionSummary;
   navigation: {
     previousEdition: WorldCupEditionNavigationItem | null;
@@ -143,6 +168,7 @@ export interface WorldCupEditionData {
 export interface WorldCupTeamListItem {
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   participationsCount: number;
   titlesCount: number;
   bestResultLabel: string;
@@ -151,12 +177,14 @@ export interface WorldCupTeamListItem {
 }
 
 export interface WorldCupTeamsData {
+  competition: WorldCupCompetitionReference;
   teams: WorldCupTeamListItem[];
   updatedAt: string;
 }
 
 export interface WorldCupTeamParticipationTopScorer {
   playerId: string | null;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
@@ -176,6 +204,7 @@ export interface WorldCupTeamParticipation {
 export interface WorldCupTeamHistoricalScorer {
   rank: number;
   playerId: string | null;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
@@ -185,6 +214,7 @@ export interface WorldCupTeamHistoricalScorer {
 export interface WorldCupTeamSummary {
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   participationsCount: number;
   titlesCount: number;
   bestResultLabel: string;
@@ -193,6 +223,7 @@ export interface WorldCupTeamSummary {
 }
 
 export interface WorldCupTeamData {
+  competition: WorldCupCompetitionReference;
   team: WorldCupTeamSummary;
   participations: WorldCupTeamParticipation[];
   historicalScorers: WorldCupTeamHistoricalScorer[];
@@ -204,17 +235,20 @@ export interface WorldCupRankingScorerEdition {
   year: number;
   teamId: string | null;
   teamName: string | null;
+  teamIdentity?: WorldCupEntityIdentity | null;
   goals: number;
 }
 
 export interface WorldCupRankingScorer {
   rank: number;
   playerId: string | null;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
+  teamIdentity?: WorldCupEntityIdentity | null;
   goals: number;
   editions: WorldCupRankingScorerEdition[];
 }
@@ -223,6 +257,7 @@ export interface WorldCupRankingTeam {
   rank: number;
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   titlesCount: number;
   participationsCount: number;
   finalsCount: number;
@@ -238,6 +273,7 @@ export interface WorldCupRankingTeamWinsItem {
   rank: number;
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   wins: number;
   matches: number;
 }
@@ -246,6 +282,7 @@ export interface WorldCupRankingTeamMatchesItem {
   rank: number;
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   matches: number;
   wins: number;
 }
@@ -254,6 +291,7 @@ export interface WorldCupRankingTeamGoalsItem {
   rank: number;
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   goalsScored: number;
   matches: number;
 }
@@ -262,6 +300,7 @@ export interface WorldCupRankingTeamTopFourItem {
   rank: number;
   teamId: string;
   teamName: string | null;
+  identity?: WorldCupEntityIdentity | null;
   topFourCount: number;
   titlesCount: number;
 }
@@ -293,11 +332,13 @@ export interface WorldCupRankingPlayerSquadEdition {
 export interface WorldCupRankingPlayerSquadAppearance {
   rank: number;
   playerId: string;
+  identity?: WorldCupEntityIdentity | null;
   imageAssetId: string | null;
   playerName: string | null;
   profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
+  teamIdentity?: WorldCupEntityIdentity | null;
   appearancesCount: number;
   editions: WorldCupRankingPlayerSquadEdition[];
 }
@@ -351,6 +392,7 @@ export interface WorldCupRankingBiggestWinRecord {
 }
 
 export interface WorldCupRankingsData {
+  competition: WorldCupCompetitionReference;
   scorers: WorldCupRankingScorer[];
   teams: WorldCupRankingTeam[];
   teamRankings: {

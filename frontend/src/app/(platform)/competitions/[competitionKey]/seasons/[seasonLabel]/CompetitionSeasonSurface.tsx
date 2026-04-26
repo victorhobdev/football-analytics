@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { useQueries } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -2331,7 +2332,7 @@ function LeagueStandingsTable({
 
   return (
     <div className="overflow-hidden overflow-x-auto rounded-xl bg-white shadow-sm">
-      <table className="w-full border-collapse text-left">
+      <table className="w-full min-w-[640px] border-collapse text-left">
         <thead>
           <tr className="bg-[#f0f3ff]">
             <th className="w-12 py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Pos</th>
@@ -3876,10 +3877,13 @@ function CupHistoricalHero({
 
         <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)]">
           {heroImageSrc && !isHeroPhotoUnavailable ? (
-            <img
+            <Image
               alt={`Celebração do campeão da ${context.competitionName}`}
               className="absolute inset-0 h-full w-full object-cover"
+              fill
               onError={() => setIsHeroPhotoUnavailable(true)}
+              priority
+              sizes="(min-width: 1280px) 44vw, 100vw"
               src={heroImageSrc}
             />
           ) : null}
@@ -4289,10 +4293,13 @@ function HybridHistoricalHero({
 
         <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)]">
           {heroImageSrc && !isHeroPhotoUnavailable ? (
-            <img
+            <Image
               alt={`Celebração do campeão da ${context.competitionName}`}
               className="absolute inset-0 h-full w-full object-cover"
+              fill
               onError={() => setIsHeroPhotoUnavailable(true)}
+              priority
+              sizes="(min-width: 1280px) 44vw, 100vw"
               src={heroImageSrc}
             />
           ) : null}
@@ -4832,8 +4839,8 @@ function RoundPickerDropdown({
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
-        <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">Rodada:</span>
-        <span className="text-xs font-extrabold text-white">
+        <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-white/80">Rodada:</span>
+        <span className="text-[0.82rem] font-extrabold text-white">
           {selectedRound?.label?.replace(/rodada\s*/i, "").trim() ?? activeRoundId ?? "Todas"}
         </span>
         <svg
@@ -4850,13 +4857,13 @@ function RoundPickerDropdown({
       {isOpen ? (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 top-12 z-50 w-[260px] rounded-xl border border-[rgba(191,201,195,0.55)] bg-white p-4 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.2)]">
+          <div className="absolute left-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-[rgba(191,201,195,0.55)] bg-white p-4 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.2)]">
             <div className="mb-3 flex items-center justify-between border-b border-[rgba(191,201,195,0.3)] pb-2">
               <span className="text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">
                 Selecione a rodada
               </span>
-              <button className="text-[#515f74] hover:text-black" onClick={() => setIsOpen(false)} type="button">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <button aria-label="Fechar seleção de rodada" className="text-[#515f74] hover:text-black" onClick={() => setIsOpen(false)} type="button">
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
@@ -4867,7 +4874,7 @@ function RoundPickerDropdown({
                 const shortLabel = round.label.replace(/rodada\s*/i, "").trim();
                 return (
                   <button
-                    className={`flex h-8 w-8 items-center justify-center rounded-md text-[0.7rem] font-bold tabular-nums transition-colors ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-md text-[0.78rem] font-bold tabular-nums transition-colors ${
                       isActive
                         ? "bg-[#003526] text-white shadow-md"
                         : "border border-[#dce3f9] bg-[#f0f3ff] text-[#515f74] hover:bg-[#e1e7fa]"

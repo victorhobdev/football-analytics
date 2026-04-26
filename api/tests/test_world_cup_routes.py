@@ -10,6 +10,8 @@ from api.src.routers.world_cup import (
     _build_world_cup_team_stat_rankings,
     _build_world_cup_team_catalog,
     _filter_scorer_list_by_minimum_goals,
+    _serialize_team,
+    _serialize_world_cup_competition,
 )
 from api.src.routers.world_cup_labels import serialize_world_cup_display_team
 
@@ -25,6 +27,44 @@ class WorldCupRouteHelpersTests(unittest.TestCase):
         self.assertEqual(germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
         self.assertEqual(west_germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
         self.assertEqual(east_germany, {"teamId": "world-cup-east-germany", "teamName": "Alemanha Oriental"})
+
+    def test_serialize_team_adds_public_identity_contract(self) -> None:
+        germany = _serialize_team(7030069810056421591, "West Germany")
+
+        self.assertIsNotNone(germany)
+        self.assertEqual(germany["teamId"], "world-cup-germany")
+        self.assertEqual(
+            germany["identity"],
+            {
+                "entityType": "team",
+                "competitionKey": "fifa_world_cup_mens",
+                "canonicalId": "world-cup-germany",
+                "displayName": "Alemanha",
+                "sourceId": "7030069810056421591",
+                "sourceSystem": "world_cup_source",
+                "confidence": "confirmed",
+                "editorialStatus": "canonical",
+            },
+        )
+
+    def test_serialize_world_cup_competition_adds_public_identity_contract(self) -> None:
+        competition = _serialize_world_cup_competition()
+
+        self.assertEqual(competition["competitionKey"], "fifa_world_cup_mens")
+        self.assertEqual(competition["competitionName"], "Copa do Mundo FIFA")
+        self.assertEqual(
+            competition["identity"],
+            {
+                "entityType": "competition",
+                "competitionKey": "fifa_world_cup_mens",
+                "canonicalId": "fifa_world_cup_mens",
+                "displayName": "Copa do Mundo FIFA",
+                "sourceId": "0",
+                "sourceSystem": "football_analytics",
+                "confidence": "confirmed",
+                "editorialStatus": "canonical",
+            },
+        )
 
     def test_biggest_wins_include_translated_venue_name(self) -> None:
         rankings = _build_world_cup_match_rankings(
@@ -288,8 +328,12 @@ class WorldCupRouteHelpersTests(unittest.TestCase):
         )
 
         self.assertEqual(rankings["squadAppearances"]["items"][0]["playerId"], "184798")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["identity"]["canonicalId"], "184798")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["identity"]["sourceId"], "7040928914210329456")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["identity"]["confidence"], "confirmed")
         self.assertEqual(rankings["squadAppearances"]["items"][0]["imageAssetId"], "7040928914210329456")
         self.assertEqual(rankings["squadAppearances"]["items"][0]["profileUrl"], "/players/184798")
+        self.assertEqual(rankings["squadAppearances"]["items"][0]["teamIdentity"]["canonicalId"], "world-cup-argentina")
 
 
 if __name__ == "__main__":

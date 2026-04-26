@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import re
 import unicodedata
 from datetime import date
 from typing import Any, Literal
 
 from fastapi import APIRouter, Query, Request
 
+from ..core.config import get_settings
 from ..core.contracts import build_api_response, build_coverage_from_counts, build_pagination
 from ..core.filters import GlobalFilters, append_fact_match_filters, validate_and_build_global_filters
 from ..db.client import db_client
 
 router = APIRouter(prefix="/api/v1/market", tags=["market"])
+PRODUCT_DATA_CUTOFF = get_settings().product_data_cutoff
 
 MarketSortBy = Literal["transferDate", "playerName", "amount"]
 SortDirection = Literal["asc", "desc"]
@@ -63,11 +66,53 @@ _TRANSFER_TYPE_NAMES = {
     9688: "Retorno de empréstimo",
 }
 
+_TRANSFER_MOVEMENT_KINDS = {
+    219: "permanent_transfer",
+    218: "loan_out",
+    220: "free_transfer",
+    9688: "loan_return",
+}
+
+_TECHNICAL_FALLBACK_PATTERN = re.compile(
+    r"^(?:Unknown (?:Player|Team|Venue) #\d+|Team #\d+|\d+)$"
+)
+
 
 def _transfer_type_name(value: Any) -> str:
     if value is None:
         return "Tipo desconhecido"
     return _TRANSFER_TYPE_NAMES.get(int(value), "Tipo desconhecido")
+
+
+def _movement_kind(value: Any, *, career_ended: bool) -> str:
+    if career_ended:
+        return "career_end"
+
+    if value is None:
+        return "unknown"
+
+    return _TRANSFER_MOVEMENT_KINDS.get(int(value), "unknown")
+
+
+def _is_technical_fallback(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+
+    return bool(_TECHNICAL_FALLBACK_PATTERN.match(value.strip()))
+
+
+def _public_player_name(value: Any) -> str:
+    if isinstance(value, str) and value.strip() and not _is_technical_fallback(value):
+        return value.strip()
+
+    return "Nome indisponível"
+
+
+def _public_team_name(value: Any, *, missing_label: str) -> str:
+    if isinstance(value, str) and value.strip() and not _is_technical_fallback(value):
+        return value.strip()
+
+    return missing_label
 
 
 def _market_team_scope_sql(filters: GlobalFilters) -> tuple[str, list[Any], bool]:
@@ -190,7 +235,7 @@ def get_market_transfers(
             coverage=build_coverage_from_counts(0, 0, "Market transfers coverage"),
         )
 
-    player_name_sql = "coalesce(nullif(trim(spt.player_name), ''), concat('Unknown Player #', spt.player_id::text))"
+    player_name_sql = "coalesce(nullif(trim(spt.player_name), ''), 'Nome indisponível')"
     from_team_name_sql = (
         "coalesce(dim_from.team_name, nullif(trim(spt.payload -> 'fromTeam' ->> 'name'), ''), "
         "nullif(trim(spt.payload -> 'from_team' ->> 'name'), ''), '')"
@@ -226,7 +271,7 @@ def get_market_transfers(
                         dim_from.team_name,
                         nullif(trim(spt.payload -> 'fromTeam' ->> 'name'), ''),
                         nullif(trim(spt.payload -> 'from_team' ->> 'name'), ''),
-                        concat('Team #', spt.from_team_id::text)
+                        'Origem indisponível'
                     )
                 end as from_team_name,
                 spt.to_team_id,
@@ -236,7 +281,7 @@ def get_market_transfers(
                         dim_to.team_name,
                         nullif(trim(spt.payload -> 'toTeam' ->> 'name'), ''),
                         nullif(trim(spt.payload -> 'to_team' ->> 'name'), ''),
-                        concat('Team #', spt.to_team_id::text)
+                        'Destino indisponível'
                     )
                 end as to_team_name,
                 spt.transfer_date,
@@ -284,6 +329,7 @@ def get_market_transfers(
               and (%s::bigint is null or spt.type_id = %s)
               and (%s::date is null or spt.transfer_date >= %s)
               and (%s::date is null or spt.transfer_date <= %s)
+              and (spt.transfer_date is null or spt.transfer_date <= %s)
               and (
                 not %s::boolean
                 or spt.from_team_id = any(%s::bigint[])
@@ -341,6 +387,7 @@ def get_market_transfers(
             filters.date_start,
             filters.date_end,
             filters.date_end,
+            PRODUCT_DATA_CUTOFF,
             use_team_scope,
             team_scope_ids or [],
             team_scope_ids or [],
@@ -360,16 +407,25 @@ def get_market_transfers(
         {
             "transferId": str(row["transfer_id"]),
             "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
-            "playerName": row.get("player_name"),
+            "playerName": _public_player_name(row.get("player_name")),
             "fromTeamId": str(row["from_team_id"]) if row.get("from_team_id") is not None else None,
-            "fromTeamName": row.get("from_team_name"),
+            "fromTeamName": (
+                _public_team_name(row.get("from_team_name"), missing_label="Origem indisponível")
+                if row.get("from_team_id") is not None
+                else None
+            ),
             "toTeamId": str(row["to_team_id"]) if row.get("to_team_id") is not None else None,
-            "toTeamName": row.get("to_team_name"),
+            "toTeamName": (
+                _public_team_name(row.get("to_team_name"), missing_label="Destino indisponível")
+                if row.get("to_team_id") is not None
+                else None
+            ),
             "transferDate": row.get("transfer_date"),
             "completed": bool(row.get("completed")),
             "careerEnded": bool(row.get("career_ended")),
             "typeId": _to_int(row.get("type_id")) if row.get("type_id") is not None else None,
             "typeName": _transfer_type_name(row.get("type_id")),
+            "movementKind": _movement_kind(row.get("type_id"), career_ended=bool(row.get("career_ended"))),
             "amount": row.get("amount"),
             "amountValue": row.get("amount_value"),
             "currency": None,

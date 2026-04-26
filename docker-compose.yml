@@ -1,4 +1,4 @@
-﻿services:
+services:
 
   postgres:
     image: postgres:16
@@ -13,10 +13,12 @@
       - pg_stat_statements.max=10000
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: ${POSTGRES_DB}
+    secrets:
+      - postgres_password
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -30,23 +32,34 @@
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
       DBMATE_MIGRATIONS_DIR: /db/migrations
+    secrets:
+      - postgres_password
     volumes:
       - ./db/migrations:/db/migrations
-    command: --wait --migrations-dir /db/migrations up
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: >
+      export DATABASE_URL="postgres://$${POSTGRES_USER}:$$(cat /run/secrets/postgres_password)@postgres:5432/$${POSTGRES_DB}?sslmode=disable";
+      dbmate --wait --migrations-dir "$${DBMATE_MIGRATIONS_DIR}" up
     restart: "no"
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: football_minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER_FILE: /run/secrets/minio_root_user
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_root_password
+    secrets:
+      - minio_root_user
+      - minio_root_password
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - minio_data:/data
 
@@ -63,17 +76,12 @@
         condition: service_completed_successfully
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "false"
       AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-admin}
-      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-change_me_airflow_admin_password}
       AIRFLOW_ADMIN_FIRSTNAME: ${AIRFLOW_ADMIN_FIRSTNAME:-Airflow}
       AIRFLOW_ADMIN_LASTNAME: ${AIRFLOW_ADMIN_LASTNAME:-Admin}
       AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-admin@example.com}
-      APIFOOTBALL_API_KEY: ${APIFOOTBALL_API_KEY}
       APIFOOTBALL_BASE_URL: ${APIFOOTBALL_BASE_URL}
       ACTIVE_PROVIDER: ${ACTIVE_PROVIDER:-sportmonks}
       SPORTMONKS_DEFAULT_LEAGUE_ID: ${SPORTMONKS_DEFAULT_LEAGUE_ID:-648}
@@ -83,32 +91,43 @@
       INGEST_FIXTURES_REQUESTS_PER_MINUTE: ${INGEST_FIXTURES_REQUESTS_PER_MINUTE:-0}
       INGEST_STATISTICS_REQUESTS_PER_MINUTE: ${INGEST_STATISTICS_REQUESTS_PER_MINUTE:-0}
       INGEST_EVENTS_REQUESTS_PER_MINUTE: ${INGEST_EVENTS_REQUESTS_PER_MINUTE:-0}
-      API_KEY_SPORTMONKS: ${API_KEY_SPORTMONKS:-}
       SPORTMONKS_BASE_URL: ${SPORTMONKS_BASE_URL:-https://api.sportmonks.com/v3/football}
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      FOOTBALL_PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-
-
-
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    secrets:
+      - airflow_admin_password
+      - airflow_database_sql_alchemy_conn
+      - airflow_fernet_key
+      - airflow_webserver_secret_key
+      - apifootball_api_key
+      - minio_access_key
+      - minio_secret_key
+      - postgres_password
+      - sportmonks_api_key
+    volumes:
+      - ./infra/airflow/load_runtime_secrets.sh:/opt/airflow/load_runtime_secrets.sh:ro
+    entrypoint:
+      - /bin/bash
+      - -lc
     command: >
-      bash -lc "if [ -z \"$${AIRFLOW__CORE__FERNET_KEY}\" ]; then
-        echo 'AIRFLOW__CORE__FERNET_KEY obrigatoria (nao vazia).';
+      bash /opt/airflow/load_runtime_secrets.sh bash -lc
+      'if [ -z "$${AIRFLOW__CORE__FERNET_KEY}" ]; then
+        echo "AIRFLOW__CORE__FERNET_KEY obrigatoria (nao vazia).";
         exit 1;
       fi;
-      if [ \"$${AIRFLOW_ADMIN_PASSWORD}\" = 'change_me_airflow_admin_password' ]; then
-        echo 'Defina AIRFLOW_ADMIN_PASSWORD com valor seguro.';
+      if [ -z "$${AIRFLOW_ADMIN_PASSWORD}" ] || [ "$${AIRFLOW_ADMIN_PASSWORD}" = "change_me_airflow_admin_password" ]; then
+        echo "Defina AIRFLOW_ADMIN_PASSWORD com valor seguro.";
         exit 1;
       fi;
       airflow db init &&
       airflow users create
-      --username \"$${AIRFLOW_ADMIN_USERNAME}\"
-      --password \"$${AIRFLOW_ADMIN_PASSWORD}\"
-      --firstname \"$${AIRFLOW_ADMIN_FIRSTNAME}\"
-      --lastname \"$${AIRFLOW_ADMIN_LASTNAME}\"
+      --username "$${AIRFLOW_ADMIN_USERNAME}"
+      --password "$${AIRFLOW_ADMIN_PASSWORD}"
+      --firstname "$${AIRFLOW_ADMIN_FIRSTNAME}"
+      --lastname "$${AIRFLOW_ADMIN_LASTNAME}"
       --role Admin
-      --email \"$${AIRFLOW_ADMIN_EMAIL}\""
+      --email "$${AIRFLOW_ADMIN_EMAIL}"'
 
   airflow-webserver:
     image: football-airflow:local
@@ -117,13 +136,9 @@
       - airflow-init
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "false"
       PYTHONPATH: /opt/airflow:/opt/airflow/dags
-      APIFOOTBALL_API_KEY: ${APIFOOTBALL_API_KEY}
       APIFOOTBALL_BASE_URL: ${APIFOOTBALL_BASE_URL}
       ACTIVE_PROVIDER: ${ACTIVE_PROVIDER:-sportmonks}
       SPORTMONKS_DEFAULT_LEAGUE_ID: ${SPORTMONKS_DEFAULT_LEAGUE_ID:-648}
@@ -133,22 +148,30 @@
       INGEST_FIXTURES_REQUESTS_PER_MINUTE: ${INGEST_FIXTURES_REQUESTS_PER_MINUTE:-0}
       INGEST_STATISTICS_REQUESTS_PER_MINUTE: ${INGEST_STATISTICS_REQUESTS_PER_MINUTE:-0}
       INGEST_EVENTS_REQUESTS_PER_MINUTE: ${INGEST_EVENTS_REQUESTS_PER_MINUTE:-0}
-      API_KEY_SPORTMONKS: ${API_KEY_SPORTMONKS:-}
       SPORTMONKS_BASE_URL: ${SPORTMONKS_BASE_URL:-https://api.sportmonks.com/v3/football}
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      FOOTBALL_PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-
-
-
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    secrets:
+      - airflow_database_sql_alchemy_conn
+      - airflow_fernet_key
+      - airflow_webserver_secret_key
+      - apifootball_api_key
+      - minio_access_key
+      - minio_secret_key
+      - postgres_password
+      - sportmonks_api_key
     volumes:
+      - ./infra/airflow/load_runtime_secrets.sh:/opt/airflow/load_runtime_secrets.sh:ro
       - ./infra/airflow/dags:/opt/airflow/dags
       - ./platform/dbt:/opt/airflow/dbt
       - ./platform/quality:/opt/airflow/quality
     ports:
-      - "8080:8080"
-    command: webserver
+      - "127.0.0.1:8080:8080"
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command: bash /opt/airflow/load_runtime_secrets.sh airflow webserver
 
   airflow-scheduler:
     image: football-airflow:local
@@ -157,13 +180,9 @@
       - airflow-init
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
-      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "false"
       PYTHONPATH: /opt/airflow:/opt/airflow/dags
-      APIFOOTBALL_API_KEY: ${APIFOOTBALL_API_KEY}
       APIFOOTBALL_BASE_URL: ${APIFOOTBALL_BASE_URL}
       ACTIVE_PROVIDER: ${ACTIVE_PROVIDER:-sportmonks}
       SPORTMONKS_DEFAULT_LEAGUE_ID: ${SPORTMONKS_DEFAULT_LEAGUE_ID:-648}
@@ -173,42 +192,54 @@
       INGEST_FIXTURES_REQUESTS_PER_MINUTE: ${INGEST_FIXTURES_REQUESTS_PER_MINUTE:-0}
       INGEST_STATISTICS_REQUESTS_PER_MINUTE: ${INGEST_STATISTICS_REQUESTS_PER_MINUTE:-0}
       INGEST_EVENTS_REQUESTS_PER_MINUTE: ${INGEST_EVENTS_REQUESTS_PER_MINUTE:-0}
-      API_KEY_SPORTMONKS: ${API_KEY_SPORTMONKS:-}
       SPORTMONKS_BASE_URL: ${SPORTMONKS_BASE_URL:-https://api.sportmonks.com/v3/football}
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      FOOTBALL_PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-
-
-
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    secrets:
+      - airflow_database_sql_alchemy_conn
+      - airflow_fernet_key
+      - airflow_webserver_secret_key
+      - apifootball_api_key
+      - minio_access_key
+      - minio_secret_key
+      - postgres_password
+      - sportmonks_api_key
     volumes:
+      - ./infra/airflow/load_runtime_secrets.sh:/opt/airflow/load_runtime_secrets.sh:ro
       - ./infra/airflow/dags:/opt/airflow/dags
       - ./platform/dbt:/opt/airflow/dbt
       - ./platform/quality:/opt/airflow/quality
-    command: scheduler
-
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command: bash /opt/airflow/load_runtime_secrets.sh airflow scheduler
 
   minio-init:
-    image: minio/mc
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       - minio
+    environment:
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+    secrets:
+      - minio_access_key
+      - minio_secret_key
     entrypoint: >
       /bin/sh -c "
       sleep 5;
-      mc alias set local ${MINIO_ENDPOINT_URL} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
-      mc mb local/football-bronze;
-      mc mb local/football-silver;
+      mc alias set local \"$${MINIO_ENDPOINT_URL}\" \"$$(cat /run/secrets/minio_access_key)\" \"$$(cat /run/secrets/minio_secret_key)\";
+      mc mb --ignore-existing local/football-bronze;
+      mc mb --ignore-existing local/football-silver;
       exit 0;
       "
 
   metabase:
-    image: metabase/metabase:latest
+    image: metabase/metabase:v0.60.2.5
     container_name: football_metabase
     depends_on:
       - postgres
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - metabase_data:/metabase.db
     environment:
@@ -220,9 +251,30 @@ volumes:
   minio_data:
   metabase_data:
 
+secrets:
+  airflow_admin_password:
+    environment: AIRFLOW_ADMIN_PASSWORD
+  airflow_database_sql_alchemy_conn:
+    environment: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+  airflow_fernet_key:
+    environment: AIRFLOW__CORE__FERNET_KEY
+  airflow_webserver_secret_key:
+    environment: AIRFLOW__WEBSERVER__SECRET_KEY
+  apifootball_api_key:
+    environment: APIFOOTBALL_API_KEY
+  minio_access_key:
+    environment: MINIO_ACCESS_KEY
+  minio_root_password:
+    environment: MINIO_ROOT_PASSWORD
+  minio_root_user:
+    environment: MINIO_ROOT_USER
+  minio_secret_key:
+    environment: MINIO_SECRET_KEY
+  postgres_password:
+    environment: POSTGRES_PASSWORD
+  sportmonks_api_key:
+    environment: API_KEY_SPORTMONKS
+
 networks:
   default:
     name: football-network
-
-
-
