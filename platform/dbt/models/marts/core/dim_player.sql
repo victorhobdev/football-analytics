@@ -1,4 +1,11 @@
-{{ config(materialized='incremental', unique_key='player_sk', on_schema_change='sync_all_columns') }}
+{{ config(
+    materialized='incremental',
+    unique_key='player_sk',
+    on_schema_change='sync_all_columns',
+    indexes=[
+        {'columns': ['player_id'], 'type': 'btree'}
+    ]
+) }}
 
 with events as (
     select * from {{ ref('stg_match_events') }}

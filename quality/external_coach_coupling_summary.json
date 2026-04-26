@@ -1,23 +1,23 @@
 {
-  "run_id": "external_coach_coupling_20260425T135504Z",
+  "run_id": "external_coach_coupling_20260425T152445Z",
   "window_start": "2020-01-01",
   "window_end": "2025-12-31",
   "coverage": {
     "total_match_teams": 32522,
-    "public_assigned": 10903,
-    "promotable_match_teams": 8201,
-    "review_needed_match_teams": 8908
+    "public_assigned": 19104,
+    "promotable_match_teams": 163,
+    "review_needed_match_teams": 2560
   },
   "classification_counts": {
     "blocked_invalid_interval": 2,
     "blocked_invalid_name": 1451,
     "blocked_non_senior_or_season_team": 9838,
-    "blocked_outside_window": 1915,
-    "blocked_unresolved_team": 119970,
-    "likely_duplicate": 144,
-    "low_value_context": 570,
-    "promotable_candidate": 343,
-    "review_needed": 17804
+    "blocked_outside_window": 1939,
+    "blocked_unresolved_team": 119939,
+    "likely_duplicate": 657,
+    "low_value_context": 571,
+    "promotable_candidate": 5,
+    "review_needed": 17635
   },
   "source_counts": {
     "dbpedia_managerClub": 116226,
@@ -28,9 +28,9 @@
     "wikidata_P6087_person_to_team": 15554
   },
   "assignment_status_counts": {
-    "review_needed": 15913,
+    "review_needed": 5166,
     "blocked_conflict": 24,
-    "promotable": 8201
+    "promotable": 163
   },
   "gate_counts": {
     "outside_window_assignment_candidates": 0,
@@ -40,388 +40,113 @@
   },
   "top_teams_by_promotable_match_teams": [
     {
-      "team_id": 3468,
-      "team_name": "Real Madrid",
-      "promotable_match_teams": 196
-    },
-    {
-      "team_id": 9,
-      "team_name": "Manchester City",
-      "promotable_match_teams": 191
-    },
-    {
-      "team_id": 591,
-      "team_name": "Paris Saint Germain",
-      "promotable_match_teams": 188
-    },
-    {
-      "team_id": 7980,
-      "team_name": "Atlético Madrid",
-      "promotable_match_teams": 176
-    },
-    {
-      "team_id": 68,
-      "team_name": "Borussia Dortmund",
-      "promotable_match_teams": 169
-    },
-    {
-      "team_id": 18,
-      "team_name": "Chelsea",
-      "promotable_match_teams": 167
-    },
-    {
-      "team_id": 113,
-      "team_name": "AC Milan",
-      "promotable_match_teams": 166
-    },
-    {
-      "team_id": 625,
-      "team_name": "Juventus",
-      "promotable_match_teams": 164
-    },
-    {
-      "team_id": 19,
-      "team_name": "Arsenal",
-      "promotable_match_teams": 158
-    },
-    {
-      "team_id": 676,
-      "team_name": "Sevilla",
-      "promotable_match_teams": 157
-    },
-    {
-      "team_id": 14,
-      "team_name": "Manchester United",
-      "promotable_match_teams": 153
-    },
-    {
-      "team_id": 3496,
-      "team_name": "São Paulo",
-      "promotable_match_teams": 150
-    },
-    {
-      "team_id": 44,
-      "team_name": "Olympique Marseille",
-      "promotable_match_teams": 145
-    },
-    {
-      "team_id": 15,
-      "team_name": "Aston Villa",
-      "promotable_match_teams": 144
-    },
-    {
-      "team_id": 3477,
-      "team_name": "Villarreal",
-      "promotable_match_teams": 144
-    },
-    {
-      "team_id": 6,
-      "team_name": "Tottenham Hotspur",
-      "promotable_match_teams": 142
-    },
-    {
-      "team_id": 594,
-      "team_name": "Real Sociedad",
-      "promotable_match_teams": 140
-    },
-    {
-      "team_id": 2696,
-      "team_name": "Internacional",
-      "promotable_match_teams": 138
-    },
-    {
-      "team_id": 20,
-      "team_name": "Newcastle United",
-      "promotable_match_teams": 136
-    },
-    {
-      "team_id": 3427,
-      "team_name": "Atlético Mineiro",
-      "promotable_match_teams": 135
-    },
-    {
-      "team_id": 29,
-      "team_name": "Wolverhampton Wanderers",
-      "promotable_match_teams": 135
-    },
-    {
-      "team_id": 3321,
-      "team_name": "Bayer 04 Leverkusen",
-      "promotable_match_teams": 134
-    },
-    {
-      "team_id": 78,
-      "team_name": "Brighton & Hove Albion",
-      "promotable_match_teams": 133
-    },
-    {
-      "team_id": 1024,
-      "team_name": "Flamengo",
-      "promotable_match_teams": 133
-    },
-    {
-      "team_id": 1,
-      "team_name": "West Ham United",
-      "promotable_match_teams": 133
-    },
-    {
-      "team_id": 613,
-      "team_name": "Torino",
-      "promotable_match_teams": 132
-    },
-    {
-      "team_id": 214,
-      "team_name": "Valencia",
-      "promotable_match_teams": 132
-    },
-    {
-      "team_id": 79,
-      "team_name": "Olympique Lyonnais",
-      "promotable_match_teams": 131
-    },
-    {
-      "team_id": 1123,
-      "team_name": "Hellas Verona",
-      "promotable_match_teams": 127
-    },
-    {
-      "team_id": 59,
-      "team_name": "Nantes",
-      "promotable_match_teams": 127
+      "team_id": 3422,
+      "team_name": "Palmeiras",
+      "promotable_match_teams": 163
     }
   ],
   "top_promotable_sources": [
     {
       "source": "wikidata_P286_team_to_person",
-      "candidates": 343,
-      "missing_match_team_sum": 8225
+      "candidates": 5,
+      "missing_match_team_sum": 187
     }
   ],
   "confirmation_sample": [
     {
       "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Dorival Júnior",
-      "clipped_start_date": "2022-06-10",
-      "clipped_end_date": "2022-11-25",
-      "canonical_missing_matches_covered": 43,
-      "candidate_confidence": "0.9500",
-      "classification": "promotable_candidate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jorge Sampaoli",
-      "clipped_start_date": "2023-04-17",
-      "clipped_end_date": "2023-09-28",
-      "canonical_missing_matches_covered": 39,
-      "candidate_confidence": "0.9500",
-      "classification": "promotable_candidate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Paulo Sousa",
-      "clipped_start_date": "2021-12-29",
-      "clipped_end_date": "2022-06-10",
-      "canonical_missing_matches_covered": 18,
-      "candidate_confidence": "0.9500",
-      "classification": "promotable_candidate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Rogério Ceni",
-      "clipped_start_date": "2020-11-10",
-      "clipped_end_date": "2021-07-10",
-      "canonical_missing_matches_covered": 16,
-      "candidate_confidence": "0.9500",
-      "classification": "promotable_candidate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Tite",
-      "clipped_start_date": "2023-10-09",
-      "clipped_end_date": "2024-09-30",
-      "canonical_missing_matches_covered": 12,
-      "candidate_confidence": "0.9500",
-      "classification": "promotable_candidate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Maurício Souza",
-      "clipped_start_date": "2021-11-29",
-      "clipped_end_date": "2021-12-29",
-      "canonical_missing_matches_covered": 4,
+      "local_team_name": "Palmeiras",
+      "coach_name": "Abel Ferreira",
+      "clipped_start_date": "2020-11-04",
+      "clipped_end_date": "2025-12-31",
+      "canonical_missing_matches_covered": 163,
       "candidate_confidence": "0.8075",
       "classification": "promotable_candidate"
     },
     {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Vítor Pereira",
-      "clipped_start_date": "2023-01-01",
-      "clipped_end_date": "2023-04-10",
-      "canonical_missing_matches_covered": 1,
-      "candidate_confidence": "0.7362",
-      "classification": "promotable_candidate"
-    },
-    {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Dorival Júnior",
       "clipped_start_date": "2020-01-01",
       "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 176,
+      "canonical_missing_matches_covered": 163,
       "candidate_confidence": "0.4879",
       "classification": "review_needed"
     },
     {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Mano Menezes",
       "clipped_start_date": "2020-01-01",
       "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 176,
+      "canonical_missing_matches_covered": 163,
       "candidate_confidence": "0.4879",
       "classification": "review_needed"
     },
     {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Nelsinho Baptista",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Roger Machado",
       "clipped_start_date": "2020-01-01",
       "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 176,
+      "canonical_missing_matches_covered": 163,
       "candidate_confidence": "0.4879",
       "classification": "review_needed"
     },
     {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Dorival Júnior",
-      "clipped_start_date": "2022-01-01",
-      "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 117,
-      "candidate_confidence": "0.4879",
-      "classification": "review_needed"
-    },
-    {
-      "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Dorival Júnior",
-      "clipped_start_date": "2022-01-01",
-      "clipped_end_date": "2022-12-31",
-      "canonical_missing_matches_covered": 61,
-      "candidate_confidence": "0.3850",
-      "classification": "review_needed"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Tite",
-      "clipped_start_date": "2023-01-01",
+      "clipped_start_date": "2020-01-01",
       "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 56,
+      "canonical_missing_matches_covered": 163,
       "candidate_confidence": "0.4879",
       "classification": "review_needed"
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Tite (football manager)",
-      "clipped_start_date": "2023-01-01",
-      "clipped_end_date": "2024-12-31",
-      "canonical_missing_matches_covered": 56,
-      "candidate_confidence": "0.3850",
-      "classification": "review_needed"
+      "local_team_name": "Palmeiras",
+      "coach_name": "Abel Ferreira",
+      "clipped_start_date": "2020-01-01",
+      "clipped_end_date": "2020-12-31",
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.2888",
+      "classification": "low_value_context"
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Vítor Pereira (footballer, born 1968)",
-      "clipped_start_date": "2023-01-01",
-      "clipped_end_date": "2023-12-31",
-      "canonical_missing_matches_covered": 56,
-      "candidate_confidence": "0.3850",
-      "classification": "review_needed"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jorge Sampaoli",
-      "clipped_start_date": "2023-04-14",
-      "clipped_end_date": "2023-09-28",
-      "canonical_missing_matches_covered": 40,
-      "candidate_confidence": "0.8200",
-      "classification": "review_needed"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Filipe Luís",
-      "clipped_start_date": "2024-01-01",
-      "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.3659",
-      "classification": "likely_duplicate"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Filipe Luís",
-      "clipped_start_date": "2024-09-30",
-      "clipped_end_date": "2025-12-31",
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.7125",
-      "classification": "likely_duplicate"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jorge Jesus",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Vanderlei Luxemburgo",
       "clipped_start_date": "2020-01-01",
-      "clipped_end_date": "2020-07-17",
+      "clipped_end_date": "2020-12-31",
       "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.6150",
+      "candidate_confidence": "0.2888",
       "classification": "low_value_context"
     },
     {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jorge Jesus",
-      "clipped_start_date": "2020-01-01",
-      "clipped_end_date": "2020-07-17",
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Abel Ferreira  ComIH  1",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.7125",
-      "classification": "low_value_context"
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Abel Picabea",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
     },
     {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Rogério Ceni",
-      "clipped_start_date": "2020-01-01",
-      "clipped_end_date": "2021-01-01",
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.4305",
-      "classification": "low_value_context"
-    },
-    {
-      "source": "wikidata_P286_team_to_person",
-      "local_team_name": "Flamengo",
-      "coach_name": "Domènec Torrent",
-      "clipped_start_date": "2020-07-31",
-      "clipped_end_date": "2020-11-09",
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.7125",
-      "classification": "low_value_context"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Adílio (footballer, born 1956)  Adílio  1",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Abel Picabéa",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -430,8 +155,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Aílton Ferraz",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ageu",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -440,8 +165,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Andrade (footballer, born 1957)",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Alberto Valentim",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -450,8 +175,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Antônio Lopes",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Amílcar Barbuy",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -460,7 +185,37 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Andrey Lopes",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Antônio Carlos Zago",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Armando Del Debbio",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
       "coach_name": "Armando Renganeschi",
       "clipped_start_date": null,
       "clipped_end_date": null,
@@ -470,8 +225,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Athirson",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Aymoré Moreira",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -480,7 +235,27 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Aymoré Moreira",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Aymoré Moreira",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
       "coach_name": "Aymoré Moreira",
       "clipped_start_date": null,
       "clipped_end_date": null,
@@ -490,8 +265,18 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Cândido de Oliveira",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Caio Júnior",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Caio Zanardi",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -500,7 +285,7 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Candinho",
       "clipped_start_date": null,
       "clipped_end_date": null,
@@ -509,49 +294,9 @@
       "classification": "blocked_outside_window"
     },
     {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Carlinhos (footballer, born 1937)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Carlos Alberto Torres",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "César Sampaio",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Charlie Williams (footballer, born 1873)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Cláudio Coutinho",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Carlos Alberto Silva",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -560,8 +305,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Cláudio Coutinho",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Carlos Castilho",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -570,8 +315,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Cristóvão Borges",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Chinesinho",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -580,8 +325,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Daniel Frasson",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Cleber Xavier",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -590,8 +335,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Deivid",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Conrad Ross",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -599,28 +344,18 @@
       "classification": "review_needed"
     },
     {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Deivid de Souza",
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Diede Lameiro",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
       "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Deivid de Souza",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
+      "classification": "review_needed"
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Dino Sani",
       "clipped_start_date": null,
       "clipped_end_date": null,
@@ -629,28 +364,18 @@
       "classification": "review_needed"
     },
     {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Dorival Júnior",
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Diogo Giacomini",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
       "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
+      "classification": "review_needed"
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Dorival Júnior",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
+      "local_team_name": "Palmeiras",
       "coach_name": "Dorival Júnior",
       "clipped_start_date": null,
       "clipped_end_date": null,
@@ -660,8 +385,28 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Edinho (footballer, born 1955)",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Dudu (footballer, born 1939)",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Eduardo Baptista",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Émerson Leão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -670,8 +415,18 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Ernesto Paulo",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Émerson Leão",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Émerson Leão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -680,8 +435,198 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Ernesto Paulo",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ephigênio de Freitas",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Imre Hirschl",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Jenő Medgyessy",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Jim López",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "João Burse",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Jorginho (footballer, born 1965)  Jorginho  1",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Leandro Zago",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Luís dos Reis",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Luiz Felipe Scolari",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Luiz Felipe Scolari",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Luiz Felipe Scolari",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Mano Menezes",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Marcelo Martelotte",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Márcio Araújo (footballer, born 1960)",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Marco Aurélio (footballer, born 1952)",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Marcos Falopa",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Marcos Valadares",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Mário Travaglini",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Moraci Sant'Anna",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Narciso (footballer)",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -690,58 +635,8 @@
     },
     {
       "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo de Macedo",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo de Macedo",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo de Macedo",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo (footballer)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo (footballer)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "blocked_outside_window"
-    },
-    {
-      "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Evaristo (footballer)",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Nelsinho Baptista",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -750,18 +645,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Fábio Moreno",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Filipe Luís  Filipe Luís  1",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ondino Viera",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -770,8 +655,8 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -780,8 +665,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -790,8 +675,8 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -800,8 +685,8 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -810,8 +695,8 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -820,8 +705,58 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Flávio Costa",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Osvaldo Brandão",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Otacílio Gonçalves",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Paulo César Carpegiani",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Paulo Victor Gomes",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "dbpedia_managerClub",
+      "local_team_name": "Palmeiras",
+      "coach_name": "PC Gusmão",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "review_needed"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Pedro Santilli",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -830,8 +765,38 @@
     },
     {
       "source": "mediawiki_infobox_en",
-      "local_team_name": "Flamengo",
-      "coach_name": "Gentil Cardoso",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ramón Platero",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ramón Platero",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Ramón Platero",
+      "clipped_start_date": null,
+      "clipped_end_date": null,
+      "canonical_missing_matches_covered": 0,
+      "candidate_confidence": "0.0000",
+      "classification": "blocked_outside_window"
+    },
+    {
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Roger Machado (footballer)",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -840,8 +805,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Gérson Andreotti",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Roger Machado (footballer)",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -850,8 +815,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Gilmar Popoca",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Rubens Minelli",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -860,8 +825,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Iván Palanco",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Sergio Clerici",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -870,8 +835,8 @@
     },
     {
       "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Izidor Kürschner",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Sylvio Pirillo",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
@@ -879,127 +844,17 @@
       "classification": "review_needed"
     },
     {
-      "source": "wikidata_P6087_person_to_team",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jaime de Almeida",
+      "source": "mediawiki_infobox_en",
+      "local_team_name": "Palmeiras",
+      "coach_name": "Sylvio Pirillo",
       "clipped_start_date": null,
       "clipped_end_date": null,
       "canonical_missing_matches_covered": 0,
       "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jaime de Almeida  Jaime de Almeida  1",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jayme de Almeida",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jayme Valente",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "João Carlos (football manager)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "João Pedro (footballer, born 1989)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Joel Santana",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Jorginho (footballer, born 1964)  Jorginho  1",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Josué Teixeira",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Joubert (footballer)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Juan (footballer, born 1979)",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
-    },
-    {
-      "source": "dbpedia_managerClub",
-      "local_team_name": "Flamengo",
-      "coach_name": "Léo Júnior",
-      "clipped_start_date": null,
-      "clipped_end_date": null,
-      "canonical_missing_matches_covered": 0,
-      "candidate_confidence": "0.0000",
-      "classification": "review_needed"
+      "classification": "blocked_outside_window"
     }
   ],
   "facts_loaded_this_run": 157017,
-  "assignment_candidate_rows_built_this_run": 24270,
-  "elapsed_seconds": 44.17
+  "assignment_candidate_rows_built_this_run": 5353,
+  "elapsed_seconds": 31.79
 }

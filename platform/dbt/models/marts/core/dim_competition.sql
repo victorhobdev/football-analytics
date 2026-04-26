@@ -1,4 +1,12 @@
-{{ config(materialized='incremental', unique_key='league_id', incremental_strategy='delete+insert', on_schema_change='sync_all_columns') }}
+{{ config(
+    materialized='incremental',
+    unique_key='league_id',
+    incremental_strategy='delete+insert',
+    on_schema_change='sync_all_columns',
+    indexes=[
+        {'columns': ['league_id'], 'type': 'btree'}
+    ]
+) }}
 
 with fixtures as (
     select * from {{ ref('stg_matches') }}

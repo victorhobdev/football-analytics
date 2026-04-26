@@ -1,12 +1,12 @@
 {
-  "run_id": "external_coach_promotion_20260425T145630Z",
+  "run_id": "external_coach_promotion_20260425T152525Z",
   "executed": true,
   "blocked": false,
   "preflight": {
     "gates": {
-      "promotable_rows": 8201,
-      "promotable_match_teams": 8201,
-      "promotable_coach_keys": 280,
+      "promotable_rows": 163,
+      "promotable_match_teams": 163,
+      "promotable_coach_keys": 1,
       "outside_window": 0,
       "would_overwrite_protected_assignment": 0,
       "unresolved_match_team_conflicts": 0,
@@ -20,15 +20,6 @@
     "blockers": {}
   },
   "before": {
-    "coach_identity": 1959,
-    "coach_identity_source_ref": 0,
-    "coach_tenure": 0,
-    "fact_assignment": 10903,
-    "fact_public": 10903,
-    "external_fact_assignment": 0,
-    "external_fact_coaches": 0
-  },
-  "after": {
     "coach_identity": 2103,
     "coach_identity_source_ref": 560,
     "coach_tenure": 340,
@@ -37,11 +28,20 @@
     "external_fact_assignment": 8201,
     "external_fact_coaches": 280
   },
+  "after": {
+    "coach_identity": 2103,
+    "coach_identity_source_ref": 562,
+    "coach_tenure": 341,
+    "fact_assignment": 19267,
+    "fact_public": 19267,
+    "external_fact_assignment": 8364,
+    "external_fact_coaches": 281
+  },
   "writes": {
-    "identities": 144,
-    "identity_refs": 560,
-    "tenures": 340,
-    "assignments": 8201
+    "identities": 0,
+    "identity_refs": 2,
+    "tenures": 1,
+    "assignments": 163
   },
   "quality": {
     "external_outside_window": 0,

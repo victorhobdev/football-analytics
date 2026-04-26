@@ -169,7 +169,6 @@ export function ProfileMedia({
           onError={handleError}
           sizes="96px"
           src={resolvedAssetUrl}
-          unoptimized
         />
       ) : (
         <span
