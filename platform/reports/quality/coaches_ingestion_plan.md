@@ -357,9 +357,9 @@ Comecar pelo Bloco 0 e Bloco 1.
 Entrega recomendada imediata:
 
 ```text
-quality/coach_assignment_audit.sql
-quality/coach_assignment_audit_sample.csv
-quality/coach_assignment_audit_summary.md
+platform/reports/quality/coach_assignment_audit.sql
+platform/reports/quality/coach_assignment_audit_sample.csv
+platform/reports/quality/coach_assignment_audit_summary.md
 ```
 
 O relatorio deve dizer onde ingerir, quanto falta, quais conflitos existem e qual parte da pagina atual esta estatisticamente insegura.

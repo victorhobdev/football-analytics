@@ -10,21 +10,23 @@ from dataclasses import dataclass
 from datetime import date
 from difflib import SequenceMatcher
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api.src.core.config import get_settings
 from api.src.db.client import db_client
 
-SUMMARY_PATH = ROOT / "quality" / "external_coach_sources_summary.json"
-REPORT_PATH = ROOT / "quality" / "external_coach_novelty_report.md"
-HIGH_VALUE_CSV = ROOT / "quality" / "external_coach_high_novelty_candidates.csv"
-DUPLICATE_CSV = ROOT / "quality" / "external_coach_likely_duplicates.csv"
-UNRESOLVED_CSV = ROOT / "quality" / "external_coach_unresolved_team_candidates.csv"
-SUMMARY_JSON = ROOT / "quality" / "external_coach_novelty_summary.json"
+SUMMARY_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_sources_summary.json"
+REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_novelty_report.md"
+HIGH_VALUE_CSV = ROOT / "platform" / "reports" / "quality" / "external_coach_high_novelty_candidates.csv"
+DUPLICATE_CSV = ROOT / "platform" / "reports" / "quality" / "external_coach_likely_duplicates.csv"
+UNRESOLVED_CSV = ROOT / "platform" / "reports" / "quality" / "external_coach_unresolved_team_candidates.csv"
+SUMMARY_JSON = ROOT / "platform" / "reports" / "quality" / "external_coach_novelty_summary.json"
 
 
 @dataclass(frozen=True)

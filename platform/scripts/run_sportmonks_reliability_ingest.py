@@ -9,6 +9,8 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -19,10 +21,10 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 DEFAULT_ENV_PATH = ROOT / ".env"
-DEFAULT_REPORT_PATH = ROOT / "quality" / "sportmonks_probe_report.md"
-DEFAULT_JSON_PATH = ROOT / "quality" / "sportmonks_probe_payload_sample.json"
+DEFAULT_REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_probe_report.md"
+DEFAULT_JSON_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_probe_payload_sample.json"
 
 FINAL_STATUSES = ("FT", "AET", "PEN", "FTP")
 SPORTMONKS_PROVIDER = "sportmonks"

@@ -6,12 +6,14 @@ import time
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -19,8 +21,8 @@ from api.src.core.config import get_settings
 from api.src.db.client import db_client
 
 ENV_PATH = ROOT / ".env"
-REPORT_PATH = ROOT / "quality" / "sportmonks_ingestion_report.md"
-PROBE_JSON_PATH = ROOT / "quality" / "sportmonks_probe_report.json"
+REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_ingestion_report.md"
+PROBE_JSON_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_probe_report.json"
 
 TEAM_ID_FLAMENGO = 1024
 EVERTON_RIBEIRO_ID = 215915

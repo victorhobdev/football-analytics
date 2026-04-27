@@ -139,10 +139,10 @@ Separar o que parece ser dado novo aproveitavel do que tende a ser duplicacao ou
 
 ## Arquivos gerados
 
-- Alta novidade: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_high_novelty_candidates.csv`
-- Duplicacao provavel: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_likely_duplicates.csv`
-- Time nao resolvido: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_unresolved_team_candidates.csv`
-- Resumo JSON: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_novelty_summary.json`
+- Alta novidade: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_high_novelty_candidates.csv`
+- Duplicacao provavel: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_likely_duplicates.csv`
+- Time nao resolvido: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_unresolved_team_candidates.csv`
+- Resumo JSON: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_novelty_summary.json`
 
 ## Leitura
 

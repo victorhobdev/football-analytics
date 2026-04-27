@@ -218,9 +218,9 @@ node -e "const fs=require('fs'),p=require('path'); const root=process.env.FOOTBA
 Backfill de tecnicos via Wikidata/Wikimedia Commons:
 
 ```powershell
-python scripts/ingest_wikidata_coach_assets.py
-python scripts/ingest_wikidata_coach_assets.py --reconcile-manifest
-python scripts/ingest_wikidata_coach_assets.py --export-missing-csv quality/coaches_missing_assets.csv
+python platform/scripts/ingest_wikidata_coach_assets.py
+python platform/scripts/ingest_wikidata_coach_assets.py --reconcile-manifest
+python platform/scripts/ingest_wikidata_coach_assets.py --export-missing-csv platform/reports/quality/coaches_missing_assets.csv
 ```
 
 Sync especifico da vertical da Copa:

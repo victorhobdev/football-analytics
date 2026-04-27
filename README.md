@@ -10,7 +10,7 @@
 
 </div>
 
-![Football Analytics - página inicial](assets/readme/home.jpg)
+![Football Analytics - página inicial](frontend/public/readme/home.jpg)
 
 ## O Produto
 
@@ -40,19 +40,19 @@ A proposta é simples: sair da leitura fragmentada e entregar uma interface em q
 
 <table>
   <tr>
-    <td width="33%"><strong>Competições</strong><br /><img src="assets/readme/competitions.jpg" alt="Catálogo de competições" /></td>
-    <td width="33%"><strong>Copa do Mundo</strong><br /><img src="assets/readme/world-cup.jpg" alt="Hub da Copa do Mundo" /></td>
-    <td width="33%"><strong>Rankings</strong><br /><img src="assets/readme/rankings.jpg" alt="Hub de rankings" /></td>
+    <td width="33%"><strong>Competições</strong><br /><img src="frontend/public/readme/competitions.jpg" alt="Catálogo de competições" /></td>
+    <td width="33%"><strong>Copa do Mundo</strong><br /><img src="frontend/public/readme/world-cup.jpg" alt="Hub da Copa do Mundo" /></td>
+    <td width="33%"><strong>Rankings</strong><br /><img src="frontend/public/readme/rankings.jpg" alt="Hub de rankings" /></td>
   </tr>
   <tr>
-    <td width="33%"><strong>Partidas</strong><br /><img src="assets/readme/matches.jpg" alt="Lista de partidas" /></td>
-    <td width="33%"><strong>Times</strong><br /><img src="assets/readme/teams.jpg" alt="Lista de times" /></td>
-    <td width="33%"><strong>Jogadores</strong><br /><img src="assets/readme/players.jpg" alt="Lista de jogadores" /></td>
+    <td width="33%"><strong>Partidas</strong><br /><img src="frontend/public/readme/matches.jpg" alt="Lista de partidas" /></td>
+    <td width="33%"><strong>Times</strong><br /><img src="frontend/public/readme/teams.jpg" alt="Lista de times" /></td>
+    <td width="33%"><strong>Jogadores</strong><br /><img src="frontend/public/readme/players.jpg" alt="Lista de jogadores" /></td>
   </tr>
   <tr>
-    <td width="33%"><strong>Comparativos</strong><br /><img src="assets/readme/head-to-head.jpg" alt="Confronto direto entre times" /></td>
-    <td width="33%"><strong>Mercado</strong><br /><img src="assets/readme/market.jpg" alt="Área de mercado e transferências" /></td>
-    <td width="33%"><strong>Início</strong><br /><img src="assets/readme/home.jpg" alt="Página inicial do Football Analytics" /></td>
+    <td width="33%"><strong>Comparativos</strong><br /><img src="frontend/public/readme/head-to-head.jpg" alt="Confronto direto entre times" /></td>
+    <td width="33%"><strong>Mercado</strong><br /><img src="frontend/public/readme/market.jpg" alt="Área de mercado e transferências" /></td>
+    <td width="33%"><strong>Início</strong><br /><img src="frontend/public/readme/home.jpg" alt="Página inicial do Football Analytics" /></td>
   </tr>
 </table>
 
