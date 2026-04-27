@@ -440,10 +440,7 @@ export function CoachesPageContent() {
               <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
                 Ranking limpo de comando técnico
               </h1>
-              <p className="mt-4 max-w-2xl text-sm/6 text-white/72 md:text-[0.95rem]/7">
-                A lista usa os nomes recuperáveis no banco atual, separa cadastros ainda pendentes de ingestão e mostra o clube ligado à campanha encontrada.
-                {` ${CAMPAIGN_INDEX_EXPLANATION}`}
-              </p>
+  
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
