@@ -97,6 +97,9 @@ function parseNullableText(value: string | null): string | null {
   }
 
   const trimmed = value.trim();
+  if (trimmed.toLowerCase() === "all") {
+    return null;
+  }
 
   return trimmed.length > 0 ? trimmed : null;
 }

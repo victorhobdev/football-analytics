@@ -36,6 +36,13 @@ function toQueryParams(filters: RankingQueryFilters = {}): QueryParams {
     if (typeof value === "string" && value.trim().length === 0) {
       continue;
     }
+    if (
+      (key === "competitionId" || key === "seasonId") &&
+      typeof value === "string" &&
+      value.trim().toLowerCase() === "all"
+    ) {
+      continue;
+    }
 
     if (key === "venue" && value === "all") {
       continue;
