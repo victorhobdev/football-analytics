@@ -2,48 +2,48 @@ import Link from "next/link";
 
 const PRODUCT_PILLARS = [
   {
-    title: "Temporadas canônicas",
+    title: "Dados confiáveis",
     description:
-      "Competição, temporada, rankings, tabela e calendário operam como a espinha dorsal do produto.",
+      "Cada análise nasce de um acervo consistente, com contexto claro de competição e temporada para reduzir ruído e aumentar confiança.",
   },
   {
-    title: "Profundidade por partida",
+    title: "Leitura completa do jogo",
     description:
-      "Central da partida, escalações, linha do tempo e estatísticas dão continuidade operacional sem quebrar o recorte.",
+      "Da visão geral ao detalhe da partida, você encontra performance, tendências e comparativos sem perder o fio da análise.",
   },
   {
-    title: "Perfis contextuais",
+    title: "Decisão mais rápida",
     description:
-      "Times e jogadores já navegam dentro de um contexto de temporada consistente, com links profundos e descoberta real.",
+      "Rankings, times e jogadores em uma experiência integrada para transformar informação em ação com mais velocidade.",
   },
 ] as const;
 
 const PRODUCT_ENTRIES = [
   {
     href: "/",
-    title: "Página inicial executiva",
+    title: "Visão geral do produto",
     description:
-      "Entrada operacional do produto para abrir competições, rankings, times e jogadores.",
+      "Painel principal para acompanhar o cenário atual e abrir as análises mais relevantes em poucos cliques.",
   },
   {
     href: "/competitions",
     title: "Competições",
-    description: "Catálogo principal do acervo e ponto de entrada para hubs de temporada.",
+    description: "Explore ligas e torneios com contexto histórico e recorte por temporada.",
   },
   {
     href: "/teams",
     title: "Times",
-    description: "Descoberta e aprofundamento em perfis contextuais de time.",
+    description: "Avalie desempenho, consistência e evolução de cada equipe com profundidade.",
   },
   {
     href: "/players",
     title: "Jogadores",
-    description: "Exploração individual, comparação e entrada para perfis canônicos.",
+    description: "Compare atletas, encontre destaques e identifique impacto real em campo.",
   },
   {
     href: "/rankings",
     title: "Rankings",
-    description: "Família viva de rankings com entrada pública clara no produto atual.",
+    description: "Monitore líderes por métrica e descubra oportunidades com leitura objetiva.",
   },
 ] as const;
 
@@ -57,7 +57,7 @@ export default function MarketingLandingPage() {
               Football Analytics
             </p>
             <h1 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.04em] text-[#003526]">
-              Plataforma editorial e analítica
+              Inteligência de futebol para decidir melhor
             </h1>
           </div>
 
@@ -66,13 +66,13 @@ export default function MarketingLandingPage() {
               className="button-pill button-pill-secondary"
               href="/competitions"
             >
-              Explorar acervo
+              Ver produto
             </Link>
             <Link
               className="button-pill button-pill-primary"
               href="/"
             >
-              Abrir página inicial
+              Começar agora
             </Link>
           </div>
         </header>
@@ -81,22 +81,21 @@ export default function MarketingLandingPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-[rgba(216,227,251,0.78)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#404944]">
-                Página institucional
+                Plataforma profissional
               </span>
               <span className="inline-flex items-center rounded-full bg-[rgba(139,214,182,0.22)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#00513b]">
-                Papel editorial
+                Pronta para operação
               </span>
             </div>
 
             <div className="space-y-4">
               <h2 className="font-[family:var(--font-profile-headline)] text-5xl font-extrabold tracking-[-0.06em] text-[#003526] md:text-6xl">
-                Um produto de exploração futebolística com arquitetura de temporada, não um mosaico
-                de telas.
+                Transforme dados de futebol em vantagem competitiva.
               </h2>
               <p className="max-w-3xl text-base/8 text-[#57657a] md:text-[1.05rem]/8">
-                Esta página apresenta o produto, deixa explícito seu papel institucional e aponta
-                para as entradas operacionais certas. A exploração diária continua na página
-                inicial, no catálogo de competições, na central da partida e nos perfis contextuais.
+                O Football Analytics conecta competições, partidas, times e jogadores em uma única
+                experiência. Você ganha clareza para comparar cenários, identificar tendências e
+                agir com segurança em decisões esportivas e editoriais.
               </p>
             </div>
 
@@ -105,42 +104,42 @@ export default function MarketingLandingPage() {
                 className="button-pill button-pill-primary"
                 href="/"
               >
-                Entrar no produto
+                Experimentar plataforma
               </Link>
               <Link
                 className="button-pill button-pill-secondary"
                 href="/competitions"
               >
-                Ver competições
+                Explorar competições
               </Link>
             </div>
           </div>
 
           <aside className="rounded-[2rem] border border-[rgba(17,28,45,0.08)] bg-[linear-gradient(135deg,#082319_0%,#0d3b2b_58%,#14543e_100%)] p-6 text-white shadow-[0_32px_80px_-56px_rgba(0,53,38,0.8)]">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-white/62">
-              Papel desta página
+              Por que escolher
             </p>
             <h3 className="mt-4 font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em]">
-              Institucional por fora, operacional por dentro
+              Qualidade, velocidade e profundidade
             </h3>
             <p className="mt-4 text-sm/7 text-white/78">
-              A página organiza narrativa, posicionamento e portas de entrada. Ela não duplica a
-              página inicial nem tenta substituir a navegação principal do produto em operação.
+              Desenvolvido para quem precisa confiar no dado e ganhar tempo na análise: scouting,
+              conteúdo, inteligência de mercado e acompanhamento de performance.
             </p>
 
             <div className="mt-6 grid gap-3">
               <div className="rounded-[1.3rem] border border-white/10 bg-white/10 px-4 py-4">
-                <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/62">Página institucional</p>
+                <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/62">Cobertura rica</p>
                 <p className="mt-2 text-sm/6 text-white/82">
-                  Explica o produto, sintetiza sua proposta e envia para a entrada correta.
+                  Métricas, rankings e contexto para enxergar o jogo além do placar.
                 </p>
               </div>
               <div className="rounded-[1.3rem] border border-white/10 bg-white/10 px-4 py-4">
                 <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/62">
-                  Página inicial executiva
+                  Fluxo integrado
                 </p>
                 <p className="mt-2 text-sm/6 text-white/82">
-                  Funciona como painel operacional para acervo, recortes e descoberta analítica.
+                  Navegue entre competição, partida, time e jogador sem quebrar o contexto.
                 </p>
               </div>
             </div>
@@ -154,7 +153,7 @@ export default function MarketingLandingPage() {
               key={pillar.title}
             >
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                Pilar
+                Diferencial
               </p>
               <h3 className="mt-3 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-[#111c2d]">
                 {pillar.title}
@@ -168,10 +167,10 @@ export default function MarketingLandingPage() {
           <div className="space-y-5">
             <div>
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                Entradas do produto
+                Onde você gera valor
               </p>
               <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] text-[#111c2d]">
-                Rotas públicas que já definem a experiência real
+                Módulos desenhados para uso real
               </h2>
             </div>
 
@@ -192,23 +191,22 @@ export default function MarketingLandingPage() {
           <aside className="space-y-4 rounded-[1.8rem] border border-[rgba(17,28,45,0.08)] bg-[rgba(240,243,255,0.7)] p-6">
             <div>
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                Arquitetura pública
+                Potencial de uso
               </p>
               <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] text-[#111c2d]">
-                A narrativa aponta para o núcleo vivo
+                Da análise diária à estratégia
               </h2>
             </div>
             <p className="text-sm/7 text-[#57657a]">
-              A página institucional não apresenta aliases legados como destino principal e não desloca a
-              navegação pública para rotas secundárias ainda em transição. O produto principal
-              continua organizado em competições, rankings, times e jogadores, com partidas abertas
-              dentro dos contextos de competição e temporada.
+              Use a plataforma para monitorar desempenho, antecipar narrativas, encontrar padrões de
+              evolução e comparar cenários com precisão. Tudo em um ambiente pronto para apoiar
+              decisões de negócio e de campo.
             </p>
             <Link
               className="button-pill button-pill-primary"
               href="/competitions"
             >
-              Começar por competições
+              Acessar plataforma
             </Link>
           </aside>
         </section>

@@ -45,6 +45,8 @@ def _to_optional_int(raw_value: str | int | None, *, field_name: str) -> int | N
     value = raw_value.strip()
     if value == "":
         return None
+    if value.lower() == "all":
+        return None
     try:
         return int(value)
     except ValueError as exc:
