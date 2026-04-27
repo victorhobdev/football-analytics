@@ -3,7 +3,7 @@ import { PlatformStateSurface } from "@/shared/components/feedback/PlatformState
 export default function PlatformHomeLoading() {
   return (
     <PlatformStateSurface
-      description="Estamos montando a visão inicial com os blocos editoriais e atalhos principais do produto."
+      description="Estamos carregando a página inicial e os principais atalhos."
       kicker="Início"
       loading
       title="Preparando o início"

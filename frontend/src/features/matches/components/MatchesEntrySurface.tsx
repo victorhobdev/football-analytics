@@ -43,7 +43,7 @@ const MATCH_COLLECTIONS: MatchCollectionConfig[] = [
   {
     competitionKey: "copa_do_brasil",
     description:
-      "Um recorte de copa para navegar por final, semifinais e rodadas eliminatórias sem procurar no catálogo.",
+      "Caminho direto para final, semifinais e rodadas eliminatórias da copa nacional.",
     eyebrow: "Copa do Brasil 2024",
     meta: ["122 partidas", "mata-mata", "ida e volta"],
     seasonLabel: "2024",
@@ -172,8 +172,7 @@ export function MatchesEntrySurface() {
               Partidas
             </h1>
             <p className="mt-3 max-w-2xl text-sm/6 text-[#57657a]">
-              Comece por recortes concretos de jogos: edições, rodadas e fases que abrem direto na
-              lista de partidas.
+              Comece por edições, rodadas e fases que abrem direto na lista de partidas.
             </p>
           </div>
 
@@ -182,7 +181,7 @@ export function MatchesEntrySurface() {
               Como a página funciona
             </p>
             <div className="mt-3 space-y-2 text-sm/6 text-[#1f2d40]">
-              <p>1. Abra um recorte fechado de competição e temporada.</p>
+              <p>1. Escolha uma competição e temporada.</p>
               <p>2. Refine por busca, rodada ou janela dentro da lista.</p>
               <p>3. Entre na central da partida para o detalhe completo.</p>
             </div>
@@ -221,7 +220,7 @@ export function MatchesEntrySurface() {
               ))}
             </div>
             <span className="mt-8 inline-flex text-sm font-semibold text-white transition-colors group-hover:text-white/82">
-              Abrir partidas deste recorte
+              Abrir partidas
             </span>
           </Link>
 
@@ -231,7 +230,7 @@ export function MatchesEntrySurface() {
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded-[1.25rem] bg-[rgba(240,243,255,0.92)] p-4">
-                <p className="text-sm font-semibold text-[#111c2d]">Lista de partidas do recorte</p>
+                <p className="text-sm font-semibold text-[#111c2d]">Lista de partidas</p>
                 <p className="mt-1 text-sm/6 text-[#57657a]">
                   A página abre com paginação real e somente os jogos da edição selecionada.
                 </p>
@@ -239,7 +238,7 @@ export function MatchesEntrySurface() {
               <div className="rounded-[1.25rem] bg-[rgba(240,243,255,0.92)] p-4">
                 <p className="text-sm font-semibold text-[#111c2d]">Agrupamento por competição</p>
                 <p className="mt-1 text-sm/6 text-[#57657a]">
-                  Liga aparece por rodada; copa aparece por fase, sem tratar o acervo como agenda.
+                  Ligas aparecem por rodada; copas aparecem por fase.
                 </p>
               </div>
               <div className="rounded-[1.25rem] bg-[rgba(240,243,255,0.92)] p-4">

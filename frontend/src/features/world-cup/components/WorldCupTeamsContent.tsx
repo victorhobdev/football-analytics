@@ -161,7 +161,7 @@ export function WorldCupTeamsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="A vertical não retornou seleções suficientes para montar esta lista."
+        description="Não há seleções suficientes para exibir esta lista agora."
         kicker="Copa do Mundo"
         title="Lista indisponível"
         tone="warning"

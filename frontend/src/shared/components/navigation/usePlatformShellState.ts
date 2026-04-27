@@ -374,11 +374,11 @@ export function usePlatformShellState(): PlatformShellState {
 
     const surfaceLinks: PlatformShellLink[] = [];
     let surfaceLabel = "Visão geral";
-    let surfaceTitle = context ? `${context.competitionName} ${context.seasonLabel}` : "Explore o produto";
+    let surfaceTitle = context ? `${context.competitionName} ${context.seasonLabel}` : "Explore as competições";
     let description =
-      "Use os atalhos da página e os filtros para navegar entre competições, rankings, jogadores e times.";
+      "Use os atalhos e filtros para navegar entre competições, rankings, jogadores e times.";
     let helperText =
-      "Os filtros mantêm o recorte ativo enquanto você troca de área.";
+      "Os filtros mantêm a mesma seleção durante a navegação.";
 
     if (isWorldCupRoute) {
       breadcrumbs.splice(0, breadcrumbs.length, {
@@ -396,9 +396,9 @@ export function usePlatformShellState(): PlatformShellState {
       surfaceLabel = "Copa do Mundo";
       surfaceTitle = "Entrada dedicada da Copa do Mundo";
       description =
-        "A vertical da Copa ocupa entrada própria no produto e segue rota base dedicada, fora da hierarquia de ligas.";
+        "A Copa do Mundo tem uma área própria, separada das ligas e torneios de clubes.";
       helperText =
-        "Use esta rota como base estável da vertical enquanto o hub e as subpáginas são materializados.";
+        "Use esta página para acessar edições, seleções, rankings e finais.";
     } else if (competitionOnly) {
       breadcrumbs.push({
         label: competitionOnly.shortName,
@@ -436,13 +436,13 @@ export function usePlatformShellState(): PlatformShellState {
       surfaceLabel = "Início";
       surfaceTitle = context
         ? `${context.competitionName} ${context.seasonLabel}`
-        : "Entrada executiva do produto";
+        : "Página inicial";
       description =
         context
           ? "Comece pela competição atual e siga para times, jogadores ou rankings."
           : "Comece por competições ou use a busca global para entrar direto em times e jogadores.";
       helperText = context
-        ? "A página inicial mantém o recorte atual enquanto você abre as áreas principais."
+        ? "A página inicial preserva seus filtros ao abrir as áreas principais."
         : "Escolha uma competição ou abra a busca global para começar.";
       surfaceLinks.splice(
         0,
@@ -455,9 +455,9 @@ export function usePlatformShellState(): PlatformShellState {
       surfaceLabel = "Copa do Mundo";
       surfaceTitle = "Entrada dedicada da Copa do Mundo";
       description =
-        "A vertical da Copa já está posicionada como item de primeiro nível e abre por esta rota base dedicada.";
+        "A Copa do Mundo reúne edições, seleções, rankings e finais em uma área própria.";
       helperText =
-        "O hub completo da vertical será carregado sobre esta mesma rota.";
+        "Acesse as principais páginas históricas da Copa por aqui.";
     } else if (pathname === "/competitions") {
       surfaceLabel = "Competições";
       surfaceTitle = "Campeonatos disponíveis";
@@ -487,8 +487,8 @@ export function usePlatformShellState(): PlatformShellState {
           : activeTab === "rankings"
             ? "Destaques individuais e coletivos da edição no mesmo recorte competitivo."
             : activeTab === "calendar"
-              ? "Confrontos e partidas concluídas da edição, sem tratamento de temporada ao vivo."
-              : "Resumo editorial da edição encerrada, orientado pelo tipo real da competição.";
+              ? "Confrontos e partidas concluídas da edição."
+              : "Resumo da edição, com calendário, estrutura e destaques.";
       helperText =
         "Os atalhos preservam competição, temporada e filtros extras enquanto você muda de leitura.";
     } else if (isShortPlayerResolverPath(pathname)) {
@@ -511,10 +511,10 @@ export function usePlatformShellState(): PlatformShellState {
       surfaceLabel = "Compatibilidade";
       surfaceTitle = "Abrindo time";
       description = isLegacyClubResolverPath(pathname)
-        ? "A rota legada de clubes encaminha automaticamente para o perfil canônico de time."
+        ? "Estamos abrindo o perfil do time na página atualizada."
         : "Estamos localizando a competição e a temporada mais adequadas para este perfil.";
       helperText = isLegacyClubResolverPath(pathname)
-        ? "O alias legado é preservado por compatibilidade, mas a experiência final continua em times."
+        ? "Você será levado para a versão mais completa do perfil."
         : "Se houver contexto disponível, o perfil abre automaticamente.";
       breadcrumbs.push({
         label: "Abrindo time",
@@ -533,7 +533,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Encontre atletas e siga para o perfil individual com o contexto atual.";
       helperText = context
-        ? "Os perfis preservam o mesmo recorte sempre que ele estiver disponível."
+        ? "Os perfis preservam a mesma competição e temporada quando disponíveis."
         : "Escolha uma competição ou use a busca para entrar em um contexto específico.";
     } else if (pathname.startsWith("/players/") || pathname.includes("/players/")) {
       surfaceLabel = "Perfil de jogador";
@@ -553,7 +553,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Encontre times e siga para o perfil completo no recorte atual.";
       helperText = context
-        ? "Os perfis preservam o mesmo recorte quando ele já estiver definido."
+        ? "Os perfis preservam a mesma competição e temporada quando disponíveis."
         : "Escolha uma competição ou abra um perfil para encontrar o melhor contexto.";
     } else if (pathname.startsWith("/teams/") || pathname.includes("/teams/")) {
       surfaceLabel = "Perfil de time";
@@ -582,7 +582,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Resumo, linha do tempo, escalações e estatísticas do jogo.";
       helperText =
-        "Volte para competição, times, jogadores e rankings mantendo o mesmo recorte.";
+        "Volte para competição, times, jogadores e rankings mantendo os mesmos filtros.";
     } else if (pathname === "/rankings") {
       surfaceLabel = "Rankings";
       surfaceTitle = context
@@ -591,7 +591,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Abra o catálogo completo de rankings disponíveis e escolha entre leituras de jogadores e times.";
       helperText =
-        "Os cards mantêm o recorte ativo enquanto você navega entre os rankings.";
+        "Os cards mantêm seus filtros ao navegar entre rankings.";
     } else if (pathname.startsWith("/rankings/")) {
       surfaceLabel = "Rankings";
       surfaceTitle = rankingDefinition
@@ -600,14 +600,14 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Compare líderes da temporada e entre direto em jogadores e times.";
       helperText =
-        "Os atalhos mantêm o mesmo recorte ao mudar de área.";
+        "Os atalhos mantêm seus filtros ao mudar de área.";
     } else if (pathname === "/market") {
       surfaceLabel = "Mercado";
       surfaceTitle = "Transferências de jogadores";
       description =
-        "Explore movimentações reais de jogadores com busca, tipo de transferência e paginação no recorte atual.";
+        "Explore movimentações de jogadores com busca, tipo de transferência e paginação.";
       helperText =
-        "A cobertura preserva os filtros globais, mas valores financeiros e nomes de alguns clubes dependem da fonte disponível.";
+        "Valores financeiros e nomes de clubes podem variar conforme a disponibilidade dos dados.";
       breadcrumbs.push({ label: "Mercado" });
       surfaceLinks.splice(
         0,
@@ -627,7 +627,7 @@ export function usePlatformShellState(): PlatformShellState {
         ? `Comparar times em ${context.competitionName} ${context.seasonLabel}`
         : "Confronto direto";
       description =
-        "Compare dois times no mesmo recorte e siga dos confrontos diretos para a central da partida e os perfis canônicos.";
+        "Compare dois times no mesmo contexto e siga para partidas e perfis completos.";
       helperText =
         "Escolha dois times no contexto atual para montar o comparativo sem sair da temporada.";
       breadcrumbs.push({ label: "Confronto direto" });
@@ -647,9 +647,9 @@ export function usePlatformShellState(): PlatformShellState {
       surfaceLabel = "Técnicos";
       surfaceTitle = "Cobertura de técnicos";
       description =
-        "O domínio de técnicos já existe no produto, mas ainda não tem listagem pública sustentada pelo BFF atual.";
+        "A área de técnicos ainda está sendo ampliada. Enquanto isso, navegue por times e competições.";
       helperText =
-        "Use times e competições como portas de entrada enquanto a descoberta pública de técnicos é fechada.";
+        "Use times e competições como caminho principal para encontrar contextos de técnicos.";
       breadcrumbs.push({ label: "Técnicos" });
       surfaceLinks.splice(
         0,
@@ -659,11 +659,11 @@ export function usePlatformShellState(): PlatformShellState {
       );
     } else if (pathname.startsWith("/coaches/")) {
       surfaceLabel = "Técnicos";
-      surfaceTitle = "Perfil de técnico em preparação";
+      surfaceTitle = "Perfil de técnico";
       description =
-        "O link direto de técnico já existe, mas o detalhe público ainda depende de um contrato dedicado para fechar histórico, ciclos e desempenho.";
+        "Este perfil ainda não tem histórico completo disponível para exibição.";
       helperText =
-        "Use times, jogadores e competições para navegar pelo contexto atual sem cair em rota quebrada.";
+        "Use times, jogadores e competições para continuar navegando pelo contexto atual.";
       breadcrumbs.push({ label: "Técnicos" });
       surfaceLinks.splice(
         0,
@@ -672,10 +672,10 @@ export function usePlatformShellState(): PlatformShellState {
         buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
       );
     } else if (pathname === "/audit") {
-      surfaceLabel = "Área interna";
+      surfaceLabel = "Área indisponível";
       surfaceTitle = "Área indisponível";
       description =
-        "Esta rota não está aberta na navegação do produto.";
+        "Esta página não está disponível na navegação principal.";
       helperText =
         "Volte para o início ou competições para continuar.";
       breadcrumbs.push({ label: "Auditoria" });

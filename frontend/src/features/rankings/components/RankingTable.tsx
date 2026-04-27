@@ -217,10 +217,10 @@ function shouldShowCoverageNotice(status: string, percentage?: number): boolean 
 
 function resolveCoverageMessage(percentage?: number): string {
   if (typeof percentage === "number") {
-    return `Cobertura parcial no recorte atual (${percentage.toFixed(0)}% coberto). Use o ranking como leitura comparativa, não como retrato exaustivo.`;
+    return `Cobertura parcial no filtro atual (${percentage.toFixed(0)}% coberto). Alguns nomes podem mudar conforme novos dados entram.`;
   }
 
-  return "Cobertura parcial no recorte atual. Use o ranking como leitura comparativa, não como retrato exaustivo.";
+  return "Cobertura parcial no filtro atual. Alguns nomes podem mudar conforme novos dados entram.";
 }
 
 function buildRankingHref(rankingId: string, currentSearch: string): string {
@@ -500,7 +500,7 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <RankingSummaryCard
-              detail={`${entityCopy.plural} no recorte`}
+              detail={`${entityCopy.plural} filtrados`}
               label="Resultados"
               value={formatInteger(totalCount)}
             />
@@ -623,7 +623,7 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
             <EmptyState
               description={
                 search.trim().length > 0
-                  ? `Nenhum ${entityCopy.singular} encontrado para "${search.trim()}" no recorte atual.`
+                  ? `Nenhum ${entityCopy.singular} encontrado para "${search.trim()}" nos filtros atuais.`
                   : `Não há ${entityCopy.plural} suficientes para os filtros atuais.`
               }
               title="Ranking vazio"

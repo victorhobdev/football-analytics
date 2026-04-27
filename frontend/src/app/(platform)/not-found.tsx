@@ -7,8 +7,8 @@ export default function PlatformNotFound() {
     <PlatformStateSurface
       actionHref="/"
       actionLabel="Voltar ao início"
-      description="Esse caminho não existe ou não está disponível dentro do recorte atual do produto."
-      detail="Confira o endereço ou retome a navegação pelas áreas principais do acervo histórico."
+      description="Esse caminho não existe ou não está disponível com os filtros atuais."
+      detail="Confira o endereço ou retome a navegação pelas áreas principais."
       secondaryAction={
         <>
           <Link

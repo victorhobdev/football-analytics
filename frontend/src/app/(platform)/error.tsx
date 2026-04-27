@@ -20,8 +20,8 @@ export default function PlatformError({ error, reset }: PlatformErrorProps) {
     <PlatformStateSurface
       actionHref="/"
       actionLabel="Voltar ao início"
-      description="Não foi possível abrir esta área agora. Tente novamente ou siga para uma rota estável do produto."
-      detail="O problema ficou restrito a esta superfície. A shell e os atalhos principais seguem disponíveis."
+      description="Não foi possível abrir esta área agora. Tente novamente ou siga para uma página principal."
+      detail="O problema ficou restrito a esta página. Os atalhos principais seguem disponíveis."
       secondaryAction={
         <>
           <button

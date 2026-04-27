@@ -4,7 +4,7 @@ const PRODUCT_PILLARS = [
   {
     title: "Dados confiáveis",
     description:
-      "Cada análise nasce de um acervo consistente, com contexto claro de competição e temporada para reduzir ruído e aumentar confiança.",
+      "Cada análise parte de dados organizados por competição e temporada para reduzir ruído e aumentar confiança.",
   },
   {
     title: "Leitura completa do jogo",
@@ -21,14 +21,14 @@ const PRODUCT_PILLARS = [
 const PRODUCT_ENTRIES = [
   {
     href: "/",
-    title: "Visão geral do produto",
+    title: "Visão geral",
     description:
       "Painel principal para acompanhar o cenário atual e abrir as análises mais relevantes em poucos cliques.",
   },
   {
     href: "/competitions",
     title: "Competições",
-    description: "Explore ligas e torneios com contexto histórico e recorte por temporada.",
+    description: "Explore ligas e torneios com histórico organizado por temporada.",
   },
   {
     href: "/teams",
@@ -66,7 +66,7 @@ export default function MarketingLandingPage() {
               className="button-pill button-pill-secondary"
               href="/competitions"
             >
-              Ver produto
+              Ver plataforma
             </Link>
             <Link
               className="button-pill button-pill-primary"

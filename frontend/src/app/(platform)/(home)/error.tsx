@@ -14,7 +14,7 @@ export default function PlatformHomeError({ reset }: PlatformHomeErrorProps) {
     <PlatformStateSurface
       actionHref="/"
       actionLabel="Voltar ao início"
-      description="Não foi possível carregar a visão inicial agora. Tente novamente ou siga por outra área já estável do produto."
+      description="Não foi possível carregar a página inicial agora. Tente novamente ou abra Competições."
       detail="A falha ficou restrita à abertura da página inicial. O restante da navegação principal continua disponível."
       kicker="Início"
       secondaryAction={

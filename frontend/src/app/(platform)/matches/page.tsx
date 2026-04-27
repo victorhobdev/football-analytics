@@ -747,19 +747,19 @@ export default function MatchesPage() {
 
       <section className="grid gap-4 xl:grid-cols-4">
         <ProfileRouteCard
-          description="Volte para a temporada para reler o contexto canônico antes de aprofundar."
+          description="Volte para a temporada antes de aprofundar a análise."
           href={seasonHubHref}
-          label="Contexto canônico"
+          label="Temporada"
           title="Temporada"
         />
         <ProfileRouteCard
           description="Abra os perfis de time ligados a esta mesma competição, temporada e janela."
           href={teamsHref}
-          label="Saída canônica"
+          label="Times"
           title="Times"
         />
         <ProfileRouteCard
-          description="Cruze as partidas com atletas e siga para perfis preservando o mesmo recorte."
+          description="Cruze as partidas com atletas e siga para perfis mantendo os mesmos filtros."
           href={playersHref}
           label="Descoberta"
           title="Jogadores"

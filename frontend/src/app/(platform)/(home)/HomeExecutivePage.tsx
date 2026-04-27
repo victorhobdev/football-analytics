@@ -451,7 +451,7 @@ export function HomeExecutivePage() {
   if (homeQuery.isLoading && !homeQuery.data) {
     return (
       <PlatformStateSurface
-        description="Estamos montando a visão principal do produto com dados reais do acervo."
+        description="Estamos carregando competições, temporadas e estatísticas do acervo."
         kicker="Início"
         loading
         title="Carregando a página inicial"
@@ -464,7 +464,7 @@ export function HomeExecutivePage() {
       <PlatformStateSurface
         actionHref="/competitions"
         actionLabel="Abrir competições"
-        description="Não foi possível carregar a página inicial agora. Abra outra área do produto ou tente novamente."
+        description="Não foi possível carregar a página inicial agora. Tente novamente ou abra Competições."
         kicker="Início"
         title="Falha ao carregar a página inicial"
         tone="critical"
@@ -477,7 +477,7 @@ export function HomeExecutivePage() {
       <PlatformStateSurface
         actionHref="/competitions"
         actionLabel="Abrir competições"
-        description="A página inicial não recebeu dados suficientes para ser montada agora."
+        description="Não há dados suficientes para exibir a página inicial agora."
         kicker="Início"
         title="Página inicial indisponível"
         tone="warning"
@@ -490,12 +490,12 @@ export function HomeExecutivePage() {
     {
       label: "Competições",
       value: formatWholeNumber(archiveSummary.competitions),
-      detail: "campeonatos no acervo",
+      detail: "campeonatos disponíveis",
     },
     {
       label: "Temporadas",
       value: formatWholeNumber(archiveSummary.seasons),
-      detail: "edições no acervo",
+      detail: "edições disponíveis",
     },
     {
       label: "Partidas",
@@ -575,7 +575,7 @@ export function HomeExecutivePage() {
                   label="Comparativos"
                 />
                 <QuickLinkCard
-                  description="Campanha, elenco e profundidade por entidade no recorte atual."
+                  description="Campanha, elenco e desempenho dos times selecionados."
                   href={buildTeamsPath(sharedFilters)}
                   icon="clubs"
                   label="Times"
@@ -609,7 +609,7 @@ export function HomeExecutivePage() {
               </div>
             ) : (
               <EmptyState
-                description="A página inicial não recebeu competições nacionais suficientes agora."
+                description="Não há competições nacionais disponíveis no momento."
                 title="Sem competições nacionais"
               />
             )}
@@ -636,7 +636,7 @@ export function HomeExecutivePage() {
               </div>
             ) : (
               <EmptyState
-                description="A página inicial não recebeu competições continentais suficientes agora."
+                description="Não há competições continentais disponíveis no momento."
                 title="Sem competições continentais"
               />
             )}
@@ -661,7 +661,7 @@ export function HomeExecutivePage() {
               </div>
             ) : (
               <EmptyState
-                description="A página inicial não recebeu competições mundiais suficientes agora."
+                description="Não há competições mundiais disponíveis no momento."
                 title="Sem competições mundiais"
               />
             )}

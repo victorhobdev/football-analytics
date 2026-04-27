@@ -28,13 +28,13 @@ const STATE_BADGE_LABELS = {
 
 const STATE_SUMMARY_TITLES = {
   critical: "Esta área saiu do fluxo esperado",
-  warning: "Esta área ainda não entrou no fluxo principal",
+  warning: "Esta área ainda não está disponível",
   info: "A navegação principal continua disponível",
 } as const;
 
 const STATE_SUMMARY_DESCRIPTIONS = {
-  critical: "Use os atalhos estáveis abaixo enquanto esta superfície é recuperada.",
-  warning: "Os atalhos abaixo levam para as rotas mais próximas já integradas ao produto.",
+  critical: "Use os atalhos abaixo enquanto esta página é recuperada.",
+  warning: "Os atalhos abaixo levam para páginas disponíveis.",
   info: "Escolha o próximo caminho para retomar a exploração sem perder o enquadramento atual.",
 } as const;
 
@@ -66,9 +66,9 @@ export function PlatformStateSurface({
   const contextDescription = loading
     ? "Estamos montando os blocos desta página e preservando o enquadramento da navegação."
     : tone === "critical"
-      ? "Esta superfície não conseguiu concluir a abertura. Os atalhos abaixo levam para caminhos estáveis do produto."
+      ? "Esta página não conseguiu carregar. Use os atalhos abaixo para continuar."
       : tone === "warning"
-        ? "Esta superfície ainda não participa da experiência principal. Continue a exploração pelas áreas já consolidadas."
+        ? "Esta página ainda não está disponível. Continue pelas áreas principais."
         : "A página continua dentro da mesma base visual e a navegação principal segue disponível.";
 
   return (

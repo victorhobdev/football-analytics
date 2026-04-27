@@ -143,7 +143,7 @@ export function SeasonCompetitionAnalyticsSection({
         <PartialDataBanner
           className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
           coverage={analyticsQuery.coverage}
-          message="As análises desta competição seguem navegáveis, mas parte da temporada ainda está com cobertura parcial."
+          message="As análises seguem disponíveis, mas parte da temporada tem cobertura parcial."
         />
       ) : null}
 
@@ -176,7 +176,7 @@ export function SeasonCompetitionAnalyticsSection({
         {!analyticsQuery.isLoading && stageAnalytics.length === 0 ? (
           <EmptyState
             className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-            description="Ainda não há fases suficientes para materializar análises estruturais nesta temporada."
+            description="Ainda não há fases suficientes para exibir análises estruturais desta temporada."
             title="Sem análises por fase"
           />
         ) : null}
@@ -363,7 +363,7 @@ export function SeasonCompetitionAnalyticsSection({
                 {!isLoading && !isError && ties.length === 0 ? (
                   <EmptyState
                     className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
-                    description="Nenhum confronto agregado foi materializado para esta fase."
+                    description="Nenhum confronto agregado está disponível para esta fase."
                     title="Sem confrontos"
                   />
                 ) : null}

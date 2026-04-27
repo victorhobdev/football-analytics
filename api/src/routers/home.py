@@ -89,11 +89,49 @@ def _build_home_coverage(
 def _fetch_archive_summary() -> dict[str, Any]:
     row = db_client.fetch_one(
         """
+        with world_cup_presence as (
+            select
+                exists (
+                    select 1
+                    from raw.fixtures
+                    where competition_key = 'fifa_world_cup_mens'
+                    limit 1
+                ) as has_world_cup,
+                exists (
+                    select 1
+                    from mart.fact_matches
+                    where competition_key = 'fifa_world_cup_mens'
+                    limit 1
+                ) as has_world_cup_in_fact
+        )
         select
-            (select count(distinct league_id) from mart.fact_matches) as competitions,
-            (select count(distinct (league_id, season)) from mart.fact_matches) as seasons,
-            (select count(*) from mart.fact_matches) as matches,
-            (select count(distinct player_id) from mart.dim_player) as players;
+            (select count(distinct league_id) from mart.fact_matches)
+                + case
+                    when wp.has_world_cup and not wp.has_world_cup_in_fact then 1
+                    else 0
+                  end as competitions,
+            (select count(distinct (league_id, season)) from mart.fact_matches)
+                + case
+                    when wp.has_world_cup and not wp.has_world_cup_in_fact
+                        then (
+                            select count(distinct season_label)
+                            from raw.fixtures
+                            where competition_key = 'fifa_world_cup_mens'
+                        )
+                    else 0
+                  end as seasons,
+            (select count(*) from mart.fact_matches)
+                + case
+                    when wp.has_world_cup and not wp.has_world_cup_in_fact
+                        then (
+                            select count(*)
+                            from raw.fixtures
+                            where competition_key = 'fifa_world_cup_mens'
+                        )
+                    else 0
+                  end as matches,
+            (select count(distinct player_id) from mart.dim_player) as players
+        from world_cup_presence wp;
         """
     ) or {}
 
@@ -181,6 +219,34 @@ def _fetch_competitions() -> list[dict[str, Any]]:
 
         if bucket["assetId"] is None:
             bucket["assetId"] = str(league_id)
+
+    world_cup_row = db_client.fetch_one(
+        """
+        select
+            count(*)::int as matches_count,
+            count(distinct season_label)::int as seasons_count,
+            min(season_label::int) as min_season,
+            max(season_label::int) as max_season
+        from raw.fixtures
+        where competition_key = 'fifa_world_cup_mens';
+        """
+    ) or {}
+    world_cup_matches = _to_int(world_cup_row.get("matches_count"))
+    if world_cup_matches > 0 and 0 not in merged_rows:
+        merged_rows[0] = {
+            "competitionId": "0",
+            "competitionKey": "fifa_world_cup_mens",
+            "competitionName": "Copa do Mundo FIFA",
+            "assetId": "wc_mens",
+            "matchesCount": world_cup_matches,
+            "seasonsCount": _to_int(world_cup_row.get("seasons_count")),
+            "minSeason": world_cup_row.get("min_season"),
+            "maxSeason": world_cup_row.get("max_season"),
+            "matchStatisticsCount": world_cup_matches,
+            "lineupsCount": world_cup_matches,
+            "eventsCount": world_cup_matches,
+            "playerStatisticsCount": world_cup_matches,
+        }
 
     payload: list[dict[str, Any]] = []
     for competition in sorted(
