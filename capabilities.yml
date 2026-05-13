@@ -1,0 +1,45 @@
+schema_version: 1.0.0
+default_provider: sportmonks
+
+entities:
+  fixtures:
+    canonical_schema_version: 2.0.0
+    required_metadata:
+      - provider
+      - entity_type
+      - schema_version
+      - ingested_at
+      - payload_hash
+  statistics:
+    canonical_schema_version: 2.0.0
+    required_metadata:
+      - provider
+      - entity_type
+      - schema_version
+      - ingested_at
+      - payload_hash
+  match_events:
+    canonical_schema_version: 2.0.0
+    required_metadata:
+      - provider
+      - entity_type
+      - schema_version
+      - ingested_at
+      - payload_hash
+
+providers:
+  sportmonks:
+    fixtures: full
+    statistics: full
+    match_events: full
+  api_football:
+    fixtures: full
+    statistics: full
+    match_events: full
+
+degradation_policy:
+  when_capability_unavailable:
+    field_mode: nullable
+    endpoint_mode: partial_response_allowed
+    feature_flag_mode: disable_column
+    logging_mode: structured_warning

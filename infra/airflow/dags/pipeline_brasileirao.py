@@ -1,5 +1,4 @@
-﻿from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator, get_current_context
@@ -7,10 +6,11 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.utils.task_group import TaskGroup
 
 from common.observability import DEFAULT_DAG_ARGS, log_event
-
+from common.providers import get_default_provider, normalize_provider_name
 
 DEFAULT_LEAGUE_ID = 71
 DEFAULT_SEASON = 2024
+DEFAULT_PROVIDER = get_default_provider()
 
 
 def _safe_int(value, default_value: int, field_name: str) -> int:
@@ -31,6 +31,7 @@ def resolve_params() -> dict:
     resolved = {
         "league_id": _safe_int(conf.get("league_id", params.get("league_id", DEFAULT_LEAGUE_ID)), DEFAULT_LEAGUE_ID, "league_id"),
         "season": _safe_int(conf.get("season", params.get("season", DEFAULT_SEASON)), DEFAULT_SEASON, "season"),
+        "provider": normalize_provider_name(str(conf.get("provider", params.get("provider", DEFAULT_PROVIDER)))),
     }
 
     log_event(
@@ -63,7 +64,7 @@ with DAG(
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False,
-    params={"league_id": DEFAULT_LEAGUE_ID, "season": DEFAULT_SEASON},
+    params={"league_id": DEFAULT_LEAGUE_ID, "season": DEFAULT_SEASON, "provider": DEFAULT_PROVIDER},
     render_template_as_native_obj=True,
     default_args=DEFAULT_DAG_ARGS,
     tags=["pipeline", "orchestrator", "brasileirao"],
@@ -132,3 +133,6 @@ with DAG(
     group_1_done >> group_2_lake_raw >> group_2_done
     group_2_done >> group_3_dbt_quality >> group_3_done
     group_3_done >> end_pipeline
+
+
+

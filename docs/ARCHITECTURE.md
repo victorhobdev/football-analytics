@@ -1,4 +1,4 @@
-# Architecture - football-analytics
+﻿# Architecture - football-analytics
 
 ## Overview
 Current architecture is dbt-first for transformations, with Airflow as orchestrator and explicit quality gates.
@@ -9,7 +9,7 @@ Official runtime flow:
 ## Layers
 
 ### Bronze (MinIO JSON)
-- Source: API-Football endpoints.
+- Source: provider-agnostic adapters (`sportmonks` default, `api_football` fallback).
 - Stored as raw JSON payloads for replay and audit.
 - Main ingestion DAGs:
   - `ingest_brasileirao_2024_backfill`
@@ -115,3 +115,4 @@ Execution groups:
 ## Related docs
 - Contracts: `docs/contracts/data_contracts.md`
 - Roadmap status: `docs/ROADMAP.md`
+

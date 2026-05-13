@@ -1,4 +1,4 @@
-# football-analytics
+﻿# football-analytics
 
 Plataforma de dados para analise de futebol com fluxo oficial:
 `ingestao -> silver/raw -> dbt_run -> great_expectations_checks -> data_quality_checks`.
@@ -10,6 +10,7 @@ Plataforma de dados para analise de futebol com fluxo oficial:
 - dbt (transformacao): `dbt/`
 - Great Expectations + SQL assertions (quality gates): `quality/great_expectations/` + `infra/airflow/dags/data_quality_checks.py`
 - Metabase (BI): `bi/metabase/`
+- Providers de ingestao: `sportmonks` (default) e `api_football` (fallback), selecionados por `ACTIVE_PROVIDER`
 - CI: `.github/workflows/ci.yml`
 
 ## Subir stack local
@@ -51,8 +52,24 @@ DAG principal: `pipeline_brasileirao`.
 
 Execucao de teste:
 ```powershell
-$conf='{"league_id":71,"season":2024}'
+$conf='{"league_id":71,"season":2024,"provider":"sportmonks"}'
 docker compose exec -T airflow-webserver airflow dags test pipeline_brasileirao 2026-02-17 -c $conf
+```
+
+Selecionar provider (PowerShell):
+```powershell
+$env:ACTIVE_PROVIDER='sportmonks'
+$env:API_KEY_SPORTMONKS='sua_chave'
+$env:SPORTMONKS_BASE_URL='https://api.sportmonks.com/v3/football'
+```
+
+Obs.: `league_id` no `dag_run.conf` e ID do provider ativo. `season` deve ser o ano da temporada (ex.: `2024`).
+
+Provider legado opcional:
+```powershell
+$env:ACTIVE_PROVIDER='api_football'
+$env:APIFOOTBALL_API_KEY='sua_chave'
+$env:APIFOOTBALL_BASE_URL='https://v3.football.api-sports.io'
 ```
 
 Fluxo interno da DAG:
@@ -138,3 +155,6 @@ Versionamento de dashboards:
 - Arquitetura: `docs/ARCHITECTURE.md`
 - Roadmap: `docs/ROADMAP.md`
 - DDL legado (somente referencia): `warehouse/ddl/`
+
+
+
