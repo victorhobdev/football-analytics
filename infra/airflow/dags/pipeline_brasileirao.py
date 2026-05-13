@@ -1,8 +1,10 @@
 from datetime import datetime
 
 from airflow import DAG
+from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator, get_current_context
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.utils.task_group import TaskGroup
 
 
 DEFAULT_LEAGUE_ID = 71
@@ -52,102 +54,101 @@ with DAG(
         python_callable=resolve_params,
     )
 
-    start_ingest = PythonOperator(
-        task_id="start_ingest",
+    def trigger_task(task_id: str, dag_id: str) -> TriggerDagRunOperator:
+        return TriggerDagRunOperator(
+            task_id=task_id,
+            trigger_dag_id=dag_id,
+            conf="{{ ti.xcom_pull(task_ids='resolve_runtime_params') }}",
+            wait_for_completion=True,
+            poke_interval=10,
+            reset_dag_run=True,
+            allowed_states=["success"],
+            failed_states=["failed"],
+        )
+
+    with TaskGroup(group_id="group_1_ingestion") as group_1_ingestion:
+        run_ingest_fixtures = trigger_task(
+            task_id="run_ingest_brasileirao_2024_backfill",
+            dag_id="ingest_brasileirao_2024_backfill",
+        )
+        run_ingest_statistics = trigger_task(
+            task_id="run_ingest_statistics_bronze",
+            dag_id="ingest_statistics_bronze",
+        )
+        run_ingest_match_events = trigger_task(
+            task_id="run_ingest_match_events_bronze",
+            dag_id="ingest_match_events_bronze",
+        )
+
+    with TaskGroup(group_id="group_2_lake_raw") as group_2_lake_raw:
+        run_bronze_to_silver_fixtures = trigger_task(
+            task_id="run_bronze_to_silver_fixtures_backfill",
+            dag_id="bronze_to_silver_fixtures_backfill",
+        )
+        run_silver_to_postgres_fixtures = trigger_task(
+            task_id="run_silver_to_postgres_fixtures",
+            dag_id="silver_to_postgres_fixtures",
+        )
+        run_bronze_to_silver_fixtures >> run_silver_to_postgres_fixtures
+
+        run_bronze_to_silver_statistics = trigger_task(
+            task_id="run_bronze_to_silver_statistics",
+            dag_id="bronze_to_silver_statistics",
+        )
+        run_silver_to_postgres_statistics = trigger_task(
+            task_id="run_silver_to_postgres_statistics",
+            dag_id="silver_to_postgres_statistics",
+        )
+        run_bronze_to_silver_statistics >> run_silver_to_postgres_statistics
+
+        run_bronze_to_silver_match_events = trigger_task(
+            task_id="run_bronze_to_silver_match_events",
+            dag_id="bronze_to_silver_match_events",
+        )
+        run_silver_to_postgres_match_events = trigger_task(
+            task_id="run_silver_to_postgres_match_events",
+            dag_id="silver_to_postgres_match_events",
+        )
+        run_bronze_to_silver_match_events >> run_silver_to_postgres_match_events
+
+    with TaskGroup(group_id="group_3_gold") as group_3_gold:
+        run_gold_dimensions = trigger_task(
+            task_id="run_gold_dimensions_load",
+            dag_id="gold_dimensions_load",
+        )
+        run_gold_facts = trigger_task(
+            task_id="run_gold_facts_load",
+            dag_id="gold_facts_load",
+        )
+        run_gold_dimensions >> run_gold_facts
+
+    with TaskGroup(group_id="group_4_mart_quality") as group_4_mart_quality:
+        run_mart = trigger_task(
+            task_id="run_mart_build_brasileirao_2024",
+            dag_id="mart_build_brasileirao_2024",
+        )
+        run_quality = trigger_task(
+            task_id="run_data_quality_checks",
+            dag_id="data_quality_checks",
+        )
+        run_mart >> run_quality
+
+    start_pipeline = PythonOperator(
+        task_id="start_pipeline",
         python_callable=log_stage,
-        op_kwargs={"stage": "ingest_brasileirao_2024_backfill", "action": "START"},
+        op_kwargs={"stage": "pipeline_brasileirao", "action": "START"},
     )
-    run_ingest = TriggerDagRunOperator(
-        task_id="run_ingest_brasileirao_2024_backfill",
-        trigger_dag_id="ingest_brasileirao_2024_backfill",
-        conf="{{ ti.xcom_pull(task_ids='resolve_runtime_params') }}",
-        wait_for_completion=True,
-        poke_interval=10,
-        reset_dag_run=True,
-        allowed_states=["success"],
-        failed_states=["failed"],
-    )
-    end_ingest = PythonOperator(
-        task_id="end_ingest",
+    end_pipeline = PythonOperator(
+        task_id="end_pipeline",
         python_callable=log_stage,
-        op_kwargs={"stage": "ingest_brasileirao_2024_backfill", "action": "END"},
+        op_kwargs={"stage": "pipeline_brasileirao", "action": "END"},
     )
 
-    start_bronze_silver = PythonOperator(
-        task_id="start_bronze_to_silver",
-        python_callable=log_stage,
-        op_kwargs={"stage": "bronze_to_silver_fixtures_backfill", "action": "START"},
-    )
-    run_bronze_silver = TriggerDagRunOperator(
-        task_id="run_bronze_to_silver_fixtures_backfill",
-        trigger_dag_id="bronze_to_silver_fixtures_backfill",
-        conf="{{ ti.xcom_pull(task_ids='resolve_runtime_params') }}",
-        wait_for_completion=True,
-        poke_interval=10,
-        reset_dag_run=True,
-        allowed_states=["success"],
-        failed_states=["failed"],
-    )
-    end_bronze_silver = PythonOperator(
-        task_id="end_bronze_to_silver",
-        python_callable=log_stage,
-        op_kwargs={"stage": "bronze_to_silver_fixtures_backfill", "action": "END"},
-    )
+    group_1_done = EmptyOperator(task_id="group_1_done")
+    group_2_done = EmptyOperator(task_id="group_2_done")
+    group_3_done = EmptyOperator(task_id="group_3_done")
 
-    start_silver_postgres = PythonOperator(
-        task_id="start_silver_to_postgres",
-        python_callable=log_stage,
-        op_kwargs={"stage": "silver_to_postgres_fixtures", "action": "START"},
-    )
-    run_silver_postgres = TriggerDagRunOperator(
-        task_id="run_silver_to_postgres_fixtures",
-        trigger_dag_id="silver_to_postgres_fixtures",
-        conf="{{ ti.xcom_pull(task_ids='resolve_runtime_params') }}",
-        wait_for_completion=True,
-        poke_interval=10,
-        reset_dag_run=True,
-        allowed_states=["success"],
-        failed_states=["failed"],
-    )
-    end_silver_postgres = PythonOperator(
-        task_id="end_silver_to_postgres",
-        python_callable=log_stage,
-        op_kwargs={"stage": "silver_to_postgres_fixtures", "action": "END"},
-    )
-
-    start_mart = PythonOperator(
-        task_id="start_mart",
-        python_callable=log_stage,
-        op_kwargs={"stage": "mart_build_brasileirao_2024", "action": "START"},
-    )
-    run_mart = TriggerDagRunOperator(
-        task_id="run_mart_build_brasileirao_2024",
-        trigger_dag_id="mart_build_brasileirao_2024",
-        conf="{{ ti.xcom_pull(task_ids='resolve_runtime_params') }}",
-        wait_for_completion=True,
-        poke_interval=10,
-        reset_dag_run=True,
-        allowed_states=["success"],
-        failed_states=["failed"],
-    )
-    end_mart = PythonOperator(
-        task_id="end_mart",
-        python_callable=log_stage,
-        op_kwargs={"stage": "mart_build_brasileirao_2024", "action": "END"},
-    )
-
-    (
-        resolve_runtime_params
-        >> start_ingest
-        >> run_ingest
-        >> end_ingest
-        >> start_bronze_silver
-        >> run_bronze_silver
-        >> end_bronze_silver
-        >> start_silver_postgres
-        >> run_silver_postgres
-        >> end_silver_postgres
-        >> start_mart
-        >> run_mart
-        >> end_mart
-    )
+    resolve_runtime_params >> start_pipeline >> group_1_ingestion >> group_1_done
+    group_1_done >> group_2_lake_raw >> group_2_done
+    group_2_done >> group_3_gold >> group_3_done
+    group_3_done >> group_4_mart_quality >> end_pipeline

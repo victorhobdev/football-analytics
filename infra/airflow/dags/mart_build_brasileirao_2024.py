@@ -135,13 +135,14 @@ def build_mart():
     )
 
 
+# Deprecated: legacy SQL-based mart loader. Prefer `dbt_run` DAG.
 with DAG(
     dag_id="mart_build_brasileirao_2024",
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False,
     params={"league_id": 71, "season": 2024},
-    tags=["mart", "gold", "warehouse"],
+    tags=["mart", "gold", "warehouse", "deprecated"],
 ) as dag:
     PythonOperator(
         task_id="build_mart_tables",

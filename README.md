@@ -149,3 +149,15 @@ WHERE season = 2024;
 - `docs/ARCHITECTURE.md` — current + target architecture
 - `docs/ROADMAP.md` — phased plan of work (what’s next)
 - `AGENTS.md` — instructions for coding agents (source of truth for contributions)
+
+## Visualizacao (Metabase)
+- Acesso: `http://localhost:3000`
+- O servico do Metabase sobe via `docker compose` junto com os demais containers.
+
+### Conectar o Metabase ao Data Warehouse
+Na tela de configuracao de banco (PostgreSQL), use:
+- Host: `football-postgres`
+- Port: `5432`
+- User: valor de `POSTGRES_USER` no `.env` (default local: `football`)
+- Password: valor de `POSTGRES_PASSWORD` no `.env` (default local: `football`)
+- Database: valor de `POSTGRES_DB` no `.env` (default local: `football_dw`)

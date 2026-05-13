@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: postgres_raw
+    database: "{{ env_var('FOOTBALL_PG_DBNAME', env_var('POSTGRES_DB', 'football_dw')) }}"
+    schema: raw
+    tables:
+      - name: fixtures
+      - name: match_statistics
+      - name: match_events

@@ -13,6 +13,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      default:
+        aliases:
+          - football-postgres
 
   minio:
     image: minio/minio:latest
@@ -78,6 +82,7 @@ services:
     volumes:
       - ./infra/airflow/dags:/opt/airflow/dags
       - ./warehouse:/opt/airflow/warehouse
+      - ./dbt:/opt/airflow/dbt
     ports:
       - "8080:8080"
     command: webserver
@@ -107,6 +112,7 @@ services:
     volumes:
       - ./infra/airflow/dags:/opt/airflow/dags
       - ./warehouse:/opt/airflow/warehouse
+      - ./dbt:/opt/airflow/dbt
     command: scheduler
 
 
@@ -124,7 +130,24 @@ services:
       exit 0;
       "
 
+  metabase:
+    image: metabase/metabase:latest
+    container_name: football_metabase
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    volumes:
+      - metabase_data:/metabase.db
+    environment:
+      MB_DB_FILE: /metabase.db/metabase
+
 
 volumes:
   postgres_data:
   minio_data:
+  metabase_data:
+
+networks:
+  default:
+    name: football-network
