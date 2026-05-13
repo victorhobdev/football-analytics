@@ -55,3 +55,21 @@ CREATE TABLE IF NOT EXISTS mart.league_summary (
 
 CREATE INDEX IF NOT EXISTS idx_league_summary_season
   ON mart.league_summary (season);
+
+CREATE TABLE IF NOT EXISTS mart.standings_evolution (
+  season                    INT NOT NULL,
+  round                     INT NOT NULL,
+  team_id                   BIGINT NOT NULL,
+  points_accumulated        INT NOT NULL,
+  goals_for_accumulated     INT NOT NULL,
+  goal_diff_accumulated     INT NOT NULL,
+  position                  INT NOT NULL,
+  updated_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT pk_standings_evolution PRIMARY KEY (season, round, team_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_standings_evolution_season_round_position
+  ON mart.standings_evolution (season, round, position);
+
+CREATE INDEX IF NOT EXISTS idx_standings_evolution_team
+  ON mart.standings_evolution (team_id);
