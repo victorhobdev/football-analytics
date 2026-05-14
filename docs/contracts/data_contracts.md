@@ -46,6 +46,7 @@ Relevant fields and types:
 Quality rules applied:
 - GE suite: `raw_fixtures_suite` (not null + unique `fixture_id`, season range)
 - Loader contract checks: required input columns + explicit target columns (`silver_to_postgres_fixtures.py`)
+- DB constraints/indexes: `fixture_id` PK, `league_id` + `season` NOT NULL, indexes em `league_id`, `season` e `(league_id, season)`.
 
 ### `raw.match_statistics`
 - Grain: 1 row per (`fixture_id`, `team_id`).
@@ -74,6 +75,7 @@ Relevant fields and types:
 Quality rules applied:
 - GE suite: `raw_match_statistics_suite` (not null keys, compound uniqueness, ball possession range)
 - Loader contract checks + idempotent upsert with `IS DISTINCT FROM`
+- DB constraints/indexes: PK (`fixture_id`, `team_id`) + FK para `raw.fixtures`; IDs `fixture_id`/`team_id` NOT NULL; indexes em `fixture_id` e `team_id`.
 
 ### `raw.match_events` (partitioned)
 - Grain: 1 row per technical event (`event_id`, `season`).
@@ -102,6 +104,7 @@ Quality rules applied:
 - GE suite: `raw_match_events_suite` (not null keys, uniqueness, time range)
 - SQL check: `raw_events_orphan` in `data_quality_checks.py`
 - Loader contract checks + idempotent upsert with `IS DISTINCT FROM`
+- DB constraints/indexes: PK (`event_id`, `season`), IDs `event_id`/`season`/`fixture_id` NOT NULL, indexes em `fixture_id`, `team_id`, `player_id`, `assist_id`.
 
 ---
 
