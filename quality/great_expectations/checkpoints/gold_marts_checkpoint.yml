@@ -31,3 +31,13 @@ validations:
       batch_identifiers:
         runtime_batch_identifier_name: mart_standings_evolution
     expectation_suite_name: mart_standings_evolution_suite
+
+  - batch_request:
+      datasource_name: postgres_runtime
+      data_connector_name: default_runtime_data_connector_name
+      data_asset_name: mart_dim_player_asset
+      runtime_parameters:
+        query: "SELECT * FROM mart.dim_player"
+      batch_identifiers:
+        runtime_batch_identifier_name: mart_dim_player
+    expectation_suite_name: mart_dim_player_suite
