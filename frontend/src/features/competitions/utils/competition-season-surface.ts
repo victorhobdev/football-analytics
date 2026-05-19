@@ -19,7 +19,8 @@ export type CompetitionSeasonSurfaceSection =
   | "overview"
   | "structure"
   | "matches"
-  | "highlights";
+  | "highlights"
+  | "rounds";
 
 export type CompetitionSeasonSurfaceResolution = {
   defaultStructureStage: CompetitionStructureStage | null;
@@ -112,6 +113,10 @@ export function resolveCompetitionSeasonSurfaceSection(
     return "highlights";
   }
 
+  if (tab === "rounds") {
+    return "rounds";
+  }
+
   return "overview";
 }
 
@@ -124,6 +129,10 @@ export function mapCompetitionSeasonSurfaceSectionToLegacyTab(
 
   if (section === "highlights") {
     return "rankings";
+  }
+
+  if (section === "rounds") {
+    return "rounds" as SeasonHubTab;
   }
 
   return "calendar";

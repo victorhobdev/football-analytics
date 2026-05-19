@@ -11,6 +11,16 @@ from airflow.operators.python import get_current_context
 from sqlalchemy import create_engine, text
 
 from common.observability import StepMetrics, log_event
+from common.services.world_cup_config import (
+    DEFAULT_WORLD_CUP_EDITION_KEY,
+    FJELSTUL_SOURCE,
+    WORLD_CUP_COMPETITION_KEY,
+    WORLD_CUP_COMPETITION_NAME,
+    WORLD_CUP_COMPETITION_TYPE,
+    WorldCupEditionConfig,
+    get_world_cup_edition_config,
+    get_world_cup_edition_config_from_context,
+)
 from common.services.warehouse_service import (
     FIXTURE_LINEUPS_TARGET_COLUMNS,
     STANDINGS_SNAPSHOTS_TARGET_COLUMNS,
@@ -18,20 +28,6 @@ from common.services.warehouse_service import (
     _assert_target_columns,
     _stage_and_upsert_with_classified_counts,
 )
-
-
-WORLD_CUP_EDITION_KEY = "fifa_world_cup_mens__2022"
-WORLD_CUP_PROVIDER = "world_cup_2022"
-WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens"
-WORLD_CUP_COMPETITION_NAME = "FIFA Men's World Cup"
-WORLD_CUP_COMPETITION_TYPE = "international_cup"
-WORLD_CUP_SEASON = 2022
-WORLD_CUP_SEASON_LABEL = "2022"
-WORLD_CUP_SEASON_NAME = "2022 FIFA Men's World Cup"
-WORLD_CUP_SOURCE_FIXTURES = "fjelstul_worldcup"
-WORLD_CUP_SOURCE_COACHES = "fjelstul_worldcup"
-QATAR_TIMEZONE_LABEL = "Asia/Qatar"
-QATAR_TZ = timezone(timedelta(hours=3), name=QATAR_TIMEZONE_LABEL)
 
 LEAGUE_ID_BASE = 7_000_000_000_000_000_000
 SEASON_ID_BASE = 7_010_000_000_000_000_000
@@ -133,8 +129,8 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _run_id(now_utc: datetime) -> str:
-    return f"world_cup_raw_publish__{now_utc.strftime('%Y%m%dT%H%M%SZ')}"
+def _run_id(config: WorldCupEditionConfig, now_utc: datetime) -> str:
+    return f"world_cup_raw_publish__{config.season_label}__{now_utc.strftime('%Y%m%dT%H%M%SZ')}"
 
 
 def _json_text(value: Any) -> str | None:
@@ -150,29 +146,36 @@ def _stable_bigint(seed: str, *, base: int) -> int:
     return base + (int(digest[:15], 16) % HASH_MOD)
 
 
-def _lineup_id(fixture_id: int, team_id: int, player_id: int) -> int:
+def _lineup_id(config: WorldCupEditionConfig, fixture_id: int, team_id: int, player_id: int) -> int:
     return _stable_bigint(
-        f"lineup|provider={WORLD_CUP_PROVIDER}|fixture={fixture_id}|team={team_id}|player={player_id}",
+        f"lineup|provider={config.provider}|fixture={fixture_id}|team={team_id}|player={player_id}",
         base=LINEUP_ID_BASE,
     )
 
 
-def _world_cup_ids() -> dict[str, int]:
+def _world_cup_ids(config: WorldCupEditionConfig) -> dict[str, int]:
     return {
         "league_id": _stable_bigint(f"league|{WORLD_CUP_COMPETITION_KEY}", base=LEAGUE_ID_BASE),
-        "season_id": _stable_bigint(f"season|{WORLD_CUP_EDITION_KEY}", base=SEASON_ID_BASE),
+        "season_id": _stable_bigint(f"season|{config.edition_key}", base=SEASON_ID_BASE),
     }
 
 
-def _kickoff_to_utc(match_date: date, kick_off: str | None) -> datetime:
+def _kickoff_to_utc(config: WorldCupEditionConfig, match_date: date, kick_off: str | None) -> datetime:
+    if not config.kickoff_timezone_label or config.kickoff_timezone_offset_hours is None:
+        raise RuntimeError(
+            f"Edicao {config.edition_key} ainda nao tem estrategia de timezone de kickoff fechada para raw publish."
+        )
     time_part = kick_off or "00:00:00.000"
     local_dt = datetime.strptime(f"{match_date.isoformat()} {time_part}", "%Y-%m-%d %H:%M:%S.%f").replace(
-        tzinfo=QATAR_TZ
+        tzinfo=timezone(
+            timedelta(hours=config.kickoff_timezone_offset_hours),
+            name=config.kickoff_timezone_label,
+        )
     )
     return local_dt.astimezone(timezone.utc)
 
 
-def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
+def _read_fixtures_frame(conn, config: WorldCupEditionConfig, run_id: str, now_utc: datetime) -> pd.DataFrame:
     sql = text(
         """
         SELECT
@@ -217,11 +220,11 @@ def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
         ORDER BY f.match_date, f.internal_match_id
         """
     )
-    df = pd.read_sql_query(sql, conn, params={"edition_key": WORLD_CUP_EDITION_KEY})
+    df = pd.read_sql_query(sql, conn, params={"edition_key": config.edition_key})
     if df.empty:
         raise RuntimeError("Nenhum fixture silver encontrado para publicar em raw.fixtures.")
 
-    ids = _world_cup_ids()
+    ids = _world_cup_ids(config)
     season_start = pd.to_datetime(df["match_date"]).dt.date.min()
     season_end = pd.to_datetime(df["match_date"]).dt.date.max()
 
@@ -237,18 +240,18 @@ def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
         axis=1,
     )
     df["date_utc"] = df.apply(
-        lambda row: _kickoff_to_utc(pd.Timestamp(row["match_date"]).date(), row["kick_off"]),
+        lambda row: _kickoff_to_utc(config, pd.Timestamp(row["match_date"]).date(), row["kick_off"]),
         axis=1,
     )
     df["timestamp"] = df["date_utc"].map(lambda value: int(value.timestamp()))
-    df["timezone"] = QATAR_TIMEZONE_LABEL
+    df["timezone"] = config.kickoff_timezone_label
     df["referee"] = df["referee_name"]
     df["venue_id"] = pd.to_numeric(df["venue_id"], errors="coerce").astype("Int64")
     df["referee_id"] = pd.to_numeric(df["referee_id"], errors="coerce").astype("Int64")
     df["league_id"] = ids["league_id"]
     df["provider_league_id"] = ids["league_id"]
     df["league_name"] = WORLD_CUP_COMPETITION_NAME
-    df["season"] = WORLD_CUP_SEASON
+    df["season"] = config.season_year
     df["round"] = df.apply(
         lambda row: f"Group {row['group_key']}" if pd.notna(row["group_key"]) else row["stage_name"],
         axis=1,
@@ -258,7 +261,7 @@ def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
     df["year"] = df["match_date"].astype(str).str.slice(0, 4)
     df["month"] = df["match_date"].astype(str).str.slice(5, 7)
     df["date"] = pd.to_datetime(df["match_date"]).dt.date
-    df["source_provider"] = WORLD_CUP_SOURCE_FIXTURES
+    df["source_provider"] = FJELSTUL_SOURCE
     df["attendance"] = pd.Series(pd.NA, index=df.index, dtype="Int64")
     df["weather_description"] = pd.Series(pd.NA, index=df.index, dtype="string")
     df["weather_temperature_c"] = pd.Series([None] * len(df), index=df.index, dtype="float64")
@@ -267,12 +270,12 @@ def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
     df["away_goals_ht"] = pd.Series(pd.NA, index=df.index, dtype="Int64")
     df["home_goals_ft"] = df["home_team_score"].astype("Int64")
     df["away_goals_ft"] = df["away_team_score"].astype("Int64")
-    df["provider"] = WORLD_CUP_PROVIDER
+    df["provider"] = config.provider
     df["competition_key"] = WORLD_CUP_COMPETITION_KEY
     df["competition_type"] = WORLD_CUP_COMPETITION_TYPE
-    df["season_label"] = WORLD_CUP_SEASON_LABEL
+    df["season_label"] = config.season_label
     df["provider_season_id"] = ids["season_id"]
-    df["season_name"] = WORLD_CUP_SEASON_NAME
+    df["season_name"] = config.season_name
     df["season_start_date"] = season_start
     df["season_end_date"] = season_end
     df["round_name"] = df["round"]
@@ -287,7 +290,7 @@ def _read_fixtures_frame(conn, run_id: str, now_utc: datetime) -> pd.DataFrame:
     return df[RAW_FIXTURES_TARGET_COLUMNS]
 
 
-def _read_lineups_frame(conn, run_id: str) -> pd.DataFrame:
+def _read_lineups_frame(conn, config: WorldCupEditionConfig, run_id: str) -> pd.DataFrame:
     sql = text(
         """
         SELECT
@@ -313,19 +316,19 @@ def _read_lineups_frame(conn, run_id: str) -> pd.DataFrame:
         ORDER BY internal_match_id, team_internal_id, player_internal_id
         """
     )
-    df = pd.read_sql_query(sql, conn, params={"edition_key": WORLD_CUP_EDITION_KEY})
+    df = pd.read_sql_query(sql, conn, params={"edition_key": config.edition_key})
     if df.empty:
         raise RuntimeError("Nenhum lineup silver encontrado para publicar em raw.fixture_lineups.")
 
-    ids = _world_cup_ids()
+    ids = _world_cup_ids(config)
     df["fixture_id"] = df["internal_match_id"].map(lambda value: _stable_bigint(value, base=FIXTURE_ID_BASE))
     df["team_id"] = df["team_internal_id"].map(lambda value: _stable_bigint(value, base=TEAM_ID_BASE))
     df["player_id"] = df["player_internal_id"].map(lambda value: _stable_bigint(value, base=PLAYER_ID_BASE))
     df["lineup_id"] = df.apply(
-        lambda row: _lineup_id(int(row["fixture_id"]), int(row["team_id"]), int(row["player_id"])),
+        lambda row: _lineup_id(config, int(row["fixture_id"]), int(row["team_id"]), int(row["player_id"])),
         axis=1,
     )
-    df["provider"] = WORLD_CUP_PROVIDER
+    df["provider"] = config.provider
     df["position_id"] = pd.to_numeric(df["first_position_id"], errors="coerce").astype("Int64")
     df["position_name"] = df["first_position_name"].astype("string")
     df["lineup_type_id"] = df["is_starter"].map(lambda value: 1 if bool(value) else 2).astype("Int64")
@@ -336,7 +339,7 @@ def _read_lineups_frame(conn, run_id: str) -> pd.DataFrame:
     df["payload"] = df.apply(
         lambda row: _json_text(
             {
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "source_name": row["source_name"],
                 "source_version": row["source_version"],
                 "internal_match_id": row["internal_match_id"],
@@ -349,14 +352,14 @@ def _read_lineups_frame(conn, run_id: str) -> pd.DataFrame:
     )
     df["provider_league_id"] = ids["league_id"]
     df["competition_key"] = WORLD_CUP_COMPETITION_KEY
-    df["season_label"] = WORLD_CUP_SEASON_LABEL
+    df["season_label"] = config.season_label
     df["provider_season_id"] = ids["season_id"]
     df["source_run_id"] = run_id
     df["ingested_run"] = run_id
     return df[FIXTURE_LINEUPS_TARGET_COLUMNS]
 
 
-def _read_standings_frame(conn, run_id: str) -> pd.DataFrame:
+def _read_standings_frame(conn, config: WorldCupEditionConfig, run_id: str) -> pd.DataFrame:
     sql = text(
         """
         SELECT
@@ -385,16 +388,16 @@ def _read_standings_frame(conn, run_id: str) -> pd.DataFrame:
         ORDER BY stage_key, group_key, final_position
         """
     )
-    df = pd.read_sql_query(sql, conn, params={"edition_key": WORLD_CUP_EDITION_KEY})
+    df = pd.read_sql_query(sql, conn, params={"edition_key": config.edition_key})
     if df.empty:
         raise RuntimeError("Nenhum group standing silver encontrado para publicar em raw.standings_snapshots.")
 
-    ids = _world_cup_ids()
-    df["provider"] = WORLD_CUP_PROVIDER
+    ids = _world_cup_ids(config)
+    df["provider"] = config.provider
     df["league_id"] = ids["league_id"]
     df["provider_league_id"] = ids["league_id"]
     df["competition_key"] = WORLD_CUP_COMPETITION_KEY
-    df["season_label"] = WORLD_CUP_SEASON_LABEL
+    df["season_label"] = config.season_label
     df["provider_season_id"] = ids["season_id"]
     df["season_id"] = ids["season_id"]
     df["stage_id"] = df["stage_internal_id"].map(lambda value: _stable_bigint(value, base=STAGE_ID_BASE))
@@ -409,7 +412,7 @@ def _read_standings_frame(conn, run_id: str) -> pd.DataFrame:
     df["payload"] = df.apply(
         lambda row: _json_text(
             {
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "source_name": row["source_name"],
                 "source_version": row["source_version"],
                 "source_row_id": row["source_row_id"],
@@ -430,7 +433,7 @@ def _read_standings_frame(conn, run_id: str) -> pd.DataFrame:
     return df[STANDINGS_SNAPSHOTS_TARGET_COLUMNS]
 
 
-def _read_team_coaches_frame(conn, run_id: str) -> pd.DataFrame:
+def _read_team_coaches_frame(conn, config: WorldCupEditionConfig, run_id: str) -> pd.DataFrame:
     sql = text(
         """
         SELECT
@@ -455,21 +458,21 @@ def _read_team_coaches_frame(conn, run_id: str) -> pd.DataFrame:
         ORDER BY m.key_id
         """
     )
-    df = pd.read_sql_query(sql, conn, params={"edition_key": WORLD_CUP_EDITION_KEY})
+    df = pd.read_sql_query(sql, conn, params={"edition_key": config.edition_key})
     if df.empty:
         raise RuntimeError("Nenhum manager_appointment bronze encontrado para team_coaches da Copa.")
 
-    df["provider"] = WORLD_CUP_PROVIDER
+    df["provider"] = config.provider
     df["coach_tenure_id"] = df["key_id"].map(
         lambda value: _stable_bigint(
-            f"coach_tenure|edition={WORLD_CUP_EDITION_KEY}|source_key={value}",
+            f"coach_tenure|edition={config.edition_key}|source_key={value}",
             base=COACH_TENURE_ID_BASE,
         )
     )
     df["team_id"] = df["team_internal_id"].map(lambda value: _stable_bigint(value, base=TEAM_ID_BASE))
     df["coach_id"] = df["source_manager_id"].map(
         lambda value: _stable_bigint(
-            f"coach_source|provider={WORLD_CUP_SOURCE_COACHES}|manager_id={value}",
+            f"coach_source|provider={FJELSTUL_SOURCE}|manager_id={value}",
             base=COACH_ID_BASE,
         )
     )
@@ -481,7 +484,7 @@ def _read_team_coaches_frame(conn, run_id: str) -> pd.DataFrame:
     df["payload"] = df.apply(
         lambda row: _json_text(
             {
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "source_name": row["source_name"],
                 "source_version": row["source_version"],
                 "coach_identity_scope": "source_scoped_fjelstul_manager_id",
@@ -503,7 +506,7 @@ def _read_team_coaches_frame(conn, run_id: str) -> pd.DataFrame:
     return df[TEAM_COACHES_TARGET_COLUMNS]
 
 
-def _read_wc_match_events_frame(conn) -> pd.DataFrame:
+def _read_wc_match_events_frame(conn, config: WorldCupEditionConfig) -> pd.DataFrame:
     sql = text(
         """
         SELECT
@@ -540,7 +543,7 @@ def _read_wc_match_events_frame(conn) -> pd.DataFrame:
         ORDER BY internal_match_id, event_index, source_event_id
         """
     )
-    df = pd.read_sql_query(sql, conn, params={"edition_key": WORLD_CUP_EDITION_KEY})
+    df = pd.read_sql_query(sql, conn, params={"edition_key": config.edition_key})
     if df.empty:
         raise RuntimeError("Nenhum match_event silver encontrado para publicar em raw.wc_match_events.")
 
@@ -549,14 +552,23 @@ def _read_wc_match_events_frame(conn) -> pd.DataFrame:
     return df[RAW_WC_MATCH_EVENTS_TARGET_COLUMNS]
 
 
-def _validate_prerequisites(conn) -> dict[str, Any]:
+def _validate_prerequisites(conn, config: WorldCupEditionConfig) -> dict[str, Any]:
     checks = {
-        "silver_fixtures": ("SELECT count(*) FROM silver.wc_fixtures WHERE edition_key = :edition_key", 64),
-        "silver_stages": ("SELECT count(*) FROM silver.wc_stages WHERE edition_key = :edition_key", 6),
-        "silver_groups": ("SELECT count(*) FROM silver.wc_groups WHERE edition_key = :edition_key", 8),
-        "silver_group_standings": ("SELECT count(*) FROM silver.wc_group_standings WHERE edition_key = :edition_key", 32),
-        "silver_lineups": ("SELECT count(*) FROM silver.wc_lineups WHERE edition_key = :edition_key", 3244),
-        "silver_match_events": ("SELECT count(*) FROM silver.wc_match_events WHERE edition_key = :edition_key", 234652),
+        "silver_fixtures": ("SELECT count(*) FROM silver.wc_fixtures WHERE edition_key = :edition_key", config.expected_matches),
+        "silver_stages": ("SELECT count(*) FROM silver.wc_stages WHERE edition_key = :edition_key", config.expected_stages),
+        "silver_groups": ("SELECT count(*) FROM silver.wc_groups WHERE edition_key = :edition_key", config.expected_groups),
+        "silver_group_standings": (
+            "SELECT count(*) FROM silver.wc_group_standings WHERE edition_key = :edition_key",
+            config.expected_group_standings,
+        ),
+        "silver_lineups_matches": (
+            "SELECT count(DISTINCT internal_match_id) FROM silver.wc_lineups WHERE edition_key = :edition_key",
+            config.expected_statsbomb_lineup_match_files,
+        ),
+        "silver_match_events_matches": (
+            "SELECT count(DISTINCT internal_match_id) FROM silver.wc_match_events WHERE edition_key = :edition_key",
+            config.expected_statsbomb_event_match_files,
+        ),
         "blocking_divergences": (
             "SELECT count(*) FROM silver.wc_source_divergences WHERE edition_key = :edition_key AND severity = 'blocking'",
             0,
@@ -564,7 +576,7 @@ def _validate_prerequisites(conn) -> dict[str, Any]:
     }
     results: dict[str, Any] = {}
     for name, (sql, expected) in checks.items():
-        actual = conn.execute(text(sql), {"edition_key": WORLD_CUP_EDITION_KEY}).scalar_one()
+        actual = conn.execute(text(sql), {"edition_key": config.edition_key}).scalar_one()
         results[name] = actual
         if actual != expected:
             raise RuntimeError(f"Precondicao do Bloco 6 invalida para {name}: esperado={expected} atual={actual}")
@@ -582,17 +594,18 @@ def _validate_prerequisites(conn) -> dict[str, Any]:
             WHERE edition_key = :edition_key
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().one()
     results["team_coaches_gate"] = dict(coach_gate)
-    if int(coach_gate["total_rows"]) != 32 or int(coach_gate["distinct_key_id"]) != 32:
+    expected_coaches = config.expected_groups * 4
+    if int(coach_gate["total_rows"]) != expected_coaches or int(coach_gate["distinct_key_id"]) != expected_coaches:
         raise RuntimeError(f"Gate de team_coaches invalido no bronze: {dict(coach_gate)}")
     if int(coach_gate["null_team_or_manager"]) != 0:
         raise RuntimeError(f"Gate de team_coaches com ids nulos: {dict(coach_gate)}")
     return results
 
 
-def _assert_no_fixture_id_collision(conn, fixture_ids: list[int]) -> None:
+def _assert_no_fixture_id_collision(conn, config: WorldCupEditionConfig, fixture_ids: list[int]) -> None:
     if not fixture_ids:
         return
     collisions = conn.execute(
@@ -604,7 +617,7 @@ def _assert_no_fixture_id_collision(conn, fixture_ids: list[int]) -> None:
               AND coalesce(provider, '') <> :provider
             """
         ),
-        {"fixture_ids": fixture_ids, "provider": WORLD_CUP_PROVIDER},
+        {"fixture_ids": fixture_ids, "provider": config.provider},
     ).scalar_one()
     if collisions:
         raise RuntimeError(f"Fixture IDs sinteticos da Copa colidem com raw.fixtures existente: {collisions}")
@@ -726,7 +739,16 @@ def _upsert_wc_match_events(conn, df: pd.DataFrame) -> tuple[int, int, int]:
     )
 
 
-def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, Any]:
+def _validate_raw_outputs(
+    conn,
+    config: WorldCupEditionConfig,
+    *,
+    expected_fixture_lineups_rows: int,
+    expected_standings_rows: int,
+    expected_team_coaches_rows: int,
+    expected_wc_match_event_rows: int,
+    team_coaches_published: bool,
+) -> dict[str, Any]:
     results: dict[str, Any] = {}
     checks = {
         "raw_fixtures": (
@@ -737,7 +759,7 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
               AND competition_key = :competition_key
               AND season_label = :season_label
             """,
-            64,
+            config.expected_matches,
         ),
         "raw_fixture_lineups": (
             """
@@ -747,7 +769,7 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
               AND competition_key = :competition_key
               AND season_label = :season_label
             """,
-            3244,
+            expected_fixture_lineups_rows,
         ),
         "raw_standings_snapshots": (
             """
@@ -757,15 +779,15 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
               AND competition_key = :competition_key
               AND season_label = :season_label
             """,
-            32,
+            expected_standings_rows,
         ),
         "raw_wc_match_events": (
             """
-            SELECT count(DISTINCT fixture_id)
+            SELECT count(*)
             FROM raw.wc_match_events
             WHERE edition_key = :edition_key
             """,
-            64,
+            expected_wc_match_event_rows,
         ),
         "raw_match_events_wc": (
             """
@@ -777,10 +799,10 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
         ),
     }
     params = {
-        "provider": WORLD_CUP_PROVIDER,
+        "provider": config.provider,
         "competition_key": WORLD_CUP_COMPETITION_KEY,
-        "season_label": WORLD_CUP_SEASON_LABEL,
-        "edition_key": WORLD_CUP_EDITION_KEY,
+        "season_label": config.season_label,
+        "edition_key": config.edition_key,
     }
     for name, (sql, expected) in checks.items():
         actual = conn.execute(text(sql), params).scalar_one()
@@ -890,10 +912,13 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
     if team_coaches_published:
         coaches_rows = conn.execute(
             text("SELECT count(*) FROM raw.team_coaches WHERE provider = :provider"),
-            {"provider": WORLD_CUP_PROVIDER},
+            {"provider": config.provider},
         ).scalar_one()
-        if coaches_rows != 32:
-            raise RuntimeError(f"raw.team_coaches da Copa invalido: esperado=32 atual={coaches_rows}")
+        if coaches_rows != expected_team_coaches_rows:
+            raise RuntimeError(
+                "raw.team_coaches da Copa invalido: "
+                f"esperado={expected_team_coaches_rows} atual={coaches_rows}"
+            )
         coach_nulls = conn.execute(
             text(
                 """
@@ -903,7 +928,7 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
                   AND (coach_tenure_id IS NULL OR team_id IS NULL OR coach_id IS NULL)
                 """
             ),
-            {"provider": WORLD_CUP_PROVIDER},
+            {"provider": config.provider},
         ).scalar_one()
         if coach_nulls != 0:
             raise RuntimeError(f"raw.team_coaches da Copa com ids nulos: {coach_nulls}")
@@ -913,30 +938,35 @@ def _validate_raw_outputs(conn, *, team_coaches_published: bool) -> dict[str, An
     return results
 
 
-def publish_world_cup_2022_to_raw() -> dict[str, Any]:
+def publish_world_cup_to_raw(edition_key: str | None = None) -> dict[str, Any]:
     context = get_current_context()
     now_utc = _utc_now()
-    run_id = _run_id(now_utc)
+    config = (
+        get_world_cup_edition_config(edition_key)
+        if edition_key
+        else get_world_cup_edition_config_from_context(default=DEFAULT_WORLD_CUP_EDITION_KEY)
+    )
+    run_id = _run_id(config, now_utc)
     engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
 
     with StepMetrics(
         service="airflow",
         module="world_cup_raw_publish_service",
-        step="publish_world_cup_2022_to_raw",
+        step="publish_world_cup_to_raw",
         context=context,
-        dataset="raw.world_cup_2022",
+        dataset=f"raw.world_cup_{config.season_label}",
         table="raw.*",
     ):
         with engine.begin() as conn:
-            prereq = _validate_prerequisites(conn)
+            prereq = _validate_prerequisites(conn, config)
 
-            fixtures_df = _read_fixtures_frame(conn, run_id, now_utc)
-            lineups_df = _read_lineups_frame(conn, run_id)
-            standings_df = _read_standings_frame(conn, run_id)
-            coaches_df = _read_team_coaches_frame(conn, run_id)
-            wc_match_events_df = _read_wc_match_events_frame(conn)
+            fixtures_df = _read_fixtures_frame(conn, config, run_id, now_utc)
+            lineups_df = _read_lineups_frame(conn, config, run_id)
+            standings_df = _read_standings_frame(conn, config, run_id)
+            coaches_df = _read_team_coaches_frame(conn, config, run_id)
+            wc_match_events_df = _read_wc_match_events_frame(conn, config)
 
-            _assert_no_fixture_id_collision(conn, fixtures_df["fixture_id"].astype(int).tolist())
+            _assert_no_fixture_id_collision(conn, config, fixtures_df["fixture_id"].astype(int).tolist())
 
             fixtures_counts = _upsert_dataframe_without_updated_at(
                 conn,
@@ -981,7 +1011,15 @@ def publish_world_cup_2022_to_raw() -> dict[str, Any]:
             )
             wc_events_counts = _upsert_wc_match_events(conn, wc_match_events_df)
 
-            validations = _validate_raw_outputs(conn, team_coaches_published=True)
+            validations = _validate_raw_outputs(
+                conn,
+                config,
+                expected_fixture_lineups_rows=len(lineups_df),
+                expected_standings_rows=len(standings_df),
+                expected_team_coaches_rows=len(coaches_df),
+                expected_wc_match_event_rows=len(wc_match_events_df),
+                team_coaches_published=True,
+            )
 
     summary = {
         "prerequisites": prereq,
@@ -1001,10 +1039,17 @@ def publish_world_cup_2022_to_raw() -> dict[str, Any]:
         step="summary",
         status="success",
         context=context,
-        dataset="raw.world_cup_2022",
-        row_count=64 + 3244 + 32 + 32 + 234652,
+        dataset=f"raw.world_cup_{config.season_label}",
+        row_count=(
+            config.expected_matches
+            + len(lineups_df)
+            + len(standings_df)
+            + len(coaches_df)
+            + len(wc_match_events_df)
+        ),
         message=(
-            "Raw World Cup 2022 publicado | "
+            "Raw World Cup publicado | "
+            f"edition={config.edition_key} | "
             f"fixtures={summary['validations']['raw_fixtures']} | "
             f"lineups={summary['validations']['raw_fixture_lineups']} | "
             f"standings={summary['validations']['raw_standings_snapshots']} | "
@@ -1013,3 +1058,7 @@ def publish_world_cup_2022_to_raw() -> dict[str, Any]:
         ),
     )
     return summary
+
+
+def publish_world_cup_2022_to_raw() -> dict[str, Any]:
+    return publish_world_cup_to_raw(DEFAULT_WORLD_CUP_EDITION_KEY)

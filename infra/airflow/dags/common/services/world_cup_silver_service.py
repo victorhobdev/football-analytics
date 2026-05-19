@@ -8,11 +8,15 @@ from airflow.operators.python import get_current_context
 from sqlalchemy import create_engine, text
 
 from common.observability import StepMetrics, log_event
-
-
-WORLD_CUP_EDITION_KEY = "fifa_world_cup_mens__2022"
-STATSBOMB_SOURCE = "statsbomb_open_data"
-FJELSTUL_SOURCE = "fjelstul_worldcup"
+from common.services.world_cup_config import (
+    DEFAULT_WORLD_CUP_EDITION_KEY,
+    FJELSTUL_SOURCE,
+    STATSBOMB_SOURCE,
+    WorldCupEditionConfig,
+    fetch_active_world_cup_snapshots,
+    get_world_cup_edition_config,
+    get_world_cup_edition_config_from_context,
+)
 
 
 def _get_required_env(name: str) -> str:
@@ -26,46 +30,30 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _fetch_active_snapshots(engine) -> dict[str, dict[str, Any]]:
-    sql = text(
-        """
-        SELECT source_name, source_version, checksum_sha256, local_path
-        FROM control.wc_source_snapshots
-        WHERE edition_scope = :edition_key
-          AND usage_decision = 'now'
-          AND is_active = TRUE
-          AND source_name IN (:statsbomb_source, :fjelstul_source)
-        ORDER BY source_name
-        """
-    )
-    with engine.begin() as conn:
-        rows = conn.execute(
-            sql,
-            {
-                "edition_key": WORLD_CUP_EDITION_KEY,
-                "statsbomb_source": STATSBOMB_SOURCE,
-                "fjelstul_source": FJELSTUL_SOURCE,
-            },
-        ).mappings().all()
-    snapshots = {row["source_name"]: dict(row) for row in rows}
-    missing = [source for source in (STATSBOMB_SOURCE, FJELSTUL_SOURCE) if source not in snapshots]
-    if missing:
-        raise RuntimeError(f"Snapshots ativos ausentes para o Bloco 5: {missing}")
-    return snapshots
-
-
-def _validate_prerequisites(conn, snapshots: dict[str, dict[str, Any]]) -> None:
+def _validate_prerequisites(conn, snapshots: dict[str, dict[str, Any]], config: WorldCupEditionConfig) -> None:
     bronze_checks = {
-        "statsbomb_matches": ("SELECT count(*) FROM bronze.statsbomb_wc_matches WHERE edition_key = :edition_key", 64),
-        "statsbomb_events_matches": ("SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_events WHERE edition_key = :edition_key", 64),
-        "statsbomb_lineups_matches": ("SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_lineups WHERE edition_key = :edition_key", 64),
-        "statsbomb_three_sixty_matches": ("SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_three_sixty WHERE edition_key = :edition_key", 64),
-        "fjelstul_matches": ("SELECT count(*) FROM bronze.fjelstul_wc_matches WHERE edition_key = :edition_key", 64),
-        "fjelstul_groups": ("SELECT count(*) FROM bronze.fjelstul_wc_groups WHERE edition_key = :edition_key", 8),
-        "fjelstul_group_standings": ("SELECT count(*) FROM bronze.fjelstul_wc_group_standings WHERE edition_key = :edition_key", 32),
+        "statsbomb_matches": ("SELECT count(*) FROM bronze.statsbomb_wc_matches WHERE edition_key = :edition_key", config.expected_matches),
+        "statsbomb_events_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_events WHERE edition_key = :edition_key",
+            config.expected_statsbomb_event_match_files,
+        ),
+        "statsbomb_lineups_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_lineups WHERE edition_key = :edition_key",
+            config.expected_statsbomb_lineup_match_files,
+        ),
+        "statsbomb_three_sixty_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_three_sixty WHERE edition_key = :edition_key",
+            config.expected_statsbomb_three_sixty_match_files,
+        ),
+        "fjelstul_matches": ("SELECT count(*) FROM bronze.fjelstul_wc_matches WHERE edition_key = :edition_key", config.expected_matches),
+        "fjelstul_groups": ("SELECT count(*) FROM bronze.fjelstul_wc_groups WHERE edition_key = :edition_key", config.expected_groups),
+        "fjelstul_group_standings": (
+            "SELECT count(*) FROM bronze.fjelstul_wc_group_standings WHERE edition_key = :edition_key",
+            config.expected_group_standings,
+        ),
     }
     for name, (sql, expected) in bronze_checks.items():
-        actual = conn.execute(text(sql), {"edition_key": WORLD_CUP_EDITION_KEY}).scalar_one()
+        actual = conn.execute(text(sql), {"edition_key": config.edition_key}).scalar_one()
         if actual != expected:
             raise RuntimeError(f"Precondicao do bronze invalida para {name}: esperado={expected} atual={actual}")
 
@@ -81,7 +69,7 @@ def _validate_prerequisites(conn, snapshots: dict[str, dict[str, Any]]) -> None:
     for table_name, source_name in version_checks:
         rows = conn.execute(
             text(f"SELECT DISTINCT source_version FROM {table_name} WHERE edition_key = :edition_key ORDER BY source_version"),
-            {"edition_key": WORLD_CUP_EDITION_KEY},
+            {"edition_key": config.edition_key},
         ).scalars().all()
         expected = [snapshots[source_name]["source_version"]]
         if rows != expected:
@@ -89,20 +77,130 @@ def _validate_prerequisites(conn, snapshots: dict[str, dict[str, Any]]) -> None:
                 f"Versao do bronze divergente do snapshot ativo em {table_name}: bronze={rows} ativo={expected}"
             )
 
-    provider_checks = {
-        "team": ("SELECT count(*) FROM raw.provider_entity_map WHERE entity_type='team' AND provider IN ('statsbomb_open_data','fjelstul_worldcup')", 64),
-        "match": ("SELECT count(*) FROM raw.provider_entity_map WHERE entity_type='match' AND edition_key=:edition_key AND provider IN ('statsbomb_open_data','fjelstul_worldcup')", 128),
-        "stage": ("SELECT count(*) FROM raw.provider_entity_map WHERE entity_type='stage' AND edition_key=:edition_key AND provider IN ('statsbomb_open_data','fjelstul_worldcup')", 12),
-        "group": ("SELECT count(*) FROM raw.provider_entity_map WHERE entity_type='group' AND edition_key=:edition_key AND provider='fjelstul_worldcup'", 8),
-        "player": ("SELECT count(*) FROM raw.provider_entity_map WHERE entity_type='player' AND edition_key=:edition_key AND provider='statsbomb_open_data'", 829),
+    mapping_checks = {
+        "statsbomb_match_map_missing": """
+            SELECT count(*)
+            FROM bronze.statsbomb_wc_matches b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'statsbomb_open_data'
+             AND pm.entity_type = 'match'
+             AND pm.source_id = b.match_id::text
+             AND pm.edition_key = :edition_key
+            WHERE b.edition_key = :edition_key
+              AND pm.canonical_id IS NULL
+        """,
+        "statsbomb_stage_map_missing": """
+            SELECT count(*)
+            FROM (
+              SELECT DISTINCT (payload->'competition_stage'->>'id')::text AS source_stage_id
+              FROM bronze.statsbomb_wc_matches
+              WHERE edition_key = :edition_key
+            ) b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'statsbomb_open_data'
+             AND pm.entity_type = 'stage'
+             AND pm.source_id = :edition_key || '::stage::' || b.source_stage_id
+             AND pm.edition_key = :edition_key
+            WHERE pm.canonical_id IS NULL
+        """,
+        "statsbomb_team_map_missing": """
+            SELECT count(*)
+            FROM (
+              SELECT DISTINCT (payload->'home_team'->>'home_team_id')::text AS source_team_id
+              FROM bronze.statsbomb_wc_matches
+              WHERE edition_key = :edition_key
+              UNION
+              SELECT DISTINCT (payload->'away_team'->>'away_team_id')::text AS source_team_id
+              FROM bronze.statsbomb_wc_matches
+              WHERE edition_key = :edition_key
+            ) b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'statsbomb_open_data'
+             AND pm.entity_type = 'team'
+             AND pm.source_id = b.source_team_id
+            WHERE pm.canonical_id IS NULL
+        """,
+        "statsbomb_player_map_missing": """
+            SELECT count(*)
+            FROM (
+              SELECT DISTINCT player->>'player_id' AS source_player_id
+              FROM bronze.statsbomb_wc_lineups l
+              CROSS JOIN LATERAL jsonb_array_elements(l.payload) team
+              CROSS JOIN LATERAL jsonb_array_elements(team->'lineup') player
+              WHERE l.edition_key = :edition_key
+            ) b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'statsbomb_open_data'
+             AND pm.entity_type = 'player'
+             AND pm.source_id = b.source_player_id
+             AND pm.edition_key = :edition_key
+            WHERE pm.canonical_id IS NULL
+        """,
+        "fjelstul_match_map_missing": """
+            SELECT count(*)
+            FROM bronze.fjelstul_wc_matches b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'fjelstul_worldcup'
+             AND pm.entity_type = 'match'
+             AND pm.source_id = b.match_id
+             AND pm.edition_key = :edition_key
+            WHERE b.edition_key = :edition_key
+              AND pm.canonical_id IS NULL
+        """,
+        "fjelstul_stage_map_missing": """
+            SELECT count(*)
+            FROM (
+              SELECT DISTINCT stage_name
+              FROM bronze.fjelstul_wc_matches
+              WHERE edition_key = :edition_key
+            ) b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'fjelstul_worldcup'
+             AND pm.entity_type = 'stage'
+             AND pm.source_id = :fjelstul_tournament_id || '::stage::' || b.stage_name
+             AND pm.edition_key = :edition_key
+            WHERE pm.canonical_id IS NULL
+        """,
+        "fjelstul_group_map_missing": """
+            SELECT count(*)
+            FROM bronze.fjelstul_wc_groups b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'fjelstul_worldcup'
+             AND pm.entity_type = 'group'
+             AND pm.source_id = :fjelstul_tournament_id || '::group::' || b.stage_name || '::' || b.group_name
+             AND pm.edition_key = :edition_key
+            WHERE b.edition_key = :edition_key
+              AND pm.canonical_id IS NULL
+        """,
+        "fjelstul_team_map_missing": """
+            SELECT count(*)
+            FROM (
+              SELECT DISTINCT home_team_id AS source_team_id
+              FROM bronze.fjelstul_wc_matches
+              WHERE edition_key = :edition_key
+              UNION
+              SELECT DISTINCT away_team_id AS source_team_id
+              FROM bronze.fjelstul_wc_matches
+              WHERE edition_key = :edition_key
+            ) b
+            LEFT JOIN raw.provider_entity_map pm
+              ON pm.provider = 'fjelstul_worldcup'
+             AND pm.entity_type = 'team'
+             AND pm.source_id = b.source_team_id
+            WHERE pm.canonical_id IS NULL
+        """,
     }
-    for name, (sql, expected) in provider_checks.items():
-        actual = conn.execute(text(sql), {"edition_key": WORLD_CUP_EDITION_KEY}).scalar_one()
-        if actual != expected:
-            raise RuntimeError(f"Precondicao do mapa canonico invalida para {name}: esperado={expected} atual={actual}")
+    mapping_params = {
+        "edition_key": config.edition_key,
+        "fjelstul_tournament_id": config.fjelstul_tournament_id,
+    }
+    for name, sql in mapping_checks.items():
+        actual = conn.execute(text(sql), mapping_params).scalar_one()
+        if actual != 0:
+            raise RuntimeError(f"Precondicao do mapa canonico invalida para {name}: atual={actual}")
 
 
-def _delete_edition_rows(conn) -> None:
+def _delete_edition_rows(conn, config: WorldCupEditionConfig) -> None:
     for table_name in (
         "wc_match_events",
         "wc_lineups",
@@ -113,16 +211,16 @@ def _delete_edition_rows(conn) -> None:
     ):
         conn.execute(
             text(f"DELETE FROM silver.{table_name} WHERE edition_key = :edition_key"),
-            {"edition_key": WORLD_CUP_EDITION_KEY},
+            {"edition_key": config.edition_key},
         )
 
     conn.execute(
         text("DELETE FROM silver.wc_coverage_manifest WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     )
     conn.execute(
         text("DELETE FROM silver.wc_source_divergences WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     )
 
 
@@ -195,18 +293,18 @@ SELECT
   g.count_teams::integer,
   g.source_name,
   g.source_version,
-  'WC-2022::group::' || g.stage_name || '::' || g.group_name,
+  :fjelstul_tournament_id || '::group::' || g.stage_name || '::' || g.group_name,
   :materialized_at
 FROM bronze.fjelstul_wc_groups g
 JOIN raw.provider_entity_map pm_stage
   ON pm_stage.provider = 'fjelstul_worldcup'
  AND pm_stage.entity_type = 'stage'
- AND pm_stage.source_id = 'WC-2022::stage::' || g.stage_name
+ AND pm_stage.source_id = :fjelstul_tournament_id || '::stage::' || g.stage_name
  AND pm_stage.edition_key = :edition_key
 JOIN raw.provider_entity_map pm_group
   ON pm_group.provider = 'fjelstul_worldcup'
  AND pm_group.entity_type = 'group'
- AND pm_group.source_id = 'WC-2022::group::' || g.stage_name || '::' || g.group_name
+ AND pm_group.source_id = :fjelstul_tournament_id || '::group::' || g.stage_name || '::' || g.group_name
  AND pm_group.edition_key = :edition_key
 WHERE g.edition_key = :edition_key
 """
@@ -245,12 +343,12 @@ FROM bronze.fjelstul_wc_group_standings gs
 JOIN raw.provider_entity_map pm_stage
   ON pm_stage.provider = 'fjelstul_worldcup'
  AND pm_stage.entity_type = 'stage'
- AND pm_stage.source_id = 'WC-2022::stage::' || gs.stage_name
+ AND pm_stage.source_id = :fjelstul_tournament_id || '::stage::' || gs.stage_name
  AND pm_stage.edition_key = :edition_key
 JOIN raw.provider_entity_map pm_group
   ON pm_group.provider = 'fjelstul_worldcup'
  AND pm_group.entity_type = 'group'
- AND pm_group.source_id = 'WC-2022::group::' || gs.stage_name || '::' || gs.group_name
+ AND pm_group.source_id = :fjelstul_tournament_id || '::group::' || gs.stage_name || '::' || gs.group_name
  AND pm_group.edition_key = :edition_key
 JOIN raw.provider_entity_map pm_team
   ON pm_team.provider = 'fjelstul_worldcup'
@@ -297,12 +395,12 @@ WITH fj AS (
   JOIN raw.provider_entity_map pm_stage
     ON pm_stage.provider = 'fjelstul_worldcup'
    AND pm_stage.entity_type = 'stage'
-   AND pm_stage.source_id = 'WC-2022::stage::' || m.stage_name
+   AND pm_stage.source_id = :fjelstul_tournament_id || '::stage::' || m.stage_name
    AND pm_stage.edition_key = :edition_key
   LEFT JOIN raw.provider_entity_map pm_group
     ON pm_group.provider = 'fjelstul_worldcup'
    AND pm_group.entity_type = 'group'
-   AND pm_group.source_id = 'WC-2022::group::' || m.stage_name || '::' || m.group_name
+   AND pm_group.source_id = :fjelstul_tournament_id || '::group::' || m.stage_name || '::' || m.group_name
    AND pm_group.edition_key = :edition_key
   JOIN raw.provider_entity_map pm_home
     ON pm_home.provider = 'fjelstul_worldcup'
@@ -501,7 +599,7 @@ VALUES
   (:edition_key, 'lineups', 'statsbomb_open_data', 'FULL_TOURNAMENT', 64,
     (SELECT count(DISTINCT internal_match_id) FROM silver.wc_lineups WHERE edition_key = :edition_key), NULL,
     (SELECT count(*) FROM silver.wc_lineups WHERE edition_key = :edition_key),
-    'Lineups source-scoped via StatsBomb bootstrap 2022', :materialized_at),
+    'Lineups source-scoped via StatsBomb bootstrap inicial', :materialized_at),
   (:edition_key, 'match_events', 'statsbomb_open_data', 'FULL_TOURNAMENT', 64,
     (SELECT count(DISTINCT internal_match_id) FROM silver.wc_match_events WHERE edition_key = :edition_key), NULL,
     (SELECT count(*) FROM silver.wc_match_events WHERE edition_key = :edition_key),
@@ -606,8 +704,12 @@ WHERE sb_away_team_score IS DISTINCT FROM fj_away_team_score;
 """
 
 
-def _materialize_silver(conn) -> None:
-    params = {"edition_key": WORLD_CUP_EDITION_KEY, "materialized_at": _utc_now()}
+def _materialize_silver(conn, config: WorldCupEditionConfig) -> None:
+    params = {
+        "edition_key": config.edition_key,
+        "fjelstul_tournament_id": config.fjelstul_tournament_id,
+        "materialized_at": _utc_now(),
+    }
     conn.execute(text(INSERT_STAGES_SQL), params)
     conn.execute(text(INSERT_GROUPS_SQL), params)
     conn.execute(text(INSERT_GROUP_STANDINGS_SQL), params)
@@ -618,15 +720,17 @@ def _materialize_silver(conn) -> None:
     conn.execute(text(INSERT_SOURCE_DIVERGENCES_SQL), params)
 
 
-def _validate_silver_outputs(conn) -> dict[str, Any]:
+def _validate_silver_outputs(conn, config: WorldCupEditionConfig) -> dict[str, Any]:
     results: dict[str, Any] = {}
 
     results["fixtures"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_fixtures WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
-    if results["fixtures"] != 64:
-        raise RuntimeError(f"silver.wc_fixtures invalido: esperado=64 atual={results['fixtures']}")
+    if results["fixtures"] != config.expected_matches:
+        raise RuntimeError(
+            f"silver.wc_fixtures invalido: esperado={config.expected_matches} atual={results['fixtures']}"
+        )
 
     stage_nulls = conn.execute(
         text(
@@ -637,7 +741,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
               AND stage_key IS NULL
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if stage_nulls != 0:
         raise RuntimeError(f"silver.wc_fixtures tem stage_key nulo: {stage_nulls}")
@@ -653,7 +757,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
               AND group_key IS NULL
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if group_nulls != 0:
         raise RuntimeError(f"silver.wc_fixtures tem group_key nulo na fase de grupos: {group_nulls}")
@@ -672,7 +776,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
             ) dup
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if standings_duplicates != 0:
         raise RuntimeError(f"silver.wc_group_standings com grão duplicado: {standings_duplicates}")
@@ -691,7 +795,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
             ) bad
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if lineup_bad_matches != 0:
         raise RuntimeError(f"silver.wc_lineups com match sem 2 times: {lineup_bad_matches}")
@@ -710,7 +814,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
             ) bad
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if lineup_bad_starters != 0:
         raise RuntimeError(f"silver.wc_lineups com contagem de titulares invalida: {lineup_bad_starters}")
@@ -724,10 +828,13 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
             WHERE edition_key = :edition_key
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
-    if event_matches != 64:
-        raise RuntimeError(f"silver.wc_match_events cobre matches invalidos: {event_matches}")
+    if event_matches != config.expected_statsbomb_event_match_files:
+        raise RuntimeError(
+            "silver.wc_match_events cobre matches invalidos: "
+            f"esperado={config.expected_statsbomb_event_match_files} atual={event_matches}"
+        )
     results["event_matches"] = event_matches
 
     blocking_divergences = conn.execute(
@@ -739,7 +846,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
               AND severity = 'blocking'
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if blocking_divergences != 0:
         raise RuntimeError(f"silver.wc_source_divergences tem blockers: {blocking_divergences}")
@@ -758,7 +865,7 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
               )
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     if manifest_full_tournament_mismatches != 0:
         raise RuntimeError(
@@ -768,54 +875,59 @@ def _validate_silver_outputs(conn) -> dict[str, Any]:
 
     results["stages"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_stages WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["groups"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_groups WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["group_standings"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_group_standings WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["lineups"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_lineups WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["match_events"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_match_events WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["coverage_rows"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_coverage_manifest WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
     results["divergence_rows"] = conn.execute(
         text("SELECT count(*) FROM silver.wc_source_divergences WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).scalar_one()
 
     return results
 
 
-def normalize_world_cup_2022_to_silver() -> dict[str, Any]:
+def normalize_world_cup_to_silver(edition_key: str | None = None) -> dict[str, Any]:
     context = get_current_context()
     engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
+    config = (
+        get_world_cup_edition_config(edition_key)
+        if edition_key
+        else get_world_cup_edition_config_from_context(default=DEFAULT_WORLD_CUP_EDITION_KEY)
+    )
 
     with StepMetrics(
         service="airflow",
         module="world_cup_silver_service",
-        step="normalize_world_cup_2022_to_silver",
+        step="normalize_world_cup_to_silver",
         context=context,
-        dataset="silver.world_cup_2022",
+        dataset=f"silver.world_cup_{config.season_label}",
         table="silver.*",
     ):
-        snapshots = _fetch_active_snapshots(engine)
+        snapshots = fetch_active_world_cup_snapshots(engine, edition_key=config.edition_key)
         with engine.begin() as conn:
-            _validate_prerequisites(conn, snapshots)
-            _delete_edition_rows(conn)
-            _materialize_silver(conn)
-            summary = _validate_silver_outputs(conn)
+            _validate_prerequisites(conn, snapshots, config)
+            _delete_edition_rows(conn, config)
+            _materialize_silver(conn, config)
+            summary = _validate_silver_outputs(conn, config)
 
     log_event(
         service="airflow",
@@ -823,13 +935,14 @@ def normalize_world_cup_2022_to_silver() -> dict[str, Any]:
         step="summary",
         status="success",
         context=context,
-        dataset="silver.world_cup_2022",
+        dataset=f"silver.world_cup_{config.season_label}",
         row_count=sum(
             summary[key]
             for key in ("fixtures", "stages", "groups", "group_standings", "lineups", "match_events", "coverage_rows", "divergence_rows")
         ),
         message=(
-            "Silver World Cup 2022 concluido | "
+            "Silver World Cup concluido | "
+            f"edition={config.edition_key} | "
             f"fixtures={summary['fixtures']} | "
             f"stages={summary['stages']} | "
             f"groups={summary['groups']} | "
@@ -841,3 +954,7 @@ def normalize_world_cup_2022_to_silver() -> dict[str, Any]:
         ),
     )
     return summary
+
+
+def normalize_world_cup_2022_to_silver() -> dict[str, Any]:
+    return normalize_world_cup_to_silver(DEFAULT_WORLD_CUP_EDITION_KEY)

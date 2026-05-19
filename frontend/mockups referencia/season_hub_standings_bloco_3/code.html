@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tactical Lens | Classificação Premier League</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#002116",
+                        "inverse-on-surface": "#ecf1ff",
+                        "on-surface-variant": "#404944",
+                        "on-background": "#111c2d",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#6e3900",
+                        "background": "#f9f9ff",
+                        "outline": "#707974",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "outline-variant": "#bfc9c3",
+                        "primary-container": "#004e39",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary": "#515f74",
+                        "on-secondary-container": "#57657a",
+                        "tertiary-fixed-dim": "#ffb77d",
+                        "surface": "#f9f9ff",
+                        "inverse-primary": "#8bd6b6",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-tertiary-fixed": "#2f1500",
+                        "on-primary-fixed-variant": "#00513b",
+                        "surface-container-highest": "#d8e3fb",
+                        "secondary-fixed": "#d5e3fc",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#8bd6b6",
+                        "surface-dim": "#cfdaf2",
+                        "secondary-fixed": "#d5e3fc",
+                        "on-surface": "#111c2d",
+                        "primary": "#003526",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary-container": "#76c0a1",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dee8ff",
+                        "tertiary-container": "#6a3700",
+                        "inverse-surface": "#263143",
+                        "tertiary-fixed": "#ffdcc3",
+                        "on-tertiary-container": "#ff9939",
+                        "surface-tint": "#1b6b51",
+                        "tertiary": "#4a2400",
+                        "surface-variant": "#d8e3fb",
+                        "surface-container": "#e7eeff",
+                        "primary-fixed": "#a6f2d1"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .no-line-rule { border: none !important; }
+        .surface-shift { background-color: rgba(249, 249, 255, 0.8); }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-xl shadow-sm h-16 flex justify-between items-center px-6 max-w-[1920px] mx-auto no-line-rule">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black text-emerald-900 tracking-tighter font-headline">Tactical Lens</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-headline font-bold text-sm tracking-tight text-slate-500 hover:text-emerald-800 transition-colors" href="#">Ligas</a>
+<a class="font-headline font-bold text-sm tracking-tight text-slate-500 hover:text-emerald-800 transition-colors" href="#">Jogadores</a>
+<a class="font-headline font-bold text-sm tracking-tight text-slate-500 hover:text-emerald-800 transition-colors" href="#">Análise</a>
+<a class="font-headline font-bold text-sm tracking-tight text-slate-500 hover:text-emerald-800 transition-colors" href="#">Transferências</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-slate-200/50 rounded-md px-3 py-1.5">
+<span class="material-symbols-outlined text-slate-500 text-lg">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs w-48 font-medium" placeholder="Buscar dados..." type="text"/>
+</div>
+<button class="p-2 hover:bg-slate-200/50 rounded-md transition-all">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-200/50 rounded-md transition-all">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container overflow-hidden">
+<img alt="User Profile" data-alt="Professional user profile avatar headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBenZt9Iwe_jKiwhhNF5cP3J0_7Khm9Ix5TA77VTOjv4MAMZ3oJW4RSKUpM-d2gN-b-GA2NjOPYe0lJwa4NkDD5aPD6u-RbuSEGjoTIZ4o975iylZovw8wCEoF4FNWsNu4b6uWKgP6uafu3FzU9SD-zkkjtsug_CUnU9YX0tS9wzG317_2XQaqaBBxmX4pQ9WY7823UJcckFf6UWE7riaylXGM7OJ4BMLj1nE8P528o8dwm9vWYd8TvXPVtXUjo_s5DRMZw3gWvq6U"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 pt-20 bg-slate-100 border-r border-slate-200/10 flex flex-col hidden lg:flex">
+<div class="px-6 py-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center">
+<img alt="Competition Logo" class="w-8 h-8 object-contain" data-alt="Premier League official logo emblem" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkH4-f2rCPctoSFa0ntueRx3xLtsI4O65TZxL-UEfWoRCu6mMIY7vxnvjA1qNyWylM13nKy477a3b8NK_wW8J8Z0Wnar2PcC77uL4WN7H34IIxn1YHp6Rvc1F8sdbSeYQhrTa91bAGT4tDza7jPwiN91NrE4VhXDWQMtNQNk863xAIw0F1gIBKolpMqFyr5FIe5a5tANDRJWHFTHdobhLfetUHoSy929iabEiDrnwgvGeEel7mMjzE9kpLnW4If4ggw-XWwBOi1hg"/>
+</div>
+<div>
+<p class="font-headline font-extrabold text-sm text-emerald-900 tracking-tight">Premier League</p>
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Temporada 2024/25</p>
+</div>
+</div>
+<nav class="flex-1 mt-4 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="font-inter text-xs font-semibold uppercase tracking-widest">Painel</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white text-emerald-900 rounded-lg shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="font-inter text-xs font-semibold uppercase tracking-widest">Competições</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined text-[20px]">sports_soccer</span>
+<span class="font-inter text-xs font-semibold uppercase tracking-widest">Partidas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-inter text-xs font-semibold uppercase tracking-widest">Análise de Equipe</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-200/50 rounded-lg transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined text-[20px]">trending_up</span>
+<span class="font-inter text-xs font-semibold uppercase tracking-widest">Valor de Mercado</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200/10">
+<button class="w-full bg-primary-container text-white py-2 rounded-md font-headline font-bold text-xs shadow-md active:scale-95 duration-200">
+                Baixar Relatório
+            </button>
+<div class="mt-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200/50 rounded-lg text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span>Suporte</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-slate-200/50 rounded-lg text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+<span>Feedback</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-20 px-4 md:px-8 pb-12 min-h-screen">
+<!-- Breadcrumbs -->
+<nav class="mb-6">
+<ol class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-secondary">
+<li class="hover:text-primary cursor-pointer">Início</li>
+<li class="text-outline-variant">/</li>
+<li class="hover:text-primary cursor-pointer">Premier League</li>
+<li class="text-outline-variant">/</li>
+<li class="hover:text-primary cursor-pointer">2024/25</li>
+<li class="text-outline-variant">/</li>
+<li class="text-emerald-900">Classificação</li>
+</ol>
+</nav>
+<!-- Header & Global Filter Bar -->
+<header class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h1 class="font-headline font-extrabold text-3xl text-on-surface tracking-tight">Classificação Premier League</h1>
+<span class="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                        Cobertura Total
+                    </span>
+</div>
+<p class="text-secondary font-medium text-sm">Atualizado até a Rodada 28 • Março 2025</p>
+</div>
+<div class="bg-surface-container-low p-1.5 rounded-xl flex flex-wrap items-center gap-2 shadow-sm">
+<div class="px-4 py-2 bg-surface-container-lowest rounded-lg flex items-center gap-2 cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Comp:</span>
+<span class="text-xs font-bold text-on-surface">Premier League</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+<div class="px-4 py-2 bg-surface-container-lowest rounded-lg flex items-center gap-2 cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Temporada:</span>
+<span class="text-xs font-bold text-on-surface">2024/25</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+<div class="px-4 py-2 bg-primary-container text-white rounded-lg flex items-center gap-2 cursor-pointer">
+<span class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Rodada:</span>
+<span class="text-xs font-extrabold">28</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+</div>
+</div>
+</header>
+<!-- Secondary Nav -->
+<div class="flex gap-4 mb-6 border-b border-outline-variant/10">
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-900 border-b-2 border-emerald-900">Classificação</button>
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-secondary hover:text-emerald-900 transition-colors">Calendário</button>
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-secondary hover:text-emerald-900 transition-colors">Rankings</button>
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-secondary hover:text-emerald-900 transition-colors">Central da Partida</button>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+<!-- Main Table Section -->
+<div class="xl:col-span-3 space-y-6">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest w-12 text-center">Pos</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest min-w-[200px]">Clube</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Partidas">P</th>
+<th class="py-4 px-2 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Vitórias">V</th>
+<th class="py-4 px-2 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Empates">E</th>
+<th class="py-4 px-2 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Derrotas">D</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Saldo de Gols">SG</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest text-center" title="Pontos">Pts</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest text-center">Últimos 5</th>
+<th class="py-4 px-4 text-[11px] font-bold text-secondary uppercase tracking-widest text-center">Tendência</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1: Champions League Zone -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-4 px-4 font-bold text-sm text-center border-l-4 border-primary">1</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center p-1">
+<img alt="Arsenal" class="w-6 h-6 object-contain" data-alt="Arsenal club crest logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA50P6yU4k49OC4ZZzXZlJWFzWc21CeULbvYEdNasW1RFDcUC1Na5h_Wp7eVX1VGC1MQQR-SVBECe4WL0q_o8pfC7-Fbv_QvstggaGAbu8fidcVkI5E5HvUvw7ri4uRBZae3JcX_oIXxs71DlG7R1bSPoerHOi1gQmUc5niYqLEY9RgRLsZJnmzaDFiu6BxvyhMCDWtXQgIuXrVZ7wKzs9SmLYI1ql4SDizOBRX9jFFOX7SNKyLcGbjQqimVdf2ejaJ0iSU6gJj64s"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">Arsenal</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums">28</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">20</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">4</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">4</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums text-emerald-700">+38</td>
+<td class="py-4 px-4 text-center font-extrabold text-sm tabular-nums text-primary">64</td>
+<td class="py-4 px-4">
+<div class="flex items-center justify-center gap-1">
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-slate-400 text-[10px] text-white flex items-center justify-center font-bold">E</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<svg class="w-16 h-8 mx-auto" viewbox="0 0 64 32">
+<path d="M0 24 L16 16 L32 8 L48 4 L64 0" fill="none" stroke="#1b6b51" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</td>
+</tr>
+<!-- Row 2: Champions League Zone -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-4 px-4 font-bold text-sm text-center border-l-4 border-primary">2</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center p-1">
+<img alt="Man City" class="w-6 h-6 object-contain" data-alt="Manchester City club crest logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvukplOJUEozViBgKIw66BYoLKthOL6yqtGOMFCgOBv0aWx-FSOk4b0Ohur_2bvC8h4XZ1WkkBjFdfe1iwYUPMn3qBCFhP3TY4Umiuibdmt7M55vdHbV_h4omqe3RJv6cje9oG_tlRznCGTKGlTe8-FSIAZkFiZz8770blbeVFnjPb6TyzjMTEHx3DTFiNmNud0lbJVPuwqyjksEvvFDpN2dc4ijWTb9AQWeUv0Q44GARxxNX5-dUXdaZcUd2PKjF04ix5GoIRFxk"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">Man City</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums">28</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">19</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">6</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">3</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums text-emerald-700">+42</td>
+<td class="py-4 px-4 text-center font-extrabold text-sm tabular-nums text-primary">63</td>
+<td class="py-4 px-4">
+<div class="flex items-center justify-center gap-1">
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-slate-400 text-[10px] text-white flex items-center justify-center font-bold">E</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<svg class="w-16 h-8 mx-auto" viewbox="0 0 64 32">
+<path d="M0 16 L16 12 L32 8 L48 8 L64 4" fill="none" stroke="#1b6b51" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</td>
+</tr>
+<!-- Row 5: Europa League Zone -->
+<tr class="hover:bg-surface-container-low transition-colors border-t-2 border-surface-container-high">
+<td class="py-4 px-4 font-bold text-sm text-center border-l-4 border-secondary">5</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center p-1">
+<img alt="Aston Villa" class="w-6 h-6 object-contain" data-alt="Aston Villa club crest logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjpmWyMT2_phKCCXN3S0I8Dy6bfJyubuA8vrDtV6puK829UgtuA5uk6OXbuD7I2c5a_Mm_BOenk6wBoVFAlRmebajxsR2m3GRVjh3KMzlQvs-qxN3ykp1NHnfqrgVR2Pb6EJXYjBYebYikO6Ajrx1EwRFqWefY5CwKSk6bONYlLHqVvtBFbOJhth4LRbySEeIbhzur7XztaAKrtpTlIo7yeE6uhiYb9sPTMV6YwPjaudyyepDCW5YtAPjGQ4FTAyUCDGtEpXMOUiw"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">Aston Villa</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums">28</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">15</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">5</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">8</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums text-emerald-700">+14</td>
+<td class="py-4 px-4 text-center font-extrabold text-sm tabular-nums text-primary">50</td>
+<td class="py-4 px-4">
+<div class="flex items-center justify-center gap-1">
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+<div class="w-5 h-5 rounded-full bg-slate-400 text-[10px] text-white flex items-center justify-center font-bold">E</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<svg class="w-16 h-8 mx-auto" viewbox="0 0 64 32">
+<path d="M0 8 L16 12 L32 4 L48 4 L64 12" fill="none" stroke="#515f74" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</td>
+</tr>
+<!-- Row Partial -->
+<tr class="hover:bg-surface-container-low transition-colors bg-tertiary-fixed/10">
+<td class="py-4 px-4 font-bold text-sm text-center border-l-4 border-transparent">12</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center p-1">
+<img alt="Everton" class="w-6 h-6 object-contain" data-alt="Everton club crest logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6jCnYbZYyB1oEsY8Jk0hSE6yskTIcLnUtmfBzslB_da4b3McK_bKy_yN1pvAXt-upDqtJAcOMy3pAAtIaTP20dXUzwcInI5C1uuVg5hDweGbdxSpYMvDrZPuOZqSPd9neHfo0I6mr59Up-DTgPzrCvwwZ-WCVpOBLXbhU2-rVVyrM0j0jWjvhKlG_PvCuZQmF-euAzk1IST6_Wnr8iJ4wlIGaCESWhNye333vTwewdSC_iBXimp8nsJRSncTwJ_SS5HBCL3S_oT0"/>
+</div>
+<div class="flex items-center gap-2">
+<p class="font-headline font-bold text-sm text-on-surface">Everton</p>
+<span class="material-symbols-outlined text-amber-600 text-[14px]" title="Dados Parciais: Partida Pendente de Análise">info</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums">27*</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">8</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">7</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">12</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums text-on-error-container">-8</td>
+<td class="py-4 px-4 text-center font-extrabold text-sm tabular-nums text-primary">31</td>
+<td class="py-4 px-4 text-center">
+<span class="text-[10px] font-bold text-on-tertiary-fixed-variant uppercase tracking-widest bg-tertiary-fixed px-2 py-0.5 rounded">Parcial</span>
+</td>
+<td class="py-4 px-4 text-center">
+<svg class="w-16 h-8 mx-auto" viewbox="0 0 64 32">
+<path d="M0 20 L16 24 L32 20 L48 24 L64 22" fill="none" stroke="#6e3900" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</td>
+</tr>
+<!-- Row 18: Relegation Zone -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-4 px-4 font-bold text-sm text-center border-l-4 border-error">18</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center p-1">
+<img alt="Burnley" class="w-6 h-6 object-contain" data-alt="Burnley club crest logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0yPJ-DhyrzvG4qkuTvarCyb_FtSta0CcxCn6YMrH9g5FW3otKJTMevTip-I4vzdtUZzxC22-gd4hg67A9zLGFJijuSGjmGKjo0oJcHiyUU6zMLwm-m0lQLc3dUv3fKc8lwLC2glyr8h9igKmGj3IWZ4kZauYjOzTU8Pq2BcgmM4GniW7rlnZ0VWUNk60puVc-OgQZbX_7kV3mkjmqpqtmRHx2x2IVpooN1L7-vlvRIvb7VE7of4NWu8sGRGZAKImUwKheCQPwnMU"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">Burnley</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums">28</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">4</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">5</td>
+<td class="py-4 px-2 text-center font-medium text-sm tabular-nums">19</td>
+<td class="py-4 px-4 text-center font-bold text-sm tabular-nums text-on-error-container">-31</td>
+<td class="py-4 px-4 text-center font-extrabold text-sm tabular-nums text-primary">17</td>
+<td class="py-4 px-4">
+<div class="flex items-center justify-center gap-1">
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+<div class="w-5 h-5 rounded-full bg-primary-container text-[10px] text-white flex items-center justify-center font-bold">V</div>
+<div class="w-5 h-5 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">D</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<svg class="w-16 h-8 mx-auto" viewbox="0 0 64 32">
+<path d="M0 16 L16 20 L32 24 L48 20 L64 28" fill="none" stroke="#ba1a1a" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Qualification Key -->
+<div class="flex flex-wrap gap-6 px-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-primary rounded-sm"></span>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Champions League</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-secondary rounded-sm"></span>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Europa League</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-error rounded-sm"></span>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Rebaixamento</span>
+</div>
+</div>
+</div>
+<!-- Sidebar Modules -->
+<div class="space-y-6">
+<!-- Round Metadata -->
+<section class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-extrabold text-sm text-on-surface uppercase tracking-tight">Detalhes Rodada 28</h3>
+<span class="material-symbols-outlined text-secondary text-lg">info</span>
+</div>
+<div class="space-y-4">
+<div>
+<p class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Calendário</p>
+<p class="text-xs font-bold text-on-surface">15 de Março - 17 de Março, 2025</p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Status</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<p class="text-xs font-bold text-on-surface">9/10 Partidas Concluídas</p>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant/20">
+<a class="flex items-center justify-between group" href="#">
+<span class="text-xs font-extrabold text-emerald-900 group-hover:underline">Ver Jogos da Rodada</span>
+<span class="material-symbols-outlined text-emerald-900 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Predictive Analytics Glass Card -->
+<section class="glass-card rounded-xl p-6 border border-white/40 shadow-xl shadow-emerald-900/5 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<h3 class="font-headline font-extrabold text-sm text-on-surface mb-1">Probabilidade de Título</h3>
+<p class="text-[10px] text-secondary font-medium mb-4 uppercase tracking-widest">Calculado com base na Rodada 28</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between mb-1 text-[10px] font-bold uppercase">
+<span class="text-on-surface">Arsenal</span>
+<span class="text-emerald-900">46%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 46%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1 text-[10px] font-bold uppercase">
+<span class="text-on-surface">Man City</span>
+<span class="text-emerald-900">42%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 42%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1 text-[10px] font-bold uppercase">
+<span class="text-on-surface">Liverpool</span>
+<span class="text-emerald-900">12%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 12%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Round Snapshot -->
+<section class="bg-surface-container-highest/40 rounded-xl p-6">
+<h3 class="font-headline font-extrabold text-sm text-emerald-900 mb-4">Destaque da Rodada</h3>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+<img alt="Newcastle" class="w-8 h-8 object-contain" data-alt="Newcastle United club crest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUD6kazoNpMDu6dlqHwozCsMB4xaWvxhQLB1MBywhQNWmJP5j5bySlAkgE4Dv-bkQwYg7v2RnCSfFBWgtBjz2AHRYFJa6gOCR0OnkjLYRm-zBM9rECpo_6HbYpLeYMZ3a_PYWU_QwwjagLw68RBkHR0HrPFxXHm5NJqpqeePGc_vx6M3na55Jglzvt7WjcHvk4AtE_Y4AULEMvYvuzq7EWFYyvnxzXWBXP4Cnct_kHjLHScN0FN5hCdYBZyKHS3zdslmV9tJFCncM"/>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Newcastle Utd</p>
+<div class="flex items-center gap-1 text-emerald-700 font-bold text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+3 Posições</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</body></html>

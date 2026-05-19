@@ -89,11 +89,12 @@ export function ProfilePanel({
 }
 
 type ProfileTabItem = {
-  key: string;
-  label: ReactNode;
+  badge?: ReactNode;
   href: string;
   isActive: boolean;
-  badge?: ReactNode;
+  key: string;
+  label: ReactNode;
+  customComponent?: ReactNode;
 };
 
 export function ProfileTabs({
@@ -116,32 +117,38 @@ export function ProfileTabs({
       tone="soft"
     >
       <nav aria-label={ariaLabel} className="flex flex-wrap items-center gap-2">
-        {items.map((item) => (
-          <Link
-            aria-current={item.isActive ? "page" : undefined}
-            aria-label={typeof item.label === "string" ? item.label : undefined}
-            className={
-              item.isActive
-                ? "inline-flex items-center gap-2 rounded-full bg-[#003526] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white shadow-[0_20px_42px_-28px_rgba(0,53,38,0.58)]"
-                : "inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/74 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#404944] transition-colors hover:bg-white"
-            }
-            href={item.href}
-            key={item.key}
-          >
-            <span>{item.label}</span>
-            {item.badge ? (
-              <span
-                className={
-                  item.isActive
-                    ? "rounded-full bg-white/14 px-2 py-0.5 text-[0.62rem] font-semibold"
-                    : "rounded-full bg-[rgba(216,227,251,0.88)] px-2 py-0.5 text-[0.62rem] font-semibold"
-                }
-              >
-                {item.badge}
-              </span>
-            ) : null}
-          </Link>
-        ))}
+        {items.map((item) => {
+          if (item.customComponent) {
+            return <div key={item.key}>{item.customComponent}</div>;
+          }
+
+          return (
+            <Link
+              aria-current={item.isActive ? "page" : undefined}
+              aria-label={typeof item.label === "string" ? item.label : undefined}
+              className={
+                item.isActive
+                  ? "inline-flex items-center gap-2 rounded-full bg-[#003526] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] !text-white shadow-[0_12px_32px_-16px_rgba(0,53,38,0.7)]"
+                  : "inline-flex items-center gap-2 rounded-full border border-[rgba(191,201,195,0.5)] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#404944] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]"
+              }
+              href={item.href}
+              key={item.key}
+            >
+              <span>{item.label}</span>
+              {item.badge ? (
+                <span
+                  className={
+                    item.isActive
+                      ? "rounded-full bg-white/14 px-2 py-0.5 text-[0.62rem] font-semibold"
+                      : "rounded-full bg-[rgba(216,227,251,0.88)] px-2 py-0.5 text-[0.62rem] font-semibold"
+                  }
+                >
+                  {item.badge}
+                </span>
+              ) : null}
+            </Link>
+          );
+        })}
       </nav>
 
       {aside ? <div className="flex flex-wrap items-center gap-2">{aside}</div> : null}

@@ -51,7 +51,7 @@ import {
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
-import { useGlobalFilters, useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
+import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
@@ -377,18 +377,18 @@ function LeaguePageHeader({
   );
 }
 
-function RoundPickerDropdown({ rounds, selectedRoundId, onRoundChange }: { rounds: { roundId: string; roundName?: string | null }[]; selectedRoundId: string | null; onRoundChange: (id: string | null) => void; }) {
+function RoundPickerDropdown({ rounds, selectedRoundId, onRoundChange }: { rounds: { roundId: string; roundName: string; stageId: string }[]; selectedRoundId: string | null; onRoundChange: (id: string | null) => void; }) {
   const [isOpen, setIsOpen] = useState(false);
   const currentRound = rounds.find(r => r.roundId === selectedRoundId);
 
   return (
-    <div className="relative z-40">
-       <button onClick={() => setIsOpen(!isOpen)} className="inline-flex items-center justify-between gap-3 h-[34px] rounded-full border border-[rgba(191,201,195,0.5)] bg-white pl-3 pr-2 text-xs font-bold uppercase tracking-[0.18em] text-[#003526] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]">
-           <div className="flex items-center gap-1.5">
-               <span className="material-symbols-outlined text-[16px] text-[#003526]">calendar_month</span>
+    <div className="relative w-48 z-40">
+       <button onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-full h-10 px-4 py-2 border border-[#dcdcdc] rounded-xl text-sm font-semibold text-[#111c2d] bg-white hover:bg-[#f9fafb] transition-colors focus:ring-2 focus:ring-[#003526]/20">
+           <div className="flex items-center gap-2">
+               <span className="material-symbols-outlined text-[1.1rem] text-[#57657a]">calendar_month</span>
                <span>{currentRound ? currentRound.roundName : "Rodada atual"}</span>
            </div>
-           <span className="material-symbols-outlined text-[16px] text-[#404944]">unfold_more</span>
+           <span className="material-symbols-outlined text-[1.1rem] text-[#8fa097]">unfold_more</span>
        </button>
        {isOpen && (
            <div className="absolute top-12 left-0 w-full max-h-64 overflow-y-auto bg-white border border-[#dcdcdc] rounded-xl shadow-[0_12px_24px_-12px_rgba(0,0,0,0.15)] py-2">
@@ -827,9 +827,9 @@ function KnockoutBracketPanel({
           title="Sem chaveamento"
         />
       ) : (
-        <div className="flex w-full snap-x snap-mandatory gap-6 overflow-x-auto pb-6 xl:grid xl:grid-cols-4">
+        <div className="grid gap-4 xl:grid-cols-4">
           {stages.map(({ stage, ties, isLoading, isError }) => (
-            <ProfilePanel className="w-[85vw] max-w-[340px] shrink-0 snap-center space-y-4 xl:w-auto" key={stage.stageId} tone={stage.isCurrent ? "soft" : "base"}>
+            <ProfilePanel className="space-y-4" key={stage.stageId} tone={stage.isCurrent ? "soft" : "base"}>
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <ProfileTag>{stage.stageName ?? stage.stageId}</ProfileTag>
@@ -861,47 +861,42 @@ function KnockoutBracketPanel({
 
               {!isLoading && ties.length > 0 ? (
                 <div className="grid gap-3">
-                  {ties.map((tie) => {
-                    const homeIsWinner = tie.winnerTeamName && tie.homeTeamName && tie.winnerTeamName === tie.homeTeamName;
-                    const awayIsWinner = tie.winnerTeamName && tie.awayTeamName && tie.winnerTeamName === tie.awayTeamName;
-                    return (
-                      <div
-                        className="flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] border border-[rgba(191,201,195,0.55)] shrink-0"
-                        key={tie.tieId}
-                      >
-                        <div className={`flex items-center justify-between px-3 py-3 ${homeIsWinner ? 'bg-[#f0faf6]' : ''} border-b border-[#f0f3ff]`}>
-                           <div className="flex items-center gap-2">
-                             <TeamBadge teamId={tie.homeTeamId} teamName={tie.homeTeamName ?? "Mandante"} size={22} />
-                             <span className={`text-sm ${homeIsWinner ? 'font-bold text-[#003526]' : 'font-medium text-[#455468]'} truncate max-w-[160px]`}>
-                               {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
-                             </span>
-                           </div>
-                           <span className={`font-bold ${homeIsWinner ? 'text-[#003526]' : 'text-[#111c2d]'}`}>{tie.homeGoals}</span>
+                  {ties.map((tie) => (
+                    <div
+                      className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-4 py-4"
+                      key={tie.tieId}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <ProfileTag>Confronto {tie.tieOrder}</ProfileTag>
+                        {tie.resolutionType ? <ProfileTag>{tie.resolutionType}</ProfileTag> : null}
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-[#111c2d]">
+                            {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
+                          </span>
+                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                            {tie.homeGoals}
+                          </span>
                         </div>
-                        <div className={`flex items-center justify-between px-3 py-3 ${awayIsWinner ? 'bg-[#f0faf6]' : ''}`}>
-                           <div className="flex items-center gap-2">
-                             <TeamBadge teamId={tie.awayTeamId} teamName={tie.awayTeamName ?? "Visitante"} size={22} />
-                             <span className={`text-sm ${awayIsWinner ? 'font-bold text-[#003526]' : 'font-medium text-[#455468]'} truncate max-w-[160px]`}>
-                               {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
-                             </span>
-                           </div>
-                           <span className={`font-bold ${awayIsWinner ? 'text-[#003526]' : 'text-[#111c2d]'}`}>{tie.awayGoals}</span>
-                        </div>
-                        <div className="bg-[#f8fbff] py-1.5 text-[0.62rem] font-semibold text-[#8fa097] border-t border-[#f0f3ff] uppercase tracking-widest flex items-center justify-between px-3">
-                           <span className="flex items-center gap-1">
-                             <span className="material-symbols-outlined text-[12px]">sports_soccer</span>
-                             Jogo {tie.tieOrder}
-                           </span>
-                           {formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? (
-                             <span className="flex items-center gap-1">
-                               <span className="material-symbols-outlined text-[12px]">event</span>
-                               {formatDateWindow(tie.firstLegAt, tie.lastLegAt)}
-                             </span>
-                           ) : null}
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-[#111c2d]">
+                            {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
+                          </span>
+                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                            {tie.awayGoals}
+                          </span>
                         </div>
                       </div>
-                    );
-                  })}
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#57657a]">
+                        <span>{tie.matchCount} jogos</span>
+                        {tie.winnerTeamName ? <span>• classificado: {tie.winnerTeamName}</span> : null}
+                        {formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? (
+                          <span>• {formatDateWindow(tie.firstLegAt, tie.lastLegAt)}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : null}
             </ProfilePanel>
@@ -1614,26 +1609,14 @@ function LeagueSeasonSurface({
   context: CompetitionSeasonContext;
   resolution: CompetitionSeasonSurfaceResolution;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const filterInput = useSeasonFilterInput(context);
   const navLabels = buildSurfaceNavLabels(resolution.type);
 
-  const { setRoundId, roundId: activeRoundId } = useGlobalFilters();
-  const standingsQuery = useStandingsTable({
-    competitionId: context.competitionId,
-    seasonId: context.seasonId,
-    stageId: resolution.primaryTableStage?.stageId,
-    roundId: activeRoundId,
-  });
-
-  const selectedRound = standingsQuery.data?.selectedRound;
-  const rounds = standingsQuery.data?.rounds ?? [];
-
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<LeaguePageHeader context={context} tag="Pontos Corridos" />}
+      heroSummary={<LeagueHeroSummary context={context} />}
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1646,16 +1629,6 @@ function LeagueSeasonSurface({
           isActive: activeSection === "structure",
           key: "structure",
           label: navLabels.structure,
-          customComponent: (
-            <RoundPickerDropdown
-              onRoundChange={(newId) => {
-                setRoundId(newId);
-                router.push(buildSeasonSurfaceHref(context, "structure", searchParams));
-              }}
-              rounds={rounds}
-              selectedRoundId={selectedRound?.roundId ?? null}
-            />
-          ),
         },
         {
           href: buildSeasonSurfaceHref(context, "matches", searchParams),
@@ -1670,21 +1643,20 @@ function LeagueSeasonSurface({
           label: "Destaques da edicao",
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? <LeagueOverviewSection context={context} /> : null}
-          {activeSection === "structure" ? <LeagueStructureSection context={context} /> : null}
-          {activeSection === "matches" ? (
-            <ClosingMatchesPanel
-              context={context}
-              description="Lista editorial das partidas de fechamento da edicao, sem tratar a liga como feed ao vivo."
-              title="Partidas marcantes da temporada"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={null} /> : null}
-        </>
-      }
-    />
+      routeCards={buildRouteCards(filterInput)}
+      tags={[getSurfaceTypeLabel(resolution), context.seasonLabel]}
+    >
+      {activeSection === "overview" ? <LeagueOverviewSection context={context} /> : null}
+      {activeSection === "structure" ? <LeagueStructureSection context={context} /> : null}
+      {activeSection === "matches" ? (
+        <ClosingMatchesPanel
+          context={context}
+          description="Lista editorial das partidas de fechamento da edicao, sem tratar a liga como feed ao vivo."
+          title="Partidas marcantes da temporada"
+        />
+      ) : null}
+      {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={null} /> : null}
+    </CompetitionSeasonSurfaceShell>
   );
 }
 
@@ -1711,7 +1683,7 @@ function CupSeasonSurface({
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<CupHeroBanner tag="Mata-Mata / Eliminatorias" context={context} />}
+      heroSummary={<CupHeroSummary championTieQuery={championTieQuery} context={context} />}
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1738,24 +1710,22 @@ function CupSeasonSurface({
           label: "Destaques da edicao",
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? (
-            <CupOverviewSection championTieQuery={championTieQuery} context={context} resolution={resolution} />
-          ) : null}
-          {activeSection === "structure" ? <CupStructureSection context={context} resolution={resolution} /> : null}
-          {activeSection === "matches" ? (
-            <KnockoutBracketPanel
-              context={context}
-              resolution={resolution}
-              description="Confrontos eliminatorios"
-              title="Mata-mata"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
-        </>
-      }
-    />
+      routeCards={buildRouteCards(filterInput)}
+      tags={[getSurfaceTypeLabel(resolution), context.seasonLabel]}
+    >
+      {activeSection === "overview" ? (
+        <CupOverviewSection championTieQuery={championTieQuery} context={context} resolution={resolution} />
+      ) : null}
+      {activeSection === "structure" ? <CupStructureSection context={context} resolution={resolution} /> : null}
+      {activeSection === "matches" ? (
+        <ClosingMatchesPanel
+          context={context}
+          description="Ultimos confrontos concluidos da edicao, incluindo final e fases decisivas."
+          title="Confrontos decisivos"
+        />
+      ) : null}
+      {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
+    </CompetitionSeasonSurfaceShell>
   );
 }
 
@@ -1770,7 +1740,6 @@ function HybridSeasonSurface({
   resolution: CompetitionSeasonSurfaceResolution;
   structure: CompetitionStructureData | null;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const filterInput = useSeasonFilterInput(context);
   const championTieQuery = useStageTies({
@@ -1780,21 +1749,10 @@ function HybridSeasonSurface({
   });
   const navLabels = buildSurfaceNavLabels(resolution.type);
 
-  const { setRoundId, roundId: activeRoundId } = useGlobalFilters();
-  const standingsQuery = useStandingsTable({
-    competitionId: context.competitionId,
-    seasonId: context.seasonId,
-    stageId: resolution.primaryTableStage?.stageId,
-    roundId: activeRoundId,
-  });
-
-  const selectedRound = standingsQuery.data?.selectedRound;
-  const rounds = standingsQuery.data?.rounds ?? [];
-
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<LeaguePageHeader context={context} tag="Formato Misto" />}
+      heroSummary={<HybridHeroSummary championTieQuery={championTieQuery} context={context} />}
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1807,16 +1765,6 @@ function HybridSeasonSurface({
           isActive: activeSection === "structure",
           key: "structure",
           label: navLabels.structure,
-          customComponent: (
-            <RoundPickerDropdown
-              onRoundChange={(newId) => {
-                setRoundId(newId);
-                router.push(buildSeasonSurfaceHref(context, "structure", searchParams));
-              }}
-              rounds={rounds}
-              selectedRoundId={selectedRound?.roundId ?? null}
-            />
-          ),
         },
         {
           href: buildSeasonSurfaceHref(context, "matches", searchParams),
@@ -1831,22 +1779,21 @@ function HybridSeasonSurface({
           label: "Destaques da edicao",
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? <HybridOverviewSection context={context} resolution={resolution} /> : null}
-          {activeSection === "structure" ? <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} /> : null}
-          {activeSection === "matches" ? (
-            <KnockoutBracketPanel
-              context={context}
-              resolution={resolution}
-              description="Confrontos eliminatorios"
-              title="Mata-mata"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
-        </>
-      }
-    />
+      routeCards={buildRouteCards(filterInput)}
+      tags={[getSurfaceTypeLabel(resolution), context.seasonLabel]}
+    >
+      {activeSection === "overview" ? <HybridOverviewSection context={context} resolution={resolution} /> : null}
+      {activeSection === "structure" ? <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} /> : null}
+      {activeSection === "matches" ? (
+        <KnockoutBracketPanel
+          context={context}
+          description="O mata-mata concluido aparece como segunda metade da mesma edicao."
+          resolution={resolution}
+          title="Mata-mata finalizado"
+        />
+      ) : null}
+      {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
+    </CompetitionSeasonSurfaceShell>
   );
 }
 
@@ -1874,7 +1821,8 @@ export function CompetitionSeasonSurface({
     return (
       <CompetitionSeasonSurfaceShell
         context={context}
-        hero={<LeaguePageHeader context={context} tag="Estrutura indisponivel" />}
+        heroDescription="A surface orientada por tipo depende da estrutura da edicao para diferenciar copa e formato hibrido com seguranca."
+        heroEyebrow="Estrutura indisponivel"
         navItems={[
           {
             href: buildSeasonHubPath(context),
@@ -1883,12 +1831,13 @@ export function CompetitionSeasonSurface({
             label: "Resumo da edicao",
           },
         ]}
-        mainCanvas={
-          <ProfileAlert title="Nao foi possivel carregar a estrutura da edicao">
-            Sem esse contrato nao e possivel diferenciar com seguranca o desenho de copa ou hibrido.
-          </ProfileAlert>
-        }
-      />
+        routeCards={buildRouteCards(filterInput)}
+        tags={[context.seasonLabel, "Estrutura indisponivel"]}
+      >
+        <ProfileAlert title="Nao foi possivel carregar a estrutura da edicao" tone="critical">
+          Sem esse contrato nao e possivel diferenciar com seguranca o desenho de copa ou hibrido.
+        </ProfileAlert>
+      </CompetitionSeasonSurfaceShell>
     );
   }
 

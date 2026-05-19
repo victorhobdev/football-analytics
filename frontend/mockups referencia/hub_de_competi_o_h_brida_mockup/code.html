@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Competition Analytics - Elite League Hub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "tertiary-fixed": "#ffdcc3",
+              "surface-container-highest": "#d8e3fb",
+              "surface-container": "#e7eeff",
+              "secondary-fixed-dim": "#b9c7df",
+              "on-error-container": "#93000a",
+              "on-secondary": "#ffffff",
+              "surface-dim": "#cfdaf2",
+              "on-secondary-fixed-variant": "#3a485b",
+              "on-surface-variant": "#404944",
+              "surface-container-high": "#dee8ff",
+              "secondary": "#515f74",
+              "on-primary": "#ffffff",
+              "surface-tint": "#1b6b51",
+              "error": "#ba1a1a",
+              "on-secondary-container": "#57657a",
+              "primary-fixed": "#a6f2d1",
+              "on-error": "#ffffff",
+              "on-primary-fixed": "#002116",
+              "inverse-primary": "#8bd6b6",
+              "primary": "#003526",
+              "on-tertiary-fixed-variant": "#6e3900",
+              "surface-variant": "#d8e3fb",
+              "surface": "#f9f9ff",
+              "surface-container-lowest": "#ffffff",
+              "inverse-surface": "#263143",
+              "primary-container": "#004e39",
+              "inverse-on-surface": "#ecf1ff",
+              "tertiary": "#4a2400",
+              "outline-variant": "#bfc9c3",
+              "secondary-container": "#d5e3fc",
+              "tertiary-container": "#6a3700",
+              "surface-container-low": "#f0f3ff",
+              "secondary-fixed": "#d5e3fc",
+              "on-secondary-fixed": "#0d1c2e",
+              "on-primary-fixed-variant": "#00513b",
+              "on-tertiary-container": "#ff9939",
+              "tertiary-fixed-dim": "#ffb77d",
+              "surface-bright": "#f9f9ff",
+              "on-primary-container": "#76c0a1"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9f9ff;
+      }
+      h1, h2, h3, .font-headline {
+        font-family: 'Manrope', sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #bfc9c3;
+        border-radius: 10px;
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">trophy</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-emerald-950 dark:text-emerald-50">Elite League</h1>
+<p class="text-[10px] uppercase tracking-widest font-semibold text-slate-500">Continental Hub</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-3">
+<a class="flex items-center gap-3 px-3 py-2.5 text-emerald-900 dark:text-emerald-400 font-bold border-r-4 border-emerald-900 dark:border-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10 transition-colors scale-98 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Visão Geral</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Grupos</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">sports_soccer</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Partidas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Chaveamento</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Rankings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Times</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Jogadores</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4 border-t border-slate-200/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200">
+<img class="w-full h-full rounded-full object-cover" data-alt="professional male sports analyst portrait with neutral background and soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqBlqdnaau9i8GU9kAynv4ZtYLTA-OKfFRwr1QqD9IaQjUHXOFRlLuEzM2Duj12S7kkhjx84YJ0kg2Gg-sbf1THpgvYyZgMzFD9j-Bf4DunYt4yCuum2OfYZcgM2iFn1Ps_sMSABVnVq4uulVAxbPXolf5LIoX4yWwFRe_QnmMQgZNWVGzHejyd0c2W73q6cVsTVPzYz-12htFOtco_IbIQDCXJjJx1QFeX8opEjkQzQDWNYuGEv1PDnBmZGQM7u1iFwzmNwG1gfw"/>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface">Alex Santos</p>
+<p class="text-[10px] text-slate-500 uppercase">Analista Pro</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center h-16 ml-64 px-8 w-[calc(100%-16rem)] sticky top-0 z-40 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/15 dark:border-slate-800/15">
+<div class="flex gap-8 items-center">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">Elite League / <span class="text-emerald-900 dark:text-emerald-400">Visão Geral</span></span>
+<nav class="hidden md:flex gap-6">
+<a class="text-emerald-900 dark:text-emerald-400 border-b-2 border-emerald-900 dark:border-emerald-400 pb-2 text-sm font-medium" href="#">Visão Geral</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all text-sm font-medium" href="#">Fase de Grupos</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all text-sm font-medium" href="#">Mata-mata</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative flex items-center">
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-1 focus:ring-primary-container" placeholder="Buscar times, jogadores..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 text-slate-400 text-lg">search</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<main class="ml-64 p-8 min-h-screen">
+<!-- Hero Header Section -->
+<section class="relative h-[320px] rounded-xl overflow-hidden mb-8 bg-primary">
+<div class="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-black opacity-90"></div>
+<!-- Decorative Pitch Background -->
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-fixed-dim to-transparent"></div>
+<div class="relative h-full flex flex-col justify-center px-12 z-10">
+<div class="flex items-center gap-6 mb-6">
+<div class="w-24 h-24 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 p-4">
+<img class="w-full h-full object-contain filter brightness-0 invert" data-alt="minimalist gold trophy icon on a transparent background for a premier football league logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO-aPCFTvpoP91uvICsAreU3bnuBiTphN-pP35BTZUizrJNss_5oL7woIDc9yMsqaOrkEa4HGQxFPxCE_z79yk1Ux72LYXgm_XanrzmVvHA51oUALwotOlVXWSlPNSvwJIm4dar5Ij73WIw2RrjigAWoltiREM-y2zewEsDUoDKDhBz_DMItKj3kvnywQuZxIrdSlEL7XQp-xIZlLbo9QwT68XRRNkl3johmcVSpZYh6NwMOATNXL3Rnd5w9yPvpf__pyXKEpD56E"/>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold uppercase rounded">Temporada 2024</span>
+<span class="flex items-center gap-1 text-on-primary-container text-xs font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Em Andamento
+                            </span>
+</div>
+<h2 class="text-4xl font-extrabold text-white font-headline tracking-tight">Copa Elite Continental</h2>
+<p class="text-on-primary-container text-lg max-w-2xl mt-2 font-medium">A maior competição do continente entra em sua fase decisiva. Prepare-se para o mata-mata.</p>
+</div>
+</div>
+<div class="flex items-center gap-8 border-t border-white/10 pt-8 mt-4">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-wider text-on-primary-container font-semibold">Próxima Fase</span>
+<span class="text-white font-bold text-xl">Oitavas de Final</span>
+</div>
+<div class="flex items-center gap-4 bg-black/20 backdrop-blur-sm rounded-full px-6 py-2">
+<div class="flex items-center gap-2 opacity-60">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+<span class="text-xs text-white font-semibold">Fase de Grupos</span>
+</div>
+<span class="material-symbols-outlined text-white/40">chevron_right</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span class="text-xs text-white font-bold">Mata-Mata</span>
+</div>
+<span class="material-symbols-outlined text-white/40">chevron_right</span>
+<div class="flex items-center gap-2 opacity-60">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+<span class="text-xs text-white font-semibold">Final</span>
+</div>
+</div>
+</div>
+</div>
+<img class="absolute top-0 right-0 h-full w-1/2 object-cover opacity-30 mix-blend-overlay" data-alt="dramatic aerial view of a packed football stadium under bright floodlights at night with green pitch visible" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQEMdsjTmWve0eEk-Nk7iYrsTyffmgJ1cSUoLVrbcLToOAo7QBhzGlHivo-mCkVba8HYK2g4B256jGZcj0gs0rC4rfBgJGn5HoF1Ijm2i0F7-C8KW2bWWX6VEt5R0AWTx6jmPXOQiQtN23x3vqwVk43fIuADRMmyvss4dQUj6J6nsWnOUuhXqgUihvVPANaIJeje4Bi9DxXWzDMUnCi4Xypy8D9WYH-yhNS5VcKOci3S8toSDIEJFvZXV9nmsfDCBfWxsfdjyb7dw"/>
+</section>
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: Main Data -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Group Stage Summary -->
+<section class="bg-surface-container-low rounded-xl p-6">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-xl font-bold text-emerald-950 font-headline">Resumo: Fase de Grupos</h3>
+<p class="text-sm text-slate-500">Última atualização: Hoje, 14:30</p>
+</div>
+<button class="px-4 py-2 bg-primary-container text-white rounded-lg text-xs font-bold hover:bg-primary transition-colors">VER TODOS OS GRUPOS</button>
+</div>
+<div class="grid md:grid-cols-2 gap-6">
+<!-- Group A -->
+<div class="bg-surface-container-lowest rounded-lg p-4">
+<h4 class="text-xs font-bold uppercase text-slate-400 mb-4 tracking-widest flex items-center justify-between">
+                                Grupo A
+                                <span class="px-2 py-0.5 bg-primary-fixed text-[9px] text-on-primary-fixed-variant rounded">Full Coverage</span>
+</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">1</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="minimalist football club crest with red and white geometric patterns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdYv62-JCXeDFY03iPAMmB9v-G-FPZdF4EA7kZPwcklW-Rih7pssF_jo4Pkh_DKKEi_OOEIYDTIToCgRg762UTAHYPc2GbgfU3Ur_6PYuzfgBosBlGVm8nc0Lsba6PyraHt_p7x2Z1oKdsc8GyrwteW2t99foa-4x9Qj_IfhULw-Ywl865Cet61oYe_WXLe_uq-3GsnJaShAEWQaoJX6v7DrewaLgUH5cFVZ8ATwVuiCdnuqtYlnt932mvZejUBXsz7ro4Lj3twNU"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">Flamengo</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900 bg-emerald-50 px-2 py-1 rounded">15 PTS</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">2</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="traditional football badge with blue and black shield design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyYRmAYdEgRHKTIqJE-EjN0qmFtpd-vwhy9Ie1MSdJadOWXIa5Vj0_VJG_EhPDLVbC7Ey6lUMyDzn16k4kmKvTRZMe48KyIW4s_-NA0C1iyU8sG_dYfsIcP2RZwRqYqQtxzWHqFLehPUEH4_Iw2bqKkz9SScWIDNCRxf-igkhI6w1a-kVhD01Pw75kcuQ_BqfOCVXMh8XOIE2F_3pn2_J4AkkHcH5LykxWPCTfmVRBniL-B1QLYeRq48VmZ2wLbq-aJGp2DJguLZE"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">River Plate</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900 bg-emerald-50 px-2 py-1 rounded">12 PTS</span>
+</div>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">3</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="circular green and yellow football team crest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwgk-Tp7-C_79uzb7A27hRmEGvqFE0Y88Op2wz-crvkXuWTsD9HIdShR7mPI_hCz7GRBlCYo9lTYmH4i_Wiz7u1K1yuth06O43A7hVsSJG5NdobWKyJEDSQhDCkCdHZj_UMqbqMc8bG3U3cMJATB8IZxmzDFp7UT59BIT43GFqTuekt8X7VFvZ964vuKEm5acY7qk7FmAQTtuKijzMbkB-TLB871aCDIcrJnfd7qLt40_vCG1JfyI9UKrygFvKJxZAcFU-ZxC--Jk"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">Millonarios</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900">4 PTS</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Group B -->
+<div class="bg-surface-container-lowest rounded-lg p-4">
+<h4 class="text-xs font-bold uppercase text-slate-400 mb-4 tracking-widest flex items-center justify-between">
+                                Grupo B
+                                <span class="px-2 py-0.5 bg-tertiary-fixed text-[9px] text-on-tertiary-fixed-variant rounded">Partial</span>
+</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">1</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="elegant gold and black football logo with star motifs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeYVyPO6WvpEY2umvP9HPw-G4NRcv2HpURa9ej7y9nqST2zdLDoPorqutwulgYIiDwmI-HqJgJ1UVDF7dmXXsbwZ9MWp0XCzobcrNZACrqPru2OZpQLRw-xlh3JC0pxHDpgfDo6Ty1vTP3zoc1oK5Mx630GoUH8DnPYTR4UBgqPAzhEQxg51EZq6zkBgbqPyW7MrY6GsrH6GzwD-x8c28RERUT3I_bxinHgehGaOWTWNYa7BSIZiLrb-qBo-Hg_tOCgE6YtZ5hm1I"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">Palmeiras</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900 bg-emerald-50 px-2 py-1 rounded">16 PTS</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">2</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="royal blue football crest with a shield and crown" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARH0RTpQ9pjnmjHay8JJ8KWcVOFxQVDBtv7k1vxxIi81emIvsZekiOlLWjL-jzZ3ul02cX-X-p3N9UGNFBGk8no6PHTJDFPBgiNMo9Mz-_VpnjNC0pU2NgNOpcb8DTjzAJQtOLIViXnGgMArRl9r0HUYdpDfmht2wEArz6yWxxBuzFg7Hv_s3ugRpAIb8ngLEb0tD2w2WDY6HvVK5TZhaLz1fRq1zCOB-4ZhpcP_VLOIxvWka3e3eB6zK0srw4ZDUciVsUn7weuoU"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">Ind. Del Valle</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900 bg-emerald-50 px-2 py-1 rounded">10 PTS</span>
+</div>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-3">
+<span class="text-sm font-bold text-slate-400 w-4">3</span>
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="simple navy blue and white sports logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhr7utMqD-_ntfJ5LHTLxyPouhOnvxl3hWxUqz9gCwpHV-sYHs0QP8HCpfWYq6oKXIk8c3QDTlTfRTJeBhHUHPmQobkm0YTriVvbUr0rcAwYqqYZXbmRkCq_LWjOOqzXJOdRieG9ivYMV5ibpMudwVaj_w5vUnc8MfsL2nl_rAcZ-kn2q31JeumfDQQitQPMXJi-vgAKHqXLW3OufakfDA0T99bwkD-JVAG0hu238xZGm47H_EksCBTxOGmVYMonMVtw5S2il6WIY"/>
+</div>
+<span class="text-sm font-bold text-emerald-900">San Lorenzo</span>
+</div>
+<div class="flex items-center gap-4 text-xs font-bold">
+<span class="text-slate-500">PJ: 6</span>
+<span class="text-emerald-900">5 PTS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bracket Preview Section (Hybrid Nature) -->
+<section class="bg-surface-container rounded-xl p-8 overflow-hidden relative">
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-1.5 h-8 bg-primary rounded-full"></div>
+<h3 class="text-2xl font-bold text-emerald-950 font-headline">Chaveamento: Oitavas de Final</h3>
+</div>
+<div class="grid grid-cols-3 gap-12 items-center">
+<!-- Matchup 1 -->
+<div class="space-y-4">
+<div class="bg-white/60 backdrop-blur-md p-4 rounded-xl shadow-sm border border-white/40">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200"></div>
+<span class="text-xs font-bold text-slate-400 italic">1º Grupo A</span>
+</div>
+</div>
+<div class="h-[1px] w-full bg-slate-100 my-3"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200"></div>
+<span class="text-xs font-bold text-slate-400 italic">2º Grupo H</span>
+</div>
+</div>
+</div>
+<div class="bg-white/60 backdrop-blur-md p-4 rounded-xl shadow-sm border border-white/40">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200"></div>
+<span class="text-xs font-bold text-slate-400 italic">1º Grupo C</span>
+</div>
+</div>
+<div class="h-[1px] w-full bg-slate-100 my-3"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200"></div>
+<span class="text-xs font-bold text-slate-400 italic">2º Grupo F</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Connector Path -->
+<div class="flex flex-col items-center justify-center relative py-12">
+<div class="w-full h-32 border-y-2 border-r-2 border-slate-300 rounded-r-3xl"></div>
+<div class="w-12 h-[2px] bg-slate-300 absolute right-[-48px]"></div>
+</div>
+<!-- Quarterfinal Placeholder -->
+<div class="bg-primary/5 border-2 border-dashed border-primary/20 rounded-2xl h-48 flex flex-col items-center justify-center text-center px-6">
+<span class="material-symbols-outlined text-primary/40 text-4xl mb-2">lock_clock</span>
+<p class="text-primary/60 font-bold text-sm">Quartas de Final</p>
+<p class="text-slate-400 text-[10px] uppercase font-semibold mt-1">A definir após Oitavas</p>
+</div>
+</div>
+</div>
+<div class="absolute -right-20 -bottom-20 opacity-5">
+<span class="material-symbols-outlined text-[300px]">account_tree</span>
+</div>
+</section>
+</div>
+<!-- Right Column: Secondary Blocks -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Next Matches Decisive -->
+<section class="bg-surface-container-low rounded-xl p-6">
+<h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600">event</span>
+                        Próximas Partidas Decisivas
+                    </h3>
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded">QUA, 21:30</span>
+<span class="text-[10px] font-medium text-slate-400">MARACANÃ</span>
+</div>
+<div class="flex items-center justify-between gap-2">
+<div class="flex flex-col items-center flex-1">
+<div class="w-10 h-10 bg-slate-100 rounded-full mb-1">
+<img class="w-full h-full object-contain" data-alt="club crest with red and black stripes for a prominent brazilian football team" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4wtoUxAzQqBWzUhbI7a-KmTG0cOKaszb77B6Nf5wQARXSfkmQQ_gcQGa991biRMF4X73m99Q6QN3dE_OWW_6uC60ILWzQZ4OnuXL1NP1C-OR08aKiAYIxgHwXxgvvRzUxbpcTd3UZFl0hiFIlp2zWn3KxEIlAf3WXd30wj66jopDR2pxzfzf2TYhl5TJJDfR7x_wmG2_FHuGfCWbGvGvtnrecsxERAUIzbIT2HTlMnOmEnRsOVAKQouuqBpntiNnkpr0Lw66Fm9Y"/>
+</div>
+<span class="text-[10px] font-bold text-on-surface">FLAMENGO</span>
+</div>
+<span class="text-xs font-bold text-slate-300">VS</span>
+<div class="flex flex-col items-center flex-1">
+<div class="w-10 h-10 bg-slate-100 rounded-full mb-1">
+<img class="w-full h-full object-contain" data-alt="circular shield logo with blue and white colors and diagonal stripe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJ-3IvAMH083_5BWpcToQTJLXdIcNfxfVrcBcSHDuEQ_VAeB2hSjxf2S8HVbUZ2SUhIm7dEb8Rb0gDFdgst2M3X9PL55XKGfXnUHBVkVJGccZFzGYVjn6Ig0Hsq-NPEd79p30nd2cMaHermD4KRRcY1YkDluEFK0huXTs68u0LlDVJf3eElvY_1Ho8dkncnFJAMC9KvX3LosxTzRANTq4KYHjAAChF_HbIMtvqMJlnUF1f-_lrgg3gYbNb5S_b3sf0BPRVRhuQwTM"/>
+</div>
+<span class="text-[10px] font-bold text-on-surface">BOCA JUNIORS</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-[10px] font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded">QUI, 19:00</span>
+<span class="text-[10px] font-medium text-slate-400">ALLIANZ PARQUE</span>
+</div>
+<div class="flex items-center justify-between gap-2">
+<div class="flex flex-col items-center flex-1">
+<div class="w-10 h-10 bg-slate-100 rounded-full mb-1">
+<img class="w-full h-full object-contain" data-alt="classic green and white football badge with circular crest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsQljG4Ntn9QQXM-q100NKBIDT3xN5cLDoySr0J5aR_MtoOtV8Ab_lyNJRc6okzUsuuBlDqgfv82ZIQqBDAER3crgJQtARVwKdtY6mCYYGWqJLRncwooqmB7vGXs2P-gTss4zA4Zn3jfMkCmLxHvbxYpb3AWef6B1Ar7Wo2LnM7WFr6RTUu-XiXv3YkwHde0ZjFvj9QHxvkhRMaLNoSJz_cFJ2wgcwkj3eeDNqsF0rBhLJIqil-EgFyOrai_dO5UIRQmsX03nZCak"/>
+</div>
+<span class="text-[10px] font-bold text-on-surface">PALMEIRAS</span>
+</div>
+<span class="text-xs font-bold text-slate-300">VS</span>
+<div class="flex flex-col items-center flex-1">
+<div class="w-10 h-10 bg-slate-100 rounded-full mb-1">
+<img class="w-full h-full object-contain" data-alt="black and white striped shield crest of a professional sports club" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn9C652eI93MBy_5xfRWhXnhNDZBzU-91rwHWpcrrfkRG8TAusscJnnF1kk__i0K7nG2c7enzf7oWiRwZrrdhxnlNVqnqlPwflOSjqlHmrVJ0bNTZzZcILn4MTNr01NwUXbljedeeYw5pwUn6wtUS_xA2xiGSB7U2XC2CYsbINAyLytFLicnhJZ7AcxCSf9Feni79nWMbGFuLiaz1LvdezB7tATMZTHVXMH2s_n3-Vu0jr-PiOaq5eKmSeDtwyd6-4Fl2SQpprVYY"/>
+</div>
+<span class="text-[10px] font-bold text-on-surface">PEÑAROL</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Round Highlights -->
+<section class="bg-primary-container rounded-xl p-6 text-white relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="text-sm font-bold text-on-primary-container uppercase tracking-widest mb-6">Destaques da Rodada</h3>
+<div class="space-y-6">
+<!-- Top Scorer -->
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-white/10 backdrop-blur-md overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover grayscale" data-alt="close-up portrait of a determined professional male athlete in his 20s with athletic wear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD876KAiEeg3xZwEegAL5KJg6kqXcVPcbmeIRKK1vAxbdMvwa8ZdYrTqx3Rp3RZUJehjn19COrV46l3hXozP680kYArIhNYJFStKtZnJgK4JnHcI4rnRIk35qEjaJMcSqMnIk4l7AsTCpS_OgeM7NrWQt2hnp0q5qegiOZC2eVRzENpiPI22Y8Yx29ivgpHumDVO2lLcm8djCM5rkTISFnZBPoKO09RoloMBwUxiiaMjMzdxsCUSYZw-4s5GyL48OyumiXpl8B8Euc"/>
+<div class="absolute bottom-0 right-0 p-1 bg-primary rounded-tl-lg">
+<span class="material-symbols-outlined text-xs">local_fire_department</span>
+</div>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-on-primary-container">Artilheiro</p>
+<p class="text-lg font-bold">L. Martinez</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-bold text-emerald-400">8 Gols</span>
+<span class="text-[10px] text-white/60">Racing Club</span>
+</div>
+</div>
+</div>
+<!-- Best Defense -->
+<div class="bg-white/5 rounded-lg p-4 border border-white/10">
+<p class="text-[10px] uppercase font-bold text-on-primary-container mb-3">Defesa Mais Sólida</p>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+<img class="w-6 h-6 object-contain" data-alt="clean minimal sports logo on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChJZ7tqlusd1-OwH6aRp7RsxPLSMTvRI0so9K3AoZzn__1R1VCRhTb_qfOUtKBuOeV0dHsxs-BTgk6nO8DSJboYkg69asd53eIUPXy3GHUVCsCJgZkiAUQXtjvBbU5vY1DmdQpAL1peBMrKIt578yJnnMClqc1TuB9myTXbkiSOJL2T6vjC9h8yfRFAxbGXcW6PrMBv64OubnTOdIBqHrThzjaT55XFEQpsBEYm6ThT6KJiqQq-ez9xNFobc2BJHcLmda7PvEeM3c"/>
+</div>
+<div>
+<p class="text-sm font-bold">Atlético Mineiro</p>
+<p class="text-[10px] text-white/60">Apenas 2 gols sofridos (6 Jgs)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed-dim/20 blur-[60px] rounded-full translate-x-10 -translate-y-10"></div>
+</section>
+</div>
+</div>
+</main>
+</body></html>

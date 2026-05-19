@@ -11,20 +11,18 @@ from airflow.operators.python import get_current_context
 from sqlalchemy import create_engine, text
 
 from common.observability import StepMetrics, log_event
+from common.services.world_cup_config import (
+    DEFAULT_WORLD_CUP_EDITION_KEY,
+    FJELSTUL_SOURCE,
+    STATSBOMB_SOURCE,
+    WorldCupEditionConfig,
+    fetch_active_world_cup_snapshots,
+    get_world_cup_edition_config,
+    get_world_cup_edition_config_from_context,
+)
 
-
-WORLD_CUP_EDITION_KEY = "fifa_world_cup_mens__2022"
-WORLD_CUP_FJELSTUL_TOURNAMENT_ID = "WC-2022"
 WORLD_CUP_DATA_MOUNT_ROOT_ENV = "WORLD_CUP_DATA_MOUNT_ROOT"
 DEFAULT_WORLD_CUP_DATA_MOUNT_ROOT = "/opt/airflow/data"
-
-STATSBOMB_SOURCE = "statsbomb_open_data"
-FJELSTUL_SOURCE = "fjelstul_worldcup"
-
-STATSBOMB_EXPECTED_MATCHES = 64
-FJELSTUL_EXPECTED_MATCHES = 64
-FJELSTUL_EXPECTED_GROUPS = 8
-FJELSTUL_EXPECTED_GROUP_STANDINGS = 32
 
 
 def _get_required_env(name: str) -> str:
@@ -36,26 +34,6 @@ def _get_required_env(name: str) -> str:
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _snapshot_query() -> str:
-    return """
-    SELECT
-      source_name,
-      source_version,
-      source_commit_or_release,
-      edition_scope,
-      checksum_sha256,
-      local_path,
-      license_code,
-      attribution_note
-    FROM control.wc_source_snapshots
-    WHERE edition_scope = :edition_key
-      AND usage_decision = 'now'
-      AND is_active = TRUE
-      AND source_name IN (:statsbomb_source, :fjelstul_source)
-    ORDER BY source_name
-    """
 
 
 def _resolve_runtime_snapshot_path(registered_path: str) -> Path:
@@ -105,26 +83,7 @@ def _serialize_payload(payload: Any) -> str:
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str)
 
 
-def _fetch_active_snapshots(engine) -> dict[str, dict[str, Any]]:
-    sql = text(_snapshot_query())
-    with engine.begin() as conn:
-        rows = conn.execute(
-            sql,
-            {
-                "edition_key": WORLD_CUP_EDITION_KEY,
-                "statsbomb_source": STATSBOMB_SOURCE,
-                "fjelstul_source": FJELSTUL_SOURCE,
-            },
-        ).mappings().all()
-
-    snapshots = {row["source_name"]: dict(row) for row in rows}
-    missing = [source for source in (STATSBOMB_SOURCE, FJELSTUL_SOURCE) if source not in snapshots]
-    if missing:
-        raise RuntimeError(f"Snapshots ativos ausentes para o Bloco 3: {missing}")
-    return snapshots
-
-
-def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+def _build_statsbomb_rows(snapshot: dict[str, Any], config: WorldCupEditionConfig) -> dict[str, list[dict[str, Any]]]:
     runtime_root = _resolve_runtime_snapshot_path(snapshot["local_path"])
     manifest_path = _require_file(runtime_root, "CHECKSUMS.sha256")
     if _manifest_hash(manifest_path) != snapshot["checksum_sha256"]:
@@ -141,13 +100,15 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
             item
             for item in competitions
             if item.get("competition_name") == "FIFA World Cup"
-            and item.get("season_name") == "2022"
+            and item.get("season_name") == config.statsbomb_season_name
             and "male" in str(item.get("competition_gender", "")).lower()
         ),
         None,
     )
     if competition is None:
-        raise RuntimeError("Nao encontrei FIFA World Cup 2022 masculina em competitions.json do StatsBomb.")
+        raise RuntimeError(
+            f"Nao encontrei FIFA World Cup masculina {config.season_label} em competitions.json do StatsBomb."
+        )
 
     source_version = snapshot["source_version"]
     source_name = snapshot["source_name"]
@@ -156,9 +117,9 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
     matches_relative = f"data/matches/{competition['competition_id']}/{competition['season_id']}.json"
     matches_path = _require_file(runtime_root, matches_relative)
     matches_payload = _read_json(matches_path)
-    if len(matches_payload) != STATSBOMB_EXPECTED_MATCHES:
+    if len(matches_payload) != config.expected_matches:
         raise RuntimeError(
-            f"StatsBomb 2022 deveria ter {STATSBOMB_EXPECTED_MATCHES} matches. "
+            f"StatsBomb {config.season_label} deveria ter {config.expected_matches} matches. "
             f"Encontrei {len(matches_payload)}."
         )
 
@@ -177,7 +138,7 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
             {
                 "source_name": source_name,
                 "source_version": source_version,
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "snapshot_path": snapshot_path,
                 "snapshot_checksum_sha256": snapshot_checksum,
                 "source_file": matches_relative,
@@ -193,7 +154,6 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
         for dataset_name, relative_template in (
             ("statsbomb_wc_events", "data/events/{match_id}.json"),
             ("statsbomb_wc_lineups", "data/lineups/{match_id}.json"),
-            ("statsbomb_wc_three_sixty", "data/three-sixty/{match_id}.json"),
         ):
             relative = relative_template.format(match_id=match_id)
             payload_path = _require_file(runtime_root, relative)
@@ -202,7 +162,7 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
                 {
                     "source_name": source_name,
                     "source_version": source_version,
-                    "edition_key": WORLD_CUP_EDITION_KEY,
+                    "edition_key": config.edition_key,
                     "snapshot_path": snapshot_path,
                     "snapshot_checksum_sha256": snapshot_checksum,
                     "source_file": relative,
@@ -213,14 +173,50 @@ def _build_statsbomb_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, 
                 }
             )
 
+        three_sixty_relative = f"data/three-sixty/{match_id}.json"
+        three_sixty_path = runtime_root / Path(three_sixty_relative.replace("/", os.sep))
+        if config.expected_statsbomb_three_sixty_match_files > 0:
+            payload_path = _require_file(runtime_root, three_sixty_relative)
+            payload = _read_json(payload_path)
+            rows["statsbomb_wc_three_sixty"].append(
+                {
+                    "source_name": source_name,
+                    "source_version": source_version,
+                    "edition_key": config.edition_key,
+                    "snapshot_path": snapshot_path,
+                    "snapshot_checksum_sha256": snapshot_checksum,
+                    "source_file": three_sixty_relative,
+                    "match_id": match_id,
+                    "payload_item_count": len(payload),
+                    "payload": _serialize_payload(payload),
+                    "ingested_at": _utc_now(),
+                }
+            )
+        elif three_sixty_path.exists():
+            payload = _read_json(three_sixty_path)
+            rows["statsbomb_wc_three_sixty"].append(
+                {
+                    "source_name": source_name,
+                    "source_version": source_version,
+                    "edition_key": config.edition_key,
+                    "snapshot_path": snapshot_path,
+                    "snapshot_checksum_sha256": snapshot_checksum,
+                    "source_file": three_sixty_relative,
+                    "match_id": match_id,
+                    "payload_item_count": len(payload),
+                    "payload": _serialize_payload(payload),
+                    "ingested_at": _utc_now(),
+                }
+            )
+
     distinct_event_matches = len({row["match_id"] for row in rows["statsbomb_wc_events"]})
     distinct_lineup_matches = len({row["match_id"] for row in rows["statsbomb_wc_lineups"]})
     distinct_three_sixty_matches = len({row["match_id"] for row in rows["statsbomb_wc_three_sixty"]})
-    if distinct_event_matches != STATSBOMB_EXPECTED_MATCHES:
+    if distinct_event_matches != config.expected_statsbomb_event_match_files:
         raise RuntimeError(f"Coverage StatsBomb events invalida: {distinct_event_matches} matches.")
-    if distinct_lineup_matches != STATSBOMB_EXPECTED_MATCHES:
+    if distinct_lineup_matches != config.expected_statsbomb_lineup_match_files:
         raise RuntimeError(f"Coverage StatsBomb lineups invalida: {distinct_lineup_matches} matches.")
-    if distinct_three_sixty_matches != STATSBOMB_EXPECTED_MATCHES:
+    if distinct_three_sixty_matches != config.expected_statsbomb_three_sixty_match_files:
         raise RuntimeError(f"Coverage StatsBomb three-sixty invalida: {distinct_three_sixty_matches} matches.")
 
     return rows
@@ -231,7 +227,7 @@ def _read_csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+def _build_fjelstul_rows(snapshot: dict[str, Any], config: WorldCupEditionConfig) -> dict[str, list[dict[str, Any]]]:
     runtime_root = _resolve_runtime_snapshot_path(snapshot["local_path"])
     manifest_path = _require_file(runtime_root, "CHECKSUMS.sha256")
     if _manifest_hash(manifest_path) != snapshot["checksum_sha256"]:
@@ -253,11 +249,11 @@ def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, A
     dataset_specs = {
         "fjelstul_wc_matches": {
             "relative_path": "data-csv/matches.csv",
-            "required_count": FJELSTUL_EXPECTED_MATCHES,
+            "required_count": config.expected_matches,
             "row_builder": lambda item, relative_path: {
                 "source_name": source_name,
                 "source_version": source_version,
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "snapshot_path": snapshot_path,
                 "snapshot_checksum_sha256": snapshot_checksum,
                 "source_file": relative_path,
@@ -275,11 +271,11 @@ def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, A
         },
         "fjelstul_wc_groups": {
             "relative_path": "data-csv/groups.csv",
-            "required_count": FJELSTUL_EXPECTED_GROUPS,
+            "required_count": config.expected_groups,
             "row_builder": lambda item, relative_path: {
                 "source_name": source_name,
                 "source_version": source_version,
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "snapshot_path": snapshot_path,
                 "snapshot_checksum_sha256": snapshot_checksum,
                 "source_file": relative_path,
@@ -295,11 +291,11 @@ def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, A
         },
         "fjelstul_wc_group_standings": {
             "relative_path": "data-csv/group_standings.csv",
-            "required_count": FJELSTUL_EXPECTED_GROUP_STANDINGS,
+            "required_count": config.expected_group_standings,
             "row_builder": lambda item, relative_path: {
                 "source_name": source_name,
                 "source_version": source_version,
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "snapshot_path": snapshot_path,
                 "snapshot_checksum_sha256": snapshot_checksum,
                 "source_file": relative_path,
@@ -323,7 +319,7 @@ def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, A
             "row_builder": lambda item, relative_path: {
                 "source_name": source_name,
                 "source_version": source_version,
-                "edition_key": WORLD_CUP_EDITION_KEY,
+                "edition_key": config.edition_key,
                 "snapshot_path": snapshot_path,
                 "snapshot_checksum_sha256": snapshot_checksum,
                 "source_file": relative_path,
@@ -347,12 +343,12 @@ def _build_fjelstul_rows(snapshot: dict[str, Any]) -> dict[str, list[dict[str, A
         relative_path = spec["relative_path"]
         csv_path = _require_file(runtime_root, relative_path)
         dataset_rows = [
-            item for item in _read_csv_rows(csv_path) if item.get("tournament_id") == WORLD_CUP_FJELSTUL_TOURNAMENT_ID
+            item for item in _read_csv_rows(csv_path) if item.get("tournament_id") == config.fjelstul_tournament_id
         ]
         required_count = spec["required_count"]
         if required_count is not None and len(dataset_rows) != required_count:
             raise RuntimeError(
-                f"{table_name} deveria ter {required_count} rows para {WORLD_CUP_FJELSTUL_TOURNAMENT_ID}. "
+                f"{table_name} deveria ter {required_count} rows para {config.fjelstul_tournament_id}. "
                 f"Encontrei {len(dataset_rows)}."
             )
         rows[table_name] = [spec["row_builder"](item, relative_path) for item in dataset_rows]
@@ -372,39 +368,44 @@ def _build_insert_sql(table_name: str, columns: list[str]) -> Any:
     return text(f"INSERT INTO bronze.{table_name} ({columns_sql}) VALUES ({values_sql})")
 
 
-def _replace_table_rows(conn, table_name: str, rows: list[dict[str, Any]]) -> None:
+def _replace_table_rows(conn, table_name: str, rows: list[dict[str, Any]], *, edition_key: str) -> None:
     if not rows:
         raise RuntimeError(f"Nenhuma row preparada para bronze.{table_name}.")
 
     columns = list(rows[0].keys())
     conn.execute(
         text(f"DELETE FROM bronze.{table_name} WHERE edition_key = :edition_key"),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": edition_key},
     )
     conn.execute(_build_insert_sql(table_name, columns), rows)
 
 
-def ingest_world_cup_2022_bronze() -> dict[str, Any]:
+def ingest_world_cup_bronze(edition_key: str | None = None) -> dict[str, Any]:
     context = get_current_context()
     engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
+    config = (
+        get_world_cup_edition_config(edition_key)
+        if edition_key
+        else get_world_cup_edition_config_from_context(default=DEFAULT_WORLD_CUP_EDITION_KEY)
+    )
 
     with StepMetrics(
         service="airflow",
         module="world_cup_bronze_service",
-        step="load_world_cup_2022_bronze",
+        step="load_world_cup_bronze",
         context=context,
-        dataset="bronze.world_cup_2022",
+        dataset=f"bronze.world_cup_{config.season_label}",
         table="bronze.*",
     ):
-        snapshots = _fetch_active_snapshots(engine)
-        statsbomb_rows = _build_statsbomb_rows(snapshots[STATSBOMB_SOURCE])
-        fjelstul_rows = _build_fjelstul_rows(snapshots[FJELSTUL_SOURCE])
+        snapshots = fetch_active_world_cup_snapshots(engine, edition_key=config.edition_key)
+        statsbomb_rows = _build_statsbomb_rows(snapshots[STATSBOMB_SOURCE], config)
+        fjelstul_rows = _build_fjelstul_rows(snapshots[FJELSTUL_SOURCE], config)
 
         with engine.begin() as conn:
             for table_name, rows in statsbomb_rows.items():
-                _replace_table_rows(conn, table_name, rows)
+                _replace_table_rows(conn, table_name, rows, edition_key=config.edition_key)
             for table_name, rows in fjelstul_rows.items():
-                _replace_table_rows(conn, table_name, rows)
+                _replace_table_rows(conn, table_name, rows, edition_key=config.edition_key)
 
         summary = {
             "statsbomb_matches": len(statsbomb_rows["statsbomb_wc_matches"]),
@@ -423,10 +424,10 @@ def ingest_world_cup_2022_bronze() -> dict[str, Any]:
         step="summary",
         status="success",
         context=context,
-        dataset="bronze.world_cup_2022",
+        dataset=f"bronze.world_cup_{config.season_label}",
         row_count=sum(summary.values()),
         message=(
-            "Bronze World Cup 2022 carregado com sucesso | "
+            f"Bronze World Cup {config.season_label} carregado com sucesso | "
             f"statsbomb_matches={summary['statsbomb_matches']} | "
             f"statsbomb_events={summary['statsbomb_events_match_files']} | "
             f"statsbomb_lineups={summary['statsbomb_lineups_match_files']} | "
@@ -438,3 +439,7 @@ def ingest_world_cup_2022_bronze() -> dict[str, Any]:
         ),
     )
     return summary
+
+
+def ingest_world_cup_2022_bronze() -> dict[str, Any]:
+    return ingest_world_cup_bronze(DEFAULT_WORLD_CUP_EDITION_KEY)

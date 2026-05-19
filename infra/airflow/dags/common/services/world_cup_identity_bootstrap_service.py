@@ -13,40 +13,21 @@ from airflow.operators.python import get_current_context
 from sqlalchemy import create_engine, text
 
 from common.observability import StepMetrics, log_event
-
-
-WORLD_CUP_EDITION_KEY = "fifa_world_cup_mens__2022"
-STATSBOMB_SOURCE = "statsbomb_open_data"
-FJELSTUL_SOURCE = "fjelstul_worldcup"
-WORLD_CUP_TEAM_TYPE = "national_team"
-
-EXPECTED_COUNTS = {
-    "statsbomb_matches": 64,
-    "statsbomb_events_matches": 64,
-    "statsbomb_lineups_matches": 64,
-    "statsbomb_three_sixty_matches": 64,
-    "fjelstul_matches": 64,
-    "fjelstul_groups": 8,
-    "fjelstul_group_standings": 32,
-}
-
-STATSBOMB_STAGE_KEY_MAP = {
-    "Group Stage": "group_stage_1",
-    "Round of 16": "round_of_16",
-    "Quarter-finals": "quarter_final",
-    "Semi-finals": "semi_final",
-    "3rd Place Final": "third_place",
-    "Final": "final",
-}
-
-FJELSTUL_STAGE_KEY_MAP = {
-    "group stage": "group_stage_1",
-    "round of 16": "round_of_16",
-    "quarter-finals": "quarter_final",
-    "semi-finals": "semi_final",
-    "third-place match": "third_place",
-    "final": "final",
-}
+from common.services.world_cup_config import (
+    DEFAULT_WORLD_CUP_EDITION_KEY,
+    FJELSTUL_SOURCE,
+    FJELSTUL_STAGE_KEY_MAP,
+    STATSBOMB_SOURCE,
+    STATSBOMB_STAGE_KEY_MAP,
+    WORLD_CUP_TEAM_TYPE,
+    WorldCupEditionConfig,
+    fetch_active_world_cup_snapshots,
+    fjelstul_group_source_id,
+    fjelstul_stage_source_id,
+    get_world_cup_edition_config,
+    get_world_cup_edition_config_from_context,
+    statsbomb_stage_source_id,
+)
 
 GROUP_PATTERN = re.compile(r"Group\s+([A-Z])$", re.IGNORECASE)
 
@@ -80,12 +61,12 @@ def _team_internal_id(team_code: str) -> str:
     return f"team__{WORLD_CUP_TEAM_TYPE}__{team_code}"
 
 
-def _stage_internal_id(stage_key: str) -> str:
-    return f"stage__{WORLD_CUP_EDITION_KEY}__{stage_key}"
+def _stage_internal_id(stage_key: str, edition_key: str) -> str:
+    return f"stage__{edition_key}__{stage_key}"
 
 
-def _group_internal_id(stage_key: str, group_code: str) -> str:
-    return f"group__{WORLD_CUP_EDITION_KEY}__{stage_key}__{group_code}"
+def _group_internal_id(stage_key: str, group_code: str, edition_key: str) -> str:
+    return f"group__{edition_key}__{stage_key}__{group_code}"
 
 
 def _match_internal_id() -> str:
@@ -103,53 +84,44 @@ def _require_group_code(group_name: str) -> str:
     return match.group(1).upper()
 
 
-def _fetch_active_snapshots(engine) -> dict[str, dict[str, Any]]:
-    sql = text(
-        """
-        SELECT source_name, source_version, checksum_sha256, local_path
-        FROM control.wc_source_snapshots
-        WHERE edition_scope = :edition_key
-          AND usage_decision = 'now'
-          AND is_active = TRUE
-          AND source_name IN (:statsbomb_source, :fjelstul_source)
-        ORDER BY source_name
-        """
-    )
-    with engine.begin() as conn:
-        rows = conn.execute(
-            sql,
-            {
-                "edition_key": WORLD_CUP_EDITION_KEY,
-                "statsbomb_source": STATSBOMB_SOURCE,
-                "fjelstul_source": FJELSTUL_SOURCE,
-            },
-        ).mappings().all()
-
-    snapshots = {row["source_name"]: dict(row) for row in rows}
-    missing = [source for source in (STATSBOMB_SOURCE, FJELSTUL_SOURCE) if source not in snapshots]
-    if missing:
-        raise RuntimeError(f"Snapshots ativos ausentes para o Bloco 4: {missing}")
-    return snapshots
-
-
-def _validate_bronze_counts(conn) -> None:
+def _validate_bronze_counts(conn, config: WorldCupEditionConfig) -> None:
     checks = {
-        "statsbomb_matches": "SELECT count(*) FROM bronze.statsbomb_wc_matches WHERE edition_key = :edition_key",
-        "statsbomb_events_matches": "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_events WHERE edition_key = :edition_key",
-        "statsbomb_lineups_matches": "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_lineups WHERE edition_key = :edition_key",
-        "statsbomb_three_sixty_matches": "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_three_sixty WHERE edition_key = :edition_key",
-        "fjelstul_matches": "SELECT count(*) FROM bronze.fjelstul_wc_matches WHERE edition_key = :edition_key",
-        "fjelstul_groups": "SELECT count(*) FROM bronze.fjelstul_wc_groups WHERE edition_key = :edition_key",
-        "fjelstul_group_standings": "SELECT count(*) FROM bronze.fjelstul_wc_group_standings WHERE edition_key = :edition_key",
+        "statsbomb_matches": (
+            "SELECT count(*) FROM bronze.statsbomb_wc_matches WHERE edition_key = :edition_key",
+            config.expected_matches,
+        ),
+        "statsbomb_events_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_events WHERE edition_key = :edition_key",
+            config.expected_statsbomb_event_match_files,
+        ),
+        "statsbomb_lineups_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_lineups WHERE edition_key = :edition_key",
+            config.expected_statsbomb_lineup_match_files,
+        ),
+        "statsbomb_three_sixty_matches": (
+            "SELECT count(DISTINCT match_id) FROM bronze.statsbomb_wc_three_sixty WHERE edition_key = :edition_key",
+            config.expected_statsbomb_three_sixty_match_files,
+        ),
+        "fjelstul_matches": (
+            "SELECT count(*) FROM bronze.fjelstul_wc_matches WHERE edition_key = :edition_key",
+            config.expected_matches,
+        ),
+        "fjelstul_groups": (
+            "SELECT count(*) FROM bronze.fjelstul_wc_groups WHERE edition_key = :edition_key",
+            config.expected_groups,
+        ),
+        "fjelstul_group_standings": (
+            "SELECT count(*) FROM bronze.fjelstul_wc_group_standings WHERE edition_key = :edition_key",
+            config.expected_group_standings,
+        ),
     }
-    for name, sql in checks.items():
-        actual = conn.execute(text(sql), {"edition_key": WORLD_CUP_EDITION_KEY}).scalar_one()
-        expected = EXPECTED_COUNTS[name]
+    for name, (sql, expected) in checks.items():
+        actual = conn.execute(text(sql), {"edition_key": config.edition_key}).scalar_one()
         if actual != expected:
             raise RuntimeError(f"Precondicao do bronze invalida para {name}: esperado={expected} atual={actual}")
 
 
-def _validate_bronze_snapshot_versions(conn, snapshots: dict[str, dict[str, Any]]) -> None:
+def _validate_bronze_snapshot_versions(conn, snapshots: dict[str, dict[str, Any]], config: WorldCupEditionConfig) -> None:
     version_checks = [
         ("bronze.statsbomb_wc_matches", STATSBOMB_SOURCE),
         ("bronze.statsbomb_wc_events", STATSBOMB_SOURCE),
@@ -163,7 +135,7 @@ def _validate_bronze_snapshot_versions(conn, snapshots: dict[str, dict[str, Any]
     for table_name, source_name in version_checks:
         rows = conn.execute(
             text(f"SELECT DISTINCT source_version FROM {table_name} WHERE edition_key = :edition_key ORDER BY source_version"),
-            {"edition_key": WORLD_CUP_EDITION_KEY},
+            {"edition_key": config.edition_key},
         ).scalars().all()
         expected = [snapshots[source_name]["source_version"]]
         if rows != expected:
@@ -172,7 +144,7 @@ def _validate_bronze_snapshot_versions(conn, snapshots: dict[str, dict[str, Any]
             )
 
 
-def _fetch_existing_map(conn) -> dict[tuple[str, str, str], str]:
+def _fetch_existing_map(conn, config: WorldCupEditionConfig) -> dict[tuple[str, str, str], str]:
     rows = conn.execute(
         text(
             """
@@ -180,14 +152,22 @@ def _fetch_existing_map(conn) -> dict[tuple[str, str, str], str]:
             FROM raw.provider_entity_map
             WHERE provider IN (:statsbomb_source, :fjelstul_source)
               AND entity_type IN ('team', 'match', 'stage', 'group', 'player')
+              AND (
+                entity_type = 'team'
+                OR edition_key = :edition_key
+              )
             """
         ),
-        {"statsbomb_source": STATSBOMB_SOURCE, "fjelstul_source": FJELSTUL_SOURCE},
+        {
+            "statsbomb_source": STATSBOMB_SOURCE,
+            "fjelstul_source": FJELSTUL_SOURCE,
+            "edition_key": config.edition_key,
+        },
     ).mappings().all()
     return {(row["provider"], row["entity_type"], row["source_id"]): row["canonical_id"] for row in rows}
 
 
-def _fetch_team_rows(conn) -> list[dict[str, Any]]:
+def _fetch_team_rows(conn, config: WorldCupEditionConfig) -> list[dict[str, Any]]:
     rows = conn.execute(
         text(
             """
@@ -211,14 +191,27 @@ def _fetch_team_rows(conn) -> list[dict[str, Any]]:
             ORDER BY fj.team_code
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
-    if len(rows) != 32:
-        raise RuntimeError(f"Team bootstrap exige 32 joins StatsBomb<->Fjelstul. Encontrei {len(rows)}.")
+    expected = conn.execute(
+        text(
+            """
+            SELECT count(DISTINCT team_id)
+            FROM bronze.fjelstul_wc_group_standings
+            WHERE edition_key = :edition_key
+            """
+        ),
+        {"edition_key": config.edition_key},
+    ).scalar_one()
+    if len(rows) != expected:
+        raise RuntimeError(
+            f"Team bootstrap exige {expected} joins StatsBomb<->Fjelstul para {config.edition_key}. "
+            f"Encontrei {len(rows)}."
+        )
     return [dict(row) for row in rows]
 
 
-def _fetch_stage_rows(conn) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _fetch_stage_rows(conn, config: WorldCupEditionConfig) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     statsbomb_rows = conn.execute(
         text(
             """
@@ -228,7 +221,7 @@ def _fetch_stage_rows(conn) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]
             ORDER BY source_id
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
     fjelstul_rows = conn.execute(
         text(
@@ -239,16 +232,18 @@ def _fetch_stage_rows(conn) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]
             ORDER BY stage_name
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
-    if len(statsbomb_rows) != 6 or len(fjelstul_rows) != 6:
+    if len(statsbomb_rows) != config.expected_stages or len(fjelstul_rows) != config.expected_stages:
         raise RuntimeError(
-            f"Stage bootstrap invalido: statsbomb={len(statsbomb_rows)} fjelstul={len(fjelstul_rows)}"
+            "Stage bootstrap invalido: "
+            f"statsbomb={len(statsbomb_rows)} fjelstul={len(fjelstul_rows)} "
+            f"esperado={config.expected_stages}"
         )
     return [dict(row) for row in statsbomb_rows], [dict(row) for row in fjelstul_rows]
 
 
-def _fetch_group_rows(conn) -> list[dict[str, Any]]:
+def _fetch_group_rows(conn, config: WorldCupEditionConfig) -> list[dict[str, Any]]:
     rows = conn.execute(
         text(
             """
@@ -258,14 +253,16 @@ def _fetch_group_rows(conn) -> list[dict[str, Any]]:
             ORDER BY group_name
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
-    if len(rows) != 8:
-        raise RuntimeError(f"Group bootstrap exige 8 grupos. Encontrei {len(rows)}.")
+    if len(rows) != config.expected_groups:
+        raise RuntimeError(
+            f"Group bootstrap exige {config.expected_groups} grupos para {config.edition_key}. Encontrei {len(rows)}."
+        )
     return [dict(row) for row in rows]
 
 
-def _fetch_match_rows(conn) -> list[dict[str, Any]]:
+def _fetch_match_rows(conn, config: WorldCupEditionConfig) -> list[dict[str, Any]]:
     rows = conn.execute(
         text(
             """
@@ -324,14 +321,17 @@ def _fetch_match_rows(conn) -> list[dict[str, Any]]:
             ORDER BY sb.match_date, sb.statsbomb_match_id
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
-    if len(rows) != 64:
-        raise RuntimeError(f"Match bootstrap exige 64 joins StatsBomb<->Fjelstul. Encontrei {len(rows)}.")
+    if len(rows) != config.expected_matches:
+        raise RuntimeError(
+            f"Match bootstrap exige {config.expected_matches} joins StatsBomb<->Fjelstul para {config.edition_key}. "
+            f"Encontrei {len(rows)}."
+        )
     return [dict(row) for row in rows]
 
 
-def _fetch_player_rows(conn) -> list[dict[str, Any]]:
+def _fetch_player_rows(conn, config: WorldCupEditionConfig) -> list[dict[str, Any]]:
     rows = conn.execute(
         text(
             """
@@ -349,14 +349,14 @@ def _fetch_player_rows(conn) -> list[dict[str, Any]]:
             ORDER BY team_name, player_name, player_id
             """
         ),
-        {"edition_key": WORLD_CUP_EDITION_KEY},
+        {"edition_key": config.edition_key},
     ).mappings().all()
     if not rows:
         raise RuntimeError("Nenhum player encontrado em bronze.statsbomb_wc_lineups.")
     return [dict(row) for row in rows]
 
 
-def _delete_obsolete_stage_rows(conn) -> None:
+def _delete_obsolete_stage_rows(conn, config: WorldCupEditionConfig) -> None:
     conn.execute(
         text(
             """
@@ -367,7 +367,7 @@ def _delete_obsolete_stage_rows(conn) -> None:
               AND source_id ~ '^[0-9]+$'
             """
         ),
-        {"provider": STATSBOMB_SOURCE, "edition_key": WORLD_CUP_EDITION_KEY},
+        {"provider": STATSBOMB_SOURCE, "edition_key": config.edition_key},
     )
 
 
@@ -432,30 +432,35 @@ def _upsert_review_queue(conn, rows: list[dict[str, Any]]) -> None:
     )
 
 
-def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
+def bootstrap_world_cup_identity_map(edition_key: str | None = None) -> dict[str, Any]:
     context = get_current_context()
     engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
     now = _utc_now()
+    config = (
+        get_world_cup_edition_config(edition_key)
+        if edition_key
+        else get_world_cup_edition_config_from_context(default=DEFAULT_WORLD_CUP_EDITION_KEY)
+    )
 
     with StepMetrics(
         service="airflow",
         module="world_cup_identity_bootstrap_service",
-        step="bootstrap_world_cup_2022_identity_map",
+        step="bootstrap_world_cup_identity_map",
         context=context,
         dataset="raw.provider_entity_map",
         table="raw.provider_entity_map",
     ):
-        snapshots = _fetch_active_snapshots(engine)
+        snapshots = fetch_active_world_cup_snapshots(engine, edition_key=config.edition_key)
         with engine.begin() as conn:
-            _validate_bronze_counts(conn)
-            _validate_bronze_snapshot_versions(conn, snapshots)
-            _delete_obsolete_stage_rows(conn)
-            existing_map = _fetch_existing_map(conn)
-            team_rows = _fetch_team_rows(conn)
-            statsbomb_stage_rows, fjelstul_stage_rows = _fetch_stage_rows(conn)
-            group_rows = _fetch_group_rows(conn)
-            match_rows = _fetch_match_rows(conn)
-            player_rows = _fetch_player_rows(conn)
+            _validate_bronze_counts(conn, config)
+            _validate_bronze_snapshot_versions(conn, snapshots, config)
+            _delete_obsolete_stage_rows(conn, config)
+            existing_map = _fetch_existing_map(conn, config)
+            team_rows = _fetch_team_rows(conn, config)
+            statsbomb_stage_rows, fjelstul_stage_rows = _fetch_stage_rows(conn, config)
+            group_rows = _fetch_group_rows(conn, config)
+            match_rows = _fetch_match_rows(conn, config)
+            player_rows = _fetch_player_rows(conn, config)
 
             provider_rows: list[dict[str, Any]] = []
             review_rows: list[dict[str, Any]] = []
@@ -508,9 +513,9 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                     {
                         "provider": STATSBOMB_SOURCE,
                         "entity_type": "stage",
-                        "source_id": f"{WORLD_CUP_EDITION_KEY}::stage::{row['source_id']}",
-                        "canonical_id": _stage_internal_id(stage_key),
-                        "edition_key": WORLD_CUP_EDITION_KEY,
+                        "source_id": statsbomb_stage_source_id(config, row["source_id"]),
+                        "canonical_id": _stage_internal_id(stage_key, config.edition_key),
+                        "edition_key": config.edition_key,
                         "source_version": snapshots[STATSBOMB_SOURCE]["source_version"],
                         "mapping_confidence": "high",
                         "resolution_method": "canonical_stage_mapping",
@@ -530,9 +535,9 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                     {
                         "provider": FJELSTUL_SOURCE,
                         "entity_type": "stage",
-                        "source_id": f"WC-2022::stage::{row['stage_name']}",
-                        "canonical_id": _stage_internal_id(stage_key),
-                        "edition_key": WORLD_CUP_EDITION_KEY,
+                        "source_id": fjelstul_stage_source_id(config, row["stage_name"]),
+                        "canonical_id": _stage_internal_id(stage_key, config.edition_key),
+                        "edition_key": config.edition_key,
                         "source_version": snapshots[FJELSTUL_SOURCE]["source_version"],
                         "mapping_confidence": "high",
                         "resolution_method": "canonical_stage_mapping",
@@ -552,9 +557,13 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                     {
                         "provider": FJELSTUL_SOURCE,
                         "entity_type": "group",
-                        "source_id": f"WC-2022::group::{row['stage_name']}::{row['group_name']}",
-                        "canonical_id": _group_internal_id(stage_key, _require_group_code(row["group_name"])),
-                        "edition_key": WORLD_CUP_EDITION_KEY,
+                        "source_id": fjelstul_group_source_id(config, row["stage_name"], row["group_name"]),
+                        "canonical_id": _group_internal_id(
+                            stage_key,
+                            _require_group_code(row["group_name"]),
+                            config.edition_key,
+                        ),
+                        "edition_key": config.edition_key,
                         "source_version": snapshots[FJELSTUL_SOURCE]["source_version"],
                         "mapping_confidence": "high",
                         "resolution_method": "canonical_group_mapping",
@@ -583,7 +592,7 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                             "entity_type": "match",
                             "source_id": row["statsbomb_match_id"],
                             "canonical_id": canonical_id,
-                            "edition_key": WORLD_CUP_EDITION_KEY,
+                            "edition_key": config.edition_key,
                             "source_version": snapshots[STATSBOMB_SOURCE]["source_version"],
                             "mapping_confidence": "high",
                             "resolution_method": "date_teams_match",
@@ -598,7 +607,7 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                             "entity_type": "match",
                             "source_id": row["fjelstul_match_id"],
                             "canonical_id": canonical_id,
-                            "edition_key": WORLD_CUP_EDITION_KEY,
+                            "edition_key": config.edition_key,
                             "source_version": snapshots[FJELSTUL_SOURCE]["source_version"],
                             "mapping_confidence": "high",
                             "resolution_method": "date_teams_match",
@@ -631,7 +640,7 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                             "entity_type": "player",
                             "source_id": row["player_id"],
                             "canonical_id": canonical_id,
-                            "edition_key": WORLD_CUP_EDITION_KEY,
+                            "edition_key": config.edition_key,
                             "source_version": snapshots[STATSBOMB_SOURCE]["source_version"],
                             "mapping_confidence": confidence,
                             "resolution_method": "source_id_exact",
@@ -646,7 +655,7 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
                     review_rows.append(
                         {
                             "entity_type": "player",
-                            "edition_key": WORLD_CUP_EDITION_KEY,
+                            "edition_key": config.edition_key,
                             "source_name": STATSBOMB_SOURCE,
                             "source_external_id": row["player_id"] or f"missing::{row['team_name']}::{row['player_name']}",
                             "candidate_internal_id": None,
@@ -703,7 +712,8 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
             + summary["player_review_rows_upserted"]
         ),
         message=(
-            "Bootstrap World Cup 2022 concluido | "
+            "Bootstrap World Cup concluido | "
+            f"edition={config.edition_key} | "
             f"team_rows={summary['team_rows_upserted']} | "
             f"match_rows={summary['match_rows_upserted']} | "
             f"stage_rows={summary['stage_rows_upserted']} | "
@@ -716,3 +726,7 @@ def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
         ),
     )
     return summary
+
+
+def bootstrap_world_cup_2022_identity_map() -> dict[str, Any]:
+    return bootstrap_world_cup_identity_map(DEFAULT_WORLD_CUP_EDITION_KEY)
