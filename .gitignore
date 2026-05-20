@@ -11,6 +11,9 @@ secrets/
 credentials/
 config/local.yml
 config/*.local.yml
+.docs
+docs/
+tools/
 
 # =========================
 # PYTHON
