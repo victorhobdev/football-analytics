@@ -1,5 +1,0 @@
- fixture_id | league_id | season | date_utc | status_short | home_team_id | away_team_id 
-------------+-----------+--------+----------+--------------+--------------+--------------
-(0 rows)
-
-

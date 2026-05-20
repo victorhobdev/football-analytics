@@ -1,9 +1,0 @@
-mode=full
-frontend_dir=C:\Users\Vitinho\Desktop\Projetos\football-analytics\frontend
-result=PASS
-total_seconds=228.55
-
-steps:
-- PASS    pnpm validate:release (89.77s) :: C:\Users\Vitinho\AppData\Roaming\npm\pnpm.CMD validate:release
-- PASS    pnpm build (24.79s) :: C:\Users\Vitinho\AppData\Roaming\npm\pnpm.CMD build
-- PASS    pnpm test:regression (113.99s) :: C:\Users\Vitinho\AppData\Roaming\npm\pnpm.CMD test:regression

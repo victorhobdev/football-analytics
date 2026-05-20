@@ -1,1 +1,10 @@
+boto3
+requests
+pandas
+pyarrow
+psycopg2-binary
+psycopg[binary]==3.2.9
+sqlalchemy
+dbt-core==1.8.8
+dbt-postgres==1.8.2
 great_expectations==0.18.21

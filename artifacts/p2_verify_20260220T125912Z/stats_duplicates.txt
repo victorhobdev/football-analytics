@@ -1,5 +1,0 @@
- fixture_id | team_id | duplicate_count | first_updated_at | last_updated_at 
-------------+---------+-----------------+------------------+-----------------
-(0 rows)
-
-

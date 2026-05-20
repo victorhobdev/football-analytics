@@ -1,6 +1,0 @@
- season | fixtures_total | fixtures_with_any_stats | fixtures_with_two_teams_stats | pct_with_any_stats | pct_with_two_teams_stats 
---------+----------------+-------------------------+-------------------------------+--------------------+--------------------------
-   2024 |            380 |                       0 |                             0 |               0.00 |                     0.00
-(1 row)
-
-

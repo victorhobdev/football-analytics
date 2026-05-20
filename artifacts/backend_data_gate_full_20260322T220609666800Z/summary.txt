@@ -1,8 +1,0 @@
-mode=full
-result=FAIL
-total_seconds=4.71
-
-steps:
-- PASS    python -m ruff check . --select E9,F63,F7,F82 (0.24s) :: C:\Python313\python.exe -m ruff check . --select E9,F63,F7,F82
-- PASS    python -m pytest -q api/tests tests -m "not integration" (4.16s) :: C:\Python313\python.exe -m pytest -q api/tests tests -m not integration
-- FAIL    docker compose ps --status running (0.30s) :: C:\Program Files\Docker\Docker\resources\bin\docker.EXE compose ps --status running

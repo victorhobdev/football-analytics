@@ -27,7 +27,7 @@ Restricao central:
 
 Base semantica util ja existe no repositorio:
 
-- `raw.competition_seasons`, `raw.competition_stages` e `raw.competition_rounds` ja existem e estao inventariadas em `docs/INVENTARIO_DADOS_DO_PROJETO.md`.
+- `raw.competition_seasons`, `raw.competition_stages` e `raw.competition_rounds` ja existem e fazem parte do escopo consolidado em `docs/GUIA_MESTRE_APLICACAO.md`.
 - `competition_key`, `season_label` e `provider_season_id` ja entram no pipeline e ja sao validados em `infra/airflow/dags/data_quality_checks.py`.
 - o frontend e parte do BFF ja navegam por contexto canonico `competitionId + competitionKey + seasonLabel` em:
   - `frontend/src/config/competitions.registry.ts`

@@ -1,7 +1,0 @@
-mode=gate
-result=PASS
-total_seconds=4.50
-
-steps:
-- PASS    python -m ruff check . --select E9,F63,F7,F82 (0.21s) :: C:\Python313\python.exe -m ruff check . --select E9,F63,F7,F82
-- PASS    python -m pytest -q api/tests tests -m "not integration" (4.28s) :: C:\Python313\python.exe -m pytest -q api/tests tests -m not integration

@@ -10,12 +10,11 @@ Fonte de verdade usada para este mapeamento:
 - modelos finais em `dbt/models/marts/core/*.sql` e `dbt/models/marts/analytics/*.sql`
 - qualidade final em `dbt/target/run_results.json` (`dbt test --select marts.core marts.analytics`)
 - auditoria final `raw -> mart` em:
-  - `docs/MART_FINAL_COVERAGE_AUDIT.md`
   - `artifacts/mart_final_audit_20260320/scope_status_summary.csv`
   - `artifacts/mart_final_audit_20260320/mart_raw_scope_matrix.csv`
 - quality gates finais em:
-  - `docs/MART_FINAL_COVERAGE_AUDIT.md`
-  - `docs/WAVES_4_TO_7_FINAL_CLOSURE.md`
+  - `dbt/target/run_results.json`
+  - `docs/GUIA_MESTRE_APLICACAO.md`
 
 Evidencia objetiva consolidada:
 
@@ -442,8 +441,8 @@ Onde o frontend deve tratar coverage gap explicitamente:
 
 Conflitos identificados e resolucao:
 
-1. `docs/FRONTEND_MANUAL_POSSIBILIDADES.md` ainda descreve `raw` como camada factual mais robusta e `mart` em consolidacao.  
-   Resolucao: para consumo frontend/BFF neste estado final validado, `mart` passa a ser camada principal; `raw` vira apoio pontual e nao camada primaria de contrato.
+1. O material historico antigo do frontend tratava `raw` como camada factual mais robusta e `mart` em consolidacao.  
+   Resolucao: para consumo frontend/BFF neste estado validado, `mart` passa a ser camada principal; `raw` vira apoio pontual e nao camada primaria de contrato.
 
 2. `docs/BFF_API_CONTRACT.md` e registry frontend incluem `player-pass-accuracy` como ranking esperado.  
    Resolucao: no estado atual, metrica nao esta materializada para ranking confiavel; classificar como `NAO_RECOMENDADO_DIRETO` ate adaptacao adicional.

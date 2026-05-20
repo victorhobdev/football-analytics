@@ -386,10 +386,11 @@ Versionamento de dashboards:
 - Artefatos versionados: `bi/metabase/exports/`
 
 ## Referencias
+- Guia mestre da aplicacao: `docs/GUIA_MESTRE_APLICACAO.md`
 - Contratos de dados: `docs/contracts/data_contracts.md`
-- Inventario de dados: `docs/INVENTARIO_DADOS_DO_PROJETO.md`
 - Contratos frontend/BFF: `docs/MART_FRONTEND_BFF_CONTRACTS.md`
-- Arquitetura de frontend: `docs/FRONTEND_ARCHITECTURE.md`
+- Contrato publico do BFF: `docs/BFF_API_CONTRACT.md`
+- Cobertura Copa do Mundo: `docs/WORLD_CUP_DATA_READY_BY_EDITION.md`
 - DDL legado (somente referencia): `warehouse/ddl/`
 
 

@@ -2,10 +2,8 @@
 
 Reference date: 2026-03-21  
 Scope: official BFF contract for frontend integration, aligned with:
-- `docs/FRONTEND_ARCHITECTURE.md`
-- `docs/FRONTEND_DELIVERY_PLAN.md`
+- `docs/GUIA_MESTRE_APLICACAO.md`
 - `docs/MART_FRONTEND_BFF_CONTRACTS.md`
-- `docs/FRONTEND_MANUAL_POSSIBILIDADES.md`
 - `frontend/src/config/metrics.registry.ts`
 - `frontend/src/config/ranking.registry.ts`
 

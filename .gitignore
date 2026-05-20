@@ -45,26 +45,36 @@ infra/airflow/*.log
 # =========================
 # DBT
 # =========================
-dbt/target/
+dbt/target*/
 dbt/logs/
 dbt_packages/
 profiles.yml
+dbt/.user.yml
 
 # =========================
 # GREAT EXPECTATIONS
 # =========================
 quality/great_expectations/uncommitted/
 quality/great_expectations/.ge_store_backend_id
+quality/gx/uncommitted/
+.ge_store_backend_id
 
 # =========================
 # NODE / FRONTEND
 # =========================
 node_modules/
 frontend/node_modules/
+frontend/.next/
 frontend/dist/
 frontend/build/
 frontend/.vite/
 frontend/.env
+frontend/test-results/
+frontend/frontend/test-results/
+frontend/artifacts/
+frontend/frontend/artifacts/
+frontend/temp_content.txt
+frontend/tmp_*.py
 
 # =========================
 # DOCKER
@@ -79,6 +89,7 @@ docker-compose.override.yml
 *.sqlite
 *.db
 *.sqlite3
+artifacts/
 data/*
 !data/visual_assets/
 data/visual_assets/*
@@ -95,6 +106,7 @@ __codex_write_probe.tmp
 .idea/
 *.swp
 *.swo
+*.lnk
 
 # =========================
 # OS
@@ -105,8 +117,10 @@ Thumbs.db
 # =========================
 # LOCAL RUNTIME / CODEX
 # =========================
+.ci-site-packages/
 .codex-local/
 .codex-temp/
+.venv-ci-unit/
 artifacts/local-run/
 frontend/artifacts/block1-isolation/
 frontend/artifacts/runtime-validation/

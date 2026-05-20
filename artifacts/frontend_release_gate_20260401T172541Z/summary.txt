@@ -1,8 +1,0 @@
-mode=gate
-frontend_dir=C:\Users\Vitinho\Desktop\Projetos\football-analytics\frontend
-result=FAIL
-total_seconds=12.51
-
-steps:
-- FAIL    pnpm validate:release (12.51s) :: C:\Users\Vitinho\AppData\Roaming\npm\pnpm.CMD validate:release
-- SKIPPED pnpm build (0.00s) :: C:\Users\Vitinho\AppData\Roaming\npm\pnpm.CMD build
