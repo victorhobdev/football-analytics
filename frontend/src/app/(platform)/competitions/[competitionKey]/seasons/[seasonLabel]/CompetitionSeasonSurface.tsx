@@ -5,9 +5,13 @@ import { useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useQueries } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-import { getCompetitionByKey, getCompetitionById, getCompetitionVisualAssetId } from "@/config/competitions.registry";
+import {
+  getCompetitionById,
+  getCompetitionByKey,
+  getCompetitionVisualAssetId,
+} from "@/config/competitions.registry";
 import { formatMetricValue } from "@/config/metrics.registry";
 import { getRankingDefinition } from "@/config/ranking.registry";
 import type { RankingDefinition, RankingSortDirection } from "@/config/ranking.types";
@@ -35,6 +39,8 @@ import { fetchMatchesList } from "@/features/matches/services/matches.service";
 import type { MatchesListData } from "@/features/matches/types";
 import { resolveMatchDisplayContext } from "@/features/matches/utils/match-context";
 import { useRankingTable } from "@/features/rankings/hooks";
+import { fetchRanking } from "@/features/rankings/services";
+import type { RankingTableRow } from "@/features/rankings/types";
 import { useStandingsTable } from "@/features/standings/hooks";
 import { standingsQueryKeys } from "@/features/standings/queryKeys";
 import { fetchGroupStandings, fetchStandings } from "@/features/standings/services/standings.service";
@@ -46,20 +52,18 @@ import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
 import {
   ProfileAlert,
   ProfileCoveragePill,
-  ProfileKpi,
-  ProfileMetricTile,
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { useGlobalFilters, useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
+import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
 import {
   buildCanonicalPlayerPath,
   buildCanonicalTeamPath,
   buildMatchesPath,
-  buildPlayersPath,
   buildRankingPath,
   buildRetainedFilterQueryString,
   buildSeasonHubPath,
@@ -72,6 +76,7 @@ type CompetitionSeasonSurfaceProps = {
 };
 
 type SurfaceNavLabels = {
+  highlights: string;
   matches: string;
   overview: string;
   structure: string;
@@ -205,201 +210,6 @@ function useStandingsColumns(context: CompetitionSeasonContext) {
       { accessorKey: "points", header: "Pts" },
     ],
     [context],
-  );
-}
-
-function TeamBadge({
-  size = 28,
-  teamId,
-  teamName,
-}: {
-  size?: number;
-  teamId?: string | null;
-  teamName: string;
-}) {
-  const src = teamId ? `/api/visual-assets/clubs/${encodeURIComponent(teamId)}` : null;
-  const initials = teamName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((t) => t[0]?.toUpperCase() ?? "")
-    .join("");
-
-  return (
-    <span
-      className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(191,201,195,0.4)] bg-[#f0f3ff]"
-      style={{ width: size, height: size }}
-    >
-      <span className="text-[0.55rem] font-bold text-[#003526]">{initials}</span>
-      {src ? (
-        <img
-          alt={teamName}
-          className="absolute inset-0 h-full w-full object-contain bg-[#f0f3ff]"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-          src={src}
-        />
-      ) : null}
-    </span>
-  );
-}
-
-function PlayerPhoto({
-  playerId,
-  playerName,
-  size = 72,
-}: {
-  playerId?: string | null;
-  playerName: string;
-  size?: number;
-}) {
-  const src = playerId ? `/api/visual-assets/players/${encodeURIComponent(playerId)}` : null;
-  const initials = playerName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((t) => t[0]?.toUpperCase() ?? "")
-    .join("");
-
-  return (
-    <span
-      className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-400/30 bg-[#003526]"
-      style={{ width: size, height: size }}
-    >
-      <span className="text-sm font-bold text-white/70">{initials}</span>
-      {src ? (
-        <img
-          alt={playerName}
-          className="absolute inset-0 h-full w-full object-cover bg-[#003526]"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-          src={src}
-        />
-      ) : null}
-    </span>
-  );
-}
-
-function CupHeroBanner({
-  context,
-  tag,
-}: {
-  context: CompetitionSeasonContext;
-  tag: string;
-}) {
-  const compDef = getCompetitionById(context.competitionId);
-  const visualAssetId = getCompetitionVisualAssetId(compDef);
-  const logoSrc = visualAssetId
-    ? `/api/visual-assets/competitions/${encodeURIComponent(visualAssetId)}`
-    : null;
-  const initials = context.competitionName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((t) => t[0]?.toUpperCase() ?? "")
-    .join("");
-
-  return (
-    <div className="relative h-56 overflow-hidden rounded-xl bg-[#022e21] md:h-64">
-      <div className="absolute inset-0 bg-gradient-to-r from-[#011a13] via-[#022e21]/80 to-transparent" />
-      <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-      <div className="absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-emerald-600/10 blur-3xl" />
-
-      <div className="relative z-10 flex h-full items-center gap-8 px-8 md:px-10">
-        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[rgba(191,201,195,0.55)] bg-white shadow-2xl md:h-28 md:w-28">
-          <span className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-[#003526]">
-            {initials || "FA"}
-          </span>
-          {logoSrc ? (
-            <img
-              alt={`Logo ${context.competitionName}`}
-              className="absolute inset-0 h-full w-full object-contain bg-white p-3"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-              src={logoSrc}
-            />
-          ) : null}
-        </div>
-        <div>
-          <ProfileTag className="bg-white/10 text-white border-0">{tag}</ProfileTag>
-          <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-black tracking-[-0.03em] text-white drop-shadow-sm md:text-5xl">
-            {context.competitionName}
-          </h1>
-          <p className="mt-2 text-base font-semibold text-white/80 drop-shadow-sm">
-            {context.seasonLabel}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LeaguePageHeader({
-  context,
-  tag,
-}: {
-  context: CompetitionSeasonContext;
-  tag: string;
-}) {
-  const compDef = getCompetitionById(context.competitionId);
-  const visualAssetId = getCompetitionVisualAssetId(compDef);
-  const logoSrc = visualAssetId
-    ? `/api/visual-assets/competitions/${encodeURIComponent(visualAssetId)}`
-    : null;
-  const initials = context.competitionName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((t) => t[0]?.toUpperCase() ?? "")
-    .join("");
-
-  return (
-    <div className="flex items-end gap-6 px-4 md:px-8 pt-8 pb-4">
-      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(191,201,195,0.55)] bg-white shadow-sm md:h-20 md:w-20">
-        <span className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
-          {initials || "FA"}
-        </span>
-        {logoSrc ? (
-          <img
-            alt={`Logo ${context.competitionName}`}
-            className="absolute inset-0 h-full w-full object-contain bg-white p-2"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-            src={logoSrc}
-          />
-        ) : null}
-      </div>
-      <div>
-        <div className="mb-2">
-          <ProfileTag className="bg-[#f0f3ff] text-[#455468] border border-[rgba(208,220,236,0.88)]">{tag}</ProfileTag>
-        </div>
-        <h1 className="font-[family:var(--font-profile-headline)] text-3xl font-black tracking-[-0.03em] text-[#111c2d]">
-          {context.competitionName} {context.seasonLabel}
-        </h1>
-      </div>
-    </div>
-  );
-}
-
-function RoundPickerDropdown({ rounds, selectedRoundId, onRoundChange }: { rounds: { roundId: string; roundName?: string | null }[]; selectedRoundId: string | null; onRoundChange: (id: string | null) => void; }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const currentRound = rounds.find(r => r.roundId === selectedRoundId);
-
-  return (
-    <div className="relative z-40">
-       <button onClick={() => setIsOpen(!isOpen)} className="inline-flex items-center justify-between gap-3 h-[34px] rounded-full border border-[rgba(191,201,195,0.5)] bg-white pl-3 pr-2 text-xs font-bold uppercase tracking-[0.18em] text-[#003526] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]">
-           <div className="flex items-center gap-1.5">
-               <span className="material-symbols-outlined text-[16px] text-[#003526]">calendar_month</span>
-               <span>{currentRound ? currentRound.roundName : "Rodada atual"}</span>
-           </div>
-           <span className="material-symbols-outlined text-[16px] text-[#404944]">unfold_more</span>
-       </button>
-       {isOpen && (
-           <div className="absolute top-12 left-0 w-full max-h-64 overflow-y-auto bg-white border border-[#dcdcdc] rounded-xl shadow-[0_12px_24px_-12px_rgba(0,0,0,0.15)] py-2">
-               {rounds.map(round => (
-                   <button key={round.roundId} onClick={() => { onRoundChange(round.roundId); setIsOpen(false); }} className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-[#f0f3ff] ${selectedRoundId === round.roundId ? "bg-[#f0f3ff] font-bold text-[#003526]" : "font-medium text-[#455468]"}`}>
-                       {round.roundName}
-                   </button>
-               ))}
-           </div>
-       )}
-    </div>
   );
 }
 
@@ -555,6 +365,219 @@ function EditionSummaryGrid({ children }: { children: ReactNode }) {
   return <div className="grid gap-3 md:grid-cols-3">{children}</div>;
 }
 
+function SeasonHeroBlock({
+  context,
+  description,
+  eyebrow,
+  highlightDescription,
+  highlightLabel,
+  highlightValue,
+  summary,
+  tags = [],
+  title,
+}: {
+  context: CompetitionSeasonContext;
+  description?: string;
+  eyebrow?: string;
+  highlightDescription?: string;
+  highlightLabel?: string;
+  highlightValue?: string;
+  summary?: ReactNode;
+  tags?: string[];
+  title: string;
+}) {
+  const competitionLogoSrc = context.competitionId
+    ? `/api/visual-assets/competitions/${encodeURIComponent(context.competitionId)}`
+    : null;
+  const competitionInitials = context.competitionName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((token) => token[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return (
+    <div className="relative overflow-hidden rounded-[1.45rem] bg-[linear-gradient(128deg,#033727_0%,#054d39_44%,#12372b_100%)] px-5 py-5 text-white md:px-6 md:py-6">
+      <div className="absolute right-[-6%] top-[-18%] h-56 w-56 rounded-full bg-[rgba(139,214,182,0.18)] blur-3xl" />
+      <div className="absolute bottom-[-18%] right-[18%] h-48 w-48 rounded-full bg-[rgba(166,242,209,0.1)] blur-3xl" />
+
+      <div className="relative space-y-6">
+        {tags.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {tags.map((tag) => (
+              <span
+                className="rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.08)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#e5f5ee]"
+                key={tag}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="grid gap-6 xl:grid-cols-[auto_minmax(0,1fr)_minmax(260px,0.75fr)] xl:items-end">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[1.3rem] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.12)] p-4 shadow-[0_18px_40px_-28px_rgba(17,28,45,0.75)]">
+            {competitionLogoSrc ? (
+              <img
+                alt={`Logo da competicao ${context.competitionName}`}
+                className="h-full w-full object-contain"
+                src={competitionLogoSrc}
+              />
+            ) : (
+              <span className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-white">
+                {competitionInitials || "FA"}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {eyebrow ? (
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">{eyebrow}</p>
+            ) : null}
+            <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.45rem] font-extrabold tracking-[-0.05em] text-white md:text-[3rem]">
+              {title}
+            </h1>
+            {description ? <p className="max-w-3xl text-sm/6 text-[#d7efe4]">{description}</p> : null}
+          </div>
+
+          {highlightLabel || highlightValue ? (
+            <div className="rounded-[1.35rem] border border-[rgba(255,255,255,0.12)] bg-[rgba(7,24,18,0.22)] px-4 py-4 shadow-[0_18px_40px_-28px_rgba(17,28,45,0.9)]">
+              {highlightLabel ? (
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">{highlightLabel}</p>
+              ) : null}
+              {highlightValue ? (
+                <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold text-white">
+                  {highlightValue}
+                </p>
+              ) : null}
+              {highlightDescription ? <p className="mt-2 text-xs/5 text-[#d7efe4]">{highlightDescription}</p> : null}
+            </div>
+          ) : null}
+        </div>
+
+        {summary ? <div>{summary}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+type HistoricalTopScorer = {
+  entityId: string;
+  entityName: string;
+  goals: number;
+  minutesPlayed: number | null;
+  teamId?: string | null;
+  teamName?: string | null;
+};
+
+type HistoricalTopScorerData = {
+  scorer: HistoricalTopScorer | null;
+};
+
+function compareHistoricalTopScorers(left: RankingTableRow, right: RankingTableRow): number {
+  const leftGoals = typeof left.metricValue === "number" && Number.isFinite(left.metricValue) ? left.metricValue : Number.NEGATIVE_INFINITY;
+  const rightGoals = typeof right.metricValue === "number" && Number.isFinite(right.metricValue) ? right.metricValue : Number.NEGATIVE_INFINITY;
+
+  if (leftGoals !== rightGoals) {
+    return rightGoals - leftGoals;
+  }
+
+  const leftMinutes =
+    typeof left.minutesPlayed === "number" && Number.isFinite(left.minutesPlayed) ? left.minutesPlayed : Number.POSITIVE_INFINITY;
+  const rightMinutes =
+    typeof right.minutesPlayed === "number" && Number.isFinite(right.minutesPlayed) ? right.minutesPlayed : Number.POSITIVE_INFINITY;
+
+  if (leftMinutes !== rightMinutes) {
+    return leftMinutes - rightMinutes;
+  }
+
+  const leftName = (left.entityName ?? left.entityId ?? "").trim();
+  const rightName = (right.entityName ?? right.entityId ?? "").trim();
+  const nameComparison = leftName.localeCompare(rightName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.entityId.localeCompare(right.entityId, "pt-BR", { sensitivity: "base" });
+}
+
+async function fetchEditionTopScorer(context: CompetitionSeasonContext): Promise<ApiResponse<HistoricalTopScorerData>> {
+  const rankingDefinition = getRankingDefinition("player-goals");
+
+  if (!rankingDefinition) {
+    return {
+      data: { scorer: null },
+      meta: {
+        coverage: {
+          label: "Ranking player-goals indisponivel no registry.",
+          status: "unknown",
+        },
+      },
+    };
+  }
+
+  let page = 1;
+  let totalPages = 1;
+  let firstResponse: ApiResponse<{ rows: RankingTableRow[] }> | null = null;
+  const rows: RankingTableRow[] = [];
+
+  do {
+    const response = await fetchRanking({
+      rankingDefinition,
+      filters: {
+        competitionId: context.competitionId,
+        freshnessClass: "season",
+        minSampleValue: 0,
+        page,
+        pageSize: 100,
+        seasonId: context.seasonId,
+        sortDirection: "desc",
+      },
+    });
+
+    firstResponse ??= response;
+    rows.push(...(response.data.rows ?? []));
+    totalPages = response.meta?.pagination?.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  const scorerRow = [...rows].sort(compareHistoricalTopScorers)[0] ?? null;
+
+  return {
+    data: {
+      scorer: scorerRow
+        ? {
+            entityId: scorerRow.entityId,
+            entityName: scorerRow.entityName?.trim() || scorerRow.entityId,
+            goals:
+              typeof scorerRow.metricValue === "number" && Number.isFinite(scorerRow.metricValue)
+                ? scorerRow.metricValue
+                : 0,
+            minutesPlayed:
+              typeof scorerRow.minutesPlayed === "number" && Number.isFinite(scorerRow.minutesPlayed)
+                ? scorerRow.minutesPlayed
+                : null,
+            teamId: typeof scorerRow.teamId === "string" ? scorerRow.teamId : null,
+            teamName: typeof scorerRow.teamName === "string" ? scorerRow.teamName : null,
+          }
+        : null,
+    },
+    meta: firstResponse?.meta,
+  };
+}
+
+function useEditionTopScorer(context: CompetitionSeasonContext) {
+  return useQueryWithCoverage<HistoricalTopScorerData>({
+    enabled: Boolean(context.competitionId && context.seasonId),
+    gcTime: 30 * 60 * 1000,
+    isDataEmpty: (data) => data.scorer === null,
+    queryFn: () => fetchEditionTopScorer(context),
+    queryKey: ["competition-season-top-scorer", context.competitionId, context.seasonId],
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 function HistoricalHeroCard({
   detail,
   label,
@@ -570,8 +593,8 @@ function HistoricalHeroCard({
     <article
       className={
         tone === "soft"
-          ? "rounded-[1.25rem] border border-[rgba(216,227,251,0.7)] bg-[rgba(240,243,255,0.76)] px-4 py-4"
-          : "rounded-[1.25rem] border border-white/70 bg-[rgba(255,255,255,0.78)] px-4 py-4"
+          ? "rounded-[1.25rem] border border-[rgba(216,227,251,0.7)] bg-[rgba(240,243,255,0.94)] px-4 py-4 shadow-[0_18px_40px_-30px_rgba(17,28,45,0.55)]"
+          : "rounded-[1.25rem] border border-white/70 bg-[rgba(255,255,255,0.92)] px-4 py-4 shadow-[0_18px_40px_-30px_rgba(17,28,45,0.55)]"
       }
     >
       <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
@@ -591,6 +614,14 @@ function formatHistoricalMatchCount(matchCount: number | null | undefined) {
   return matchCount.toLocaleString("pt-BR");
 }
 
+function formatHistoricalMinutes(minutesPlayed: number | null | undefined) {
+  if (typeof minutesPlayed !== "number" || !Number.isFinite(minutesPlayed)) {
+    return null;
+  }
+
+  return `${Math.round(minutesPlayed).toLocaleString("pt-BR")} min`;
+}
+
 function resolveLeagueMatchCountFromStandings(rows: StandingsTableRow[]): number | null {
   if (rows.length === 0) {
     return null;
@@ -603,6 +634,204 @@ function resolveLeagueMatchCountFromStandings(rows: StandingsTableRow[]): number
   }
 
   return totalMatchesPlayed / 2;
+}
+
+function HistoricalTopScorerCard({ context }: { context: CompetitionSeasonContext }) {
+  const scorerQuery = useEditionTopScorer(context);
+  const scorer = scorerQuery.data?.scorer ?? null;
+  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
+  const goalsLabel = scorer ? `${scorer.goals.toLocaleString("pt-BR")} gols` : null;
+  const minutesLabel = formatHistoricalMinutes(scorer?.minutesPlayed);
+  const detail = scorerQuery.isLoading
+    ? "Calculando..."
+    : scorerQuery.isError
+      ? "Sem dados disponíveis."
+      : scorer
+        ? [
+            goalsLabel,
+            minutesLabel,
+            scorerQuery.isPartial ? "Cobertura parcial." : null,
+            "",
+          ]
+            .filter(Boolean)
+            .join(" • ")
+        : "Dados insuficientes.";
+
+  const value = scorerQuery.isLoading ? (
+    "..."
+  ) : scorer && scorerHref ? (
+    <Link className="text-[#003526] transition-colors hover:text-[#054d39] hover:underline" href={scorerHref}>
+      {scorer.entityName}
+    </Link>
+  ) : scorer ? (
+    scorer.entityName
+  ) : (
+    "Nao identificado"
+  );
+
+  return (
+    <HistoricalHeroCard
+      detail={detail}
+      label="Artilheiro"
+      tone={scorerQuery.isPartial ? "soft" : "base"}
+      value={value}
+    />
+  );
+}
+
+// ─── Shared visual atoms ──────────────────────────────────────────────────────────────
+
+function TeamBadge({
+  size = 28,
+  teamId,
+  teamName,
+}: {
+  size?: number;
+  teamId?: string | null;
+  teamName: string;
+}) {
+  const src = teamId ? `/api/visual-assets/clubs/${encodeURIComponent(teamId)}` : null;
+  const initials = teamName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((t) => t[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return (
+    <span
+      className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(191,201,195,0.4)] bg-[#f0f3ff]"
+      style={{ width: size, height: size }}
+    >
+      <span className="text-[0.55rem] font-bold text-[#003526]">{initials}</span>
+      {src ? (
+        <img
+          alt={teamName}
+          className="absolute inset-0 h-full w-full object-contain bg-[#f0f3ff]"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          src={src}
+        />
+      ) : null}
+    </span>
+  );
+}
+
+function PlayerPhoto({
+  playerId,
+  playerName,
+  size = 72,
+}: {
+  playerId?: string | null;
+  playerName: string;
+  size?: number;
+}) {
+  const src = playerId ? `/api/visual-assets/players/${encodeURIComponent(playerId)}` : null;
+  const initials = playerName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((t) => t[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return (
+    <span
+      className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-400/30 bg-[#003526]"
+      style={{ width: size, height: size }}
+    >
+      <span className="text-sm font-bold text-white/70">{initials}</span>
+      {src ? (
+        <img
+          alt={playerName}
+          className="absolute inset-0 h-full w-full object-cover bg-[#003526]"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          src={src}
+        />
+      ) : null}
+    </span>
+  );
+}
+
+// ─── Tabela de classificacao visual (mockup-fiel) ────────────────────────────
+
+function resolveZoneBorderColor(
+  position: number,
+  totalRows: number,
+): string {
+  if (totalRows <= 2) return "border-l-transparent";
+  const topZone = Math.max(1, Math.ceil(totalRows * 0.25));
+  const bottomZone = Math.max(1, Math.ceil(totalRows * 0.2));
+  if (position <= topZone) return "border-l-[#003526]";
+  if (position > totalRows - bottomZone) return "border-l-[#ba1a1a]";
+  return "border-l-transparent";
+}
+
+function LeagueStandingsTable({
+  context,
+  rows,
+}: {
+  context: CompetitionSeasonContext;
+  rows: StandingsTableRow[];
+}) {
+  const total = rows.length;
+
+  return (
+    <div className="overflow-hidden overflow-x-auto rounded-xl bg-white shadow-sm">
+      <table className="w-full border-collapse text-left">
+        <thead>
+          <tr className="bg-[#f0f3ff]">
+            <th className="w-12 py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Pos</th>
+            <th className="min-w-[180px] py-3.5 px-4 text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Clube</th>
+            <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Partidas jogadas">PJ</th>
+            <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Vitorias">V</th>
+            <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Empates">E</th>
+            <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Derrotas">D</th>
+            <th className="py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Saldo de gols">SG</th>
+            <th className="py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Pontos">Pts</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[rgba(191,201,195,0.18)]">
+          {rows.map((row) => {
+            const borderColor = resolveZoneBorderColor(row.position, total);
+            const sgPositive = row.goalDiff > 0;
+            const sgNegative = row.goalDiff < 0;
+            return (
+              <tr
+                className="transition-colors hover:bg-[#f0f3ff]"
+                key={row.teamId ?? row.teamName}
+              >
+                <td className={`border-l-4 py-3.5 px-4 text-center text-sm font-bold tabular-nums ${borderColor}`}>
+                  {row.position}
+                </td>
+                <td className="py-3.5 px-4">
+                  <Link
+                    className="flex items-center gap-3 font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+                    href={buildCanonicalTeamPath(context, row.teamId)}
+                  >
+                    <TeamBadge size={24} teamId={row.teamId} teamName={row.teamName ?? row.teamId ?? ""} />
+                    <span>{row.teamName ?? row.teamId}</span>
+                  </Link>
+                </td>
+                <td className="py-3.5 px-3 text-center text-sm font-bold tabular-nums text-[#111c2d]">{row.matchesPlayed}</td>
+                <td className="py-3.5 px-3 text-center text-sm tabular-nums text-[#515f74]">{row.wins}</td>
+                <td className="py-3.5 px-3 text-center text-sm tabular-nums text-[#515f74]">{row.draws}</td>
+                <td className="py-3.5 px-3 text-center text-sm tabular-nums text-[#515f74]">{row.losses}</td>
+                <td
+                  className={`py-3.5 px-4 text-center text-sm font-bold tabular-nums ${
+                    sgPositive ? "text-[#1b6b51]" : sgNegative ? "text-[#ba1a1a]" : "text-[#515f74]"
+                  }`}
+                >
+                  {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
+                </td>
+                <td className="py-3.5 px-4 text-center text-sm font-extrabold tabular-nums text-[#003526]">
+                  {row.points}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function FinalStandingsPanel({
@@ -618,17 +847,19 @@ function FinalStandingsPanel({
   rowsLimit?: number;
   title: string;
 }) {
-  const columns = useStandingsColumns(context);
   const rows = rowsLimit ? query.data?.rows.slice(0, rowsLimit) ?? [] : query.data?.rows ?? [];
 
   return (
-    <ProfilePanel className="space-y-4">
-      <SeasonSectionHeader
-        coverage={query.coverage}
-        description={description}
-        eyebrow="Classificacao"
-        title={title}
-      />
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[0.7rem] font-bold uppercase tracking-widest text-[#515f74]">{title}</p>
+          <p className="mt-1 max-w-2xl text-sm text-[#515f74]">{description}</p>
+        </div>
+        {query.coverage.status !== "complete" ? (
+          <ProfileCoveragePill coverage={query.coverage} />
+        ) : null}
+      </div>
 
       {query.isError && rows.length === 0 ? (
         <ProfileAlert title="Nao foi possivel carregar a classificacao final" tone="critical">
@@ -638,9 +869,9 @@ function FinalStandingsPanel({
 
       {query.isPartial ? (
         <PartialDataBanner
-          className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
+          className="rounded-xl border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
           coverage={query.coverage}
-          message="A classificacao segue disponivel, mas esta edicao ainda tem cobertura parcial."
+          message="Cobertura parcial: a classificacao pode estar incompleta."
         />
       ) : null}
 
@@ -653,22 +884,16 @@ function FinalStandingsPanel({
 
       {!query.isLoading && rows.length === 0 ? (
         <EmptyState
-          className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-          description="Nao ha linhas suficientes para montar a classificacao final desta edicao."
+          className="rounded-xl border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
+          description="Classificacao indisponivel."
           title="Sem classificacao"
         />
       ) : null}
 
       {!query.isLoading && rows.length > 0 ? (
-        <DataTable
-          columns={columns}
-          data={rows}
-          emptyDescription="Sem linhas para exibir."
-          emptyTitle="Sem classificacao"
-          variant="profile"
-        />
+        <LeagueStandingsTable context={context} rows={rows} />
       ) : null}
-    </ProfilePanel>
+    </div>
   );
 }
 
@@ -703,7 +928,7 @@ function ClosingMatchesPanel({
         <PartialDataBanner
           className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
           coverage={matchesQuery.coverage}
-          message="Parte das partidas desta edicao ainda esta com cobertura parcial."
+          message="Dados parciais."
         />
       ) : null}
 
@@ -718,7 +943,7 @@ function ClosingMatchesPanel({
       {!matchesQuery.isLoading && matches.length === 0 ? (
         <EmptyState
           className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-          description="Nao encontramos partidas suficientes para resumir esta edicao."
+          description="Nenhuma partida encontrada."
           title="Sem partidas"
         />
       ) : null}
@@ -816,7 +1041,7 @@ function KnockoutBracketPanel({
         <PartialDataBanner
           className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
           coverage={{ status: "partial", label: "Cobertura parcial do chaveamento" }}
-          message="Parte do chaveamento final desta edicao ainda esta com cobertura parcial."
+          message="Chaveamento com dados parciais."
         />
       ) : null}
 
@@ -827,9 +1052,9 @@ function KnockoutBracketPanel({
           title="Sem chaveamento"
         />
       ) : (
-        <div className="flex w-full snap-x snap-mandatory gap-6 overflow-x-auto pb-6 xl:grid xl:grid-cols-4">
+        <div className="grid gap-4 xl:grid-cols-4">
           {stages.map(({ stage, ties, isLoading, isError }) => (
-            <ProfilePanel className="w-[85vw] max-w-[340px] shrink-0 snap-center space-y-4 xl:w-auto" key={stage.stageId} tone={stage.isCurrent ? "soft" : "base"}>
+            <ProfilePanel className="space-y-4" key={stage.stageId} tone={stage.isCurrent ? "soft" : "base"}>
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <ProfileTag>{stage.stageName ?? stage.stageId}</ProfileTag>
@@ -854,54 +1079,49 @@ function KnockoutBracketPanel({
               {!isLoading && !isError && ties.length === 0 ? (
                 <EmptyState
                   className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
-                  description="Nenhum confronto agregado foi materializado para esta fase."
+                  description="Sem confrontos."
                   title="Sem confrontos"
                 />
               ) : null}
 
               {!isLoading && ties.length > 0 ? (
                 <div className="grid gap-3">
-                  {ties.map((tie) => {
-                    const homeIsWinner = tie.winnerTeamName && tie.homeTeamName && tie.winnerTeamName === tie.homeTeamName;
-                    const awayIsWinner = tie.winnerTeamName && tie.awayTeamName && tie.winnerTeamName === tie.awayTeamName;
-                    return (
-                      <div
-                        className="flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] border border-[rgba(191,201,195,0.55)] shrink-0"
-                        key={tie.tieId}
-                      >
-                        <div className={`flex items-center justify-between px-3 py-3 ${homeIsWinner ? 'bg-[#f0faf6]' : ''} border-b border-[#f0f3ff]`}>
-                           <div className="flex items-center gap-2">
-                             <TeamBadge teamId={tie.homeTeamId} teamName={tie.homeTeamName ?? "Mandante"} size={22} />
-                             <span className={`text-sm ${homeIsWinner ? 'font-bold text-[#003526]' : 'font-medium text-[#455468]'} truncate max-w-[160px]`}>
-                               {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
-                             </span>
-                           </div>
-                           <span className={`font-bold ${homeIsWinner ? 'text-[#003526]' : 'text-[#111c2d]'}`}>{tie.homeGoals}</span>
+                  {ties.map((tie) => (
+                    <div
+                      className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-4 py-4"
+                      key={tie.tieId}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <ProfileTag>Confronto {tie.tieOrder}</ProfileTag>
+                        {tie.resolutionType ? <ProfileTag>{tie.resolutionType}</ProfileTag> : null}
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-[#111c2d]">
+                            {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
+                          </span>
+                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                            {tie.homeGoals}
+                          </span>
                         </div>
-                        <div className={`flex items-center justify-between px-3 py-3 ${awayIsWinner ? 'bg-[#f0faf6]' : ''}`}>
-                           <div className="flex items-center gap-2">
-                             <TeamBadge teamId={tie.awayTeamId} teamName={tie.awayTeamName ?? "Visitante"} size={22} />
-                             <span className={`text-sm ${awayIsWinner ? 'font-bold text-[#003526]' : 'font-medium text-[#455468]'} truncate max-w-[160px]`}>
-                               {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
-                             </span>
-                           </div>
-                           <span className={`font-bold ${awayIsWinner ? 'text-[#003526]' : 'text-[#111c2d]'}`}>{tie.awayGoals}</span>
-                        </div>
-                        <div className="bg-[#f8fbff] py-1.5 text-[0.62rem] font-semibold text-[#8fa097] border-t border-[#f0f3ff] uppercase tracking-widest flex items-center justify-between px-3">
-                           <span className="flex items-center gap-1">
-                             <span className="material-symbols-outlined text-[12px]">sports_soccer</span>
-                             Jogo {tie.tieOrder}
-                           </span>
-                           {formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? (
-                             <span className="flex items-center gap-1">
-                               <span className="material-symbols-outlined text-[12px]">event</span>
-                               {formatDateWindow(tie.firstLegAt, tie.lastLegAt)}
-                             </span>
-                           ) : null}
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-[#111c2d]">
+                            {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
+                          </span>
+                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                            {tie.awayGoals}
+                          </span>
                         </div>
                       </div>
-                    );
-                  })}
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#57657a]">
+                        <span>{tie.matchCount} jogos</span>
+                        {tie.winnerTeamName ? <span>• classificado: {tie.winnerTeamName}</span> : null}
+                        {formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? (
+                          <span>• {formatDateWindow(tie.firstLegAt, tie.lastLegAt)}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : null}
             </ProfilePanel>
@@ -957,7 +1177,7 @@ function ChampionPathPanel({
   return (
     <ProfilePanel className="space-y-4" tone="soft">
       <SeasonSectionHeader
-        description="O caminho do campeao e reconstruido a partir dos confrontos concluidos de cada fase eliminatoria."
+        description="Confrontos do campeao em cada fase eliminatoria."
         eyebrow="Caminho do campeao"
         title={championName ? `${championName} ate o titulo` : "Progressao do campeao"}
       />
@@ -965,7 +1185,7 @@ function ChampionPathPanel({
       {pathRows.length === 0 ? (
         <EmptyState
           className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
-          description="Nao foi possivel reconstruir o caminho completo do campeao com os confrontos disponiveis."
+          description="Caminho do campeao indisponivel."
           title="Sem caminho consolidado"
         />
       ) : (
@@ -1260,12 +1480,7 @@ function LeagueHeroSummary({ context }: { context: CompetitionSeasonContext }) {
         label="Campeao"
         value={standingsQuery.isLoading ? "..." : champion?.teamName ?? "Nao identificado"}
       />
-      <HistoricalHeroCard
-        detail="Sem fonte oficial: o ranking de gols atual exige amostra minima de 180 min e aceita recortes."
-        label="Artilheiro"
-        tone="soft"
-        value="Sem fonte oficial"
-      />
+      <HistoricalTopScorerCard context={context} />
       <HistoricalHeroCard
         detail={
           analyticsMatchCount !== undefined
@@ -1309,12 +1524,7 @@ function CupHeroSummary({
         label="Campeao"
         value={championTieQuery.isLoading ? "..." : championTie?.winnerTeamName ?? "Nao identificado"}
       />
-      <HistoricalHeroCard
-        detail="Sem fonte oficial: o ranking de gols atual exige amostra minima de 180 min e aceita recortes."
-        label="Artilheiro"
-        tone="soft"
-        value="Sem fonte oficial"
-      />
+      <HistoricalTopScorerCard context={context} />
       <HistoricalHeroCard
         detail={
           analyticsQuery.data?.seasonSummary.matchCount !== undefined
@@ -1356,12 +1566,7 @@ function HybridHeroSummary({
         label="Campeao"
         value={championTieQuery.isLoading ? "..." : championTie?.winnerTeamName ?? "Nao identificado"}
       />
-      <HistoricalHeroCard
-        detail="Sem fonte oficial: o ranking de gols atual exige amostra minima de 180 min e aceita recortes."
-        label="Artilheiro"
-        tone="soft"
-        value="Sem fonte oficial"
-      />
+      <HistoricalTopScorerCard context={context} />
       <HistoricalHeroCard
         detail={
           analyticsQuery.data?.seasonSummary.matchCount !== undefined
@@ -1381,7 +1586,6 @@ function HybridHeroSummary({
 
 function LeagueOverviewSection({ context }: { context: CompetitionSeasonContext }) {
   const finalStandingsQuery = useSeasonFinalStandings(context);
-  const filterInput = useSeasonFilterInput(context);
   const { roundId } = useGlobalFiltersState();
 
   return (
@@ -1392,49 +1596,419 @@ function LeagueOverviewSection({ context }: { context: CompetitionSeasonContext 
         </ProfileAlert>
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_minmax(320px,0.92fr)]">
-        <FinalStandingsPanel
-          context={context}
-          description="A leitura principal da liga encerrada comeca na tabela final. Sem semantica inventada para zonas que o contrato atual nao sustenta."
-          query={finalStandingsQuery}
-          rowsLimit={6}
-          title="Classificacao final"
-        />
-        <ClosingMatchesPanel
-          context={context}
-          description="Ultimos jogos da edicao, com foco em fechamento de temporada e partidas que encerraram o campeonato."
-          title="Rodada final e jogos de fechamento"
-        />
-      </div>
-
-      <ProfilePanel className="space-y-4" tone="soft">
-        <SeasonSectionHeader
-          description="A superficie editorial da liga termina em exploracao aprofundada: rankings, partidas, times e jogadores permanecem no mesmo recorte."
-          eyebrow="Proximos passos"
-          title="Aprofunde a temporada"
-        />
-        <div className="grid gap-4 md:grid-cols-3">
-          <ProfileKpi
-            hint="Lista completa de partidas"
-            label="Partidas"
-            value={<Link className="text-[#003526]" href={buildMatchesPath(filterInput)}>Abrir</Link>}
-          />
-          <ProfileKpi
-            hint="Artilharia e rankings"
-            label="Rankings"
-            value={<Link className="text-[#003526]" href={buildRankingPath("player-goals", filterInput)}>Abrir</Link>}
-          />
-          <ProfileKpi
-            hint="Perfis canonicos da edicao"
-            label="Times"
-            value={<Link className="text-[#003526]" href={buildTeamsPath(filterInput)}>Abrir</Link>}
-          />
-        </div>
-      </ProfilePanel>
+      <FinalStandingsPanel
+        context={context}
+        description="A leitura principal da liga encerrada comeca na tabela final. Sem semantica inventada para zonas que o contrato atual nao sustenta."
+        query={finalStandingsQuery}
+        title="Classificacao final"
+      />
     </div>
   );
 }
 
+function SeasonFactsCard({
+  context,
+}: {
+  context: CompetitionSeasonContext;
+}) {
+  const standingsQuery = useSeasonFinalStandings(context);
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const closingMatchesQuery = useSeasonClosingMatches(context, 1);
+  const champion = resolveChampionFromStandings(standingsQuery.data?.rows ?? []);
+  const analyticsMatchCount = analyticsQuery.data?.seasonSummary.matchCount;
+  const standingsMatchCount = resolveLeagueMatchCountFromStandings(standingsQuery.data?.rows ?? []);
+  const resolvedMatchCount = analyticsMatchCount ?? standingsMatchCount;
+  const lastMatchDate = closingMatchesQuery.data?.items[0]?.kickoffAt ?? null;
+  const lastMatchFormatted = lastMatchDate
+    ? DATE_FORMATTER.format(new Date(lastMatchDate))
+    : null;
+
+  const facts: Array<{ label: string; value: string }> = [
+    {
+      label: "Campeao",
+      value: standingsQuery.isLoading
+        ? "..."
+        : (champion?.teamName ?? "Nao identificado"),
+    },
+    {
+      label: "Partidas",
+      value:
+        analyticsQuery.isLoading && standingsQuery.isLoading
+          ? "..."
+          : formatHistoricalMatchCount(resolvedMatchCount),
+    },
+    {
+      label: "Times",
+      value: standingsQuery.isLoading
+        ? "..."
+        : (standingsQuery.data?.rows.length
+            ? String(standingsQuery.data.rows.length)
+            : "-"),
+    },
+    {
+      label: "Encerramento",
+      value:
+        closingMatchesQuery.isLoading
+          ? "..."
+          : (lastMatchFormatted ?? "-"),
+    },
+  ];
+
+  return (
+    <ProfilePanel className="space-y-4">
+      <div>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+          {context.competitionName}
+        </p>
+        <p className="mt-1 text-sm text-[#57657a]">{context.seasonLabel}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {facts.map((fact) => (
+          <div
+            className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3"
+            key={fact.label}
+          >
+            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">{fact.label}</p>
+            <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-base font-extrabold text-[#111c2d]">
+              {fact.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </ProfilePanel>
+  );
+}
+
+function ClosingMatchesRailPanel({ context }: { context: CompetitionSeasonContext }) {
+  const matchesQuery = useSeasonClosingMatches(context, 4);
+  const matches = matchesQuery.data?.items ?? [];
+
+  return (
+    <ProfilePanel className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Fechamento</p>
+          <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+            Ultimas partidas
+          </p>
+        </div>
+        {matchesQuery.coverage.status !== "complete" ? (
+          <ProfileCoveragePill coverage={matchesQuery.coverage} />
+        ) : null}
+      </div>
+
+      {matchesQuery.isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }, (_, i) => (
+            <LoadingSkeleton height={72} key={`rail-match-loading-${i}`} />
+          ))}
+        </div>
+      ) : null}
+
+      {!matchesQuery.isLoading && matches.length === 0 ? (
+        <EmptyState
+          className="rounded-[1.1rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
+          description="Sem partidas registradas."
+          title="Sem partidas"
+        />
+      ) : null}
+
+      {!matchesQuery.isLoading && matches.length > 0 ? (
+        <div className="space-y-2">
+          {matches.map((match) => (
+            <Link
+              className="block rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
+              href={`/matches/${encodeURIComponent(match.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`}
+              key={match.matchId}
+            >
+              <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[#57657a]">
+                {resolveMatchDisplayContext(match).summary}
+              </p>
+              <p className="mt-1.5 text-sm font-semibold text-[#111c2d]">
+                {match.homeTeamName ?? "Mandante"}{" "}
+                <span className="font-normal text-[#57657a]">
+                  {typeof match.homeScore === "number" && typeof match.awayScore === "number"
+                    ? `${match.homeScore}–${match.awayScore}`
+                    : "vs"}
+                </span>{" "}
+                {match.awayTeamName ?? "Visitante"}
+              </p>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </ProfilePanel>
+  );
+}
+
+function ExploreEditionCard({ context }: { context: CompetitionSeasonContext }) {
+  const filterInput = useSeasonFilterInput(context);
+
+  const links: Array<{ href: string; label: string; hint: string }> = [
+    { href: buildMatchesPath(filterInput), label: "Partidas", hint: "Lista completa da edicao" },
+    { href: buildRankingPath("player-goals", filterInput), label: "Rankings", hint: "Artilharia e estatisticas" },
+    { href: buildTeamsPath(filterInput), label: "Times", hint: "Perfis canonicos da edicao" },
+  ];
+
+  return (
+    <ProfilePanel className="space-y-4" tone="soft">
+      <div>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Exploracao</p>
+        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+          Aprofunde a edicao
+        </p>
+      </div>
+      <div className="space-y-2">
+        {links.map((link) => (
+          <Link
+            className="flex items-center justify-between gap-3 rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-white/80 px-4 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
+            href={link.href}
+            key={link.label}
+          >
+            <div>
+              <p className="text-sm font-semibold text-[#111c2d]">{link.label}</p>
+              <p className="text-[0.68rem] text-[#57657a]">{link.hint}</p>
+            </div>
+            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">→</span>
+          </Link>
+        ))}
+      </div>
+    </ProfilePanel>
+  );
+}
+
+// ─── Copa / Híbrido — Hero Banner escuro ─────────────────────────────────────
+
+function CupHeroBanner({
+  context,
+  tag,
+}: {
+  context: CompetitionSeasonContext;
+  tag: string;
+}) {
+  const compDef = getCompetitionById(context.competitionId);
+  const visualAssetId = getCompetitionVisualAssetId(compDef);
+  const logoSrc = visualAssetId
+    ? `/api/visual-assets/competitions/${encodeURIComponent(visualAssetId)}`
+    : null;
+  const initials = context.competitionName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((t) => t[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return (
+    <div className="relative h-56 overflow-hidden rounded-xl bg-[#022e21] md:h-64">
+      <div className="absolute inset-0 bg-gradient-to-r from-[#011a13] via-[#022e21]/80 to-transparent" />
+      <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-emerald-600/10 blur-3xl" />
+
+      <div className="relative z-10 flex h-full items-center gap-8 px-8 md:px-10">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[rgba(191,201,195,0.55)] bg-white shadow-2xl md:h-28 md:w-28">
+          <span className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-[#003526]">
+            {initials || "FA"}
+          </span>
+          {logoSrc ? (
+            <img
+              alt={`Logo ${context.competitionName}`}
+              className="absolute inset-0 h-full w-full object-contain bg-white p-3"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              src={logoSrc}
+            />
+          ) : null}
+        </div>
+
+        <div className="space-y-3">
+          <span className="inline-block rounded-full bg-emerald-500 px-3 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.2em] text-white">
+            {tag}
+          </span>
+          <h1 className="font-[family:var(--font-profile-headline)] text-[2.6rem] font-extrabold leading-none tracking-[-0.04em] text-white md:text-[3.2rem]">
+            {context.competitionName}
+          </h1>
+          <p className="text-sm font-medium italic text-emerald-200/70">
+            {context.seasonLabel}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CupKpiStrip({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const matchCount = analyticsQuery.data?.seasonSummary.matchCount;
+  const knockoutCount = resolution.knockoutStages.length;
+  const coverageStatus = analyticsQuery.isLoading
+    ? "Calculando"
+    : analyticsQuery.coverage.status === "complete"
+      ? "Total"
+      : "Parcial";
+  const isCoverageTotal = analyticsQuery.coverage.status === "complete";
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <div className="rounded-xl bg-[#f0f3ff] px-6 py-4">
+        <p className="text-[0.65rem] font-bold uppercase tracking-widest text-[#515f74]">
+          {resolution.type === "hybrid" ? "Fases" : "Fases eliminatorias"}
+        </p>
+        <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
+          {knockoutCount > 0 ? String(knockoutCount).padStart(2, "0") : "--"}
+        </p>
+      </div>
+      <div className="rounded-xl bg-[#f0f3ff] px-6 py-4">
+        <p className="text-[0.65rem] font-bold uppercase tracking-widest text-[#515f74]">Partidas</p>
+        <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
+          {analyticsQuery.isLoading ? "..." : formatHistoricalMatchCount(matchCount)}
+        </p>
+      </div>
+      <div className={`rounded-xl px-6 py-4 ${isCoverageTotal ? "bg-[#a6f2d1]" : "bg-[#f0f3ff]"}`}>
+        <p className="text-[0.65rem] font-bold uppercase tracking-widest text-[#00513b]">Cobertura</p>
+        <div className="mt-1 flex items-center gap-1">
+          <p className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold uppercase text-[#003526]">
+            {analyticsQuery.isLoading ? "..." : coverageStatus}
+          </p>
+          {isCoverageTotal ? <span className="text-lg text-[#003526]">✓</span> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Rail cards visuais ───────────────────────────────────────────────────────
+
+function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
+  const scorerQuery = useEditionTopScorer(context);
+  const scorer = scorerQuery.data?.scorer ?? null;
+  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
+
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-[#003526] p-5 text-white">
+      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-emerald-400/10 blur-3xl" />
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-400">
+        Artilheiro da temporada
+      </p>
+
+      <div className="mt-4">
+        {scorerQuery.isLoading ? (
+          <div className="flex items-center gap-3">
+            <div className="h-14 w-14 animate-pulse rounded-full bg-white/10" />
+            <div className="space-y-2 flex-1">
+              <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
+              <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
+            </div>
+          </div>
+        ) : scorer ? (
+          <div className="flex items-center gap-4">
+            <PlayerPhoto playerId={scorer.entityId} playerName={scorer.entityName} size={56} />
+            <div className="space-y-0.5 min-w-0">
+              {scorerHref ? (
+                <Link
+                  className="block font-[family:var(--font-profile-headline)] text-xl font-extrabold leading-tight text-white transition-opacity hover:opacity-80 truncate"
+                  href={scorerHref}
+                >
+                  {scorer.entityName}
+                </Link>
+              ) : (
+                <p className="font-[family:var(--font-profile-headline)] text-xl font-extrabold leading-tight truncate">
+                  {scorer.entityName}
+                </p>
+              )}
+              {scorer.teamName ? (
+                <p className="text-xs font-medium uppercase tracking-wide text-emerald-400/80 truncate">
+                  {scorer.teamName}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm font-medium text-white/60">Não identificado</p>
+        )}
+      </div>
+
+      {scorer ? (
+        <div className="mt-5 flex items-end justify-between border-t border-white/10 pt-4">
+          <div>
+            <p className="text-[0.6rem] font-bold uppercase tracking-widest text-emerald-400/60">Gols</p>
+            <p className="font-[family:var(--font-profile-headline)] text-4xl font-black">
+              {String(scorer.goals).padStart(2, "0")}
+            </p>
+          </div>
+          {scorer.minutesPlayed ? (
+            <div className="text-right">
+              <p className="text-[0.6rem] font-bold uppercase tracking-widest text-emerald-400/60">Minutos</p>
+              <p className="font-[family:var(--font-profile-headline)] text-xl font-bold">
+                {Math.round(scorer.minutesPlayed).toLocaleString("pt-BR")}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function LastResultsRailCard({ context }: { context: CompetitionSeasonContext }) {
+  const matchesQuery = useSeasonClosingMatches(context, 3);
+  const matches = matchesQuery.data?.items ?? [];
+
+  return (
+    <div className="rounded-xl bg-[#f0f3ff] p-5">
+      <p className="text-[0.65rem] font-extrabold uppercase tracking-widest text-[#003526]">
+        Ultimos resultados
+      </p>
+      <div className="mt-4 space-y-2">
+        {matchesQuery.isLoading ? (
+          Array.from({ length: 3 }, (_, i) => (
+            <div className="h-10 animate-pulse rounded-lg bg-[#e7eeff]" key={`lr-skel-${i}`} />
+          ))
+        ) : matches.length === 0 ? (
+          <p className="text-xs text-[#515f74]">Sem resultados registrados.</p>
+        ) : (
+          matches.map((match) => (
+            <Link
+              className="flex items-center justify-between rounded-lg bg-white px-3 py-2.5 text-xs font-bold shadow-sm transition-colors hover:bg-[#f9f9ff]"
+              href={`/matches/${encodeURIComponent(match.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`}
+              key={match.matchId}
+            >
+              <span className="max-w-[90px] truncate text-[#111c2d]">{match.homeTeamName ?? "Mandante"}</span>
+              <span className="mx-2 shrink-0 rounded bg-[#f0f3ff] px-2 py-0.5 text-[0.7rem] font-bold text-[#003526]">
+                {typeof match.homeScore === "number" && typeof match.awayScore === "number"
+                  ? `${match.homeScore} - ${match.awayScore}`
+                  : "vs"}
+              </span>
+              <span className="max-w-[90px] truncate text-right text-[#111c2d]">{match.awayTeamName ?? "Visitante"}</span>
+            </Link>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LeagueEditionRail({ context }: { context: CompetitionSeasonContext }) {
+  return (
+    <>
+      <SeasonFactsCard context={context} />
+      <TopScorerRailCard context={context} />
+      <LastResultsRailCard context={context} />
+      <ExploreEditionCard context={context} />
+    </>
+  );
+}
 function LeagueStructureSection({ context }: { context: CompetitionSeasonContext }) {
   const finalStandingsQuery = useSeasonFinalStandings(context);
   const filteredStandingsQuery = useStandingsTable();
@@ -1464,6 +2038,8 @@ function LeagueStructureSection({ context }: { context: CompetitionSeasonContext
   );
 }
 
+// ─── Bloco 4 — Canvas da copa ────────────────────────────────────────────────
+
 function CupOverviewSection({
   championTieQuery,
   context,
@@ -1476,18 +2052,11 @@ function CupOverviewSection({
   const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
 
   return (
-    <div className="space-y-5">
-      <ChampionPathPanel
-        championName={championTie?.winnerTeamName ?? null}
-        context={context}
-        resolution={resolution}
-      />
-      <ClosingMatchesPanel
-        context={context}
-        description="Partidas concluidas que fecharam a edicao ou definiram a progressao nas ultimas fases."
-        title="Partidas marcantes da edicao"
-      />
-    </div>
+    <ChampionPathPanel
+      championName={championTie?.winnerTeamName ?? null}
+      context={context}
+      resolution={resolution}
+    />
   );
 }
 
@@ -1501,12 +2070,99 @@ function CupStructureSection({
   return (
     <KnockoutBracketPanel
       context={context}
-      description="O elemento central desta edicao e o chaveamento encerrado, com confrontos consolidados por fase."
+      description="Chaveamento completo da edicao."
       resolution={resolution}
       title="Chaveamento finalizado"
     />
   );
 }
+
+function CupFactsCard({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  const championTieQuery = useStageTies({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+    stageId: resolution.finalKnockoutStage?.stageId,
+  });
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
+
+  const facts: Array<{ label: string; value: string }> = [
+    {
+      label: "Campeao",
+      value: championTieQuery.isLoading
+        ? "..."
+        : (championTie?.winnerTeamName ?? "Nao identificado"),
+    },
+    {
+      label: "Partidas",
+      value: analyticsQuery.isLoading
+        ? "..."
+        : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount),
+    },
+    {
+      label: "Fases eliminatorias",
+      value: resolution.knockoutStages.length > 0
+        ? String(resolution.knockoutStages.length)
+        : "-",
+    },
+    {
+      label: "Formato",
+      value: resolution.editionLabel ?? "Copa",
+    },
+  ];
+
+  return (
+    <ProfilePanel className="space-y-4">
+      <div>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+          {context.competitionName}
+        </p>
+        <p className="mt-1 text-sm text-[#57657a]">{context.seasonLabel}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {facts.map((fact) => (
+          <div
+            className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3"
+            key={fact.label}
+          >
+            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">{fact.label}</p>
+            <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-base font-extrabold text-[#111c2d]">
+              {fact.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </ProfilePanel>
+  );
+}
+
+function CupEditionRail({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  return (
+    <>
+      <CupFactsCard context={context} resolution={resolution} />
+      <ClosingMatchesRailPanel context={context} />
+      <ExploreEditionCard context={context} />
+    </>
+  );
+}
+
+// ─── Bloco 5 — Canvas do hibrido ─────────────────────────────────────────────
 
 function HybridOverviewSection({
   context,
@@ -1517,92 +2173,355 @@ function HybridOverviewSection({
 }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,0.82fr)]">
-        <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} />
-        <ProfilePanel className="space-y-4" tone="soft">
-          <SeasonSectionHeader
-            description="A edicao fecha a fase classificatoria e transita para o mata-mata sem misturar os dois modelos numa unica tabela universal."
-            eyebrow="Transicao estrutural"
-            title="Como a edicao mudou de leitura"
-          />
-          <div className="grid gap-3">
-            <ProfileMetricTile
-              label="Fase classificatoria"
-              value={resolution.primaryTableStage?.stageName ?? "Nao identificada"}
-            />
-            <ProfileMetricTile
-              label="Mata-mata"
-              value={resolution.finalKnockoutStage?.stageName ?? "Nao identificado"}
-            />
-            <ProfileMetricTile
-              label="Formato"
-              value={resolution.editionLabel ?? "Liga + mata-mata"}
-            />
-          </div>
-        </ProfilePanel>
-      </div>
-
+      <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} />
       <KnockoutBracketPanel
         context={context}
-        description="O mata-mata finalizado aparece como segunda metade da mesma edicao, e nao como pagina separada."
+        description="Fase eliminatoria da edicao."
         resolution={resolution}
-        title="Progressao concluida do mata-mata"
+        title="Progressao eliminatoria"
       />
     </div>
+  );
+}
+
+function HybridFactsCard({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  const championTieQuery = useStageTies({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+    stageId: resolution.finalKnockoutStage?.stageId,
+  });
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
+  const groupCount = resolution.primaryTableStage?.groups.length ?? 0;
+
+  const facts: Array<{ label: string; value: string }> = [
+    {
+      label: "Campeao",
+      value: championTieQuery.isLoading
+        ? "..."
+        : (championTie?.winnerTeamName ?? "Nao identificado"),
+    },
+    {
+      label: "Partidas",
+      value: analyticsQuery.isLoading
+        ? "..."
+        : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount),
+    },
+    {
+      label: "Grupos",
+      value: groupCount > 0 ? String(groupCount) : "-",
+    },
+    {
+      label: "Fases eliminatorias",
+      value: resolution.knockoutStages.length > 0
+        ? String(resolution.knockoutStages.length)
+        : "-",
+    },
+  ];
+
+  return (
+    <ProfilePanel className="space-y-4">
+      <div>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+          {context.competitionName}
+        </p>
+        <p className="mt-1 text-sm text-[#57657a]">{context.seasonLabel}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {facts.map((fact) => (
+          <div
+            className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3"
+            key={fact.label}
+          >
+            <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">{fact.label}</p>
+            <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-base font-extrabold text-[#111c2d]">
+              {fact.value}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.56)] px-3 py-3">
+          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Fase grupos</p>
+          <p className="mt-1 text-sm font-semibold text-[#111c2d]">
+            {resolution.primaryTableStage?.stageName ?? "Nao identificada"}
+          </p>
+        </div>
+        <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.56)] px-3 py-3">
+          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Fase final</p>
+          <p className="mt-1 text-sm font-semibold text-[#111c2d]">
+            {resolution.finalKnockoutStage?.stageName ?? "Nao identificado"}
+          </p>
+        </div>
+      </div>
+    </ProfilePanel>
+  );
+}
+
+function HybridEditionRail({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  return (
+    <>
+      <HybridFactsCard context={context} resolution={resolution} />
+      <ClosingMatchesRailPanel context={context} />
+      <ExploreEditionCard context={context} />
+    </>
   );
 }
 
 function buildSurfaceNavLabels(type: CompetitionSeasonSurfaceResolution["type"]): SurfaceNavLabels {
   if (type === "league") {
     return {
-      matches: "Partidas marcantes",
-      overview: "Resumo da edicao",
-      structure: "Classificacao final",
+      highlights: "Destaques estatisticos",
+      matches: "Partidas de fechamento",
+      overview: "Classificacao",
+      structure: "Tabela completa",
     };
   }
 
   if (type === "hybrid") {
     return {
+      highlights: "Destaques estatisticos",
       matches: "Mata-mata",
-      overview: "Resumo da edicao",
+      overview: "Visao geral",
       structure: "Fase classificatoria",
     };
   }
 
   return {
+    highlights: "Destaques estatisticos",
     matches: "Confrontos decisivos",
-    overview: "Resumo da edicao",
+    overview: "Caminho do titulo",
     structure: "Chaveamento",
   };
 }
 
-function buildRouteCards(filterInput: ReturnType<typeof useSeasonFilterInput>) {
-  return [
-    {
-      description: "Lista completa de partidas da edicao, mantendo o recorte atual.",
-      href: buildMatchesPath(filterInput),
-      label: "Analise aprofundada",
-      title: "Partidas",
-    },
-    {
-      description: "Rankings de jogadores e times no mesmo contexto da edicao.",
-      href: buildRankingPath("player-goals", filterInput),
-      label: "Analise aprofundada",
-      title: "Rankings",
-    },
-    {
-      description: "Perfis canonicos dos times desta edicao.",
-      href: buildTeamsPath(filterInput),
-      label: "Perfis da edicao",
-      title: "Times",
-    },
-    {
-      description: "Perfis canonicos dos jogadores desta edicao.",
-      href: buildPlayersPath(filterInput),
-      label: "Perfis da edicao",
-      title: "Jogadores",
-    },
-  ];
+function buildSeasonHeroDescription(resolution: CompetitionSeasonSurfaceResolution): string {
+  if (resolution.type === "league") {
+    return "";
+  }
+
+  if (resolution.type === "hybrid") {
+    return "";
+  }
+
+  return "";
+}
+
+function buildSeasonHeroHighlight(resolution: CompetitionSeasonSurfaceResolution): {
+  description: string;
+  label: string;
+  value: string;
+} {
+  if (resolution.type === "league") {
+    return {
+      description: "",
+      label: "Leitura principal",
+      value: "Classificacao final",
+    };
+  }
+
+  if (resolution.type === "hybrid") {
+    return {
+      description: "",
+      label: "Leitura principal",
+      value: "Grupos + mata-mata",
+    };
+  }
+
+  return {
+    description: "",
+    label: "Leitura principal",
+    value: "Caminho do titulo",
+  };
+}
+
+function LeaguePageHeader({
+  context,
+  tag,
+}: {
+  context: CompetitionSeasonContext;
+  tag: string;
+}) {
+  const compDef = getCompetitionById(context.competitionId);
+  const visualAssetId = getCompetitionVisualAssetId(compDef);
+  const logoSrc = visualAssetId
+    ? `/api/visual-assets/competitions/${encodeURIComponent(visualAssetId)}`
+    : null;
+  const initials = context.competitionName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((t) => t[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return (
+    <div className="flex items-end gap-6 px-4 md:px-8 pt-8 pb-4">
+      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(191,201,195,0.55)] bg-white shadow-sm md:h-20 md:w-20">
+        <span className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
+          {initials || "FA"}
+        </span>
+        {logoSrc ? (
+          <img
+            alt={`Logo ${context.competitionName}`}
+            className="absolute inset-0 h-full w-full object-contain bg-white p-2"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            src={logoSrc}
+          />
+        ) : null}
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="inline-block rounded bg-[#e7eeff] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-[#003526]">
+            {tag}
+          </span>
+        </div>
+        <h1 className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-none tracking-[-0.03em] text-[#111c2d] md:text-4xl">
+          {context.competitionName}
+        </h1>
+        <p className="text-sm font-semibold text-[#515f74]">
+          Temporada {context.seasonLabel}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Rodada a Rodada ──────────────────────────────────────────────────────────
+
+function RoundPickerDropdown({ rounds, activeRoundId, setRoundId, selectedRound }: any) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative inline-block">
+      <button 
+        className="flex items-center gap-2 rounded-lg bg-[#003526] px-4 py-2 cursor-pointer shadow-sm transition-transform active:scale-95"
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">Rodada:</span>
+        <span className="text-xs font-extrabold text-white">
+          {selectedRound?.label?.replace(/rodada\s*/i, "").trim() ?? activeRoundId ?? "Todas"}
+        </span>
+        <svg
+          className="h-4 w-4 text-white/80"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {isOpen ? (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute left-0 top-12 z-50 w-[260px] rounded-xl border border-[rgba(191,201,195,0.55)] bg-white p-4 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.2)]">
+            <div className="mb-3 flex items-center justify-between border-b border-[rgba(191,201,195,0.3)] pb-2">
+              <span className="text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">
+                Selecione a rodada
+              </span>
+              <button className="text-[#515f74] hover:text-black" onClick={() => setIsOpen(false)} type="button">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="grid grid-cols-6 gap-1.5">
+              {rounds.map((round: any) => {
+                const isActive = round.roundId === (activeRoundId ?? selectedRound?.roundId);
+                const shortLabel = round.label.replace(/rodada\s*/i, "").trim();
+                return (
+                  <button
+                    className={`flex h-8 w-8 items-center justify-center rounded-md text-[0.7rem] font-bold tabular-nums transition-colors ${
+                      isActive
+                        ? "bg-[#003526] text-white shadow-md"
+                        : "border border-[#dce3f9] bg-[#f0f3ff] text-[#515f74] hover:bg-[#e1e7fa]"
+                    }`}
+                    key={round.roundId}
+                    onClick={() => {
+                      setRoundId(isActive ? null : round.roundId);
+                      setIsOpen(false);
+                    }}
+                    title={`Rodada ${shortLabel}`}
+                    type="button"
+                  >
+                    {shortLabel}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function RoundsSection({ context }: { context: CompetitionSeasonContext }) {
+  const { setRoundId, roundId: activeRoundId } = useGlobalFilters();
+  const standingsQuery = useStandingsTable();
+  const rows = standingsQuery.data?.rows ?? [];
+  const selectedRound = standingsQuery.data?.selectedRound;
+  const rounds = standingsQuery.data?.rounds ?? [];
+
+  return (
+    <div className="space-y-5">
+      {/* Round picker dropdown */}
+      {rounds.length > 1 ? (
+        <div className="flex items-center gap-3">
+          <RoundPickerDropdown 
+            activeRoundId={activeRoundId} 
+            rounds={rounds} 
+            selectedRound={selectedRound} 
+            setRoundId={setRoundId} 
+          />
+          {standingsQuery.coverage.status !== "complete" ? (
+            <ProfileCoveragePill coverage={standingsQuery.coverage} />
+          ) : null}
+          {selectedRound?.startingAt ? (
+            <span className="text-[0.68rem] font-semibold tracking-wide text-[#515f74]">
+              {formatDateWindow(selectedRound.startingAt, selectedRound.endingAt)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Removed old selected round indicator since details are now near the button */}
+
+      {standingsQuery.isLoading ? (
+        <div className="space-y-3">
+          <LoadingSkeleton height={56} />
+          <LoadingSkeleton height={320} />
+        </div>
+      ) : rows.length === 0 && !standingsQuery.isLoading ? (
+        <EmptyState
+          className="rounded-xl border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
+          description={rounds.length > 0 ? "Selecione uma rodada para ver a tabela." : "Sem rodadas disponíveis para esta edição."}
+          title="Nenhuma rodada selecionada"
+        />
+      ) : (
+        <LeagueStandingsTable context={context} rows={rows} />
+      )}
+    </div>
+  );
 }
 
 function LeagueSeasonSurface({
@@ -1614,26 +2533,28 @@ function LeagueSeasonSurface({
   context: CompetitionSeasonContext;
   resolution: CompetitionSeasonSurfaceResolution;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const filterInput = useSeasonFilterInput(context);
   const navLabels = buildSurfaceNavLabels(resolution.type);
-
-  const { setRoundId, roundId: activeRoundId } = useGlobalFilters();
-  const standingsQuery = useStandingsTable({
-    competitionId: context.competitionId,
-    seasonId: context.seasonId,
-    stageId: resolution.primaryTableStage?.stageId,
-    roundId: activeRoundId,
-  });
-
-  const selectedRound = standingsQuery.data?.selectedRound;
-  const rounds = standingsQuery.data?.rounds ?? [];
 
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
       hero={<LeaguePageHeader context={context} tag="Pontos Corridos" />}
+      mainCanvas={
+        <>
+          {activeSection === "overview" ? <LeagueOverviewSection context={context} /> : null}
+          {activeSection === "structure" ? <LeagueStructureSection context={context} /> : null}
+          {activeSection === "rounds" ? <RoundsSection context={context} /> : null}
+          {activeSection === "matches" ? (
+            <ClosingMatchesPanel
+              context={context}
+              description="Partidas concluidas desta temporada."
+              title="Partidas marcantes da temporada"
+            />
+          ) : null}
+          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={null} /> : null}
+        </>
+      }
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1646,16 +2567,12 @@ function LeagueSeasonSurface({
           isActive: activeSection === "structure",
           key: "structure",
           label: navLabels.structure,
-          customComponent: (
-            <RoundPickerDropdown
-              onRoundChange={(newId) => {
-                setRoundId(newId);
-                router.push(buildSeasonSurfaceHref(context, "structure", searchParams));
-              }}
-              rounds={rounds}
-              selectedRoundId={selectedRound?.roundId ?? null}
-            />
-          ),
+        },
+        {
+          href: buildSeasonSurfaceHref(context, "rounds", searchParams),
+          isActive: activeSection === "rounds",
+          key: "rounds",
+          label: "Rodada a Rodada",
         },
         {
           href: buildSeasonSurfaceHref(context, "matches", searchParams),
@@ -1667,26 +2584,14 @@ function LeagueSeasonSurface({
           href: buildSeasonSurfaceHref(context, "highlights", searchParams),
           isActive: activeSection === "highlights",
           key: "highlights",
-          label: "Destaques da edicao",
+          label: navLabels.highlights,
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? <LeagueOverviewSection context={context} /> : null}
-          {activeSection === "structure" ? <LeagueStructureSection context={context} /> : null}
-          {activeSection === "matches" ? (
-            <ClosingMatchesPanel
-              context={context}
-              description="Lista editorial das partidas de fechamento da edicao, sem tratar a liga como feed ao vivo."
-              title="Partidas marcantes da temporada"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={null} /> : null}
-        </>
-      }
+      secondaryRail={<LeagueEditionRail context={context} />}
     />
   );
 }
+
 
 function CupSeasonSurface({
   activeSection,
@@ -1700,7 +2605,6 @@ function CupSeasonSurface({
   structure: CompetitionStructureData | null;
 }) {
   const searchParams = useSearchParams();
-  const filterInput = useSeasonFilterInput(context);
   const championTieQuery = useStageTies({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
@@ -1711,7 +2615,23 @@ function CupSeasonSurface({
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<CupHeroBanner tag="Mata-Mata / Eliminatorias" context={context} />}
+      hero={<CupHeroBanner context={context} tag="Copa" />}
+      mainCanvas={
+        <>
+          {activeSection === "overview" ? (
+            <><CupKpiStrip context={context} resolution={resolution} /><CupOverviewSection championTieQuery={championTieQuery} context={context} resolution={resolution} /></>
+          ) : null}
+          {activeSection === "structure" ? <CupStructureSection context={context} resolution={resolution} /> : null}
+          {activeSection === "matches" ? (
+            <ClosingMatchesPanel
+              context={context}
+              description="Os confrontos mais importantes da edicao."
+              title="Confrontos decisivos"
+            />
+          ) : null}
+          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
+        </>
+      }
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1735,26 +2655,10 @@ function CupSeasonSurface({
           href: buildSeasonSurfaceHref(context, "highlights", searchParams),
           isActive: activeSection === "highlights",
           key: "highlights",
-          label: "Destaques da edicao",
+          label: navLabels.highlights,
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? (
-            <CupOverviewSection championTieQuery={championTieQuery} context={context} resolution={resolution} />
-          ) : null}
-          {activeSection === "structure" ? <CupStructureSection context={context} resolution={resolution} /> : null}
-          {activeSection === "matches" ? (
-            <KnockoutBracketPanel
-              context={context}
-              resolution={resolution}
-              description="Confrontos eliminatorios"
-              title="Mata-mata"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
-        </>
-      }
+      secondaryRail={<CupEditionRail context={context} resolution={resolution} />}
     />
   );
 }
@@ -1770,9 +2674,7 @@ function HybridSeasonSurface({
   resolution: CompetitionSeasonSurfaceResolution;
   structure: CompetitionStructureData | null;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const filterInput = useSeasonFilterInput(context);
   const championTieQuery = useStageTies({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
@@ -1780,21 +2682,25 @@ function HybridSeasonSurface({
   });
   const navLabels = buildSurfaceNavLabels(resolution.type);
 
-  const { setRoundId, roundId: activeRoundId } = useGlobalFilters();
-  const standingsQuery = useStandingsTable({
-    competitionId: context.competitionId,
-    seasonId: context.seasonId,
-    stageId: resolution.primaryTableStage?.stageId,
-    roundId: activeRoundId,
-  });
-
-  const selectedRound = standingsQuery.data?.selectedRound;
-  const rounds = standingsQuery.data?.rounds ?? [];
-
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<LeaguePageHeader context={context} tag="Formato Misto" />}
+      hero={<CupHeroBanner context={context} tag="Formato Híbrido" />}
+      mainCanvas={
+        <>
+          {activeSection === "overview" ? <><CupKpiStrip context={context} resolution={resolution} /><HybridOverviewSection context={context} resolution={resolution} /></> : null}
+          {activeSection === "structure" ? <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} /> : null}
+          {activeSection === "matches" ? (
+            <KnockoutBracketPanel
+              context={context}
+              description="Fase eliminatoria da edicao."
+              resolution={resolution}
+              title="Mata-mata finalizado"
+            />
+          ) : null}
+          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
+        </>
+      }
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -1807,16 +2713,6 @@ function HybridSeasonSurface({
           isActive: activeSection === "structure",
           key: "structure",
           label: navLabels.structure,
-          customComponent: (
-            <RoundPickerDropdown
-              onRoundChange={(newId) => {
-                setRoundId(newId);
-                router.push(buildSeasonSurfaceHref(context, "structure", searchParams));
-              }}
-              rounds={rounds}
-              selectedRoundId={selectedRound?.roundId ?? null}
-            />
-          ),
         },
         {
           href: buildSeasonSurfaceHref(context, "matches", searchParams),
@@ -1828,24 +2724,10 @@ function HybridSeasonSurface({
           href: buildSeasonSurfaceHref(context, "highlights", searchParams),
           isActive: activeSection === "highlights",
           key: "highlights",
-          label: "Destaques da edicao",
+          label: navLabels.highlights,
         },
       ]}
-      mainCanvas={
-        <>
-          {activeSection === "overview" ? <HybridOverviewSection context={context} resolution={resolution} /> : null}
-          {activeSection === "structure" ? <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} /> : null}
-          {activeSection === "matches" ? (
-            <KnockoutBracketPanel
-              context={context}
-              resolution={resolution}
-              description="Confrontos eliminatorios"
-              title="Mata-mata"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
-        </>
-      }
+      secondaryRail={<HybridEditionRail context={context} resolution={resolution} />}
     />
   );
 }
@@ -1860,7 +2742,6 @@ export function CompetitionSeasonSurface({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
   });
-  const filterInput = useSeasonFilterInput(context);
   const resolution = useMemo(
     () =>
       resolveCompetitionSeasonSurface({
@@ -1870,11 +2751,63 @@ export function CompetitionSeasonSurface({
     [competitionDefinition?.type, structureQuery.data],
   );
 
-  if (structureQuery.isError && competitionDefinition?.type !== "domestic_league") {
+  // Bloco 7: guard de loading para tipos que dependem de estrutura antes de resolver o canvas.
+  // Liga (domestic_league) pode renderizar imediatamente sem estrutura.
+  // Copa e hibrido precisam da estrutura para determinar o canvas correto.
+  const needsStructure = competitionDefinition?.type !== "domestic_league";
+  if (needsStructure && structureQuery.isLoading) {
     return (
       <CompetitionSeasonSurfaceShell
         context={context}
-        hero={<LeaguePageHeader context={context} tag="Estrutura indisponivel" />}
+        hero={
+          <SeasonHeroBlock
+            context={context}
+            description="Carregando..."
+            eyebrow="Carregando"
+            tags={[context.seasonLabel]}
+            title={`${context.competitionName} ${context.seasonLabel}`}
+          />
+        }
+        mainCanvas={
+          <div className="space-y-3">
+            <LoadingSkeleton height={88} />
+            <LoadingSkeleton height={220} />
+            <LoadingSkeleton height={160} />
+          </div>
+        }
+        navItems={[
+          {
+            href: buildSeasonHubPath(context),
+            isActive: true,
+            key: "overview",
+            label: "Carregando",
+          },
+        ]}
+      />
+    );
+  }
+
+  if (structureQuery.isError && needsStructure) {
+    return (
+      <CompetitionSeasonSurfaceShell
+        context={context}
+        hero={
+          <SeasonHeroBlock
+            context={context}
+            description="Estrutura da edicao indisponivel."
+            eyebrow="Estrutura indisponivel"
+            highlightDescription="Tente recarregar a pagina."
+            highlightLabel="Estado"
+            highlightValue="Estrutura ausente"
+            tags={[context.seasonLabel, "Indisponivel"]}
+            title={`${context.competitionName} ${context.seasonLabel}`}
+          />
+        }
+        mainCanvas={
+          <ProfileAlert title="Nao foi possivel carregar a estrutura da edicao" tone="critical">
+            Sem esse contrato nao e possivel diferenciar com seguranca o desenho de copa ou hibrido.
+          </ProfileAlert>
+        }
         navItems={[
           {
             href: buildSeasonHubPath(context),
@@ -1883,11 +2816,6 @@ export function CompetitionSeasonSurface({
             label: "Resumo da edicao",
           },
         ]}
-        mainCanvas={
-          <ProfileAlert title="Nao foi possivel carregar a estrutura da edicao">
-            Sem esse contrato nao e possivel diferenciar com seguranca o desenho de copa ou hibrido.
-          </ProfileAlert>
-        }
       />
     );
   }
@@ -1916,3 +2844,8 @@ export function CompetitionSeasonSurface({
     />
   );
 }
+
+
+
+
+
