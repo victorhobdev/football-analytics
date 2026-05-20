@@ -29,7 +29,18 @@ from common.services.world_cup_config import (
     statsbomb_stage_source_id,
 )
 
-GROUP_PATTERN = re.compile(r"Group\s+([A-Z])$", re.IGNORECASE)
+GROUP_PATTERN = re.compile(r"Group\s+([A-Z0-9]+)$", re.IGNORECASE)
+HISTORICAL_GROUP_ROW_EDITION_COUNT = 20
+HISTORICAL_MATCH_ROW_COUNT = 964
+HISTORICAL_STAGE_ROW_COUNT = 113
+HISTORICAL_TEAM_COUNT = 85
+HISTORICAL_WORLD_CUP_EDITION_PATTERN = "fifa_world_cup_mens__%"
+HISTORICAL_TEAM_INTERNAL_ID_OVERRIDES = {
+    "T-86": "team__national_team__WEST_GERMANY",
+}
+ALLOWED_HISTORICAL_TEAM_CODE_COLLISIONS = {
+    "DEU": {"T-31", "T-86"},
+}
 
 
 def _get_required_env(name: str) -> str:
@@ -59,6 +70,13 @@ def _uuid7() -> str:
 
 def _team_internal_id(team_code: str) -> str:
     return f"team__{WORLD_CUP_TEAM_TYPE}__{team_code}"
+
+
+def _historical_team_internal_id(team_id: str, team_code: str) -> str:
+    override = HISTORICAL_TEAM_INTERNAL_ID_OVERRIDES.get(team_id)
+    if override is not None:
+        return override
+    return _team_internal_id(team_code)
 
 
 def _stage_internal_id(stage_key: str, edition_key: str) -> str:
@@ -137,7 +155,10 @@ def _validate_bronze_snapshot_versions(conn, snapshots: dict[str, dict[str, Any]
             text(f"SELECT DISTINCT source_version FROM {table_name} WHERE edition_key = :edition_key ORDER BY source_version"),
             {"edition_key": config.edition_key},
         ).scalars().all()
-        expected = [snapshots[source_name]["source_version"]]
+        if table_name == "bronze.statsbomb_wc_three_sixty" and config.expected_statsbomb_three_sixty_match_files == 0:
+            expected = [snapshots[source_name]["source_version"]] if rows else []
+        else:
+            expected = [snapshots[source_name]["source_version"]]
         if rows != expected:
             raise RuntimeError(
                 f"Versao do bronze divergente do snapshot ativo em {table_name}: bronze={rows} ativo={expected}"
@@ -371,6 +392,272 @@ def _delete_obsolete_stage_rows(conn, config: WorldCupEditionConfig) -> None:
     )
 
 
+def _fetch_existing_historical_fjelstul_map(conn) -> dict[tuple[str, str, str], str]:
+    rows = conn.execute(
+        text(
+            """
+            SELECT provider, entity_type, source_id, canonical_id
+            FROM raw.provider_entity_map
+            WHERE provider = :provider
+              AND entity_type IN ('team', 'match', 'stage', 'group', 'player')
+              AND (
+                edition_key IS NULL
+                OR edition_key LIKE :edition_pattern
+              )
+            """
+        ),
+        {
+            "provider": FJELSTUL_SOURCE,
+            "edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN,
+        },
+    ).mappings().all()
+    return {(row["provider"], row["entity_type"], row["source_id"]): row["canonical_id"] for row in rows}
+
+
+def _validate_historical_fjelstul_backbone_bronze(conn) -> None:
+    checks = {
+        "fjelstul_matches": (
+            """
+            SELECT count(DISTINCT edition_key) AS edition_count, count(*) AS row_count
+            FROM bronze.fjelstul_wc_matches
+            WHERE edition_key LIKE :edition_pattern
+            """,
+            (22, HISTORICAL_MATCH_ROW_COUNT),
+        ),
+        "fjelstul_stages": (
+            """
+            SELECT count(DISTINCT edition_key) AS edition_count, count(*) AS row_count
+            FROM bronze.fjelstul_wc_tournament_stages
+            WHERE edition_key LIKE :edition_pattern
+            """,
+            (22, HISTORICAL_STAGE_ROW_COUNT),
+        ),
+        "fjelstul_groups": (
+            """
+            SELECT count(DISTINCT edition_key) AS edition_count, count(*) AS row_count
+            FROM bronze.fjelstul_wc_groups
+            WHERE edition_key LIKE :edition_pattern
+            """,
+            (HISTORICAL_GROUP_ROW_EDITION_COUNT, 125),
+        ),
+        "fjelstul_managers": (
+            """
+            SELECT count(DISTINCT edition_key) AS edition_count, count(*) AS row_count
+            FROM bronze.fjelstul_wc_manager_appointments
+            WHERE edition_key LIKE :edition_pattern
+            """,
+            (22, 501),
+        ),
+        "fjelstul_squads": (
+            """
+            SELECT count(DISTINCT edition_key) AS edition_count, count(*) AS row_count
+            FROM bronze.fjelstul_wc_squads
+            WHERE edition_key LIKE :edition_pattern
+            """,
+            (22, 10973),
+        ),
+    }
+    for name, (sql, expected) in checks.items():
+        row = conn.execute(
+            text(sql),
+            {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+        ).mappings().one()
+        actual = (row["edition_count"], row["row_count"])
+        if actual != expected:
+            raise RuntimeError(
+                f"Precondicao do bronze historico invalida para {name}: esperado={expected} atual={actual}"
+            )
+
+
+def _fetch_historical_team_rows(conn) -> list[dict[str, Any]]:
+    collision_rows = conn.execute(
+        text(
+            """
+            WITH refs AS (
+              SELECT team_id, team_code
+              FROM bronze.fjelstul_wc_group_standings
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT team_id, team_code
+              FROM bronze.fjelstul_wc_manager_appointments
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT team_id, team_code
+              FROM bronze.fjelstul_wc_squads
+              WHERE edition_key LIKE :edition_pattern
+            )
+            SELECT
+              team_code,
+              string_agg(DISTINCT team_id, '|' ORDER BY team_id) AS team_ids
+            FROM refs
+            WHERE team_code IS NOT NULL
+            GROUP BY team_code
+            HAVING count(DISTINCT team_id) > 1
+            ORDER BY team_code
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    actual_collisions = {
+        row["team_code"]: set(str(row["team_ids"]).split("|"))
+        for row in collision_rows
+    }
+    if actual_collisions != ALLOWED_HISTORICAL_TEAM_CODE_COLLISIONS:
+        raise RuntimeError(
+            f"Colisoes de team_code historico fora do dicionario esperado: {actual_collisions}"
+        )
+
+    rows = conn.execute(
+        text(
+            """
+            WITH refs AS (
+              SELECT team_id, team_code, team_name, source_version
+              FROM bronze.fjelstul_wc_group_standings
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT team_id, team_code, team_name, source_version
+              FROM bronze.fjelstul_wc_manager_appointments
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT team_id, team_code, team_name, source_version
+              FROM bronze.fjelstul_wc_squads
+              WHERE edition_key LIKE :edition_pattern
+            )
+            SELECT
+              team_id,
+              min(team_code) AS team_code,
+              min(team_name) AS team_name,
+              min(source_version) AS source_version,
+              count(DISTINCT team_code) AS team_code_count
+            FROM refs
+            GROUP BY team_id
+            ORDER BY min(team_code), team_id
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    if len(rows) != HISTORICAL_TEAM_COUNT:
+        raise RuntimeError(
+            f"Team backbone historico exige {HISTORICAL_TEAM_COUNT} selecoes. Encontrei {len(rows)}."
+        )
+    for row in rows:
+        if row["team_code_count"] != 1 or not row["team_code"]:
+            raise RuntimeError(
+                f"Selecao historica sem team_code estavel: team_id={row['team_id']} row={dict(row)}"
+            )
+    return [dict(row) for row in rows]
+
+
+def _fetch_historical_stage_rows(conn) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        text(
+            """
+            SELECT DISTINCT edition_key, source_version, tournament_id, stage_name
+            FROM bronze.fjelstul_wc_tournament_stages
+            WHERE edition_key LIKE :edition_pattern
+            ORDER BY edition_key, stage_name
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    if len(rows) != HISTORICAL_STAGE_ROW_COUNT:
+        raise RuntimeError(
+            f"Stage backbone historico exige {HISTORICAL_STAGE_ROW_COUNT} rows. Encontrei {len(rows)}."
+        )
+    return [dict(row) for row in rows]
+
+
+def _fetch_historical_group_rows(conn) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        text(
+            """
+            SELECT DISTINCT edition_key, source_version, tournament_id, stage_name, group_name
+            FROM bronze.fjelstul_wc_groups
+            WHERE edition_key LIKE :edition_pattern
+            ORDER BY edition_key, stage_name, group_name
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    if len(rows) != 125:
+        raise RuntimeError(f"Group backbone historico exige 125 rows. Encontrei {len(rows)}.")
+    return [dict(row) for row in rows]
+
+
+def _fetch_historical_match_rows(conn) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        text(
+            """
+            SELECT edition_key, source_version, tournament_id, match_id, match_date, stage_name, group_name
+            FROM bronze.fjelstul_wc_matches
+            WHERE edition_key LIKE :edition_pattern
+            ORDER BY edition_key, match_date, match_id
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    if len(rows) != HISTORICAL_MATCH_ROW_COUNT:
+        raise RuntimeError(
+            f"Match backbone historico exige {HISTORICAL_MATCH_ROW_COUNT} rows. Encontrei {len(rows)}."
+        )
+    return [dict(row) for row in rows]
+
+
+def _fetch_historical_player_rows(conn) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        text(
+            """
+            WITH refs AS (
+              SELECT player_id, given_name, family_name, source_version
+              FROM bronze.fjelstul_wc_squads
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT player_id, given_name, family_name, source_version
+              FROM bronze.fjelstul_wc_player_appearances
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT
+                player_id,
+                payload->>'given_name' AS given_name,
+                payload->>'family_name' AS family_name,
+                source_version
+              FROM bronze.fjelstul_wc_goals
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT
+                player_id,
+                payload->>'given_name' AS given_name,
+                payload->>'family_name' AS family_name,
+                source_version
+              FROM bronze.fjelstul_wc_bookings
+              WHERE edition_key LIKE :edition_pattern
+              UNION ALL
+              SELECT
+                player_id,
+                payload->>'given_name' AS given_name,
+                payload->>'family_name' AS family_name,
+                source_version
+              FROM bronze.fjelstul_wc_substitutions
+              WHERE edition_key LIKE :edition_pattern
+            )
+            SELECT
+              player_id,
+              min(source_version) AS source_version,
+              min(NULLIF(given_name, '')) AS given_name,
+              min(NULLIF(family_name, '')) AS family_name
+            FROM refs
+            WHERE player_id IS NOT NULL
+            GROUP BY player_id
+            ORDER BY player_id
+            """
+        ),
+        {"edition_pattern": HISTORICAL_WORLD_CUP_EDITION_PATTERN},
+    ).mappings().all()
+    if not rows:
+        raise RuntimeError("Nenhum player historico Fjelstul encontrado para bootstrap source-scoped.")
+    return [dict(row) for row in rows]
+
+
 def _upsert_provider_entity_map(conn, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
@@ -402,6 +689,231 @@ def _upsert_provider_entity_map(conn, rows: list[dict[str, Any]]) -> None:
         ),
         rows,
     )
+
+
+def bootstrap_world_cup_historical_backbone_identity_map() -> dict[str, Any]:
+    context = get_current_context()
+    engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
+    now = _utc_now()
+
+    with StepMetrics(
+        service="airflow",
+        module="world_cup_identity_bootstrap_service",
+        step="bootstrap_world_cup_historical_backbone_identity_map",
+        context=context,
+        dataset="raw.provider_entity_map",
+        table="raw.provider_entity_map",
+    ):
+        with engine.begin() as conn:
+            _validate_historical_fjelstul_backbone_bronze(conn)
+            existing_map = _fetch_existing_historical_fjelstul_map(conn)
+            team_rows = _fetch_historical_team_rows(conn)
+            stage_rows = _fetch_historical_stage_rows(conn)
+            group_rows = _fetch_historical_group_rows(conn)
+            match_rows = _fetch_historical_match_rows(conn)
+
+            provider_rows: list[dict[str, Any]] = []
+
+            for row in team_rows:
+                canonical_id = (
+                    existing_map.get((FJELSTUL_SOURCE, "team", row["team_id"]))
+                    or _historical_team_internal_id(row["team_id"], row["team_code"])
+                )
+                provider_rows.append(
+                    {
+                        "provider": FJELSTUL_SOURCE,
+                        "entity_type": "team",
+                        "source_id": row["team_id"],
+                        "canonical_id": canonical_id,
+                        "edition_key": None,
+                        "source_version": row["source_version"],
+                        "mapping_confidence": "high",
+                        "resolution_method": "historical_team_code_backbone",
+                        "needs_manual_review": False,
+                        "review_reason": None,
+                        "is_active": True,
+                        "team_type": WORLD_CUP_TEAM_TYPE,
+                        "updated_at": now,
+                    }
+                )
+
+            for row in stage_rows:
+                stage_key = FJELSTUL_STAGE_KEY_MAP.get(row["stage_name"])
+                if stage_key is None:
+                    raise RuntimeError(f"Stage historico Fjelstul sem mapeamento canonico: {row['stage_name']}")
+                source_id = f"{row['tournament_id']}::stage::{row['stage_name']}"
+                canonical_id = existing_map.get((FJELSTUL_SOURCE, "stage", source_id)) or _stage_internal_id(
+                    stage_key,
+                    row["edition_key"],
+                )
+                provider_rows.append(
+                    {
+                        "provider": FJELSTUL_SOURCE,
+                        "entity_type": "stage",
+                        "source_id": source_id,
+                        "canonical_id": canonical_id,
+                        "edition_key": row["edition_key"],
+                        "source_version": row["source_version"],
+                        "mapping_confidence": "high",
+                        "resolution_method": "historical_stage_mapping",
+                        "needs_manual_review": False,
+                        "review_reason": None,
+                        "is_active": True,
+                        "team_type": None,
+                        "updated_at": now,
+                    }
+                )
+
+            for row in group_rows:
+                stage_key = FJELSTUL_STAGE_KEY_MAP.get(row["stage_name"])
+                if stage_key is None:
+                    raise RuntimeError(f"Group historico com stage sem mapeamento canonico: {row['stage_name']}")
+                source_id = f"{row['tournament_id']}::group::{row['stage_name']}::{row['group_name']}"
+                canonical_id = existing_map.get((FJELSTUL_SOURCE, "group", source_id)) or _group_internal_id(
+                    stage_key,
+                    _require_group_code(row["group_name"]),
+                    row["edition_key"],
+                )
+                provider_rows.append(
+                    {
+                        "provider": FJELSTUL_SOURCE,
+                        "entity_type": "group",
+                        "source_id": source_id,
+                        "canonical_id": canonical_id,
+                        "edition_key": row["edition_key"],
+                        "source_version": row["source_version"],
+                        "mapping_confidence": "high",
+                        "resolution_method": "historical_group_mapping",
+                        "needs_manual_review": False,
+                        "review_reason": None,
+                        "is_active": True,
+                        "team_type": None,
+                        "updated_at": now,
+                    }
+                )
+
+            for row in match_rows:
+                canonical_id = existing_map.get((FJELSTUL_SOURCE, "match", row["match_id"])) or _match_internal_id()
+                provider_rows.append(
+                    {
+                        "provider": FJELSTUL_SOURCE,
+                        "entity_type": "match",
+                        "source_id": row["match_id"],
+                        "canonical_id": canonical_id,
+                        "edition_key": row["edition_key"],
+                        "source_version": row["source_version"],
+                        "mapping_confidence": "high",
+                        "resolution_method": "historical_fjelstul_match_id_backbone",
+                        "needs_manual_review": False,
+                        "review_reason": None,
+                        "is_active": True,
+                        "team_type": None,
+                        "updated_at": now,
+                    }
+                )
+
+            _upsert_provider_entity_map(conn, provider_rows)
+
+            summary = {
+                "team_rows_upserted": sum(1 for row in provider_rows if row["entity_type"] == "team"),
+                "match_rows_upserted": sum(1 for row in provider_rows if row["entity_type"] == "match"),
+                "stage_rows_upserted": sum(1 for row in provider_rows if row["entity_type"] == "stage"),
+                "group_rows_upserted": sum(1 for row in provider_rows if row["entity_type"] == "group"),
+                "distinct_team_ids": len({row["canonical_id"] for row in provider_rows if row["entity_type"] == "team"}),
+                "editions_with_matches": len({row["edition_key"] for row in provider_rows if row["entity_type"] == "match"}),
+                "editions_with_stages": len({row["edition_key"] for row in provider_rows if row["entity_type"] == "stage"}),
+                "editions_with_groups": len({row["edition_key"] for row in provider_rows if row["entity_type"] == "group"}),
+            }
+
+    log_event(
+        service="airflow",
+        module="world_cup_identity_bootstrap_service",
+        step="summary",
+        status="success",
+        context=context,
+        dataset="raw.provider_entity_map",
+        row_count=(
+            summary["team_rows_upserted"]
+            + summary["match_rows_upserted"]
+            + summary["stage_rows_upserted"]
+            + summary["group_rows_upserted"]
+        ),
+        message=(
+            "Bootstrap historico World Cup concluido | "
+            f"team_rows={summary['team_rows_upserted']} | "
+            f"match_rows={summary['match_rows_upserted']} | "
+            f"stage_rows={summary['stage_rows_upserted']} | "
+            f"group_rows={summary['group_rows_upserted']} | "
+            f"distinct_team_ids={summary['distinct_team_ids']} | "
+            f"match_editions={summary['editions_with_matches']} | "
+            f"stage_editions={summary['editions_with_stages']} | "
+            f"group_editions={summary['editions_with_groups']}"
+        ),
+    )
+    return summary
+
+
+def bootstrap_world_cup_historical_player_identity_map() -> dict[str, Any]:
+    context = get_current_context()
+    engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
+    now = _utc_now()
+
+    with StepMetrics(
+        service="airflow",
+        module="world_cup_identity_bootstrap_service",
+        step="bootstrap_world_cup_historical_player_identity_map",
+        context=context,
+        dataset="raw.provider_entity_map",
+        table="raw.provider_entity_map",
+    ):
+        with engine.begin() as conn:
+            _validate_historical_fjelstul_backbone_bronze(conn)
+            existing_map = _fetch_existing_historical_fjelstul_map(conn)
+            player_rows = _fetch_historical_player_rows(conn)
+
+            provider_rows: list[dict[str, Any]] = []
+            for row in player_rows:
+                canonical_id = existing_map.get((FJELSTUL_SOURCE, "player", row["player_id"])) or _player_internal_id()
+                provider_rows.append(
+                    {
+                        "provider": FJELSTUL_SOURCE,
+                        "entity_type": "player",
+                        "source_id": row["player_id"],
+                        "canonical_id": canonical_id,
+                        "edition_key": None,
+                        "source_version": row["source_version"],
+                        "mapping_confidence": "high",
+                        "resolution_method": "historical_fjelstul_player_id_source_scoped",
+                        "needs_manual_review": False,
+                        "review_reason": None,
+                        "is_active": True,
+                        "team_type": None,
+                        "updated_at": now,
+                    }
+                )
+
+            _upsert_provider_entity_map(conn, provider_rows)
+
+            summary = {
+                "player_rows_upserted": len(provider_rows),
+                "distinct_player_ids": len({row["canonical_id"] for row in provider_rows}),
+            }
+
+    log_event(
+        service="airflow",
+        module="world_cup_identity_bootstrap_service",
+        step="summary",
+        status="success",
+        context=context,
+        dataset="raw.provider_entity_map",
+        row_count=summary["player_rows_upserted"],
+        message=(
+            "Bootstrap historico World Cup players concluido | "
+            f"player_rows={summary['player_rows_upserted']} | "
+            f"distinct_player_ids={summary['distinct_player_ids']}"
+        ),
+    )
+    return summary
 
 
 def _upsert_review_queue(conn, rows: list[dict[str, Any]]) -> None:

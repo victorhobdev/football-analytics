@@ -71,7 +71,10 @@ def _validate_prerequisites(conn, snapshots: dict[str, dict[str, Any]], config: 
             text(f"SELECT DISTINCT source_version FROM {table_name} WHERE edition_key = :edition_key ORDER BY source_version"),
             {"edition_key": config.edition_key},
         ).scalars().all()
-        expected = [snapshots[source_name]["source_version"]]
+        if table_name == "bronze.statsbomb_wc_three_sixty" and config.expected_statsbomb_three_sixty_match_files == 0:
+            expected = [snapshots[source_name]["source_version"]] if rows else []
+        else:
+            expected = [snapshots[source_name]["source_version"]]
         if rows != expected:
             raise RuntimeError(
                 f"Versao do bronze divergente do snapshot ativo em {table_name}: bronze={rows} ativo={expected}"

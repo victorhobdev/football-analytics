@@ -16,6 +16,7 @@ from common.services.world_cup_config import (
     FJELSTUL_SOURCE,
     STATSBOMB_SOURCE,
     WorldCupEditionConfig,
+    fetch_active_world_cup_snapshot,
     fetch_active_world_cup_snapshots,
     get_world_cup_edition_config,
     get_world_cup_edition_config_from_context,
@@ -227,6 +228,14 @@ def _read_csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _world_cup_mens_edition_key(year: str) -> str:
+    return f"fifa_world_cup_mens__{int(year)}"
+
+
+def _is_fjelstul_mens_tournament(item: dict[str, str]) -> bool:
+    return "FIFA Men's World Cup" in str(item.get("tournament_name", ""))
+
+
 def _build_fjelstul_rows(snapshot: dict[str, Any], config: WorldCupEditionConfig) -> dict[str, list[dict[str, Any]]]:
     runtime_root = _resolve_runtime_snapshot_path(snapshot["local_path"])
     manifest_path = _require_file(runtime_root, "CHECKSUMS.sha256")
@@ -356,6 +365,252 @@ def _build_fjelstul_rows(snapshot: dict[str, Any], config: WorldCupEditionConfig
     return rows
 
 
+def _build_fjelstul_historical_rows(snapshot: dict[str, Any]) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    runtime_root = _resolve_runtime_snapshot_path(snapshot["local_path"])
+    manifest_path = _require_file(runtime_root, "CHECKSUMS.sha256")
+    if _manifest_hash(manifest_path) != snapshot["checksum_sha256"]:
+        raise RuntimeError(
+            "Checksum do manifesto do snapshot Fjelstul diverge do valor registrado em control.wc_source_snapshots."
+        )
+
+    _require_file(runtime_root, "README.md")
+    _require_file(runtime_root, "ATTRIBUTION.md")
+    _require_file(runtime_root, "UPSTREAM_LICENSE_EQUIVALENT.md")
+    _require_file(runtime_root, "codebook/csv/datasets.csv")
+    _require_file(runtime_root, "codebook/csv/variables.csv")
+
+    source_version = snapshot["source_version"]
+    source_name = snapshot["source_name"]
+    snapshot_path = snapshot["local_path"]
+    snapshot_checksum = snapshot["checksum_sha256"]
+
+    tournaments_relative = "data-csv/tournaments.csv"
+    tournaments_path = _require_file(runtime_root, tournaments_relative)
+    men_tournaments = [
+        item for item in _read_csv_rows(tournaments_path) if _is_fjelstul_mens_tournament(item)
+    ]
+    men_tournaments = sorted(men_tournaments, key=lambda item: int(item["year"]))
+    if len(men_tournaments) != 22:
+        raise RuntimeError(
+            f"Esperava 22 edicoes masculinas no snapshot Fjelstul. Encontrei {len(men_tournaments)}."
+        )
+
+    tournament_lookup = {
+        item["tournament_id"]: {
+            "edition_key": _world_cup_mens_edition_key(item["year"]),
+            "season_label": str(item["year"]),
+        }
+        for item in men_tournaments
+    }
+    men_tournament_ids = set(tournament_lookup)
+
+    def base_row(item: dict[str, str], relative_path: str) -> dict[str, Any]:
+        tournament_id = item["tournament_id"]
+        edition_key = tournament_lookup[tournament_id]["edition_key"]
+        return {
+            "source_name": source_name,
+            "source_version": source_version,
+            "edition_key": edition_key,
+            "snapshot_path": snapshot_path,
+            "snapshot_checksum_sha256": snapshot_checksum,
+            "source_file": relative_path,
+            "tournament_id": tournament_id,
+            "payload": _serialize_payload(item),
+            "ingested_at": _utc_now(),
+        }
+
+    dataset_specs = {
+        "fjelstul_wc_matches": {
+            "relative_path": "data-csv/matches.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "match_id": item["match_id"],
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "home_team_id": item.get("home_team_id"),
+                "away_team_id": item.get("away_team_id"),
+                "match_date": item.get("match_date"),
+            },
+        },
+        "fjelstul_wc_groups": {
+            "relative_path": "data-csv/groups.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "stage_number": item.get("stage_number"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "count_teams": item.get("count_teams"),
+            },
+        },
+        "fjelstul_wc_group_standings": {
+            "relative_path": "data-csv/group_standings.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "stage_number": item.get("stage_number"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "position": item.get("position"),
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "advanced": item.get("advanced"),
+            },
+        },
+        "fjelstul_wc_manager_appointments": {
+            "relative_path": "data-csv/manager_appointments.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "manager_id": item.get("manager_id"),
+                "family_name": item.get("family_name"),
+                "given_name": item.get("given_name"),
+                "country_name": item.get("country_name"),
+            },
+        },
+        "fjelstul_wc_tournament_stages": {
+            "relative_path": "data-csv/tournament_stages.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "stage_number": item.get("stage_number"),
+                "stage_name": item.get("stage_name"),
+                "group_stage": item.get("group_stage"),
+                "knockout_stage": item.get("knockout_stage"),
+                "start_date": item.get("start_date"),
+                "end_date": item.get("end_date"),
+                "count_matches": item.get("count_matches"),
+                "count_teams": item.get("count_teams"),
+            },
+        },
+        "fjelstul_wc_squads": {
+            "relative_path": "data-csv/squads.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "player_id": item.get("player_id"),
+                "family_name": item.get("family_name"),
+                "given_name": item.get("given_name"),
+                "shirt_number": item.get("shirt_number"),
+                "position_name": item.get("position_name"),
+                "position_code": item.get("position_code"),
+            },
+        },
+        "fjelstul_wc_player_appearances": {
+            "relative_path": "data-csv/player_appearances.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "match_id": item["match_id"],
+                "match_date": item.get("match_date"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "player_id": item.get("player_id"),
+                "family_name": item.get("family_name"),
+                "given_name": item.get("given_name"),
+                "shirt_number": item.get("shirt_number"),
+                "position_name": item.get("position_name"),
+                "position_code": item.get("position_code"),
+                "starter": item.get("starter"),
+                "substitute": item.get("substitute"),
+            },
+        },
+        "fjelstul_wc_goals": {
+            "relative_path": "data-csv/goals.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "goal_id": item.get("goal_id"),
+                "match_id": item["match_id"],
+                "match_date": item.get("match_date"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "player_id": item.get("player_id"),
+                "player_team_id": item.get("player_team_id"),
+                "minute_regulation": item.get("minute_regulation"),
+                "minute_stoppage": item.get("minute_stoppage"),
+                "own_goal": item.get("own_goal"),
+                "penalty": item.get("penalty"),
+            },
+        },
+        "fjelstul_wc_bookings": {
+            "relative_path": "data-csv/bookings.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "booking_id": item.get("booking_id"),
+                "match_id": item["match_id"],
+                "match_date": item.get("match_date"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "player_id": item.get("player_id"),
+                "minute_regulation": item.get("minute_regulation"),
+                "minute_stoppage": item.get("minute_stoppage"),
+                "yellow_card": item.get("yellow_card"),
+                "red_card": item.get("red_card"),
+                "second_yellow_card": item.get("second_yellow_card"),
+                "sending_off": item.get("sending_off"),
+            },
+        },
+        "fjelstul_wc_substitutions": {
+            "relative_path": "data-csv/substitutions.csv",
+            "row_builder": lambda item, relative_path: {
+                **base_row(item, relative_path),
+                "key_id": item["key_id"],
+                "substitution_id": item.get("substitution_id"),
+                "match_id": item["match_id"],
+                "match_date": item.get("match_date"),
+                "stage_name": item.get("stage_name"),
+                "group_name": item.get("group_name"),
+                "team_id": item.get("team_id"),
+                "team_name": item.get("team_name"),
+                "team_code": item.get("team_code"),
+                "player_id": item.get("player_id"),
+                "minute_regulation": item.get("minute_regulation"),
+                "minute_stoppage": item.get("minute_stoppage"),
+                "going_off": item.get("going_off"),
+                "coming_on": item.get("coming_on"),
+            },
+        },
+    }
+
+    rows: dict[str, list[dict[str, Any]]] = {}
+    source_counts: dict[str, int] = {}
+    edition_counts: dict[str, int] = {}
+    for table_name, spec in dataset_specs.items():
+        relative_path = spec["relative_path"]
+        csv_path = _require_file(runtime_root, relative_path)
+        dataset_rows = [
+            item for item in _read_csv_rows(csv_path) if item.get("tournament_id") in men_tournament_ids
+        ]
+        rows[table_name] = [spec["row_builder"](item, relative_path) for item in dataset_rows]
+        source_counts[table_name] = len(dataset_rows)
+        edition_counts[table_name] = len({row["edition_key"] for row in rows[table_name]})
+
+    return rows, {
+        "men_tournament_count": len(men_tournaments),
+        "source_counts": source_counts,
+        "edition_counts": edition_counts,
+    }
+
+
 def _build_insert_sql(table_name: str, columns: list[str]) -> Any:
     rendered_columns: list[str] = []
     for column in columns:
@@ -376,6 +631,24 @@ def _replace_table_rows(conn, table_name: str, rows: list[dict[str, Any]], *, ed
     conn.execute(
         text(f"DELETE FROM bronze.{table_name} WHERE edition_key = :edition_key"),
         {"edition_key": edition_key},
+    )
+    conn.execute(_build_insert_sql(table_name, columns), rows)
+
+
+def _replace_world_cup_scope_rows(conn, table_name: str, rows: list[dict[str, Any]]) -> None:
+    if not rows:
+        raise RuntimeError(f"Nenhuma row preparada para bronze.{table_name}.")
+
+    columns = list(rows[0].keys())
+    conn.execute(
+        text(
+            f"""
+            DELETE FROM bronze.{table_name}
+            WHERE source_name = :source_name
+              AND edition_key LIKE 'fifa_world_cup_mens__%'
+            """
+        ),
+        {"source_name": rows[0]["source_name"]},
     )
     conn.execute(_build_insert_sql(table_name, columns), rows)
 
@@ -403,7 +676,13 @@ def ingest_world_cup_bronze(edition_key: str | None = None) -> dict[str, Any]:
 
         with engine.begin() as conn:
             for table_name, rows in statsbomb_rows.items():
-                _replace_table_rows(conn, table_name, rows, edition_key=config.edition_key)
+                if rows:
+                    _replace_table_rows(conn, table_name, rows, edition_key=config.edition_key)
+                else:
+                    conn.execute(
+                        text(f"DELETE FROM bronze.{table_name} WHERE edition_key = :edition_key"),
+                        {"edition_key": config.edition_key},
+                    )
             for table_name, rows in fjelstul_rows.items():
                 _replace_table_rows(conn, table_name, rows, edition_key=config.edition_key)
 
@@ -443,3 +722,66 @@ def ingest_world_cup_bronze(edition_key: str | None = None) -> dict[str, Any]:
 
 def ingest_world_cup_2022_bronze() -> dict[str, Any]:
     return ingest_world_cup_bronze(DEFAULT_WORLD_CUP_EDITION_KEY)
+
+
+def ingest_world_cup_fjelstul_historical_bronze() -> dict[str, Any]:
+    context = get_current_context()
+    engine = create_engine(_get_required_env("FOOTBALL_PG_DSN"))
+
+    with StepMetrics(
+        service="airflow",
+        module="world_cup_bronze_service",
+        step="load_world_cup_fjelstul_historical_bronze",
+        context=context,
+        dataset="bronze.world_cup_historical_fjelstul",
+        table="bronze.fjelstul_wc_*",
+    ):
+        snapshot = fetch_active_world_cup_snapshot(
+            engine,
+            source_name=FJELSTUL_SOURCE,
+            edition_key="fifa_world_cup_mens__1930",
+        )
+        fjelstul_rows, diagnostics = _build_fjelstul_historical_rows(snapshot)
+
+        with engine.begin() as conn:
+            for table_name, rows in fjelstul_rows.items():
+                _replace_world_cup_scope_rows(conn, table_name, rows)
+
+        summary = {
+            "men_tournaments": diagnostics["men_tournament_count"],
+            **diagnostics["source_counts"],
+        }
+
+        for table_name, edition_count in diagnostics["edition_counts"].items():
+            if table_name in (
+                "fjelstul_wc_matches",
+                "fjelstul_wc_tournament_stages",
+                "fjelstul_wc_squads",
+                "fjelstul_wc_manager_appointments",
+            ) and edition_count != diagnostics["men_tournament_count"]:
+                raise RuntimeError(
+                    f"{table_name} deveria cobrir {diagnostics['men_tournament_count']} edicoes masculinas. "
+                    f"Encontrei {edition_count}."
+                )
+
+        if diagnostics["source_counts"]["fjelstul_wc_matches"] <= 64:
+            raise RuntimeError("Carga historica Fjelstul nao expandiu alem de 2022.")
+
+    log_event(
+        service="airflow",
+        module="world_cup_bronze_service",
+        step="historical_summary",
+        status="success",
+        context=context,
+        dataset="bronze.world_cup_historical_fjelstul",
+        row_count=sum(diagnostics["source_counts"].values()),
+        message=(
+            "Bronze historico Fjelstul carregado com sucesso | "
+            f"edicoes={diagnostics['men_tournament_count']} | "
+            + " | ".join(
+                f"{table_name}={count}"
+                for table_name, count in diagnostics["source_counts"].items()
+            )
+        ),
+    )
+    return summary

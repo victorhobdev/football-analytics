@@ -28,6 +28,7 @@ class WorldCupEditionConfig:
     season_name: str
     kickoff_timezone_label: str | None = None
     kickoff_timezone_offset_hours: int | None = None
+    kickoff_timezone_by_venue_id: dict[str, str] | None = None
     expected_matches: int = 64
     expected_groups: int = 8
     expected_group_standings: int = 32
@@ -46,6 +47,20 @@ WORLD_CUP_EDITIONS: dict[str, WorldCupEditionConfig] = {
         statsbomb_season_name="2018",
         provider="world_cup_2018",
         season_name="2018 FIFA Men's World Cup",
+        kickoff_timezone_by_venue_id={
+            "249": "Europe/Moscow",
+            "255": "Europe/Moscow",
+            "256": "Europe/Moscow",
+            "4130": "Europe/Moscow",
+            "4257": "Europe/Volgograd",
+            "4258": "Europe/Moscow",
+            "4259": "Europe/Moscow",
+            "4260": "Europe/Kaliningrad",
+            "4261": "Asia/Yekaterinburg",
+            "4263": "Europe/Moscow",
+            "4726": "Europe/Moscow",
+            "118023": "Europe/Samara",
+        },
         expected_statsbomb_three_sixty_match_files=0,
     ),
     "fifa_world_cup_mens__2022": WorldCupEditionConfig(
@@ -62,6 +77,105 @@ WORLD_CUP_EDITIONS: dict[str, WorldCupEditionConfig] = {
     ),
 }
 
+WORLD_CUP_STATSBOMB_SAMPLED_EDITIONS: dict[str, WorldCupEditionConfig] = {
+    "fifa_world_cup_mens__1958": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1958",
+        season_label="1958",
+        season_year=1958,
+        fjelstul_tournament_id="WC-1958",
+        statsbomb_season_name="1958",
+        provider="world_cup_1958",
+        season_name="1958 FIFA Men's World Cup",
+        expected_matches=2,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=2,
+        expected_statsbomb_lineup_match_files=2,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+    "fifa_world_cup_mens__1962": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1962",
+        season_label="1962",
+        season_year=1962,
+        fjelstul_tournament_id="WC-1962",
+        statsbomb_season_name="1962",
+        provider="world_cup_1962",
+        season_name="1962 FIFA Men's World Cup",
+        expected_matches=1,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=1,
+        expected_statsbomb_lineup_match_files=1,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+    "fifa_world_cup_mens__1970": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1970",
+        season_label="1970",
+        season_year=1970,
+        fjelstul_tournament_id="WC-1970",
+        statsbomb_season_name="1970",
+        provider="world_cup_1970",
+        season_name="1970 FIFA Men's World Cup",
+        expected_matches=6,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=6,
+        expected_statsbomb_lineup_match_files=6,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+    "fifa_world_cup_mens__1974": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1974",
+        season_label="1974",
+        season_year=1974,
+        fjelstul_tournament_id="WC-1974",
+        statsbomb_season_name="1974",
+        provider="world_cup_1974",
+        season_name="1974 FIFA Men's World Cup",
+        expected_matches=6,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=6,
+        expected_statsbomb_lineup_match_files=6,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+    "fifa_world_cup_mens__1986": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1986",
+        season_label="1986",
+        season_year=1986,
+        fjelstul_tournament_id="WC-1986",
+        statsbomb_season_name="1986",
+        provider="world_cup_1986",
+        season_name="1986 FIFA Men's World Cup",
+        expected_matches=3,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=3,
+        expected_statsbomb_lineup_match_files=3,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+    "fifa_world_cup_mens__1990": WorldCupEditionConfig(
+        edition_key="fifa_world_cup_mens__1990",
+        season_label="1990",
+        season_year=1990,
+        fjelstul_tournament_id="WC-1990",
+        statsbomb_season_name="1990",
+        provider="world_cup_1990",
+        season_name="1990 FIFA Men's World Cup",
+        expected_matches=1,
+        expected_groups=0,
+        expected_group_standings=0,
+        expected_stages=0,
+        expected_statsbomb_event_match_files=1,
+        expected_statsbomb_lineup_match_files=1,
+        expected_statsbomb_three_sixty_match_files=0,
+    ),
+}
+
 
 STATSBOMB_STAGE_KEY_MAP = {
     "Group Stage": "group_stage_1",
@@ -73,7 +187,11 @@ STATSBOMB_STAGE_KEY_MAP = {
 }
 
 FJELSTUL_STAGE_KEY_MAP = {
+    "first round": "group_stage_1",
+    "first group stage": "group_stage_1",
     "group stage": "group_stage_1",
+    "second group stage": "group_stage_2",
+    "final round": "final_round",
     "round of 16": "round_of_16",
     "quarter-finals": "quarter_final",
     "semi-finals": "semi_final",
@@ -106,10 +224,25 @@ def get_world_cup_edition_config_from_context(*, default: str = DEFAULT_WORLD_CU
     return get_world_cup_edition_config(edition_key)
 
 
-def fetch_active_world_cup_snapshots(engine, *, edition_key: str) -> dict[str, dict[str, Any]]:
+def get_world_cup_statsbomb_sampled_edition_config(edition_key: str) -> WorldCupEditionConfig:
+    try:
+        return WORLD_CUP_STATSBOMB_SAMPLED_EDITIONS[edition_key]
+    except KeyError as exc:
+        supported = ", ".join(sorted(WORLD_CUP_STATSBOMB_SAMPLED_EDITIONS))
+        raise RuntimeError(
+            f"Edicao sampled do StatsBomb ainda nao suportada: {edition_key}. "
+            f"Suportadas agora: {supported}"
+        ) from exc
+
+
+def get_world_cup_statsbomb_sampled_edition_configs() -> tuple[WorldCupEditionConfig, ...]:
+    return tuple(WORLD_CUP_STATSBOMB_SAMPLED_EDITIONS[key] for key in sorted(WORLD_CUP_STATSBOMB_SAMPLED_EDITIONS))
+
+
+def fetch_active_world_cup_snapshot(engine, *, source_name: str, edition_key: str) -> dict[str, Any]:
     sql = text(
         """
-        SELECT DISTINCT ON (source_name)
+        SELECT
           source_name,
           source_version,
           source_commit_or_release,
@@ -121,10 +254,9 @@ def fetch_active_world_cup_snapshots(engine, *, edition_key: str) -> dict[str, d
         FROM control.wc_source_snapshots
         WHERE usage_decision = 'now'
           AND is_active = TRUE
-          AND source_name IN (:statsbomb_source, :fjelstul_source)
+          AND source_name = :source_name
           AND edition_scope IN (:edition_key, 'GLOBAL')
         ORDER BY
-          source_name,
           CASE
             WHEN edition_scope = :edition_key THEN 0
             WHEN edition_scope = 'GLOBAL' THEN 1
@@ -132,25 +264,38 @@ def fetch_active_world_cup_snapshots(engine, *, edition_key: str) -> dict[str, d
           END,
           created_at DESC,
           source_commit_or_release DESC
+        LIMIT 1
         """
     )
     with engine.begin() as conn:
-        rows = conn.execute(
+        row = conn.execute(
             sql,
             {
                 "edition_key": edition_key,
-                "statsbomb_source": STATSBOMB_SOURCE,
-                "fjelstul_source": FJELSTUL_SOURCE,
+                "source_name": source_name,
             },
-        ).mappings().all()
+        ).mappings().first()
 
-    snapshots = {row["source_name"]: dict(row) for row in rows}
-    missing = [source for source in (STATSBOMB_SOURCE, FJELSTUL_SOURCE) if source not in snapshots]
-    if missing:
+    if row is None:
         raise RuntimeError(
-            f"Snapshots ativos ausentes para a edicao {edition_key}. Faltando: {missing}"
+            f"Snapshot ativo ausente para source={source_name} na edicao {edition_key}."
         )
-    return snapshots
+    return dict(row)
+
+
+def fetch_active_world_cup_snapshots(engine, *, edition_key: str) -> dict[str, dict[str, Any]]:
+    return {
+        STATSBOMB_SOURCE: fetch_active_world_cup_snapshot(
+            engine,
+            source_name=STATSBOMB_SOURCE,
+            edition_key=edition_key,
+        ),
+        FJELSTUL_SOURCE: fetch_active_world_cup_snapshot(
+            engine,
+            source_name=FJELSTUL_SOURCE,
+            edition_key=edition_key,
+        ),
+    }
 
 
 def fjelstul_stage_source_id(config: WorldCupEditionConfig, stage_name: str) -> str:

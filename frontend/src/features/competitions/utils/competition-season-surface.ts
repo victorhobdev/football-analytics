@@ -34,6 +34,31 @@ export type CompetitionSeasonSurfaceResolution = {
   type: CompetitionSeasonSurfaceType;
 };
 
+export function resolveHybridTableSectionLabel(
+  stage: CompetitionStructureStage | null | undefined,
+): string {
+  return stage?.stageFormat === "group_table" ? "Fase de grupos" : "Fase classificatoria";
+}
+
+export function normalizeCompetitionSeasonSurfaceSection(
+  section: CompetitionSeasonSurfaceSection,
+  surfaceType?: CompetitionSeasonSurfaceType | null,
+): CompetitionSeasonSurfaceSection {
+  if (surfaceType !== "hybrid") {
+    return section;
+  }
+
+  if (section === "highlights") {
+    return "overview";
+  }
+
+  if (section === "rounds") {
+    return "matches";
+  }
+
+  return section;
+}
+
 type ResolveCompetitionSeasonSurfaceInput = {
   competitionType?: CompetitionDef["type"] | null;
   structure?: CompetitionStructureData | null;
@@ -100,24 +125,23 @@ export function resolveCompetitionSeasonSurface(
 
 export function resolveCompetitionSeasonSurfaceSection(
   tab: string | null | undefined,
+  surfaceType?: CompetitionSeasonSurfaceType | null,
 ): CompetitionSeasonSurfaceSection {
+  let section: CompetitionSeasonSurfaceSection;
+
   if (tab === "standings") {
-    return "structure";
+    section = "structure";
+  } else if (tab === "calendar") {
+    section = "matches";
+  } else if (tab === "rankings") {
+    section = "highlights";
+  } else if (tab === "rounds") {
+    section = "rounds";
+  } else {
+    section = "overview";
   }
 
-  if (tab === "calendar") {
-    return "matches";
-  }
-
-  if (tab === "rankings") {
-    return "highlights";
-  }
-
-  if (tab === "rounds") {
-    return "rounds";
-  }
-
-  return "overview";
+  return normalizeCompetitionSeasonSurfaceSection(section, surfaceType);
 }
 
 export function mapCompetitionSeasonSurfaceSectionToLegacyTab(

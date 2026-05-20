@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import {
   ProfileShell,
-  ProfileTag,
   ProfileTabs,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { CanonicalRouteContextSync } from "@/shared/components/routing/CanonicalRouteContextSync";
@@ -26,8 +25,11 @@ type CompetitionSeasonSurfaceShellProps = {
   context: CompetitionSeasonContext;
   hero?: ReactNode;
   mainCanvas?: ReactNode;
+  navAside?: ReactNode;
+  navClassName?: string;
   navItems: SeasonSurfaceNavItem[];
   secondaryRail?: ReactNode;
+  showLocalBreadcrumbs?: boolean;
   summaryStrip?: ReactNode;
   supportingModules?: ReactNode;
 };
@@ -36,8 +38,11 @@ export function CompetitionSeasonSurfaceShell({
   context,
   hero,
   mainCanvas,
+  navAside,
+  navClassName,
   navItems,
   secondaryRail,
+  showLocalBreadcrumbs = true,
   summaryStrip,
   supportingModules,
 }: CompetitionSeasonSurfaceShellProps) {
@@ -46,20 +51,22 @@ export function CompetitionSeasonSurfaceShell({
   return (
     <CanonicalRouteContextSync context={context}>
       <ProfileShell className="space-y-6">
-        <div className="flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
-          <Link className="transition-colors hover:text-[#003526]" href="/competitions">
-            Competicoes
-          </Link>
-          <span className="text-[#8fa097]">/</span>
-          <Link
-            className="transition-colors hover:text-[#003526]"
-            href={buildCompetitionHubPath(context.competitionKey)}
-          >
-            {context.competitionName}
-          </Link>
-          <span className="text-[#8fa097]">/</span>
-          <span>{context.seasonLabel}</span>
-        </div>
+        {showLocalBreadcrumbs ? (
+          <div className="flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
+            <Link className="transition-colors hover:text-[#003526]" href="/competitions">
+              Competicoes
+            </Link>
+            <span className="text-[#8fa097]">/</span>
+            <Link
+              className="transition-colors hover:text-[#003526]"
+              href={buildCompetitionHubPath(context.competitionKey)}
+            >
+              {context.competitionName}
+            </Link>
+            <span className="text-[#8fa097]">/</span>
+            <span>{context.seasonLabel}</span>
+          </div>
+        ) : null}
 
         {hero ? <header className="w-full pb-2">{hero}</header> : null}
         {summaryStrip ? (
@@ -72,6 +79,8 @@ export function CompetitionSeasonSurfaceShell({
 
         <ProfileTabs
           ariaLabel="Navegacao da edicao"
+          aside={navAside}
+          className={navClassName}
           items={navItems}
         />
 

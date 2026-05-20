@@ -5,6 +5,7 @@ import json
 import os
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import pandas as pd
 from airflow.operators.python import get_current_context
@@ -160,19 +161,56 @@ def _world_cup_ids(config: WorldCupEditionConfig) -> dict[str, int]:
     }
 
 
-def _kickoff_to_utc(config: WorldCupEditionConfig, match_date: date, kick_off: str | None) -> datetime:
+def _resolve_kickoff_timezone(
+    config: WorldCupEditionConfig,
+    *,
+    venue_id: Any,
+    venue_name: Any,
+) -> tuple[str, timezone | ZoneInfo]:
+    venue_timezone_map = config.kickoff_timezone_by_venue_id or {}
+    venue_key = None if venue_id is None or pd.isna(venue_id) else str(venue_id).strip()
+    if venue_timezone_map:
+        timezone_name = venue_timezone_map.get(venue_key or "")
+        if not timezone_name:
+            raise RuntimeError(
+                "Edicao "
+                f"{config.edition_key} sem timezone configurado para venue_id={venue_key} venue_name={venue_name}."
+            )
+        try:
+            return timezone_name, ZoneInfo(timezone_name)
+        except ZoneInfoNotFoundError as exc:
+            raise RuntimeError(
+                f"Timezone IANA invalido para edition={config.edition_key} venue_id={venue_key}: {timezone_name}"
+            ) from exc
+
     if not config.kickoff_timezone_label or config.kickoff_timezone_offset_hours is None:
         raise RuntimeError(
             f"Edicao {config.edition_key} ainda nao tem estrategia de timezone de kickoff fechada para raw publish."
         )
+    return config.kickoff_timezone_label, timezone(
+        timedelta(hours=config.kickoff_timezone_offset_hours),
+        name=config.kickoff_timezone_label,
+    )
+
+
+def _kickoff_to_utc(
+    config: WorldCupEditionConfig,
+    match_date: date,
+    kick_off: str | None,
+    *,
+    venue_id: Any,
+    venue_name: Any,
+) -> tuple[str, datetime]:
+    timezone_name, timezone_info = _resolve_kickoff_timezone(
+        config,
+        venue_id=venue_id,
+        venue_name=venue_name,
+    )
     time_part = kick_off or "00:00:00.000"
     local_dt = datetime.strptime(f"{match_date.isoformat()} {time_part}", "%Y-%m-%d %H:%M:%S.%f").replace(
-        tzinfo=timezone(
-            timedelta(hours=config.kickoff_timezone_offset_hours),
-            name=config.kickoff_timezone_label,
-        )
+        tzinfo=timezone_info
     )
-    return local_dt.astimezone(timezone.utc)
+    return timezone_name, local_dt.astimezone(timezone.utc)
 
 
 def _read_fixtures_frame(conn, config: WorldCupEditionConfig, run_id: str, now_utc: datetime) -> pd.DataFrame:
@@ -239,12 +277,22 @@ def _read_fixtures_frame(conn, config: WorldCupEditionConfig, run_id: str, now_u
         ),
         axis=1,
     )
-    df["date_utc"] = df.apply(
-        lambda row: _kickoff_to_utc(config, pd.Timestamp(row["match_date"]).date(), row["kick_off"]),
+    kickoff_fields = df.apply(
+        lambda row: pd.Series(
+            _kickoff_to_utc(
+                config,
+                pd.Timestamp(row["match_date"]).date(),
+                row["kick_off"],
+                venue_id=row["venue_id"],
+                venue_name=row["venue_name"],
+            ),
+            index=["timezone", "date_utc"],
+        ),
         axis=1,
     )
+    df["timezone"] = kickoff_fields["timezone"].astype("string")
+    df["date_utc"] = pd.to_datetime(kickoff_fields["date_utc"], utc=True)
     df["timestamp"] = df["date_utc"].map(lambda value: int(value.timestamp()))
-    df["timezone"] = config.kickoff_timezone_label
     df["referee"] = df["referee_name"]
     df["venue_id"] = pd.to_numeric(df["venue_id"], errors="coerce").astype("Int64")
     df["referee_id"] = pd.to_numeric(df["referee_id"], errors="coerce").astype("Int64")

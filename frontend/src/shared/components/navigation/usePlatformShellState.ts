@@ -46,6 +46,12 @@ type PlatformShellState = {
   surfaceTitle: string;
 };
 
+const COMPACT_HYBRID_SEASON_CHROME_COMPETITION_KEYS = new Set([
+  "champions_league",
+  "libertadores",
+  "sudamericana",
+]);
+
 function decodePathSegment(value: string): string {
   try {
     return decodeURIComponent(value);
@@ -165,6 +171,16 @@ function buildScopeTags(params: {
   return tags;
 }
 
+function shouldUseCompactHybridSeasonChrome(
+  pathname: string,
+  context: CompetitionSeasonContext,
+): boolean {
+  return (
+    isCanonicalSeasonHubPath(pathname) &&
+    COMPACT_HYBRID_SEASON_CHROME_COMPETITION_KEYS.has(context.competitionKey)
+  );
+}
+
 function buildSeasonSurfaceLinks(
   pathname: string,
   currentSearchParams: ReadonlyURLSearchParams,
@@ -177,6 +193,10 @@ function buildSeasonSurfaceLinks(
     dateRangeEnd: string | null;
   },
 ): PlatformShellLink[] {
+  if (shouldUseCompactHybridSeasonChrome(pathname, context)) {
+    return [];
+  }
+
   return [
     buildSurfaceLink(
       pathname,

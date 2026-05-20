@@ -29,8 +29,10 @@ import type {
 } from "@/features/competitions/types";
 import {
   mapCompetitionSeasonSurfaceSectionToLegacyTab,
+  normalizeCompetitionSeasonSurfaceSection,
   resolveCompetitionSeasonSurface,
   resolveCompetitionSeasonSurfaceSection,
+  resolveHybridTableSectionLabel,
   type CompetitionSeasonSurfaceResolution,
   type CompetitionSeasonSurfaceSection,
 } from "@/features/competitions/utils/competition-season-surface";
@@ -64,6 +66,7 @@ import {
   buildCanonicalPlayerPath,
   buildCanonicalTeamPath,
   buildMatchesPath,
+  buildPlayersPath,
   buildRankingPath,
   buildRetainedFilterQueryString,
   buildSeasonHubPath,
@@ -94,6 +97,27 @@ type GroupStandingsQueryState = {
   group: CompetitionStructureStage["groups"][number];
   isError: boolean;
   isLoading: boolean;
+};
+
+type KnockoutStageQueryState = {
+  coverage: CoverageLike;
+  isError: boolean;
+  isLoading: boolean;
+  stage: CompetitionStructureStage;
+  ties: StageTie[];
+};
+
+type BracketSide = "left" | "right";
+
+type BracketSnapshotColumn = {
+  leftTies: StageTie[];
+  rightTies: StageTie[];
+  stageState: KnockoutStageQueryState;
+};
+
+type BracketTeamReference = {
+  teamId?: string | null;
+  teamName?: string | null;
 };
 
 const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -150,18 +174,6 @@ function formatDateWindow(
   }
 
   return null;
-}
-
-function getSurfaceTypeLabel(resolution: CompetitionSeasonSurfaceResolution): string {
-  if (resolution.type === "league") {
-    return "Liga";
-  }
-
-  if (resolution.type === "hybrid") {
-    return "Hibrida";
-  }
-
-  return "Copa";
 }
 
 function buildSeasonSurfaceHref(
@@ -336,20 +348,309 @@ function resolveChampionTie(ties: StageTie[]): StageTie | null {
   return ties.find((tie) => tie.winnerTeamId || tie.winnerTeamName) ?? ties[0];
 }
 
+function normalizeTeamIdentityKey(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return normalized.length > 0 ? normalized : null;
+}
+
+function buildTeamIdentityCandidates(
+  teamId: string | null | undefined,
+  teamName: string | null | undefined,
+): string[] {
+  const candidates = new Set<string>();
+  const normalizedId = normalizeTeamIdentityKey(teamId);
+  const normalizedName = normalizeTeamIdentityKey(teamName);
+
+  if (normalizedId) {
+    candidates.add(`id:${normalizedId}`);
+  }
+
+  if (normalizedName) {
+    candidates.add(`name:${normalizedName}`);
+  }
+
+  return [...candidates];
+}
+
+function matchesTeamIdentity(
+  left: BracketTeamReference,
+  right: BracketTeamReference,
+): boolean {
+  const leftCandidates = buildTeamIdentityCandidates(left.teamId, left.teamName);
+  const rightCandidates = buildTeamIdentityCandidates(right.teamId, right.teamName);
+
+  return leftCandidates.some((candidate) => rightCandidates.includes(candidate));
+}
+
+function buildTieParticipants(tie: StageTie): BracketTeamReference[] {
+  return [
+    {
+      teamId: tie.homeTeamId,
+      teamName: tie.homeTeamName,
+    },
+    {
+      teamId: tie.awayTeamId,
+      teamName: tie.awayTeamName,
+    },
+  ].filter((team) => team.teamId || team.teamName);
+}
+
+function buildAdvancingTeamReference(tie: StageTie): BracketTeamReference[] {
+  if (tie.winnerTeamId || tie.winnerTeamName) {
+    return [
+      {
+        teamId: tie.winnerTeamId,
+        teamName: tie.winnerTeamName,
+      },
+    ];
+  }
+
+  return buildTieParticipants(tie);
+}
+
+function tieFeedsParticipant(tie: StageTie, participant: BracketTeamReference): boolean {
+  return buildAdvancingTeamReference(tie).some((team) => matchesTeamIdentity(team, participant));
+}
+
+function buildParticipantsFromTies(ties: StageTie[]): BracketTeamReference[] {
+  return ties.flatMap((tie) => buildTieParticipants(tie));
+}
+
+function splitStageTiesFallback(ties: StageTie[]): Pick<BracketSnapshotColumn, "leftTies" | "rightTies"> {
+  const midpoint = Math.ceil(ties.length / 2);
+
+  return {
+    leftTies: ties.slice(0, midpoint),
+    rightTies: ties.slice(midpoint),
+  };
+}
+
+function resolveSnapshotColumns(
+  primaryStages: KnockoutStageQueryState[],
+): BracketSnapshotColumn[] {
+  const sideStages = primaryStages.slice(0, -1);
+  const finalTie = primaryStages.at(-1)?.ties[0] ?? null;
+  const columnsByStageId = new Map<string, BracketSnapshotColumn>();
+  let nextStageParticipants: Record<BracketSide, BracketTeamReference[]> | null = finalTie
+    ? {
+        left: [
+          {
+            teamId: finalTie.homeTeamId,
+            teamName: finalTie.homeTeamName,
+          },
+        ].filter((team) => team.teamId || team.teamName),
+        right: [
+          {
+            teamId: finalTie.awayTeamId,
+            teamName: finalTie.awayTeamName,
+          },
+        ].filter((team) => team.teamId || team.teamName),
+      }
+    : null;
+
+  for (let index = sideStages.length - 1; index >= 0; index -= 1) {
+    const stageState = sideStages[index];
+    const fallback = splitStageTiesFallback(stageState.ties);
+
+    if (!nextStageParticipants) {
+      columnsByStageId.set(stageState.stage.stageId, {
+        leftTies: fallback.leftTies,
+        rightTies: fallback.rightTies,
+        stageState,
+      });
+      nextStageParticipants = {
+        left: buildParticipantsFromTies(fallback.leftTies),
+        right: buildParticipantsFromTies(fallback.rightTies),
+      };
+      continue;
+    }
+
+    const currentParticipants = nextStageParticipants;
+    const leftTies = stageState.ties.filter((tie) =>
+      currentParticipants.left.some((participant) => tieFeedsParticipant(tie, participant)),
+    );
+    const rightTies = stageState.ties.filter((tie) =>
+      currentParticipants.right.some((participant) => tieFeedsParticipant(tie, participant)),
+    );
+    const assignedTieIds = new Set([...leftTies, ...rightTies].map((tie) => tie.tieId));
+    const unassignedTies = stageState.ties.filter((tie) => !assignedTieIds.has(tie.tieId));
+    const canUseProgression = leftTies.length > 0 && rightTies.length > 0;
+    const resolvedLeftTies = canUseProgression ? [...leftTies] : [...fallback.leftTies];
+    const resolvedRightTies = canUseProgression ? [...rightTies] : [...fallback.rightTies];
+
+    if (canUseProgression) {
+      for (const tie of unassignedTies) {
+        if (resolvedLeftTies.length <= resolvedRightTies.length) {
+          resolvedLeftTies.push(tie);
+        } else {
+          resolvedRightTies.push(tie);
+        }
+      }
+    }
+
+    columnsByStageId.set(stageState.stage.stageId, {
+      leftTies: resolvedLeftTies,
+      rightTies: resolvedRightTies,
+      stageState,
+    });
+    nextStageParticipants = {
+      left: buildParticipantsFromTies(resolvedLeftTies),
+      right: buildParticipantsFromTies(resolvedRightTies),
+    };
+  }
+
+  return sideStages.map((stageState) => {
+    const resolved = columnsByStageId.get(stageState.stage.stageId);
+
+    if (resolved) {
+      return resolved;
+    }
+
+    const fallback = splitStageTiesFallback(stageState.ties);
+
+    return {
+      leftTies: fallback.leftTies,
+      rightTies: fallback.rightTies,
+      stageState,
+    };
+  });
+}
+
+function resolveTransitionSlotCount(stage: CompetitionStructureStage | null | undefined): number | null {
+  if (!stage || stage.transitions.length === 0) {
+    return null;
+  }
+
+  const totalSlots = stage.transitions.reduce((sum, transition) => {
+    const start = transition.positionFrom ?? transition.positionTo;
+    const end = transition.positionTo ?? transition.positionFrom;
+
+    if (typeof start !== "number" || typeof end !== "number") {
+      return sum;
+    }
+
+    const slotCount = Math.abs(end - start) + 1;
+    return sum + slotCount;
+  }, 0);
+
+  return totalSlots > 0 ? totalSlots : null;
+}
+
+function resolveTransitionSummary(stage: CompetitionStructureStage | null | undefined): string | null {
+  if (!stage || stage.transitions.length === 0) {
+    return null;
+  }
+
+  const primaryTransition = stage.transitions[0];
+  const slotCount = resolveTransitionSlotCount(stage);
+  const targetLabel = primaryTransition?.toStageName ?? primaryTransition?.toStageId ?? "mata-mata";
+
+  if (!slotCount) {
+    return targetLabel;
+  }
+
+  if (stage.stageFormat === "group_table" && stage.groups.length > 0) {
+    return `${slotCount} por grupo avancam para ${targetLabel}`;
+  }
+
+  return `${slotCount} vagas para ${targetLabel}`;
+}
+
+function formatTieResolutionLabel(tie: StageTie): string | null {
+  if (tie.hasPenaltiesMatch) {
+    return "Penaltis";
+  }
+
+  if (tie.hasExtraTimeMatch) {
+    return "Prorrogacao";
+  }
+
+  if (!tie.resolutionType) {
+    return null;
+  }
+
+  if (tie.resolutionType === "aggregate") {
+    return "Agregado";
+  }
+
+  if (tie.resolutionType === "single_match") {
+    return "Jogo unico";
+  }
+
+  return tie.resolutionType.replace(/_/g, " ");
+}
+
+function formatTieMatchCountLabel(matchCount: number): string {
+  return matchCount === 1 ? "1 jogo" : `${matchCount} jogos`;
+}
+
+function useKnockoutStageQueries(
+  context: CompetitionSeasonContext,
+  resolution: CompetitionSeasonSurfaceResolution,
+): KnockoutStageQueryState[] {
+  const queries = useQueries({
+    queries: resolution.knockoutStages.map((stage) => ({
+      queryKey: competitionStructureQueryKeys.ties({
+        competitionKey: context.competitionKey,
+        seasonLabel: context.seasonLabel,
+        stageId: stage.stageId,
+      }),
+      queryFn: () =>
+        fetchStageTies({
+          competitionKey: context.competitionKey,
+          seasonLabel: context.seasonLabel,
+          stageId: stage.stageId,
+        }),
+      enabled: Boolean(context.competitionKey && context.seasonLabel && stage.stageId),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 20 * 60 * 1000,
+    })),
+  });
+
+  return useMemo(
+    () =>
+      resolution.knockoutStages.map((stage, index) => ({
+        coverage: queries[index]?.data?.meta?.coverage ?? { status: "unknown" as const },
+        isError: queries[index]?.isError ?? false,
+        isLoading: queries[index]?.isLoading ?? false,
+        stage,
+        ties: queries[index]?.data?.data?.ties ?? [],
+      })),
+    [queries, resolution.knockoutStages],
+  );
+}
+
 function SeasonSectionHeader({
+  align = "start",
   coverage,
   description,
   eyebrow,
   title,
 }: {
+  align?: "center" | "start";
   coverage?: CoverageLike;
   description: string;
   eyebrow: string;
   title: string;
 }) {
+  const wrapperClass =
+    align === "center"
+      ? "flex flex-col items-center gap-3 text-center"
+      : "flex flex-wrap items-start justify-between gap-4";
+  const copyClass = align === "center" ? "mx-auto max-w-3xl text-center" : undefined;
+
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div>
+    <div className={wrapperClass}>
+      <div className={copyClass}>
         <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">{eyebrow}</p>
         <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
           {title}
@@ -614,14 +915,6 @@ function formatHistoricalMatchCount(matchCount: number | null | undefined) {
   return matchCount.toLocaleString("pt-BR");
 }
 
-function formatHistoricalMinutes(minutesPlayed: number | null | undefined) {
-  if (typeof minutesPlayed !== "number" || !Number.isFinite(minutesPlayed)) {
-    return null;
-  }
-
-  return `${Math.round(minutesPlayed).toLocaleString("pt-BR")} min`;
-}
-
 function resolveLeagueMatchCountFromStandings(rows: StandingsTableRow[]): number | null {
   if (rows.length === 0) {
     return null;
@@ -634,49 +927,6 @@ function resolveLeagueMatchCountFromStandings(rows: StandingsTableRow[]): number
   }
 
   return totalMatchesPlayed / 2;
-}
-
-function HistoricalTopScorerCard({ context }: { context: CompetitionSeasonContext }) {
-  const scorerQuery = useEditionTopScorer(context);
-  const scorer = scorerQuery.data?.scorer ?? null;
-  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
-  const goalsLabel = scorer ? `${scorer.goals.toLocaleString("pt-BR")} gols` : null;
-  const minutesLabel = formatHistoricalMinutes(scorer?.minutesPlayed);
-  const detail = scorerQuery.isLoading
-    ? "Calculando..."
-    : scorerQuery.isError
-      ? "Sem dados disponíveis."
-      : scorer
-        ? [
-            goalsLabel,
-            minutesLabel,
-            scorerQuery.isPartial ? "Cobertura parcial." : null,
-            "",
-          ]
-            .filter(Boolean)
-            .join(" • ")
-        : "Dados insuficientes.";
-
-  const value = scorerQuery.isLoading ? (
-    "..."
-  ) : scorer && scorerHref ? (
-    <Link className="text-[#003526] transition-colors hover:text-[#054d39] hover:underline" href={scorerHref}>
-      {scorer.entityName}
-    </Link>
-  ) : scorer ? (
-    scorer.entityName
-  ) : (
-    "Nao identificado"
-  );
-
-  return (
-    <HistoricalHeroCard
-      detail={detail}
-      label="Artilheiro"
-      tone={scorerQuery.isPartial ? "soft" : "base"}
-      value={value}
-    />
-  );
 }
 
 // ─── Shared visual atoms ──────────────────────────────────────────────────────────────
@@ -990,44 +1240,371 @@ function KnockoutBracketPanel({
   description,
   resolution,
   title,
+  variant = "stacked",
 }: {
   context: CompetitionSeasonContext;
   description: string;
   resolution: CompetitionSeasonSurfaceResolution;
   title: string;
+  variant?: "snapshot" | "stacked";
 }) {
-  const queries = useQueries({
-    queries: resolution.knockoutStages.map((stage) => ({
-      queryKey: competitionStructureQueryKeys.ties({
-        competitionKey: context.competitionKey,
-        seasonLabel: context.seasonLabel,
-        stageId: stage.stageId,
-      }),
-      queryFn: () =>
-        fetchStageTies({
-          competitionKey: context.competitionKey,
-          seasonLabel: context.seasonLabel,
-          stageId: stage.stageId,
-        }),
-      enabled: Boolean(context.competitionKey && context.seasonLabel && stage.stageId),
-      staleTime: 5 * 60 * 1000,
-      gcTime: 20 * 60 * 1000,
-    })),
-  });
-
-  const stages = useMemo(
-    () =>
-      resolution.knockoutStages.map((stage, index) => ({
-        coverage: queries[index]?.data?.meta?.coverage ?? { status: "unknown" as const },
-        isError: queries[index]?.isError ?? false,
-        isLoading: queries[index]?.isLoading ?? false,
-        stage,
-        ties: queries[index]?.data?.data?.ties ?? [],
-      })),
-    [queries, resolution.knockoutStages],
-  );
+  const stages = useKnockoutStageQueries(context, resolution);
 
   const hasPartialCoverage = stages.some((stage) => stage.coverage.status === "partial");
+  const snapshotState = useMemo(() => {
+    const primaryStages = stages.filter((stage) => stage.stage.stageFormat === "knockout");
+
+    return {
+      finalStage: primaryStages.at(-1) ?? null,
+      primaryStages,
+      snapshotColumns: resolveSnapshotColumns(primaryStages),
+      supportingStages: stages.filter((stage) => stage.stage.stageFormat !== "knockout"),
+    };
+  }, [stages]);
+
+  const renderStageCards = (stage: KnockoutStageQueryState) => {
+    if (stage.isError) {
+      return (
+        <ProfileAlert title="Falha ao carregar esta fase" tone="warning">
+          Os confrontos desta etapa nao puderam ser carregados agora.
+        </ProfileAlert>
+      );
+    }
+
+    if (stage.isLoading) {
+      return (
+        <div className="space-y-3">
+          {Array.from({ length: 2 }, (_, index) => (
+            <LoadingSkeleton height={110} key={`${stage.stage.stageId}-loading-${index}`} />
+          ))}
+        </div>
+      );
+    }
+
+    if (stage.ties.length === 0) {
+      return (
+        <EmptyState
+          className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
+          description="Sem confrontos."
+          title="Sem confrontos"
+        />
+      );
+    }
+
+    return (
+      <div className="grid gap-3">
+        {stage.ties.map((tie) => {
+          const resolutionLabel = formatTieResolutionLabel(tie);
+          const windowLabel = formatDateWindow(tie.firstLegAt, tie.lastLegAt);
+
+          return (
+            <div
+              className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-4 py-4"
+              key={tie.tieId}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <ProfileTag>Confronto {tie.tieOrder}</ProfileTag>
+                {resolutionLabel ? <ProfileTag>{resolutionLabel}</ProfileTag> : null}
+              </div>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-[#111c2d]">
+                    {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
+                  </span>
+                  <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                    {tie.homeGoals}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-[#111c2d]">
+                    {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
+                  </span>
+                  <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
+                    {tie.awayGoals}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#57657a]">
+                <span>{formatTieMatchCountLabel(tie.matchCount)}</span>
+                {tie.winnerTeamName ? <span>• classificado: {tie.winnerTeamName}</span> : null}
+                {windowLabel ? <span>• {windowLabel}</span> : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderSnapshotTieCard = (tie: StageTie, side: BracketSide) => (
+    <div
+      className="rounded-[1.02rem] border border-[rgba(191,201,195,0.5)] bg-white px-3 py-3 shadow-[0_14px_34px_-28px_rgba(17,28,45,0.2)]"
+      data-bracket-side={side}
+      data-tie-id={tie.tieId}
+      key={`${side}-${tie.tieId}`}
+    >
+      <div className="flex min-h-[0.85rem] items-center justify-center text-center text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[#6a7890]">
+        {formatTieResolutionLabel(tie) ? <span>{formatTieResolutionLabel(tie)}</span> : null}
+      </div>
+      <div className="mt-2.5 space-y-2">
+        {[
+          {
+            goals: tie.homeGoals,
+            isWinner:
+              tie.winnerTeamId === tie.homeTeamId ||
+              (!!tie.winnerTeamName && tie.winnerTeamName === tie.homeTeamName),
+            teamId: tie.homeTeamId,
+            teamName: tie.homeTeamName ?? tie.homeTeamId ?? "Mandante",
+          },
+          {
+            goals: tie.awayGoals,
+            isWinner:
+              tie.winnerTeamId === tie.awayTeamId ||
+              (!!tie.winnerTeamName && tie.winnerTeamName === tie.awayTeamName),
+            teamId: tie.awayTeamId,
+            teamName: tie.awayTeamName ?? tie.awayTeamId ?? "Visitante",
+          },
+        ].map((team) => (
+          <div className="grid grid-cols-[minmax(0,1fr)_1.75rem] items-center gap-2" key={`${tie.tieId}-${team.teamId ?? team.teamName}`}>
+            <div className="flex min-w-0 items-center gap-2">
+              <TeamBadge size={24} teamId={team.teamId} teamName={team.teamName} />
+              <span className={team.isWinner ? "block min-w-0 text-[0.97rem] font-extrabold leading-[1.08rem] text-[#003526]" : "block min-w-0 text-[0.97rem] font-semibold leading-[1.08rem] text-[#111c2d]"}>
+                {team.teamName}
+              </span>
+            </div>
+            <span className="w-7 text-right font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-none text-[#111c2d]">
+              {team.goals}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSnapshotStageColumn = (
+    column: BracketSnapshotColumn,
+    side: BracketSide,
+  ) => {
+    const ties = side === "left" ? column.leftTies : column.rightTies;
+    const headingClass = "px-1 text-center text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]";
+
+    return (
+      <div
+        className="flex h-full min-w-0 flex-col justify-center gap-2.5"
+        data-bracket-column={`${column.stageState.stage.stageId}-${side}`}
+        key={`${side}-${column.stageState.stage.stageId}`}
+      >
+        <p className={headingClass}>
+          {column.stageState.stage.stageName ?? column.stageState.stage.stageId}
+        </p>
+        {column.stageState.isError ? (
+          <ProfileAlert title="Fase indisponivel" tone="warning">
+            Nao foi possivel montar esta coluna.
+          </ProfileAlert>
+        ) : null}
+        {column.stageState.isLoading ? (
+          <div className="space-y-2.5">
+            {Array.from({ length: 2 }, (_, index) => (
+              <LoadingSkeleton height={96} key={`${side}-${column.stageState.stage.stageId}-${index}`} />
+            ))}
+          </div>
+        ) : null}
+        {!column.stageState.isLoading && !column.stageState.isError && ties.length === 0 ? (
+          <EmptyState
+            className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
+            description="Sem confrontos deste lado."
+            title="Sem confrontos"
+          />
+        ) : null}
+        {!column.stageState.isLoading && !column.stageState.isError
+          ? (
+            <div className="space-y-2.5">
+              {ties.map((tie) => renderSnapshotTieCard(tie, side))}
+            </div>
+          )
+          : null}
+      </div>
+    );
+  };
+
+  if (variant === "snapshot") {
+    return (
+      <ProfilePanel className="space-y-5">
+        <SeasonSectionHeader
+          align="center"
+          description={description}
+          eyebrow="Chaveamento"
+          title={title}
+        />
+
+        {hasPartialCoverage ? (
+          <PartialDataBanner
+            className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
+            coverage={{ status: "partial", label: "Cobertura parcial do chaveamento" }}
+            message="Chaveamento com dados parciais."
+          />
+        ) : null}
+
+        {snapshotState.primaryStages.length === 0 ? (
+          <EmptyState
+            className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
+            description="Nao ha fases eliminatorias suficientes para montar o chaveamento."
+            title="Sem chaveamento"
+          />
+        ) : (
+          <div className="overflow-x-auto pb-1">
+            <div
+              className="grid items-center gap-2.5 xl:gap-3"
+              style={{
+                gridTemplateColumns: `repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(144px, 1.08fr)) minmax(198px, 0.96fr) repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(144px, 1.08fr))`,
+              }}
+            >
+              {snapshotState.snapshotColumns.length > 0
+                ? snapshotState.snapshotColumns.map((column) => renderSnapshotStageColumn(column, "left"))
+                : (
+                  <div className="space-y-3">
+                    <p className="px-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+                      Eliminatoria
+                    </p>
+                  </div>
+                )}
+
+              <div className="flex h-full flex-col justify-center">
+                <div className="mx-auto w-full max-w-[230px] rounded-[1.45rem] border border-[rgba(8,48,35,0.32)] bg-[radial-gradient(circle_at_top,rgba(32,108,79,0.24),transparent_48%),linear-gradient(180deg,#042d21_0%,#06533c_54%,#073d2d_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(0,53,38,0.62)]">
+                  <p className="text-center text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-[#bfe6d6]">
+                    {snapshotState.finalStage?.stage.stageName ?? "Final"}
+                  </p>
+
+                  {snapshotState.finalStage?.isLoading ? <LoadingSkeleton height={180} /> : null}
+
+                  {snapshotState.finalStage?.isError ? (
+                    <ProfileAlert title="Final indisponivel" tone="warning">
+                      Nao foi possivel carregar o confronto decisivo.
+                    </ProfileAlert>
+                  ) : null}
+
+                  {!snapshotState.finalStage?.isLoading && !snapshotState.finalStage?.isError && (snapshotState.finalStage?.ties.length ?? 0) === 0 ? (
+                    <EmptyState
+                      className="mt-4 rounded-[1.2rem] border-white/10 bg-white/8 text-white"
+                      description="Sem confronto consolidado para a decisao."
+                      title="Final indisponivel"
+                    />
+                  ) : null}
+
+                  {!snapshotState.finalStage?.isLoading && !snapshotState.finalStage?.isError && (snapshotState.finalStage?.ties.length ?? 0) > 0 ? (
+                    (() => {
+                      const tie = snapshotState.finalStage?.ties[0];
+                      const championName = tie?.winnerTeamName ?? "Campeao";
+                      const dateLabel = tie ? formatDateWindow(tie.firstLegAt, tie.lastLegAt) : null;
+
+                      return tie ? (
+                        <div className="mt-4 space-y-4">
+                          {dateLabel ? (
+                            <p className="text-center text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">
+                              {dateLabel}
+                            </p>
+                          ) : null}
+
+                          <div className="grid gap-2.5">
+                            {[
+                              {
+                                goals: tie.homeGoals,
+                                isWinner:
+                                  tie.winnerTeamId === tie.homeTeamId ||
+                                  (!!tie.winnerTeamName && tie.winnerTeamName === tie.homeTeamName),
+                                teamId: tie.homeTeamId,
+                                teamName: tie.homeTeamName ?? tie.homeTeamId ?? "Mandante",
+                              },
+                              {
+                                goals: tie.awayGoals,
+                                isWinner:
+                                  tie.winnerTeamId === tie.awayTeamId ||
+                                  (!!tie.winnerTeamName && tie.winnerTeamName === tie.awayTeamName),
+                                teamId: tie.awayTeamId,
+                                teamName: tie.awayTeamName ?? tie.awayTeamId ?? "Visitante",
+                              },
+                            ].map((team) => (
+                              <div
+                                className={team.isWinner ? "rounded-[1rem] border border-[rgba(166,242,209,0.24)] bg-[rgba(255,255,255,0.08)] px-3 py-3" : "rounded-[1rem] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-3"}
+                                key={`final-${team.teamId ?? team.teamName}`}
+                              >
+                                <div className="flex items-center justify-between gap-2.5">
+                                  <div className="flex min-w-0 items-center gap-2.5">
+                                    <TeamBadge size={32} teamId={team.teamId} teamName={team.teamName} />
+                                    <span className={team.isWinner ? "truncate text-[1rem] font-extrabold text-white" : "truncate text-[1rem] font-semibold text-white/88"}>
+                                      {team.teamName}
+                                    </span>
+                                  </div>
+                                  <span className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none text-white">
+                                    {team.goals}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="rounded-[1rem] border border-[rgba(166,242,209,0.16)] bg-[rgba(255,255,255,0.06)] px-3 py-3">
+                            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">
+                              Campeao
+                            </p>
+                            <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.52rem] font-extrabold text-white">
+                              {championName}
+                            </p>
+                            <p className="mt-1.5 text-[0.8rem] text-[#d7efe4]">
+                              {formatTieResolutionLabel(tie) ?? "Decisao da edicao"} • {formatTieMatchCountLabel(tie.matchCount)}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()
+                  ) : null}
+                </div>
+              </div>
+
+              {snapshotState.snapshotColumns.length > 0
+                ? [...snapshotState.snapshotColumns].reverse().map((column) => renderSnapshotStageColumn(column, "right"))
+                : (
+                  <div className="space-y-3">
+                    <p className="px-1 text-right text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+                      Eliminatoria
+                    </p>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
+
+        {snapshotState.supportingStages.length > 0 ? (
+          <div className="space-y-3 rounded-[1.3rem] border border-[rgba(216,227,251,0.72)] bg-[rgba(240,243,255,0.74)] px-4 py-4">
+            <div>
+              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Fases complementares</p>
+              <p className="mt-1 text-sm text-[#57657a]">
+                Etapas preliminares ou de colocacao aparecem fora do bracket principal.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {snapshotState.supportingStages.map((stage) => (
+                <div
+                  className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-white px-4 py-4"
+                  key={`supporting-${stage.stage.stageId}`}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ProfileTag>{stage.stage.stageName ?? stage.stage.stageId}</ProfileTag>
+                    {stage.stage.stageFormat ? <ProfileTag>{getStageFormatLabel(stage.stage.stageFormat)}</ProfileTag> : null}
+                  </div>
+                  <p className="mt-3 text-sm text-[#57657a]">
+                    {stage.ties.length > 0
+                      ? `${stage.ties.length} confrontos registrados nesta etapa.`
+                      : "Sem confrontos consolidados nesta etapa."}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </ProfilePanel>
+    );
+  }
 
   return (
     <ProfilePanel className="space-y-4">
@@ -1053,77 +1630,15 @@ function KnockoutBracketPanel({
         />
       ) : (
         <div className="grid gap-4 xl:grid-cols-4">
-          {stages.map(({ stage, ties, isLoading, isError }) => (
-            <ProfilePanel className="space-y-4" key={stage.stageId} tone={stage.isCurrent ? "soft" : "base"}>
+          {stages.map((stageState) => (
+            <ProfilePanel className="space-y-4" key={stageState.stage.stageId} tone={stageState.stage.isCurrent ? "soft" : "base"}>
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <ProfileTag>{stage.stageName ?? stage.stageId}</ProfileTag>
-                  {stage.stageFormat ? <ProfileTag>{getStageFormatLabel(stage.stageFormat)}</ProfileTag> : null}
+                  <ProfileTag>{stageState.stage.stageName ?? stageState.stage.stageId}</ProfileTag>
+                  {stageState.stage.stageFormat ? <ProfileTag>{getStageFormatLabel(stageState.stage.stageFormat)}</ProfileTag> : null}
                 </div>
               </div>
-
-              {isError ? (
-                <ProfileAlert title="Falha ao carregar esta fase" tone="warning">
-                  Os confrontos desta etapa nao puderam ser carregados agora.
-                </ProfileAlert>
-              ) : null}
-
-              {isLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 2 }, (_, index) => (
-                    <LoadingSkeleton height={110} key={`${stage.stageId}-loading-${index}`} />
-                  ))}
-                </div>
-              ) : null}
-
-              {!isLoading && !isError && ties.length === 0 ? (
-                <EmptyState
-                  className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
-                  description="Sem confrontos."
-                  title="Sem confrontos"
-                />
-              ) : null}
-
-              {!isLoading && ties.length > 0 ? (
-                <div className="grid gap-3">
-                  {ties.map((tie) => (
-                    <div
-                      className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-4 py-4"
-                      key={tie.tieId}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <ProfileTag>Confronto {tie.tieOrder}</ProfileTag>
-                        {tie.resolutionType ? <ProfileTag>{tie.resolutionType}</ProfileTag> : null}
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-semibold text-[#111c2d]">
-                            {tie.homeTeamName ?? tie.homeTeamId ?? "Mandante"}
-                          </span>
-                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
-                            {tie.homeGoals}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-semibold text-[#111c2d]">
-                            {tie.awayTeamName ?? tie.awayTeamId ?? "Visitante"}
-                          </span>
-                          <span className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
-                            {tie.awayGoals}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#57657a]">
-                        <span>{tie.matchCount} jogos</span>
-                        {tie.winnerTeamName ? <span>• classificado: {tie.winnerTeamName}</span> : null}
-                        {formatDateWindow(tie.firstLegAt, tie.lastLegAt) ? (
-                          <span>• {formatDateWindow(tie.firstLegAt, tie.lastLegAt)}</span>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+              {renderStageCards(stageState)}
             </ProfilePanel>
           ))}
         </div>
@@ -1223,6 +1738,9 @@ function GroupPhaseSummaryPanel({
   const columns = useStandingsColumns(context);
   const groupQueries = useGroupStandingsQueries(context, stage);
   const finalStandingsQuery = useSeasonFinalStandings(context, stage?.stageId);
+  const groupQueriesSettled =
+    groupQueries.length > 0 && groupQueries.every((groupQuery) => !groupQuery.isLoading);
+  const hasGroupRows = groupQueries.some((groupQuery) => (groupQuery.data?.rows.length ?? 0) > 0);
 
   if (!stage) {
     return (
@@ -1232,7 +1750,7 @@ function GroupPhaseSummaryPanel({
     );
   }
 
-  if (groupQueries.length === 0) {
+  if (groupQueries.length === 0 || (groupQueriesSettled && !hasGroupRows)) {
     return (
       <FinalStandingsPanel
         context={context}
@@ -1455,132 +1973,6 @@ function EditionHighlightsSection({
         </ProfileAlert>
       )}
     </div>
-  );
-}
-
-function LeagueHeroSummary({ context }: { context: CompetitionSeasonContext }) {
-  const standingsQuery = useSeasonFinalStandings(context);
-  const analyticsQuery = useCompetitionAnalytics({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-  });
-  const champion = resolveChampionFromStandings(standingsQuery.data?.rows ?? []);
-  const analyticsMatchCount = analyticsQuery.data?.seasonSummary.matchCount;
-  const standingsMatchCount = resolveLeagueMatchCountFromStandings(standingsQuery.data?.rows ?? []);
-  const resolvedMatchCount = analyticsMatchCount ?? standingsMatchCount;
-
-  return (
-    <EditionSummaryGrid>
-      <HistoricalHeroCard
-        detail={
-          champion
-            ? "Fonte: classificacao final."
-            : "Sem lider consolidado na classificacao final."
-        }
-        label="Campeao"
-        value={standingsQuery.isLoading ? "..." : champion?.teamName ?? "Nao identificado"}
-      />
-      <HistoricalTopScorerCard context={context} />
-      <HistoricalHeroCard
-        detail={
-          analyticsMatchCount !== undefined
-            ? "Fonte: analytics da edicao."
-            : standingsMatchCount !== null
-              ? "Fonte: classificacao final."
-              : "Total da edicao indisponivel no contrato atual."
-        }
-        label="Partidas jogadas"
-        value={
-          analyticsQuery.isLoading && resolvedMatchCount === null
-            ? "..."
-            : formatHistoricalMatchCount(resolvedMatchCount)
-        }
-      />
-    </EditionSummaryGrid>
-  );
-}
-
-function CupHeroSummary({
-  context,
-  championTieQuery,
-}: {
-  context: CompetitionSeasonContext;
-  championTieQuery: ReturnType<typeof useStageTies>;
-}) {
-  const analyticsQuery = useCompetitionAnalytics({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-  });
-  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
-
-  return (
-    <EditionSummaryGrid>
-      <HistoricalHeroCard
-        detail={
-          championTie?.winnerTeamName
-            ? "Fonte: chave final."
-            : "Chave final sem vencedor consolidado no contrato atual."
-        }
-        label="Campeao"
-        value={championTieQuery.isLoading ? "..." : championTie?.winnerTeamName ?? "Nao identificado"}
-      />
-      <HistoricalTopScorerCard context={context} />
-      <HistoricalHeroCard
-        detail={
-          analyticsQuery.data?.seasonSummary.matchCount !== undefined
-            ? "Fonte: analytics da edicao."
-            : "Total da edicao indisponivel no contrato atual."
-        }
-        label="Partidas jogadas"
-        value={
-          analyticsQuery.isLoading
-            ? "..."
-            : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount)
-        }
-      />
-    </EditionSummaryGrid>
-  );
-}
-
-function HybridHeroSummary({
-  championTieQuery,
-  context,
-}: {
-  championTieQuery: ReturnType<typeof useStageTies>;
-  context: CompetitionSeasonContext;
-}) {
-  const analyticsQuery = useCompetitionAnalytics({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-  });
-  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
-
-  return (
-    <EditionSummaryGrid>
-      <HistoricalHeroCard
-        detail={
-          championTie?.winnerTeamName
-            ? "Fonte: mata-mata final."
-            : "Mata-mata final sem vencedor consolidado no contrato atual."
-        }
-        label="Campeao"
-        value={championTieQuery.isLoading ? "..." : championTie?.winnerTeamName ?? "Nao identificado"}
-      />
-      <HistoricalTopScorerCard context={context} />
-      <HistoricalHeroCard
-        detail={
-          analyticsQuery.data?.seasonSummary.matchCount !== undefined
-            ? "Fonte: analytics da edicao."
-            : "Total da edicao indisponivel no contrato atual."
-        }
-        label="Partidas jogadas"
-        value={
-          analyticsQuery.isLoading
-            ? "..."
-            : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount)
-        }
-      />
-    </EditionSummaryGrid>
   );
 }
 
@@ -2164,6 +2556,336 @@ function CupEditionRail({
 
 // ─── Bloco 5 — Canvas do hibrido ─────────────────────────────────────────────
 
+function HybridActionLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      className="inline-flex items-center rounded-full border border-[rgba(191,201,195,0.5)] bg-white px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#404944] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6] hover:text-[#003526]"
+      href={href}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function HybridSecondaryActions({ context }: { context: CompetitionSeasonContext }) {
+  const filterInput = useSeasonFilterInput(context);
+
+  return (
+    <>
+      <HybridActionLink href={buildRankingPath("player-goals", filterInput)} label="Rankings" />
+      <HybridActionLink href={buildMatchesPath(filterInput)} label="Partidas" />
+      <HybridActionLink href={buildTeamsPath(filterInput)} label="Times" />
+      <HybridActionLink href={buildPlayersPath(filterInput)} label="Jogadores" />
+    </>
+  );
+}
+
+function HybridHistoricalHero({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const championTieQuery = useStageTies({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+    stageId: resolution.finalKnockoutStage?.stageId,
+  });
+
+  const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
+  const championName = championTieQuery.isLoading
+    ? "..."
+    : championTie?.winnerTeamName ?? "Campeao nao identificado";
+  const finalWindow = championTie ? formatDateWindow(championTie.firstLegAt, championTie.lastLegAt) : null;
+  const structureLabel = resolution.editionLabel ?? "Formato hibrido";
+  const matchCount = analyticsQuery.isLoading
+    ? "..."
+    : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount);
+  const progressionSummary =
+    resolveTransitionSummary(resolution.primaryTableStage) ??
+    "Leitura historica da fase de tabela e do chaveamento final.";
+
+  return (
+    <SeasonHeroBlock
+      context={context}
+      description="Arquivo historico da edicao, conectando a fase de tabela ao mata-mata ate a decisao final."
+      eyebrow="Edicao hibrida encerrada"
+      highlightDescription={
+        finalWindow
+          ? `Decisao registrada em ${finalWindow}.`
+          : "Confronto final consolidado no arquivo historico."
+      }
+      highlightLabel="Campeao"
+      highlightValue={championName}
+      summary={
+        <EditionSummaryGrid>
+          <HistoricalHeroCard
+            detail={progressionSummary}
+            label="Estrutura"
+            value={structureLabel}
+          />
+          <HistoricalHeroCard
+            detail={resolution.finalKnockoutStage?.stageName ?? "Sem fase final consolidada."}
+            label="Decisao"
+            value={finalWindow ?? "Data nao informada"}
+          />
+          <HistoricalHeroCard
+            detail={`${resolution.stageCount} fases mapeadas nesta edicao.`}
+            label="Partidas"
+            value={matchCount}
+          />
+        </EditionSummaryGrid>
+      }
+      tags={["Edicao encerrada", structureLabel, context.seasonLabel]}
+      title={`${context.competitionName} ${context.seasonLabel}`}
+    />
+  );
+}
+
+function HybridTableOverviewPanel({
+  context,
+  stage,
+}: {
+  context: CompetitionSeasonContext;
+  stage: CompetitionStructureStage | null;
+}) {
+  const isGroupTable = stage?.stageFormat === "group_table";
+  const groupQueries = useGroupStandingsQueries(context, isGroupTable ? stage : null);
+  const finalStandingsQuery = useSeasonFinalStandings(
+    context,
+    !isGroupTable ? stage?.stageId : null,
+  );
+  const transitionSlots = resolveTransitionSlotCount(stage);
+  const transitionSummary = resolveTransitionSummary(stage);
+
+  if (!stage) {
+    return (
+      <ProfileAlert title="Fase de tabela indisponivel" tone="warning">
+        A estrutura atual nao identificou uma fase classificatoria para esta edicao.
+      </ProfileAlert>
+    );
+  }
+
+  if (isGroupTable) {
+    const previewCount = Math.min(Math.max(transitionSlots ?? 2, 2), 3);
+    const groupQueriesSettled =
+      groupQueries.length > 0 && groupQueries.every((groupQuery) => !groupQuery.isLoading);
+    const hasGroupRows = groupQueries.some((groupQuery) => (groupQuery.data?.rows.length ?? 0) > 0);
+
+    if (groupQueries.length === 0 || (groupQueriesSettled && !hasGroupRows)) {
+      return (
+        <FinalStandingsPanel
+          context={context}
+          description="A classificacao final da fase de grupos segue como referencia principal desta edicao encerrada."
+          query={finalStandingsQuery}
+          title={stage.stageName ?? resolveHybridTableSectionLabel(stage)}
+        />
+      );
+    }
+
+    return (
+      <ProfilePanel className="space-y-5">
+        <SeasonSectionHeader
+          description="Leitura sintetica dos grupos, com foco em classificacao final e transicao para o mata-mata."
+          eyebrow="Fase de tabela"
+          title={stage.stageName ?? resolveHybridTableSectionLabel(stage)}
+        />
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <HistoricalHeroCard
+            detail="Grupos consolidados na estrutura da edicao."
+            label="Grupos"
+            tone="soft"
+            value={String(stage.groups.length)}
+          />
+          <HistoricalHeroCard
+            detail={transitionSlots ? "Numero de vagas por grupo para a etapa seguinte." : "Sem regra de progressao consolidada."}
+            label="Corte"
+            tone="soft"
+            value={transitionSlots ? `${transitionSlots} por grupo` : "-"}
+          />
+          <HistoricalHeroCard
+            detail={transitionSummary ?? "Sem transicao consolidada para a fase seguinte."}
+            label="Transicao"
+            tone="soft"
+            value={stage.transitions[0]?.toStageName ?? "Mata-mata"}
+          />
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          {groupQueries.map((groupQuery) => {
+            const rows = groupQuery.data?.rows ?? [];
+            const previewRows = rows.slice(0, previewCount);
+
+            return (
+              <ProfilePanel className="space-y-4" key={`overview-${groupQuery.group.groupId}`} tone="soft">
+                <SeasonSectionHeader
+                  coverage={groupQuery.coverage}
+                  description="Classificacao final do grupo."
+                  eyebrow="Grupo"
+                  title={groupQuery.group.groupName ?? groupQuery.group.groupId}
+                />
+
+                {groupQuery.isError ? (
+                  <ProfileAlert title="Grupo indisponivel" tone="warning">
+                    Nao foi possivel consolidar este grupo agora.
+                  </ProfileAlert>
+                ) : null}
+
+                {groupQuery.isLoading ? <LoadingSkeleton height={156} /> : null}
+
+                {!groupQuery.isLoading && !groupQuery.isError && previewRows.length === 0 ? (
+                  <EmptyState
+                    className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
+                    description="Sem classificacao suficiente neste grupo."
+                    title="Sem classificacao"
+                  />
+                ) : null}
+
+                {!groupQuery.isLoading && !groupQuery.isError && previewRows.length > 0 ? (
+                  <div className="space-y-3">
+                    {previewRows.map((row) => (
+                      <div
+                        className="flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(191,201,195,0.42)] bg-white px-3 py-3"
+                        key={`${groupQuery.group.groupId}-${row.teamId}`}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(3,53,38,0.08)] text-xs font-bold text-[#003526]">
+                            {row.position}
+                          </span>
+                          <TeamBadge size={28} teamId={row.teamId} teamName={row.teamName ?? row.teamId} />
+                          <Link
+                            className="truncate text-sm font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+                            href={buildCanonicalTeamPath(context, row.teamId)}
+                          >
+                            {row.teamName ?? row.teamId}
+                          </Link>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-extrabold text-[#111c2d]">{row.points} pts</p>
+                          <p className="text-[0.66rem] uppercase tracking-[0.16em] text-[#57657a]">
+                            {row.matchesPlayed} PJ
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {rows.length > previewRows.length ? (
+                      <p className="text-xs text-[#57657a]">
+                        +{rows.length - previewRows.length} equipes no fechamento deste grupo.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </ProfilePanel>
+            );
+          })}
+        </div>
+      </ProfilePanel>
+    );
+  }
+
+  const rows = finalStandingsQuery.data?.rows ?? [];
+  const previewRows = rows.slice(0, Math.min(rows.length, 8));
+  const cutoffRow =
+    transitionSlots && rows.length >= transitionSlots ? rows[transitionSlots - 1] : null;
+
+  return (
+    <ProfilePanel className="space-y-5">
+      <SeasonSectionHeader
+        description="Tabela final da fase classificatoria, com foco no corte para o mata-mata."
+        eyebrow="Fase de tabela"
+        title={stage.stageName ?? resolveHybridTableSectionLabel(stage)}
+      />
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <HistoricalHeroCard
+          detail="Equipes classificadas na fase unica."
+          label="Equipes"
+          tone="soft"
+          value={String(rows.length || stage.expectedTeams || 0)}
+        />
+        <HistoricalHeroCard
+          detail={transitionSummary ?? "Sem regra de progressao consolidada."}
+          label="Corte"
+          tone="soft"
+          value={cutoffRow ? `${cutoffRow.position}º ${cutoffRow.teamName}` : "-"}
+        />
+        <HistoricalHeroCard
+          detail="Jogos disputados por equipe no fechamento da fase."
+          label="Carga"
+          tone="soft"
+          value={rows[0] ? `${rows[0].matchesPlayed} PJ` : "-"}
+        />
+      </div>
+
+      {finalStandingsQuery.isError ? (
+        <ProfileAlert title="Fase classificatoria indisponivel" tone="warning">
+          Nao foi possivel carregar a tabela final desta etapa.
+        </ProfileAlert>
+      ) : null}
+
+      {finalStandingsQuery.isLoading ? <LoadingSkeleton height={220} /> : null}
+
+      {!finalStandingsQuery.isLoading && !finalStandingsQuery.isError && previewRows.length === 0 ? (
+        <EmptyState
+          className="rounded-[1rem] border-[rgba(191,201,195,0.55)] bg-white/80"
+          description="Sem linhas consolidadas para esta fase."
+          title="Sem classificacao"
+        />
+      ) : null}
+
+      {!finalStandingsQuery.isLoading && !finalStandingsQuery.isError && previewRows.length > 0 ? (
+        <div className="grid gap-3">
+          {previewRows.map((row) => {
+            const isCutLine = cutoffRow?.teamId === row.teamId;
+
+            return (
+              <div
+                className={
+                  isCutLine
+                    ? "flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(3,53,38,0.22)] bg-[rgba(139,214,182,0.14)] px-3 py-3"
+                    : "flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(191,201,195,0.42)] bg-white px-3 py-3"
+                }
+                key={`league-overview-${row.teamId}`}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(3,53,38,0.08)] text-xs font-bold text-[#003526]">
+                    {row.position}
+                  </span>
+                  <TeamBadge size={28} teamId={row.teamId} teamName={row.teamName ?? row.teamId} />
+                  <Link
+                    className="truncate text-sm font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+                    href={buildCanonicalTeamPath(context, row.teamId)}
+                  >
+                    {row.teamName ?? row.teamId}
+                  </Link>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-extrabold text-[#111c2d]">{row.points} pts</p>
+                  <p className="text-[0.66rem] uppercase tracking-[0.16em] text-[#57657a]">
+                    {row.goalDiff >= 0 ? `+${row.goalDiff}` : row.goalDiff} SG
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </ProfilePanel>
+  );
+}
+
 function HybridOverviewSection({
   context,
   resolution,
@@ -2173,13 +2895,7 @@ function HybridOverviewSection({
 }) {
   return (
     <div className="space-y-5">
-      <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} />
-      <KnockoutBracketPanel
-        context={context}
-        description="Fase eliminatoria da edicao."
-        resolution={resolution}
-        title="Progressao eliminatoria"
-      />
+      <HybridTableOverviewPanel context={context} stage={resolution.primaryTableStage} />
     </div>
   );
 }
@@ -2202,6 +2918,7 @@ function HybridFactsCard({
   });
   const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
   const groupCount = resolution.primaryTableStage?.groups.length ?? 0;
+  const tableSectionLabel = resolveHybridTableSectionLabel(resolution.primaryTableStage);
 
   const facts: Array<{ label: string; value: string }> = [
     {
@@ -2217,11 +2934,11 @@ function HybridFactsCard({
         : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount),
     },
     {
-      label: "Grupos",
-      value: groupCount > 0 ? String(groupCount) : "-",
+      label: tableSectionLabel,
+      value: groupCount > 0 ? `${groupCount} grupos` : (resolution.primaryTableStage?.stageName ?? "-"),
     },
     {
-      label: "Fases eliminatorias",
+      label: "Mata-mata",
       value: resolution.knockoutStages.length > 0
         ? String(resolution.knockoutStages.length)
         : "-",
@@ -2252,13 +2969,13 @@ function HybridFactsCard({
       </div>
       <div className="space-y-2">
         <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.56)] px-3 py-3">
-          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Fase grupos</p>
+          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Estrutura</p>
           <p className="mt-1 text-sm font-semibold text-[#111c2d]">
-            {resolution.primaryTableStage?.stageName ?? "Nao identificada"}
+            {resolution.editionLabel ?? "Formato hibrido"}
           </p>
         </div>
         <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.56)] px-3 py-3">
-          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Fase final</p>
+          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Decisao</p>
           <p className="mt-1 text-sm font-semibold text-[#111c2d]">
             {resolution.finalKnockoutStage?.stageName ?? "Nao identificado"}
           </p>
@@ -2284,8 +3001,10 @@ function HybridEditionRail({
   );
 }
 
-function buildSurfaceNavLabels(type: CompetitionSeasonSurfaceResolution["type"]): SurfaceNavLabels {
-  if (type === "league") {
+function buildSurfaceNavLabels(
+  resolution: CompetitionSeasonSurfaceResolution,
+): SurfaceNavLabels {
+  if (resolution.type === "league") {
     return {
       highlights: "Destaques estatisticos",
       matches: "Partidas de fechamento",
@@ -2294,12 +3013,12 @@ function buildSurfaceNavLabels(type: CompetitionSeasonSurfaceResolution["type"])
     };
   }
 
-  if (type === "hybrid") {
+  if (resolution.type === "hybrid") {
     return {
       highlights: "Destaques estatisticos",
-      matches: "Mata-mata",
+      matches: "Chaveamento",
       overview: "Visao geral",
-      structure: "Fase classificatoria",
+      structure: resolveHybridTableSectionLabel(resolution.primaryTableStage),
     };
   }
 
@@ -2308,46 +3027,6 @@ function buildSurfaceNavLabels(type: CompetitionSeasonSurfaceResolution["type"])
     matches: "Confrontos decisivos",
     overview: "Caminho do titulo",
     structure: "Chaveamento",
-  };
-}
-
-function buildSeasonHeroDescription(resolution: CompetitionSeasonSurfaceResolution): string {
-  if (resolution.type === "league") {
-    return "";
-  }
-
-  if (resolution.type === "hybrid") {
-    return "";
-  }
-
-  return "";
-}
-
-function buildSeasonHeroHighlight(resolution: CompetitionSeasonSurfaceResolution): {
-  description: string;
-  label: string;
-  value: string;
-} {
-  if (resolution.type === "league") {
-    return {
-      description: "",
-      label: "Leitura principal",
-      value: "Classificacao final",
-    };
-  }
-
-  if (resolution.type === "hybrid") {
-    return {
-      description: "",
-      label: "Leitura principal",
-      value: "Grupos + mata-mata",
-    };
-  }
-
-  return {
-    description: "",
-    label: "Leitura principal",
-    value: "Caminho do titulo",
   };
 }
 
@@ -2405,7 +3084,19 @@ function LeaguePageHeader({
 
 // ─── Rodada a Rodada ──────────────────────────────────────────────────────────
 
-function RoundPickerDropdown({ rounds, activeRoundId, setRoundId, selectedRound }: any) {
+type StandingsRound = StandingsTableData["rounds"][number];
+
+function RoundPickerDropdown({
+  activeRoundId,
+  rounds,
+  selectedRound,
+  setRoundId,
+}: {
+  activeRoundId: string | null;
+  rounds: StandingsRound[];
+  selectedRound?: StandingsRound | null;
+  setRoundId: (roundId: string | null) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -2445,7 +3136,7 @@ function RoundPickerDropdown({ rounds, activeRoundId, setRoundId, selectedRound 
               </button>
             </div>
             <div className="grid grid-cols-6 gap-1.5">
-              {rounds.map((round: any) => {
+              {rounds.map((round) => {
                 const isActive = round.roundId === (activeRoundId ?? selectedRound?.roundId);
                 const shortLabel = round.label.replace(/rodada\s*/i, "").trim();
                 return (
@@ -2534,7 +3225,7 @@ function LeagueSeasonSurface({
   resolution: CompetitionSeasonSurfaceResolution;
 }) {
   const searchParams = useSearchParams();
-  const navLabels = buildSurfaceNavLabels(resolution.type);
+  const navLabels = buildSurfaceNavLabels(resolution);
 
   return (
     <CompetitionSeasonSurfaceShell
@@ -2610,7 +3301,7 @@ function CupSeasonSurface({
     seasonLabel: context.seasonLabel,
     stageId: resolution.finalKnockoutStage?.stageId,
   });
-  const navLabels = buildSurfaceNavLabels(resolution.type);
+  const navLabels = buildSurfaceNavLabels(resolution);
 
   return (
     <CompetitionSeasonSurfaceShell
@@ -2667,40 +3358,45 @@ function HybridSeasonSurface({
   activeSection,
   context,
   resolution,
-  structure,
 }: {
   activeSection: CompetitionSeasonSurfaceSection;
   context: CompetitionSeasonContext;
   resolution: CompetitionSeasonSurfaceResolution;
-  structure: CompetitionStructureData | null;
 }) {
   const searchParams = useSearchParams();
-  const championTieQuery = useStageTies({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-    stageId: resolution.finalKnockoutStage?.stageId,
-  });
-  const navLabels = buildSurfaceNavLabels(resolution.type);
+  const navLabels = buildSurfaceNavLabels(resolution);
+  const overviewBracket = (
+    <KnockoutBracketPanel
+      context={context}
+      description="Snapshot do chaveamento, com progressao da fase eliminatoria ate a final."
+      resolution={resolution}
+      title="Chaveamento ate a final"
+      variant="snapshot"
+    />
+  );
+  const matchesBracket = (
+    <KnockoutBracketPanel
+      context={context}
+      description="Fase eliminatoria da edicao."
+      resolution={resolution}
+      title="Chaveamento final"
+      variant="snapshot"
+    />
+  );
+  const shouldShowHybridRail = activeSection !== "matches";
 
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<CupHeroBanner context={context} tag="Formato Híbrido" />}
+      hero={<HybridHistoricalHero context={context} resolution={resolution} />}
       mainCanvas={
         <>
-          {activeSection === "overview" ? <><CupKpiStrip context={context} resolution={resolution} /><HybridOverviewSection context={context} resolution={resolution} /></> : null}
+          {activeSection === "overview" ? <HybridOverviewSection context={context} resolution={resolution} /> : null}
           {activeSection === "structure" ? <GroupPhaseSummaryPanel context={context} stage={resolution.primaryTableStage} /> : null}
-          {activeSection === "matches" ? (
-            <KnockoutBracketPanel
-              context={context}
-              description="Fase eliminatoria da edicao."
-              resolution={resolution}
-              title="Mata-mata finalizado"
-            />
-          ) : null}
-          {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={structure} /> : null}
+          {activeSection === "matches" ? matchesBracket : null}
         </>
       }
+      navAside={<HybridSecondaryActions context={context} />}
       navItems={[
         {
           href: buildSeasonSurfaceHref(context, "overview", searchParams),
@@ -2720,14 +3416,10 @@ function HybridSeasonSurface({
           key: "matches",
           label: navLabels.matches,
         },
-        {
-          href: buildSeasonSurfaceHref(context, "highlights", searchParams),
-          isActive: activeSection === "highlights",
-          key: "highlights",
-          label: navLabels.highlights,
-        },
       ]}
-      secondaryRail={<HybridEditionRail context={context} resolution={resolution} />}
+      secondaryRail={shouldShowHybridRail ? <HybridEditionRail context={context} resolution={resolution} /> : null}
+      showLocalBreadcrumbs={false}
+      supportingModules={activeSection === "overview" ? overviewBracket : null}
     />
   );
 }
@@ -2737,7 +3429,7 @@ export function CompetitionSeasonSurface({
   initialTab,
 }: CompetitionSeasonSurfaceProps) {
   const competitionDefinition = getCompetitionByKey(context.competitionKey);
-  const activeSection = resolveCompetitionSeasonSurfaceSection(initialTab);
+  const requestedSection = resolveCompetitionSeasonSurfaceSection(initialTab);
   const structureQuery = useCompetitionStructure({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
@@ -2750,6 +3442,7 @@ export function CompetitionSeasonSurface({
       }),
     [competitionDefinition?.type, structureQuery.data],
   );
+  const activeSection = normalizeCompetitionSeasonSurfaceSection(requestedSection, resolution.type);
 
   // Bloco 7: guard de loading para tipos que dependem de estrutura antes de resolver o canvas.
   // Liga (domestic_league) pode renderizar imediatamente sem estrutura.
@@ -2830,7 +3523,6 @@ export function CompetitionSeasonSurface({
         activeSection={activeSection}
         context={context}
         resolution={resolution}
-        structure={structureQuery.data}
       />
     );
   }

@@ -609,7 +609,309 @@ function buildHybridTiesResponse(stageId: string) {
   };
 }
 
-async function setupSeasonSurfaceRoutes(page: Page) {
+function buildLibertadoresHybridStructureResponse() {
+  return {
+    data: {
+      competition: {
+        competitionKey: "libertadores",
+        competitionName: "Copa Libertadores da América",
+        seasonLabel: "2025",
+        formatFamily: "hybrid",
+        seasonFormatCode: "group_stage_knockout",
+        participantScope: "club",
+      },
+      stages: [
+        {
+          stageId: "group_stage",
+          stageName: "Fase de Grupos",
+          stageCode: "group_stage",
+          stageFormat: "group_table",
+          stageOrder: 1,
+          standingsContextMode: null,
+          bracketContextMode: null,
+          groupMode: null,
+          eliminationMode: null,
+          isCurrent: false,
+          groups: [
+            { groupId: "group_a", groupName: "Grupo A", groupOrder: 1, expectedTeams: 4 },
+            { groupId: "group_b", groupName: "Grupo B", groupOrder: 2, expectedTeams: 4 },
+            { groupId: "group_c", groupName: "Grupo C", groupOrder: 3, expectedTeams: 4 },
+            { groupId: "group_d", groupName: "Grupo D", groupOrder: 4, expectedTeams: 4 },
+          ],
+          transitions: [
+            {
+              progressionScope: "group",
+              progressionType: "qualified",
+              positionFrom: 1,
+              positionTo: 2,
+              toStageId: "quarter_final",
+              toStageName: "Quartas de final",
+              toStageFormat: "knockout",
+              toStageOrder: 2,
+            },
+          ],
+        },
+        {
+          stageId: "quarter_final",
+          stageName: "Quartas de final",
+          stageCode: "quarter_final",
+          stageFormat: "knockout",
+          stageOrder: 2,
+          standingsContextMode: null,
+          bracketContextMode: null,
+          groupMode: null,
+          eliminationMode: null,
+          isCurrent: false,
+          groups: [],
+          transitions: [],
+        },
+        {
+          stageId: "semi_final",
+          stageName: "Semifinal",
+          stageCode: "semi_final",
+          stageFormat: "knockout",
+          stageOrder: 3,
+          standingsContextMode: null,
+          bracketContextMode: null,
+          groupMode: null,
+          eliminationMode: null,
+          isCurrent: false,
+          groups: [],
+          transitions: [],
+        },
+        {
+          stageId: "final",
+          stageName: "Final",
+          stageCode: "final",
+          stageFormat: "knockout",
+          stageOrder: 4,
+          standingsContextMode: null,
+          bracketContextMode: null,
+          groupMode: null,
+          eliminationMode: null,
+          isCurrent: true,
+          groups: [],
+          transitions: [],
+        },
+      ],
+    },
+  };
+}
+
+function buildLibertadoresStandingsResponse() {
+  return {
+    data: {
+      competition: {
+        competitionId: "390",
+        competitionKey: "libertadores",
+        competitionName: "Copa Libertadores da América",
+        seasonId: "2025",
+        seasonLabel: "2025",
+      },
+      stage: {
+        stageId: "group_stage",
+        stageName: "Fase de Grupos",
+        expectedTeams: 16,
+      },
+      selectedRound: null,
+      currentRound: null,
+      rounds: [],
+      rows: [
+        {
+          position: 1,
+          teamId: "40",
+          teamName: "Flamengo",
+          matchesPlayed: 6,
+          wins: 4,
+          draws: 1,
+          losses: 1,
+          goalsFor: 12,
+          goalsAgainst: 5,
+          goalDiff: 7,
+          points: 13,
+        },
+        {
+          position: 2,
+          teamId: "42",
+          teamName: "Palmeiras",
+          matchesPlayed: 6,
+          wins: 4,
+          draws: 1,
+          losses: 1,
+          goalsFor: 11,
+          goalsAgainst: 4,
+          goalDiff: 7,
+          points: 13,
+        },
+      ],
+    },
+    meta: {
+      coverage: {
+        status: "complete",
+        percentage: 100,
+        label: "Standings coverage",
+      },
+    },
+  };
+}
+
+function buildLibertadoresGroupStandingsResponse(groupId: string) {
+  const rowsByGroup: Record<string, Array<Record<string, number | string>>> = {
+    group_a: [
+      { position: 1, teamId: "40", teamName: "Flamengo", matchesPlayed: 6, wins: 4, draws: 1, losses: 1, goalsFor: 12, goalsAgainst: 5, goalDiff: 7, points: 13 },
+      { position: 2, teamId: "52", teamName: "LDU Quito", matchesPlayed: 6, wins: 3, draws: 2, losses: 1, goalsFor: 9, goalsAgainst: 6, goalDiff: 3, points: 11 },
+      { position: 3, teamId: "61", teamName: "Talleres", matchesPlayed: 6, wins: 2, draws: 1, losses: 3, goalsFor: 6, goalsAgainst: 8, goalDiff: -2, points: 7 },
+      { position: 4, teamId: "62", teamName: "Carabobo", matchesPlayed: 6, wins: 0, draws: 2, losses: 4, goalsFor: 3, goalsAgainst: 11, goalDiff: -8, points: 2 },
+    ],
+    group_b: [
+      { position: 1, teamId: "42", teamName: "Palmeiras", matchesPlayed: 6, wins: 4, draws: 1, losses: 1, goalsFor: 11, goalsAgainst: 4, goalDiff: 7, points: 13 },
+      { position: 2, teamId: "70", teamName: "Botafogo", matchesPlayed: 6, wins: 3, draws: 1, losses: 2, goalsFor: 8, goalsAgainst: 7, goalDiff: 1, points: 10 },
+      { position: 3, teamId: "71", teamName: "Barcelona SC", matchesPlayed: 6, wins: 2, draws: 1, losses: 3, goalsFor: 7, goalsAgainst: 8, goalDiff: -1, points: 7 },
+      { position: 4, teamId: "72", teamName: "Universitario", matchesPlayed: 6, wins: 1, draws: 1, losses: 4, goalsFor: 4, goalsAgainst: 11, goalDiff: -7, points: 4 },
+    ],
+    group_c: [
+      { position: 1, teamId: "73", teamName: "River Plate", matchesPlayed: 6, wins: 4, draws: 0, losses: 2, goalsFor: 10, goalsAgainst: 5, goalDiff: 5, points: 12 },
+      { position: 2, teamId: "74", teamName: "Sao Paulo", matchesPlayed: 6, wins: 3, draws: 2, losses: 1, goalsFor: 9, goalsAgainst: 6, goalDiff: 3, points: 11 },
+      { position: 3, teamId: "75", teamName: "Independiente del Valle", matchesPlayed: 6, wins: 2, draws: 1, losses: 3, goalsFor: 6, goalsAgainst: 7, goalDiff: -1, points: 7 },
+      { position: 4, teamId: "76", teamName: "Cobresal", matchesPlayed: 6, wins: 1, draws: 1, losses: 4, goalsFor: 5, goalsAgainst: 12, goalDiff: -7, points: 4 },
+    ],
+    group_d: [
+      { position: 1, teamId: "77", teamName: "Racing Club", matchesPlayed: 6, wins: 4, draws: 1, losses: 1, goalsFor: 11, goalsAgainst: 5, goalDiff: 6, points: 13 },
+      { position: 2, teamId: "78", teamName: "Atletico Nacional", matchesPlayed: 6, wins: 3, draws: 1, losses: 2, goalsFor: 8, goalsAgainst: 6, goalDiff: 2, points: 10 },
+      { position: 3, teamId: "79", teamName: "Nacional", matchesPlayed: 6, wins: 2, draws: 1, losses: 3, goalsFor: 7, goalsAgainst: 9, goalDiff: -2, points: 7 },
+      { position: 4, teamId: "80", teamName: "Sportivo Trinidense", matchesPlayed: 6, wins: 1, draws: 1, losses: 4, goalsFor: 4, goalsAgainst: 10, goalDiff: -6, points: 4 },
+    ],
+  };
+
+  return {
+    data: {
+      competition: {
+        competitionId: "390",
+        competitionKey: "libertadores",
+        competitionName: "Copa Libertadores da América",
+        seasonId: "2025",
+        seasonLabel: "2025",
+      },
+      stage: {
+        stageId: "group_stage",
+        stageName: "Fase de Grupos",
+        expectedTeams: 4,
+      },
+      selectedRound: null,
+      currentRound: null,
+      rounds: [],
+      rows: rowsByGroup[groupId] ?? [],
+    },
+    meta: {
+      coverage: {
+        status: "complete",
+        percentage: 100,
+        label: "Group standings coverage",
+      },
+    },
+  };
+}
+
+function buildLibertadoresHybridTiesResponse(stageId: string) {
+  if (stageId === "quarter_final") {
+    return {
+      data: {
+        competition: {
+          competitionKey: "libertadores",
+          competitionName: "Copa Libertadores da América",
+          seasonLabel: "2025",
+          formatFamily: "hybrid",
+          seasonFormatCode: "group_stage_knockout",
+          participantScope: "club",
+        },
+        stage: {
+          stageId: "quarter_final",
+          stageName: "Quartas de final",
+          stageFormat: "knockout",
+          stageOrder: 2,
+          isCurrent: false,
+        },
+        ties: [
+          { tieId: "lib-qf-1", tieOrder: 1, homeTeamId: "52", homeTeamName: "LDU Quito", awayTeamId: "74", awayTeamName: "Sao Paulo", matchCount: 2, firstLegAt: "2025-08-20", lastLegAt: "2025-08-27", homeGoals: 3, awayGoals: 1, winnerTeamId: "52", winnerTeamName: "LDU Quito", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+          { tieId: "lib-qf-2", tieOrder: 2, homeTeamId: "40", homeTeamName: "Flamengo", awayTeamId: "81", awayTeamName: "Estudiantes", matchCount: 2, firstLegAt: "2025-08-21", lastLegAt: "2025-08-28", homeGoals: 2, awayGoals: 0, winnerTeamId: "40", winnerTeamName: "Flamengo", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+          { tieId: "lib-qf-3", tieOrder: 3, homeTeamId: "70", homeTeamName: "Botafogo", awayTeamId: "77", awayTeamName: "Racing Club", matchCount: 2, firstLegAt: "2025-08-20", lastLegAt: "2025-08-27", homeGoals: 2, awayGoals: 1, winnerTeamId: "70", winnerTeamName: "Botafogo", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+          { tieId: "lib-qf-4", tieOrder: 4, homeTeamId: "79", homeTeamName: "Universitario", awayTeamId: "42", awayTeamName: "Palmeiras", matchCount: 2, firstLegAt: "2025-08-21", lastLegAt: "2025-08-28", homeGoals: 0, awayGoals: 3, winnerTeamId: "42", winnerTeamName: "Palmeiras", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+        ],
+      },
+    };
+  }
+
+  if (stageId === "semi_final") {
+    return {
+      data: {
+        competition: {
+          competitionKey: "libertadores",
+          competitionName: "Copa Libertadores da América",
+          seasonLabel: "2025",
+          formatFamily: "hybrid",
+          seasonFormatCode: "group_stage_knockout",
+          participantScope: "club",
+        },
+        stage: {
+          stageId: "semi_final",
+          stageName: "Semifinal",
+          stageFormat: "knockout",
+          stageOrder: 3,
+          isCurrent: false,
+        },
+        ties: [
+          { tieId: "lib-sf-1", tieOrder: 1, homeTeamId: "52", homeTeamName: "LDU Quito", awayTeamId: "42", awayTeamName: "Palmeiras", matchCount: 2, firstLegAt: "2025-09-17", lastLegAt: "2025-09-24", homeGoals: 1, awayGoals: 3, winnerTeamId: "42", winnerTeamName: "Palmeiras", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+          { tieId: "lib-sf-2", tieOrder: 2, homeTeamId: "40", homeTeamName: "Flamengo", awayTeamId: "70", awayTeamName: "Botafogo", matchCount: 2, firstLegAt: "2025-09-18", lastLegAt: "2025-09-25", homeGoals: 2, awayGoals: 1, winnerTeamId: "40", winnerTeamName: "Flamengo", resolutionType: "aggregate", hasExtraTimeMatch: false, hasPenaltiesMatch: false },
+        ],
+      },
+    };
+  }
+
+  return {
+    data: {
+      competition: {
+        competitionKey: "libertadores",
+        competitionName: "Copa Libertadores da América",
+        seasonLabel: "2025",
+        formatFamily: "hybrid",
+        seasonFormatCode: "group_stage_knockout",
+        participantScope: "club",
+      },
+      stage: {
+        stageId: "final",
+        stageName: "Final",
+        stageFormat: "knockout",
+        stageOrder: 4,
+        isCurrent: true,
+      },
+      ties: [
+        {
+          tieId: "lib-final-1",
+          tieOrder: 1,
+          homeTeamId: "40",
+          homeTeamName: "Flamengo",
+          awayTeamId: "42",
+          awayTeamName: "Palmeiras",
+          matchCount: 1,
+          firstLegAt: "2025-11-29",
+          lastLegAt: "2025-11-29",
+          homeGoals: 2,
+          awayGoals: 0,
+          winnerTeamId: "40",
+          winnerTeamName: "Flamengo",
+          resolutionType: "single_match",
+          hasExtraTimeMatch: false,
+          hasPenaltiesMatch: false,
+        },
+      ],
+    },
+  };
+}
+
+async function setupSeasonSurfaceRoutes(
+  page: Page,
+  options: { missingGroupStandings?: boolean } = {},
+) {
   await page.route("**/api/v1/teams**", async (route) => {
     await json(route, { data: { items: [] } });
   });
@@ -630,17 +932,21 @@ async function setupSeasonSurfaceRoutes(page: Page) {
           competitionKey,
           competitionName: competitionKey,
           seasonLabel,
-          formatFamily: competitionKey === "champions_league" ? "hybrid" : "knockout",
+          formatFamily:
+            competitionKey === "champions_league" || competitionKey === "libertadores"
+              ? "hybrid"
+              : "knockout",
           seasonFormatCode: "test_format",
           participantScope: "club",
         },
         seasonSummary: {
-          matchCount: 10,
-          totalStages: competitionKey === "champions_league" ? 3 : 3,
-          tableStages: competitionKey === "champions_league" ? 1 : 0,
-          knockoutStages: 2,
-          groupCount: 0,
-          tieCount: 2,
+          matchCount: competitionKey === "libertadores" ? 34 : 10,
+          totalStages: competitionKey === "libertadores" ? 4 : 3,
+          tableStages:
+            competitionKey === "champions_league" || competitionKey === "libertadores" ? 1 : 0,
+          knockoutStages: competitionKey === "libertadores" ? 3 : 2,
+          groupCount: competitionKey === "libertadores" ? 4 : 0,
+          tieCount: competitionKey === "libertadores" ? 7 : 2,
           averageGoals: 2.8,
         },
         stageAnalytics: [],
@@ -663,6 +969,11 @@ async function setupSeasonSurfaceRoutes(page: Page) {
       return;
     }
 
+    if (competitionKey === "libertadores") {
+      await json(route, buildLibertadoresHybridStructureResponse());
+      return;
+    }
+
     await noContent(route);
   });
 
@@ -681,10 +992,29 @@ async function setupSeasonSurfaceRoutes(page: Page) {
       return;
     }
 
+    if (competitionKey === "libertadores") {
+      await json(route, buildLibertadoresHybridTiesResponse(stageId));
+      return;
+    }
+
     await noContent(route);
   });
 
   await page.route("**/api/v1/group-standings**", async (route) => {
+    const url = new URL(route.request().url());
+    const competitionKey = url.searchParams.get("competitionKey");
+    const groupId = url.searchParams.get("groupId") ?? "";
+
+    if (options.missingGroupStandings) {
+      await noContent(route);
+      return;
+    }
+
+    if (competitionKey === "libertadores") {
+      await json(route, buildLibertadoresGroupStandingsResponse(groupId));
+      return;
+    }
+
     await noContent(route);
   });
 
@@ -699,6 +1029,11 @@ async function setupSeasonSurfaceRoutes(page: Page) {
       return;
     }
 
+    if (competitionId === "390" || competitionKey === "libertadores") {
+      await json(route, buildLibertadoresStandingsResponse());
+      return;
+    }
+
     await json(route, buildHybridStandingsResponse());
   });
 
@@ -708,6 +1043,11 @@ async function setupSeasonSurfaceRoutes(page: Page) {
     const roundId = url.searchParams.get("roundId") ?? "38";
 
     if (competitionId === "732") {
+      await json(route, buildCupMatchesResponse());
+      return;
+    }
+
+    if (competitionId === "390") {
       await json(route, buildCupMatchesResponse());
       return;
     }
@@ -730,32 +1070,33 @@ test.describe("Fluxo critico: competition season surface orientada por tipo", ()
     await page.locator(`a[href="${seasonHubHref}"]`).first().click();
 
     await expect(page).toHaveURL(/\/competitions\/premier_league\/seasons\/2024%2F2025$/);
-    await expect(page.getByRole("heading", { name: "Premier League 2024/2025" })).toBeVisible();
-    await expect(page.getByText("Liga encerrada", { exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Classificacao final" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Premier League", exact: true })).toBeVisible();
+    await expect(page.getByText("Temporada 2024/2025", { exact: true })).toBeVisible();
+    await expect(page.getByText("Pontos Corridos", { exact: true })).toBeVisible();
+    await expect(page.getByText("Classificacao final").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Liverpool" }).first()).toBeVisible();
     await expect(page.locator("#global-filter-competition-id")).toBeEnabled();
 
-    await seasonNav.getByRole("link", { name: "Classificacao final" }).click();
+    await seasonNav.getByRole("link", { name: "Tabela completa" }).click();
 
     await expect(page).toHaveURL(/tab=standings/);
-    await expect(page.getByRole("heading", { name: "Classificacao final" }).first()).toBeVisible();
+    await expect(page.getByText("Classificacao final").first()).toBeVisible();
     await expect(page.getByText("Dados parciais.")).toBeVisible();
 
-    await page.locator("#global-filter-round-id").fill("29");
+    await page.goto(`${seasonHubHref}?tab=standings&roundId=29`);
 
     await expect.poll(() => page.url()).toContain("tab=standings");
     await expect.poll(() => page.url()).toContain("roundId=29");
     await expect.poll(() => page.url()).not.toContain("competitionId=");
     await expect.poll(() => page.url()).not.toContain("seasonId=");
 
-    await seasonNav.getByRole("link", { name: "Partidas marcantes" }).click();
+    await seasonNav.getByRole("link", { name: "Partidas de fechamento" }).click();
 
     await expect(page).toHaveURL(/tab=calendar/);
     await expect(page).toHaveURL(/roundId=29/);
     await expect(page.getByRole("heading", { name: "Partidas marcantes da temporada" })).toBeVisible();
 
-    await seasonNav.getByRole("link", { name: "Destaques da edicao" }).click();
+    await seasonNav.getByRole("link", { name: "Destaques estatisticos" }).click();
 
     await expect(page).toHaveURL(/tab=rankings/);
     await expect(page).toHaveURL(/roundId=29/);
@@ -775,10 +1116,10 @@ test.describe("Fluxo critico: competition season surface orientada por tipo", ()
 
     await page.goto("/competitions/copa_do_brasil/seasons/2024");
 
-    await expect(page.getByRole("heading", { name: "Copa do Brasil 2024" })).toBeVisible();
-    await expect(page.getByText("Copa encerrada", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Copa do Brasil", exact: true })).toBeVisible();
+    await expect(page.getByText("Copa", { exact: true })).toBeVisible();
     await expect(page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Chaveamento" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Flamengo", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Flamengo ate o titulo" })).toBeVisible();
 
     await page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Chaveamento" }).click();
 
@@ -787,26 +1128,106 @@ test.describe("Fluxo critico: competition season surface orientada por tipo", ()
     await expect(page.getByText("Palmeiras").first()).toBeVisible();
   });
 
-  test("hibrida separa fase classificatoria e mata-mata na mesma edicao", async ({ page }) => {
+  test("hibrida com fase unica usa tres tabs e aliases legados", async ({ page }) => {
+    const seasonNav = page.getByLabel("Navegacao da edicao");
+
     await setupSeasonSurfaceRoutes(page);
 
     await page.goto("/competitions/champions_league/seasons/2024%2F2025");
 
     await expect(page.getByRole("heading", { name: "UEFA Champions League 2024/2025" })).toBeVisible();
     await expect(page.getByText("Edicao hibrida encerrada", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Fase classificatoria" })).toBeVisible();
-    await expect(page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Mata-mata" })).toBeVisible();
+    await expect(seasonNav.getByRole("link")).toHaveCount(3);
+    await expect(seasonNav.getByRole("link", { name: "Visao geral" })).toHaveAttribute("aria-current", "page");
+    await expect(seasonNav.getByRole("link", { name: "Fase classificatoria" })).toBeVisible();
+    await expect(seasonNav.getByRole("link", { name: "Chaveamento" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Chaveamento ate a final" })).toBeVisible();
 
-    await page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Fase classificatoria" }).click();
+    await seasonNav.getByRole("link", { name: "Fase classificatoria" }).click();
 
     await expect(page).toHaveURL(/tab=standings/);
-    await expect(page.getByRole("heading", { name: "League Phase" })).toBeVisible();
+    await expect(page.getByText("League Phase").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Liverpool" }).first()).toBeVisible();
 
-    await page.getByLabel("Navegacao da edicao").getByRole("link", { name: "Mata-mata" }).click();
+    await seasonNav.getByRole("link", { name: "Chaveamento" }).click();
 
     await expect(page).toHaveURL(/tab=calendar/);
-    await expect(page.getByRole("heading", { name: "Mata-mata finalizado" })).toBeVisible();
-    await expect(page.getByText("Final", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Chaveamento final" })).toBeVisible();
+    await expect(page.getByText(/Jogo unico.*1 jogo/).first()).toBeVisible();
+
+    await page.goto("/competitions/champions_league/seasons/2024%2F2025?tab=rankings");
+
+    await expect(page).toHaveURL(/tab=rankings/);
+    await expect(seasonNav.getByRole("link", { name: "Visao geral" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("heading", { name: "Chaveamento ate a final" })).toBeVisible();
+
+    await page.goto("/competitions/champions_league/seasons/2024%2F2025?tab=rounds");
+
+    await expect(page).toHaveURL(/tab=rounds/);
+    await expect(seasonNav.getByRole("link", { name: "Chaveamento" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("heading", { name: "Chaveamento final" })).toBeVisible();
+  });
+
+  test("hibrida com grupos usa tres tabs e renderiza fallback de classificacao", async ({ page }) => {
+    const seasonNav = page.getByLabel("Navegacao da edicao");
+    const quarterFinalLeft = page.locator('[data-bracket-column="quarter_final-left"]');
+    const quarterFinalRight = page.locator('[data-bracket-column="quarter_final-right"]');
+
+    await setupSeasonSurfaceRoutes(page);
+
+    await page.goto("/competitions/libertadores/seasons/2025");
+
+    await expect(page.getByRole("heading", { name: "Copa Libertadores da América 2025" })).toBeVisible();
+    await expect(page.getByText("Edicao hibrida encerrada", { exact: true })).toBeVisible();
+    await expect(seasonNav.getByRole("link")).toHaveCount(3);
+    await expect(seasonNav.getByRole("link", { name: "Visao geral" })).toHaveAttribute("aria-current", "page");
+    await expect(seasonNav.getByRole("link", { name: "Fase de grupos" })).toBeVisible();
+    await expect(seasonNav.getByRole("link", { name: "Chaveamento" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Grupo A" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Flamengo" }).first()).toBeVisible();
+
+    await seasonNav.getByRole("link", { name: "Fase de grupos" }).click();
+
+    await expect(page).toHaveURL(/tab=standings/);
+    await expect(page.getByRole("heading", { name: "Fase de Grupos" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Grupo A" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Flamengo" }).first()).toBeVisible();
+
+    await seasonNav.getByRole("link", { name: "Chaveamento" }).click();
+
+    await expect(page).toHaveURL(/tab=calendar/);
+    await expect(page.getByRole("heading", { name: "Chaveamento final" })).toBeVisible();
+    await expect(quarterFinalLeft).toContainText("Flamengo");
+    await expect(quarterFinalLeft).toContainText("Botafogo");
+    await expect(quarterFinalLeft).not.toContainText("Palmeiras");
+    await expect(quarterFinalRight).toContainText("LDU Quito");
+    await expect(quarterFinalRight).toContainText("Palmeiras");
+    await expect(quarterFinalRight).not.toContainText("Flamengo");
+
+    await page.goto("/competitions/libertadores/seasons/2025?tab=rounds");
+
+    await expect(page).toHaveURL(/tab=rounds/);
+    await expect(seasonNav.getByRole("link", { name: "Chaveamento" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("heading", { name: "Chaveamento final" })).toBeVisible();
+  });
+
+  test("hibrida com grupos usa standings final quando group-standings falta", async ({ page }) => {
+    const seasonNav = page.getByLabel("Navegacao da edicao");
+
+    await setupSeasonSurfaceRoutes(page, { missingGroupStandings: true });
+
+    await page.goto("/competitions/libertadores/seasons/2025");
+
+    await expect(seasonNav.getByRole("link")).toHaveCount(3);
+    await expect(page.getByRole("heading", { name: "Fase de Grupos" })).toBeVisible();
+    await expect(page.getByText("A classificacao final da fase de grupos segue como referencia principal desta edicao encerrada.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Flamengo" }).first()).toBeVisible();
+
+    await seasonNav.getByRole("link", { name: "Fase de grupos" }).click();
+
+    await expect(page).toHaveURL(/tab=standings/);
+    await expect(page.getByRole("heading", { name: "Fase de Grupos" })).toBeVisible();
+    await expect(page.getByText("A fase classificatoria desta edicao foi encerrada e a tabela final segue como referencia central.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Flamengo" }).first()).toBeVisible();
   });
 });

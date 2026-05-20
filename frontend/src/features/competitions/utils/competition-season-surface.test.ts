@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { CompetitionStructureData, CompetitionStructureStage } from "@/features/competitions/types";
 import {
+  normalizeCompetitionSeasonSurfaceSection,
   mapCompetitionSeasonSurfaceSectionToLegacyTab,
   resolveCompetitionSeasonSurface,
   resolveCompetitionSeasonSurfaceSection,
+  resolveHybridTableSectionLabel,
 } from "@/features/competitions/utils/competition-season-surface";
 
 function buildStage(
@@ -109,8 +111,22 @@ describe("competition-season-surface utils", () => {
     expect(resolveCompetitionSeasonSurfaceSection("calendar")).toBe("matches");
     expect(resolveCompetitionSeasonSurfaceSection("rankings")).toBe("highlights");
     expect(resolveCompetitionSeasonSurfaceSection("unknown")).toBe("overview");
+    expect(resolveCompetitionSeasonSurfaceSection("rankings", "hybrid")).toBe("overview");
+    expect(resolveCompetitionSeasonSurfaceSection("rounds", "hybrid")).toBe("matches");
+    expect(normalizeCompetitionSeasonSurfaceSection("highlights", "hybrid")).toBe("overview");
+    expect(normalizeCompetitionSeasonSurfaceSection("rounds", "hybrid")).toBe("matches");
     expect(mapCompetitionSeasonSurfaceSectionToLegacyTab("structure")).toBe("standings");
     expect(mapCompetitionSeasonSurfaceSectionToLegacyTab("matches")).toBe("calendar");
     expect(mapCompetitionSeasonSurfaceSectionToLegacyTab("highlights")).toBe("rankings");
+  });
+
+  it("resolves the hybrid table label from the detected table stage", () => {
+    expect(resolveHybridTableSectionLabel(buildStage("groups", "group_table", 1))).toBe(
+      "Fase de grupos",
+    );
+    expect(resolveHybridTableSectionLabel(buildStage("league", "league_table", 1))).toBe(
+      "Fase classificatoria",
+    );
+    expect(resolveHybridTableSectionLabel(null)).toBe("Fase classificatoria");
   });
 });
