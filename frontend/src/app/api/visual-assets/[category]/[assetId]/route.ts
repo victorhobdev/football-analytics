@@ -4,7 +4,8 @@ import path from "path";
 import { NextResponse, type NextRequest } from "next/server";
 
 type ManifestEntry = {
-  entity_id?: number;
+  entity_id?: number | string;
+  entity_key?: string;
   local_path?: string;
   content_type?: string;
 };
@@ -13,7 +14,8 @@ type ManifestFile = {
   entries?: ManifestEntry[];
 };
 
-const ALLOWED_CATEGORIES = new Set(["clubs", "competitions", "players"]);
+const ALLOWED_CATEGORIES = new Set(["clubs", "competitions", "countries", "players"]);
+const ASSET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 type CachedManifest = {
   entries: ManifestEntry[];
   mtimeMs: number;
@@ -58,17 +60,25 @@ function resolveManifestBaseUrl(): string | null {
   );
 }
 
-function resolveRemoteManifestUrl(category: string): string | null {
+function resolveRemoteManifestUrl(fileName: string): string | null {
   const baseUrl = resolveManifestBaseUrl();
   if (!baseUrl) {
     return null;
   }
 
-  return new URL(`${category}.json`, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).toString();
+  return new URL(fileName, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).toString();
 }
 
-function resolveManifestPath(category: string): string {
-  return path.resolve(resolveVisualAssetsRoot(), "manifests", `${category}.json`);
+function resolveManifestPath(fileName: string): string {
+  return path.resolve(resolveVisualAssetsRoot(), "manifests", fileName);
+}
+
+function buildManifestFileNames(category: string): string[] {
+  const fileNames = [`${category}.json`];
+  if (category !== "countries") {
+    fileNames.push(`${category}.overrides.json`);
+  }
+  return fileNames;
 }
 
 function normalizeAssetRelativePath(localPath: string): string | null {
@@ -144,41 +154,69 @@ async function fetchPublicAsset(publicAssetUrl: string, fallbackContentType?: st
   });
 }
 
-async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
-  const remoteManifestUrl = resolveRemoteManifestUrl(category);
-  if (remoteManifestUrl) {
-    const cacheKey = `remote:${category}`;
-    const cached = manifestCache.get(cacheKey);
-    const now = Date.now();
-
-    if (cached?.loadedAtMs && now - cached.loadedAtMs < REMOTE_MANIFEST_CACHE_TTL_MS) {
-      return cached.entries;
-    }
-
-    const response = await fetch(remoteManifestUrl, {
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      const error = new Error(`Unable to load visual asset manifest: ${remoteManifestUrl}`);
-      (error as NodeJS.ErrnoException).code = response.status === 404 ? "ENOENT" : "EIO";
-      throw error;
-    }
-
-    const parsedManifest = (await response.json()) as ManifestFile;
-    const entries = Array.isArray(parsedManifest.entries) ? parsedManifest.entries : [];
-    manifestCache.set(cacheKey, {
-      entries,
-      mtimeMs: now,
-      loadedAtMs: now,
-    });
-    return entries;
+async function loadRemoteManifestEntries(
+  fileName: string,
+  optional = false,
+): Promise<ManifestEntry[]> {
+  const remoteManifestUrl = resolveRemoteManifestUrl(fileName);
+  if (!remoteManifestUrl) {
+    return [];
   }
 
-  const manifestPath = resolveManifestPath(category);
-  const manifestStat = await fs.stat(manifestPath);
-  const cacheKey = `local:${category}`;
+  const cacheKey = `remote:${fileName}`;
   const cached = manifestCache.get(cacheKey);
+  const now = Date.now();
 
+  if (cached?.loadedAtMs && now - cached.loadedAtMs < REMOTE_MANIFEST_CACHE_TTL_MS) {
+    return cached.entries;
+  }
+
+  const response = await fetch(remoteManifestUrl, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    if (optional && response.status === 404) {
+      manifestCache.set(cacheKey, {
+        entries: [],
+        mtimeMs: now,
+        loadedAtMs: now,
+      });
+      return [];
+    }
+
+    const error = new Error(`Unable to load visual asset manifest: ${remoteManifestUrl}`);
+    (error as NodeJS.ErrnoException).code = response.status === 404 ? "ENOENT" : "EIO";
+    throw error;
+  }
+
+  const parsedManifest = (await response.json()) as ManifestFile;
+  const entries = Array.isArray(parsedManifest.entries) ? parsedManifest.entries : [];
+  manifestCache.set(cacheKey, {
+    entries,
+    mtimeMs: now,
+    loadedAtMs: now,
+  });
+  return entries;
+}
+
+async function loadLocalManifestEntries(
+  fileName: string,
+  optional = false,
+): Promise<ManifestEntry[]> {
+  const manifestPath = resolveManifestPath(fileName);
+  let manifestStat: Awaited<ReturnType<typeof fs.stat>>;
+  try {
+    manifestStat = await fs.stat(manifestPath);
+  } catch (error) {
+    if (optional && (error as NodeJS.ErrnoException).code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+
+  const cacheKey = `local:${fileName}`;
+  const cached = manifestCache.get(cacheKey);
   if (cached && cached.mtimeMs === manifestStat.mtimeMs) {
     return cached.entries;
   }
@@ -194,13 +232,51 @@ async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
   return entries;
 }
 
+async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
+  const manifestFileNames = buildManifestFileNames(category);
+  const manifestBaseUrl = resolveManifestBaseUrl();
+  const entries: ManifestEntry[] = [];
+
+  for (const [index, fileName] of manifestFileNames.entries()) {
+    const optional = index > 0;
+    const manifestEntries = manifestBaseUrl
+      ? await loadRemoteManifestEntries(fileName, optional)
+      : await loadLocalManifestEntries(fileName, optional);
+    entries.push(...manifestEntries);
+  }
+
+  return entries;
+}
+
+function findManifestEntry(entries: ManifestEntry[], assetId: string): ManifestEntry | null {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (typeof entry.local_path !== "string") {
+      continue;
+    }
+
+    if (typeof entry.entity_key === "string" && entry.entity_key.trim() === assetId) {
+      return entry;
+    }
+
+    if (
+      (typeof entry.entity_id === "number" || typeof entry.entity_id === "string") &&
+      String(entry.entity_id).trim() === assetId
+    ) {
+      return entry;
+    }
+  }
+
+  return null;
+}
+
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ category: string; assetId: string }> },
 ) {
   const { category, assetId } = await context.params;
 
-  if (!ALLOWED_CATEGORIES.has(category) || !/^\d+$/.test(assetId)) {
+  if (!ALLOWED_CATEGORIES.has(category) || !ASSET_ID_PATTERN.test(assetId)) {
     return NextResponse.json({ message: "Asset não encontrado." }, { status: 404 });
   }
 
@@ -214,12 +290,7 @@ export async function GET(
     throw error;
   }
 
-  const entry = entries.find(
-    (candidate) =>
-      typeof candidate.entity_id === "number" &&
-      String(candidate.entity_id) === assetId &&
-      typeof candidate.local_path === "string",
-  );
+  const entry = findManifestEntry(entries, assetId);
 
   if (!entry?.local_path) {
     return NextResponse.json({ message: "Asset não encontrado." }, { status: 404 });
