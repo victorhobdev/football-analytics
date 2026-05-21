@@ -259,7 +259,7 @@ def _filter_scorer_list_by_minimum_goals(rows: list[dict[str, Any]]) -> list[dic
     ]
 
 
-def _fetch_wc_profile_urls(wc_player_ids: list[int | None]) -> dict[int, str]:
+def _fetch_wc_player_profile_refs(wc_player_ids: list[int | None]) -> dict[int, dict[str, str]]:
     normalized_player_ids = sorted({player_id for player_id in wc_player_ids if player_id is not None})
     if not normalized_player_ids:
         return {}
@@ -277,16 +277,44 @@ def _fetch_wc_profile_urls(wc_player_ids: list[int | None]) -> dict[int, str]:
         [normalized_player_ids],
     )
 
-    profile_urls: dict[int, str] = {}
+    profile_refs: dict[int, dict[str, str]] = {}
     for row in rows:
         wc_player_id = _safe_int(row.get("wc_player_id"))
         sportmonks_player_id = _safe_int(row.get("sportmonks_player_id"))
         if wc_player_id is None or sportmonks_player_id is None:
             continue
 
-        profile_urls[wc_player_id] = f"/players/{sportmonks_player_id}"
+        sportmonks_player_id_text = str(sportmonks_player_id)
+        profile_refs[wc_player_id] = {
+            "playerId": sportmonks_player_id_text,
+            "profileUrl": f"/players/{sportmonks_player_id_text}",
+        }
 
-    return profile_urls
+    return profile_refs
+
+
+def _resolve_wc_player_profile_ref(
+    profile_refs: dict[int, dict[str, str]],
+    wc_player_id: int | None,
+) -> dict[str, str] | None:
+    if wc_player_id is None:
+        return None
+
+    return profile_refs.get(wc_player_id)
+
+
+def _serialize_wc_player_id(
+    wc_player_id: int | None,
+    profile_refs: dict[int, dict[str, str]],
+) -> str | None:
+    if wc_player_id is None:
+        return None
+
+    profile_ref = _resolve_wc_player_profile_ref(profile_refs, wc_player_id)
+    if profile_ref is not None:
+        return profile_ref["playerId"]
+
+    return str(wc_player_id)
 
 
 def _build_champion_identity_key(team: dict[str, Any] | None) -> str | None:
@@ -660,12 +688,14 @@ def _fetch_historical_top_scorer() -> dict[str, Any] | None:
         return None
 
     player_id = _safe_int(row.get("player_id"))
-    profile_urls = _fetch_wc_profile_urls([player_id])
+    profile_refs = _fetch_wc_player_profile_refs([player_id])
+    profile_ref = _resolve_wc_player_profile_ref(profile_refs, player_id)
     team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
     return {
-        "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
+        "playerId": _serialize_wc_player_id(player_id, profile_refs),
+        "imageAssetId": str(player_id) if player_id is not None else None,
         "playerName": _sanitize_display_name(row.get("player_name")),
-        "profileUrl": profile_urls.get(player_id) if player_id is not None else None,
+        "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
         "teamId": team.get("teamId") if team else None,
         "teamName": team.get("teamName") if team else None,
         "goals": int(row.get("goals") or 0),
@@ -709,17 +739,19 @@ def _fetch_edition_top_scorers(season_label: str) -> list[dict[str, Any]]:
         [WORLD_CUP_COMPETITION_KEY, season_label],
     )
 
-    profile_urls = _fetch_wc_profile_urls([_safe_int(row.get("player_id")) for row in rows])
+    profile_refs = _fetch_wc_player_profile_refs([_safe_int(row.get("player_id")) for row in rows])
     scorers_payload: list[dict[str, Any]] = []
     for row in rows:
         player_id = _safe_int(row.get("player_id"))
+        profile_ref = _resolve_wc_player_profile_ref(profile_refs, player_id)
         team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
         scorers_payload.append(
             {
                 "rank": int(row.get("scorer_rank") or 0),
-                "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
+                "playerId": _serialize_wc_player_id(player_id, profile_refs),
+                "imageAssetId": str(player_id) if player_id is not None else None,
                 "playerName": _sanitize_display_name(row.get("player_name")),
-                "profileUrl": profile_urls.get(player_id) if player_id is not None else None,
+                "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
                 "goals": int(row.get("goals") or 0),
@@ -997,17 +1029,23 @@ def _fetch_team_historical_scorers(team_ids: list[int]) -> list[dict[str, Any]]:
         [WORLD_CUP_COMPETITION_KEY, team_ids],
     )
 
-    profile_urls = _fetch_wc_profile_urls([_safe_int(row.get("player_id")) for row in rows])
-    return [
-        {
-            "rank": int(row.get("scorer_rank") or 0),
-            "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
-            "playerName": _sanitize_display_name(row.get("player_name")),
-            "profileUrl": profile_urls.get(player_id) if (player_id := _safe_int(row.get("player_id"))) is not None else None,
-            "goals": int(row.get("goals") or 0),
-        }
-        for row in rows
-    ]
+    profile_refs = _fetch_wc_player_profile_refs([_safe_int(row.get("player_id")) for row in rows])
+    scorers_payload: list[dict[str, Any]] = []
+    for row in rows:
+        player_id = _safe_int(row.get("player_id"))
+        profile_ref = _resolve_wc_player_profile_ref(profile_refs, player_id)
+        scorers_payload.append(
+            {
+                "rank": int(row.get("scorer_rank") or 0),
+                "playerId": _serialize_wc_player_id(player_id, profile_refs),
+                "imageAssetId": str(player_id) if player_id is not None else None,
+                "playerName": _sanitize_display_name(row.get("player_name")),
+                "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
+                "goals": int(row.get("goals") or 0),
+            }
+        )
+
+    return scorers_payload
 
 
 def _fetch_historical_scorer_rows() -> list[dict[str, Any]]:
@@ -1568,22 +1606,30 @@ def _build_world_cup_edition_rankings(
 
 def _build_world_cup_squad_appearance_rankings(
     squad_rows: list[dict[str, Any]],
+    profile_refs: dict[int, dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     players_by_key: dict[str, dict[str, Any]] = {}
+    resolved_profile_refs = profile_refs or {}
 
     for row in squad_rows:
-        player_id = row.get("player_id")
+        player_id = _safe_int(row.get("player_id"))
         season_label = row.get("season_label")
         if player_id is None or season_label is None:
             continue
 
-        player_key = str(player_id)
+        player_key = _serialize_wc_player_id(player_id, resolved_profile_refs)
+        if player_key is None:
+            continue
+
+        profile_ref = _resolve_wc_player_profile_ref(resolved_profile_refs, player_id)
         team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
         player_entry = players_by_key.setdefault(
             player_key,
             {
-                "playerId": str(player_id),
+                "playerId": player_key,
+                "imageAssetId": str(player_id),
                 "playerName": _sanitize_display_name(row.get("player_name")),
+                "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
                 "editions": [],
@@ -1618,7 +1664,9 @@ def _build_world_cup_squad_appearance_rankings(
                 [
                     {
                         "playerId": item["playerId"],
+                        "imageAssetId": item.get("imageAssetId"),
                         "playerName": item.get("playerName"),
+                        "profileUrl": item.get("profileUrl"),
                         "teamId": item.get("teamId"),
                         "teamName": item.get("teamName"),
                         "appearancesCount": len(item["editions"]),
@@ -1677,6 +1725,7 @@ def _build_world_cup_match_rankings(
                 "awayScore": int(row["away_goals"]),
                 "goalDiff": abs(int(row["home_goals"]) - int(row["away_goals"])),
                 "totalGoals": int(row["home_goals"]) + int(row["away_goals"]),
+                "venueName": translate_world_cup_venue_name(_normalize_text(row.get("venue_name"))),
             }
             for row in sorted(
                 [
@@ -2346,7 +2395,7 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
     team_stage_rows = _fetch_team_stage_presence_rows()
     team_knockout_rows = _fetch_team_knockout_presence_rows()
     team_top_scorer_rows = _fetch_team_top_scorers_by_season()
-    top_scorer_profile_urls = _fetch_wc_profile_urls(
+    top_scorer_profile_refs = _fetch_wc_player_profile_refs(
         [_safe_int(row.get("player_id")) for row in team_top_scorer_rows]
     )
 
@@ -2360,16 +2409,20 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
         for row in team_knockout_rows
         if row.get("season_label") is not None and row.get("team_id") is not None
     }
-    top_scorer_index = {
-        (row["season_label"], int(row["team_id"])): {
-            "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
+    top_scorer_index: dict[tuple[Any, int], dict[str, Any]] = {}
+    for row in team_top_scorer_rows:
+        if row.get("season_label") is None or row.get("team_id") is None:
+            continue
+
+        player_id = _safe_int(row.get("player_id"))
+        profile_ref = _resolve_wc_player_profile_ref(top_scorer_profile_refs, player_id)
+        top_scorer_index[(row["season_label"], int(row["team_id"]))] = {
+            "playerId": _serialize_wc_player_id(player_id, top_scorer_profile_refs),
+            "imageAssetId": str(player_id) if player_id is not None else None,
             "playerName": _sanitize_display_name(row.get("player_name")),
-            "profileUrl": top_scorer_profile_urls.get(player_id) if (player_id := _safe_int(row.get("player_id"))) is not None else None,
+            "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
             "goals": int(row.get("goals") or 0),
         }
-        for row in team_top_scorer_rows
-        if row.get("season_label") is not None and row.get("team_id") is not None
-    }
 
     teams_by_id: dict[str, dict[str, Any]] = {}
 
@@ -2539,9 +2592,12 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
     historical_scorer_edition_rows = _fetch_historical_scorer_edition_rows()
     ranking_fixture_rows = _fetch_ranking_fixture_rows()
     squad_appearance_rows = _fetch_player_squad_appearance_rows()
+    squad_profile_refs = _fetch_wc_player_profile_refs(
+        [_safe_int(row.get("player_id")) for row in squad_appearance_rows]
+    )
     final_fixture_rows = _fetch_final_fixture_rows()
     penalty_scores_by_fixture = _fetch_penalty_shootout_scores_by_fixture()
-    scorer_profile_urls = _fetch_wc_profile_urls(
+    scorer_profile_refs = _fetch_wc_player_profile_refs(
         [_safe_int(row.get("player_id")) for row in historical_scorer_rows]
     )
 
@@ -2574,13 +2630,15 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
 
         scorer_key = scorer_row.get("scorer_key")
         player_id = _safe_int(scorer_row.get("player_id"))
+        profile_ref = _resolve_wc_player_profile_ref(scorer_profile_refs, player_id)
         team = _serialize_team(_safe_int(scorer_row.get("team_id")), scorer_row.get("team_name"))
         scorers_payload.append(
             {
                 "rank": current_scorer_rank,
-                "playerId": str(scorer_row["player_id"]) if scorer_row.get("player_id") is not None else None,
+                "playerId": _serialize_wc_player_id(player_id, scorer_profile_refs),
+                "imageAssetId": str(player_id) if player_id is not None else None,
                 "playerName": _sanitize_display_name(scorer_row.get("player_name")),
-                "profileUrl": scorer_profile_urls.get(player_id) if player_id is not None else None,
+                "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
                 "goals": goals,
@@ -2602,7 +2660,7 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
             "metricLabel": "Gols",
             "items": scorers_payload,
         },
-        **_build_world_cup_squad_appearance_rankings(squad_appearance_rows),
+        **_build_world_cup_squad_appearance_rankings(squad_appearance_rows, squad_profile_refs),
     }
 
     finals_payload: list[dict[str, Any]] = []

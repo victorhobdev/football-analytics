@@ -663,7 +663,7 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
                     const recentTeams = resolveRecentTeams(row);
 
                     return (
-                      <tr className="align-top hover:bg-[rgba(240,243,255,0.42)]" key={row.entityId}>
+                      <tr className="align-middle hover:bg-[rgba(240,243,255,0.42)]" key={row.entityId}>
                         <td className="px-4 py-3">
                           <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003526]">
                             {row.rank ?? "-"}
@@ -717,6 +717,7 @@ export function RankingTable({ rankingDefinition }: RankingTableProps) {
                                       fallback={getEntityMonogram(team.teamName ?? "Time")}
                                       fallbackClassName="text-[0.62rem]"
                                       imageClassName="p-1.25"
+                                      linkBehavior="none"
                                       shape="rounded"
                                     />
                                   );

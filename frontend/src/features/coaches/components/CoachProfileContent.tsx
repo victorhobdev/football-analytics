@@ -35,16 +35,61 @@ type CoachProfileContentProps = {
   coachId: string;
 };
 
-function formatPointsPerMatch(value: number | null | undefined): string {
-  if (typeof value !== "number") {
+const INTEGER_FORMATTER = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+const DECIMAL_FORMATTER = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const PERCENT_FORMATTER = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+
+function formatInteger(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
     return "-";
   }
 
-  return value.toFixed(2);
+  return INTEGER_FORMATTER.format(value);
+}
+
+function formatSignedInteger(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return value > 0 ? `+${INTEGER_FORMATTER.format(value)}` : INTEGER_FORMATTER.format(value);
+}
+
+function formatPointsPerMatch(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return DECIMAL_FORMATTER.format(value);
+}
+
+function formatPercent(value: number | null): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return `${PERCENT_FORMATTER.format(value)}%`;
+}
+
+function formatShortDate(value: string | null | undefined): string {
+  if (!value) {
+    return "-";
+  }
+
+  const [year, month, day] = value.split("-");
+
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return `${day}/${month}/${year}`;
 }
 
 function formatRecord(wins: number, draws: number, losses: number): string {
-  return `${wins}-${draws}-${losses}`;
+  return `${wins}V ${draws}E ${losses}D`;
 }
 
 function formatDateRange(startDate: string | null | undefined, endDate: string | null | undefined): string {
@@ -52,18 +97,30 @@ function formatDateRange(startDate: string | null | undefined, endDate: string |
   const normalizedEnd = endDate?.trim() ?? "";
 
   if (normalizedStart && normalizedEnd) {
-    return `${normalizedStart} -> ${normalizedEnd}`;
+    return `${formatShortDate(normalizedStart)} até ${formatShortDate(normalizedEnd)}`;
   }
 
   if (normalizedStart) {
-    return `${normalizedStart} -> atual`;
+    return `${formatShortDate(normalizedStart)} até atual`;
   }
 
   if (normalizedEnd) {
-    return `Até ${normalizedEnd}`;
+    return `Até ${formatShortDate(normalizedEnd)}`;
   }
 
   return "Janela não informada";
+}
+
+function calculateWinRate(wins: number, matches: number): number | null {
+  if (matches <= 0) {
+    return null;
+  }
+
+  return (wins / matches) * 100;
+}
+
+function isPendingCoachName(coachName: string): boolean {
+  return /^(Unknown Coach|Nome pendente) #/i.test(coachName.trim());
 }
 
 export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
@@ -160,6 +217,8 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
   }
 
   const { coach, sectionCoverage, summary, tenures } = profileQuery.data;
+  const coachNameIsPending = isPendingCoachName(coach.coachName);
+  const displayCoachName = coachNameIsPending ? "Nome pendente de ingestão" : coach.coachName;
   const fallbackContext = tenures.find((tenure) => tenure.context)?.context ?? resolvedContext;
   const teamHref = coach.teamId
     ? fallbackContext
@@ -181,7 +240,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
           Técnicos
         </Link>
         <span className="text-[#8fa097]">/</span>
-        <span>{coach.coachName}</span>
+        <span>{displayCoachName}</span>
       </div>
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.95fr)]">
@@ -189,7 +248,9 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
           <div className="flex flex-wrap items-center gap-2">
             <ProfileCoveragePill coverage={profileQuery.coverage} className="bg-white/16 text-white" />
             <ProfileTag className="bg-white/12 text-white/82">Técnico</ProfileTag>
-            {coach.active ? <ProfileTag className="bg-white/12 text-white/82">Ativo</ProfileTag> : null}
+            <ProfileTag className="bg-white/12 text-white/82">Dados até 31/12/2025</ProfileTag>
+            {coachNameIsPending ? <ProfileTag className="bg-white/12 text-white/82">Nome pendente</ProfileTag> : null}
+            {coach.active ? <ProfileTag className="bg-white/12 text-white/82">Ativo no corte</ProfileTag> : null}
             {coach.temporary ? <ProfileTag className="bg-white/12 text-white/82">Interino</ProfileTag> : null}
           </div>
 
@@ -206,8 +267,9 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                 Perfil do técnico
               </p>
               <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-[-0.04em] text-white md:text-5xl">
-                {coach.coachName}
+                {displayCoachName}
               </h1>
+              {coachNameIsPending ? <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">ID {coach.coachId}</p> : null}
               <p className="max-w-3xl text-sm/6 text-white/74">
                 {coach.teamName
                   ? `${coach.teamName} • ${formatDateRange(coach.startDate, coach.endDate)}`
@@ -216,16 +278,17 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-4">
-            <ProfileKpi hint="Campanha agregada" invert label="Jogos" value={summary.matches} />
+          <div className="grid gap-3 md:grid-cols-5">
+            <ProfileKpi hint="Campanha agregada" invert label="Jogos" value={formatInteger(summary.matches)} />
             <ProfileKpi
-              hint="Ranking do domínio de técnicos"
+              hint="Pontos/jogo ponderado por amostra"
               invert
-              label="Rendimento"
+              label="Índice"
               value={formatPointsPerMatch(summary.adjustedPpm)}
             />
-            <ProfileKpi hint="Passagens no recorte" invert label="Passagens" value={summary.tenureCount} />
-            <ProfileKpi hint="Clubes no recorte" invert label="Times" value={summary.teamsCount} />
+            <ProfileKpi hint="Marcados pelos times treinados" invert label="Gols pró" value={formatInteger(summary.goalsFor)} />
+            <ProfileKpi hint="Sofridos pelos times treinados" invert label="Gols contra" value={formatInteger(summary.goalsAgainst)} />
+            <ProfileKpi hint="Gols pró menos contra" invert label="Saldo" value={formatSignedInteger(summary.goalDiff)} />
           </div>
         </ProfilePanel>
 
@@ -235,6 +298,13 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
               Leitura atual
             </p>
             <dl className="space-y-3 text-sm text-[#1f2d40]">
+              <div className="rounded-[1rem] bg-[#f4f8f6] px-3 py-3">
+                <dt className="text-[#57657a]">Índice de campanha</dt>
+                <dd className="mt-1 font-medium">{formatPointsPerMatch(summary.adjustedPpm)}</dd>
+                <p className="mt-1 text-xs/5 text-[#69778d]">
+                  Pontos por jogo ponderado pelo tamanho da amostra do recorte.
+                </p>
+              </div>
               <div className="flex items-start justify-between gap-4">
                 <dt className="text-[#57657a]">Campanha</dt>
                 <dd className="text-right font-medium">
@@ -242,20 +312,42 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#57657a]">Pontos</dt>
-                <dd className="text-right font-medium">{summary.points}</dd>
+                <dt className="text-[#57657a]">Aproveitamento</dt>
+                <dd className="text-right font-medium">{formatPercent(calculateWinRate(summary.wins, summary.matches))}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#57657a]">PPM bruto</dt>
+                <dt className="text-[#57657a]">Pontos</dt>
+                <dd className="text-right font-medium">{formatInteger(summary.points)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-[#57657a]">Pontos/jogo</dt>
                 <dd className="text-right font-medium">{formatPointsPerMatch(summary.pointsPerMatch)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
+                <dt className="text-[#57657a]">Gols</dt>
+                <dd className="text-right font-medium">
+                  {formatInteger(summary.goalsFor)} pró / {formatInteger(summary.goalsAgainst)} contra
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-[#57657a]">Saldo de gols</dt>
+                <dd className="text-right font-medium">{formatSignedInteger(summary.goalDiff)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-[#57657a]">Passagens</dt>
+                <dd className="text-right font-medium">{formatInteger(summary.tenureCount)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-[#57657a]">Times</dt>
+                <dd className="text-right font-medium">{formatInteger(summary.teamsCount)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
                 <dt className="text-[#57657a]">Passagens ativas</dt>
-                <dd className="text-right font-medium">{summary.activeTenures}</dd>
+                <dd className="text-right font-medium">{formatInteger(summary.activeTenures)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
                 <dt className="text-[#57657a]">Último jogo</dt>
-                <dd className="text-right font-medium">{coach.lastMatchDate ?? "-"}</dd>
+                <dd className="text-right font-medium">{formatShortDate(coach.lastMatchDate)}</dd>
               </div>
             </dl>
           </ProfilePanel>
@@ -346,7 +438,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                     <h3 className="font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
                       {tenure.teamName ?? "Time não resolvido"}
                     </h3>
-                    {tenure.active ? <ProfileTag>Ativo</ProfileTag> : null}
+                    {tenure.active ? <ProfileTag>Ativo no corte</ProfileTag> : null}
                     {tenure.temporary ? <ProfileTag>Interino</ProfileTag> : null}
                   </div>
 
@@ -362,12 +454,18 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <ProfilePanel className="space-y-1" tone="soft">
                       <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Jogos</p>
-                      <p className="text-xl font-extrabold text-[#111c2d]">{tenure.matches}</p>
+                      <p className="text-xl font-extrabold text-[#111c2d]">{formatInteger(tenure.matches)}</p>
                     </ProfilePanel>
                     <ProfilePanel className="space-y-1" tone="soft">
-                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">PPM</p>
+                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Pontos/jogo</p>
                       <p className="text-xl font-extrabold text-[#111c2d]">
                         {formatPointsPerMatch(tenure.pointsPerMatch)}
+                      </p>
+                    </ProfilePanel>
+                    <ProfilePanel className="space-y-1" tone="soft">
+                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Aproveitamento</p>
+                      <p className="text-xl font-extrabold text-[#111c2d]">
+                        {formatPercent(calculateWinRate(tenure.wins, tenure.matches))}
                       </p>
                     </ProfilePanel>
                     <ProfilePanel className="space-y-1" tone="soft">
@@ -377,10 +475,32 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                       </p>
                     </ProfilePanel>
                     <ProfilePanel className="space-y-1" tone="soft">
-                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Último jogo</p>
+                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Gols pró</p>
                       <p className="text-xl font-extrabold text-[#111c2d]">
-                        {tenure.lastMatchDate ?? "-"}
+                        {formatInteger(tenure.goalsFor)}
                       </p>
+                    </ProfilePanel>
+                    <ProfilePanel className="space-y-1" tone="soft">
+                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Gols contra</p>
+                      <p className="text-xl font-extrabold text-[#111c2d]">
+                        {formatInteger(tenure.goalsAgainst)}
+                      </p>
+                    </ProfilePanel>
+                    <ProfilePanel className="space-y-2 sm:col-span-2" tone="soft">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Saldo</p>
+                          <p className="text-xl font-extrabold text-[#111c2d]">
+                            {formatSignedInteger(tenure.goalDiff)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Último jogo</p>
+                          <p className="text-xl font-extrabold text-[#111c2d]">
+                            {formatShortDate(tenure.lastMatchDate)}
+                          </p>
+                        </div>
+                      </div>
                     </ProfilePanel>
                   </div>
 

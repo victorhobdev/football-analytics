@@ -6,4 +6,5 @@ export type {
   MarketTransfersLocalFilters,
   MarketTransfersSortBy,
   MarketTransfersSortDirection,
+  MarketTeamDirection,
 } from "@/features/market/types/market.types";

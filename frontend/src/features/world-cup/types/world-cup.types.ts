@@ -7,7 +7,9 @@ export interface WorldCupTeamReference {
 
 export interface WorldCupHistoricalTopScorer {
   playerId: string | null;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
   goals: number;
@@ -52,7 +54,9 @@ export interface WorldCupEditionNavigationItem {
 export interface WorldCupEditionScorer {
   rank: number;
   playerId: string | null;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
   goals: number;
@@ -153,7 +157,9 @@ export interface WorldCupTeamsData {
 
 export interface WorldCupTeamParticipationTopScorer {
   playerId: string | null;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   goals: number;
 }
 
@@ -170,7 +176,9 @@ export interface WorldCupTeamParticipation {
 export interface WorldCupTeamHistoricalScorer {
   rank: number;
   playerId: string | null;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   goals: number;
 }
 
@@ -202,7 +210,9 @@ export interface WorldCupRankingScorerEdition {
 export interface WorldCupRankingScorer {
   rank: number;
   playerId: string | null;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
   goals: number;
@@ -283,7 +293,9 @@ export interface WorldCupRankingPlayerSquadEdition {
 export interface WorldCupRankingPlayerSquadAppearance {
   rank: number;
   playerId: string;
+  imageAssetId: string | null;
   playerName: string | null;
+  profileUrl: string | null;
   teamId: string | null;
   teamName: string | null;
   appearancesCount: number;
@@ -335,6 +347,7 @@ export interface WorldCupRankingBiggestWinRecord {
   awayScore: number;
   goalDiff: number;
   totalGoals: number;
+  venueName: string | null;
 }
 
 export interface WorldCupRankingsData {

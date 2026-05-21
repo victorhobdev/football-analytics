@@ -27,6 +27,8 @@ export interface CoachesGlobalFilters {
 
 export interface CoachesListLocalFilters {
   search?: string;
+  minMatches?: number | null;
+  includeUnknown?: boolean;
   page?: number;
   pageSize?: number;
   sortBy?: CoachesListSortBy;
@@ -51,6 +53,9 @@ export interface CoachListItem {
   draws: number;
   losses: number;
   points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
   adjustedPpm?: number | null;
   pointsPerMatch?: number | null;
   lastMatchDate?: string | null;
@@ -80,6 +85,9 @@ export interface CoachTenure {
   draws: number;
   losses: number;
   points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
   pointsPerMatch?: number | null;
   lastMatchDate?: string | null;
   context?: CompetitionSeasonContext | null;
@@ -113,6 +121,9 @@ export interface CoachProfileSummary {
   draws: number;
   losses: number;
   points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
   adjustedPpm?: number | null;
   pointsPerMatch?: number | null;
 }

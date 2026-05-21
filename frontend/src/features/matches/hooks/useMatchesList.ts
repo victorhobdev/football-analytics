@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
+
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -109,6 +111,7 @@ export function useMatchesList(localFilters: MatchesListLocalFilters = {}) {
     queryFn: () =>
       localFilters.allPages ? fetchAllMatchesListPages(mergedFilters) : fetchMatchesList(mergedFilters),
     enabled: localFilters.enabled,
+    placeholderData: keepPreviousData,
     staleTime: MATCHES_LIST_STALE_TIME_MS,
     gcTime: MATCHES_LIST_GC_TIME_MS,
     isDataEmpty: (data) => data.items.length === 0,

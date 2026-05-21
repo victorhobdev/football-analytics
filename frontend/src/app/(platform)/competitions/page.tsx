@@ -289,6 +289,7 @@ function CompetitionMobileCard({ competition }: { competition: CompetitionDef })
             fallback={buildCompetitionFallbackLabel(competition)}
             fallbackClassName={styles.competitionFallback}
             imageClassName={styles.competitionImage}
+            linkBehavior="none"
           />
 
           <div className={styles.competitionLead}>
@@ -447,12 +448,6 @@ export default function CompetitionsIndexPage() {
               detail="edições navegáveis"
               label="Temporadas"
               value={formatWholeNumber(totalSeasonsTracked)}
-            />
-            <HeaderMetricCard
-              detail="página ou edição mais recente"
-              highlight
-              label="Navegação direta"
-              value="100%"
             />
           </div>
         </div>

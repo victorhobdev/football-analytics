@@ -558,6 +558,7 @@ export function TeamsPageContent() {
                       className="h-16 w-16 border border-white/18 bg-white/12"
                       fallback={featuredTeam.teamName.slice(0, 3)}
                       imageClassName="p-2"
+                      linkBehavior="none"
                     />
                     <div className="min-w-0">
                       <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-white/52">
@@ -622,6 +623,7 @@ export function TeamsPageContent() {
                       className="h-10 w-10 border-0 bg-white/12"
                       fallback={team.teamName.slice(0, 3)}
                       imageClassName="p-1.5"
+                      linkBehavior="none"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold">{team.teamName}</p>

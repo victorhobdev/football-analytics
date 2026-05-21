@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import type { PlayerProfile, PlayerProfileMeta } from "@/features/players/types";
+import type { PlayerProfile } from "@/features/players/types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
@@ -78,20 +78,28 @@ function formatInsightSeverity(severity: InsightObject["severity"]): string {
   return "Informativo";
 }
 
-function getUnavailableHistoryTitle(profileMeta: PlayerProfileMeta): string {
-  if (profileMeta.profileType === "world_cup_local") {
-    return "Perfil local da Copa";
+const POSITION_LABELS: Record<string, string> = {
+  goalkeeper: "Goleiro",
+  defender: "Defensor",
+  midfielder: "Meio-campista",
+  forward: "Atacante",
+  "center forward": "Centroavante",
+  "right winger": "Ponta direita",
+  "left winger": "Ponta esquerda",
+  "attacking midfielder": "Meia ofensivo",
+  "defensive midfielder": "Volante",
+  "left back": "Lateral esquerdo",
+  "right back": "Lateral direito",
+};
+
+function formatPositionLabel(position: string | null | undefined): string | null {
+  const normalizedPosition = position?.trim();
+
+  if (!normalizedPosition) {
+    return null;
   }
 
-  return "Perfil sem histórico consolidado";
-}
-
-function getUnavailableHistoryDescription(profileMeta: PlayerProfileMeta): string {
-  if (profileMeta.profileType === "world_cup_local") {
-    return "Este jogador segue disponível como perfil local da Copa, com identidade preservada mesmo sem histórico estatístico carregado.";
-  }
-
-  return "Este jogador possui identidade consolidada na plataforma, mas ainda não tem histórico estatístico disponível para navegação.";
+  return POSITION_LABELS[normalizedPosition.toLowerCase()] ?? normalizedPosition;
 }
 
 export function PlayerOverviewSection({
@@ -115,15 +123,12 @@ export function PlayerOverviewSection({
       ? (summary.shotsOnTarget / summary.shotsTotal) * 100
       : null;
   const worldCup = profileMeta.worldCup ?? null;
+  const displayPosition = formatPositionLabel(worldCup?.primaryPosition ?? player.position);
 
   if (!profileMeta.hasHistoricalStats) {
     return (
       <div className="space-y-6">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
-
-        <ProfileAlert title={getUnavailableHistoryTitle(profileMeta)} tone="info">
-          <p>{getUnavailableHistoryDescription(profileMeta)}</p>
-        </ProfileAlert>
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <ProfilePanel className="space-y-5">
@@ -131,17 +136,17 @@ export function PlayerOverviewSection({
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <ProfileCoveragePill coverage={coverage} />
-                  {player.position ? <ProfileTag>{player.position}</ProfileTag> : null}
+                  {displayPosition ? <ProfileTag>{displayPosition}</ProfileTag> : null}
                   {worldCup?.teamCount === 1 && worldCup.teamNames[0] ? (
                     <ProfileTag>{worldCup.teamNames[0]}</ProfileTag>
                   ) : null}
                 </div>
                 <h2 className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-[#111c2d]">
-                  Identidade e contexto preservados
+                  Resumo disponível
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-[#57657a]">
-                  O perfil continua navegável com os dados de identidade disponíveis, sem tratar a
-                  ausência de histórico como erro de produto.
+                  Informações principais de {player.playerName}: seleção, edições, gols e posição
+                  quando disponíveis.
                 </p>
               </div>
 
@@ -166,27 +171,27 @@ export function PlayerOverviewSection({
                 hint={
                   worldCup?.editionLabels?.length
                     ? worldCup.editionLabels.join(" · ")
-                    : "Sem edições detalhadas"
+                    : "Sem edições registradas"
                 }
               />
               <ProfileKpi
-                label="Seleções"
+                label={worldCup?.teamCount === 1 ? "Seleção" : "Seleções"}
                 value={worldCup?.teamCount ?? "-"}
                 hint={
                   worldCup?.teamNames?.length
                     ? worldCup.teamNames.join(" · ")
-                    : "Sem seleção detalhada"
+                    : "Seleção não informada"
                 }
               />
               <ProfileKpi
                 label="Gols em Copas"
                 value={worldCup?.goalCount ?? "-"}
-                hint="Total consolidado no contexto da Copa"
+                hint="Total registrado em Copas"
               />
               <ProfileKpi
                 label="Posição"
-                value={worldCup?.primaryPosition ?? player.position ?? "-"}
-                hint="Melhor posição disponível no contexto da Copa"
+                value={displayPosition ?? "-"}
+                hint="Posição registrada"
               />
             </div>
           </ProfilePanel>
@@ -198,13 +203,13 @@ export function PlayerOverviewSection({
               </p>
               <h2 className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-white">
                 {worldCup?.editionCount
-                  ? `${worldCup.editionCount} edições registradas`
-                  : "Contexto preservado"}
+                  ? `${worldCup.editionCount} ${worldCup.editionCount === 1 ? "edição" : "edições"} da Copa`
+                  : "Dados principais"}
               </h2>
               <p className="text-sm leading-6 text-white/75">
                 {worldCup?.teamNames?.length
-                  ? "Seleções, edições e gols seguem disponíveis para leitura rápida neste perfil."
-                  : "A plataforma mantém a identidade deste jogador mesmo sem histórico consolidado."}
+                  ? "Seleção, edições e gols reunidos para uma leitura rápida."
+                  : "Informações básicas reunidas para consulta rápida."}
               </p>
             </div>
 

@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { keepPreviousData } from "@tanstack/react-query";
+
 import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -33,6 +35,8 @@ export function useCoachesList(
       dateRangeStart: timeRangeParams.dateRangeStart,
       dateRangeEnd: timeRangeParams.dateRangeEnd,
       search: search && search.length > 0 ? search : undefined,
+      minMatches: localFilters.minMatches,
+      includeUnknown: localFilters.includeUnknown,
       page: localFilters.page,
       pageSize: localFilters.pageSize,
       sortBy: localFilters.sortBy,
@@ -41,6 +45,8 @@ export function useCoachesList(
   }, [
     competitionId,
     localFilters.page,
+    localFilters.minMatches,
+    localFilters.includeUnknown,
     localFilters.pageSize,
     localFilters.search,
     localFilters.sortBy,
@@ -56,6 +62,7 @@ export function useCoachesList(
   return useQueryWithCoverage<CoachesListData>({
     queryKey: coachesQueryKeys.list(mergedFilters),
     queryFn: () => fetchCoachesList(mergedFilters),
+    placeholderData: keepPreviousData,
     staleTime: COACHES_LIST_STALE_TIME_MS,
     gcTime: COACHES_LIST_GC_TIME_MS,
     isDataEmpty: (data) => data.items.length === 0,

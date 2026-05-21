@@ -14,9 +14,39 @@ from ..db.client import db_client
 router = APIRouter(prefix="/api/v1/coaches", tags=["coaches"])
 
 ADJUSTED_PPM_PRIOR_MATCHES = 10
+COACHES_DATA_CUTOFF_SQL = "date '2025-12-31'"
 
 CoachesSortBy = Literal["coachName", "teamName", "matches", "adjustedPpm", "pointsPerMatch", "wins", "startDate"]
 SortDirection = Literal["asc", "desc"]
+
+
+def _coach_name_sql(*, include_pending_placeholder: bool) -> str:
+    resolved_name_sql = """
+        coalesce(
+            nullif(trim(dc.coach_name), ''),
+            nullif(trim(rc.coach_name), ''),
+            case
+                when lower(trim(tc.coach_name)) like 'not applicable %%' then null
+                else nullif(trim(tc.coach_name), '')
+            end,
+            nullif(
+                trim(concat_ws(
+                    ' ',
+                    case
+                        when lower(trim(tc.payload->>'given_name')) in ('not applicable', 'n/a', 'na') then null
+                        else nullif(trim(tc.payload->>'given_name'), '')
+                    end,
+                    nullif(trim(tc.payload->>'family_name'), '')
+                )),
+                ''
+            )
+        )
+    """
+
+    if not include_pending_placeholder:
+        return resolved_name_sql
+
+    return f"coalesce({resolved_name_sql}, concat('Nome pendente #', tc.coach_id::text))"
 
 
 def _request_id(request: Request) -> str | None:
@@ -73,10 +103,31 @@ def _coach_match_scope_filters_sql(
 
 def _build_match_scope_ctes(where_sql: str, *, tenure_source: str = "filtered_tenures") -> str:
     return f"""
+        match_candidate_tenures as (
+            select
+                ft.*,
+                exists (
+                    select 1
+                    from {tenure_source} peer
+                    where peer.team_id = ft.team_id
+                      and peer.coach_tenure_id <> ft.coach_tenure_id
+                      and peer.position_id = 221
+                      and daterange(coalesce(peer.start_date, date '1900-01-01'), coalesce(peer.end_date, {COACHES_DATA_CUTOFF_SQL}), '[]')
+                          && daterange(coalesce(ft.start_date, date '1900-01-01'), coalesce(ft.end_date, {COACHES_DATA_CUTOFF_SQL}), '[]')
+                ) as has_head_coach_overlap
+            from {tenure_source} ft
+        ),
         base_scoped_matches as (
             select
                 ft.coach_id,
                 ft.coach_tenure_id,
+                ft.team_id,
+                ft.position_id,
+                ft.active,
+                ft.temporary,
+                ft.start_date,
+                ft.end_date,
+                ft.payload,
                 fm.match_id,
                 fm.date_day,
                 fm.league_id,
@@ -93,13 +144,60 @@ def _build_match_scope_ctes(where_sql: str, *, tenure_source: str = "filtered_te
                     when fm.away_team_id = ft.team_id and coalesce(fm.away_goals, 0) > coalesce(fm.home_goals, 0) then 3
                     when coalesce(fm.home_goals, 0) = coalesce(fm.away_goals, 0) then 1
                     else 0
-                end as points
-            from {tenure_source} ft
+                end as points,
+                case
+                    when fm.home_team_id = ft.team_id then coalesce(fm.home_goals, 0)
+                    else coalesce(fm.away_goals, 0)
+                end as goals_for,
+                case
+                    when fm.home_team_id = ft.team_id then coalesce(fm.away_goals, 0)
+                    else coalesce(fm.home_goals, 0)
+                end as goals_against
+            from match_candidate_tenures ft
             inner join mart.fact_matches fm
               on (fm.home_team_id = ft.team_id or fm.away_team_id = ft.team_id)
              and fm.date_day >= coalesce(ft.start_date, date '1900-01-01')
              and fm.date_day <= coalesce(ft.end_date, date '2999-12-31')
+             and fm.date_day <= {COACHES_DATA_CUTOFF_SQL}
             where {where_sql}
+              and (
+                ft.payload->>'edition_key' is null
+                or (
+                    fm.competition_key = split_part(ft.payload->>'edition_key', '__', 1)
+                    and fm.season::text = split_part(ft.payload->>'edition_key', '__', 2)
+                )
+              )
+              and (
+                ft.position_id is null
+                or ft.position_id <> 560
+                or coalesce(ft.active, false)
+                or coalesce(ft.temporary, false)
+                or not ft.has_head_coach_overlap
+              )
+        ),
+        ranked_match_candidates as (
+            select
+                bsm.*,
+                row_number() over (
+                    partition by bsm.match_id, bsm.team_id
+                    order by
+                        case
+                            when bsm.position_id = 221 then 0
+                            when bsm.payload->>'coach_tenure_scope' = 'edition_scoped_manager_appointment' then 0
+                            when coalesce(bsm.temporary, false) then 1
+                            when coalesce(bsm.active, false) then 2
+                            else 3
+                        end,
+                        coalesce(bsm.start_date, date '1900-01-01') desc,
+                        coalesce(bsm.end_date, {COACHES_DATA_CUTOFF_SQL}) asc,
+                        bsm.coach_tenure_id desc
+                ) as rn_match_owner
+            from base_scoped_matches bsm
+        ),
+        owned_scoped_matches as (
+            select *
+            from ranked_match_candidates
+            where rn_match_owner = 1
         ),
         ranked_matches as (
             select
@@ -108,7 +206,7 @@ def _build_match_scope_ctes(where_sql: str, *, tenure_source: str = "filtered_te
                     partition by bsm.coach_id
                     order by bsm.date_day desc, bsm.match_id desc
                 ) as rn_recent
-            from base_scoped_matches bsm
+            from owned_scoped_matches bsm
         ),
         filtered_matches as (
             select *
@@ -166,6 +264,8 @@ def get_coaches(
     dateRangeStart: date | None = None,
     dateRangeEnd: date | None = None,
     search: str | None = None,
+    minMatches: int = Query(default=1, ge=0),
+    includeUnknown: bool = False,
     page: int = Query(default=1, ge=1),
     pageSize: int = Query(default=24, ge=1, le=100),
     sortBy: CoachesSortBy = "adjustedPpm",
@@ -197,11 +297,13 @@ def get_coaches(
     }[sortBy]
     sort_dir = "asc" if sortDirection == "asc" else "desc"
     order_by_sql = (
-        f"active desc, adjusted_ppm {sort_dir} nulls last, matches desc, points_per_match desc nulls last, coach_name asc, coach_id asc"
+        f"adjusted_ppm {sort_dir} nulls last, matches desc, active desc, points_per_match desc nulls last, coach_name asc, coach_id asc"
         if sortBy == "adjustedPpm"
         else f"{sort_column} {sort_dir} nulls last, coach_name asc, coach_id asc"
     )
     match_where_sql, match_where_params = _coach_match_scope_filters_sql(filters, tenure_alias="ft")
+    coach_name_sql = _coach_name_sql(include_pending_placeholder=True)
+    resolved_coach_name_sql = _coach_name_sql(include_pending_placeholder=False)
 
     query = f"""
         with filtered_tenures as (
@@ -209,23 +311,48 @@ def get_coaches(
                 tc.provider,
                 tc.coach_tenure_id,
                 tc.coach_id,
-                coalesce(nullif(trim(dc.coach_name), ''), concat('Unknown Coach #', tc.coach_id::text)) as coach_name,
-                nullif(trim(dc.image_path), '') as photo_url,
-                coalesce(dc.has_real_photo, false) as has_real_photo,
+                {coach_name_sql} as coach_name,
+                coalesce(nullif(trim(dc.image_path), ''), nullif(trim(rc.image_path), '')) as photo_url,
+                (
+                    coalesce(dc.has_real_photo, false)
+                    or (
+                        nullif(trim(rc.image_path), '') is not null
+                        and rc.image_path not ilike '%%placeholder%%'
+                    )
+                ) as has_real_photo,
                 tc.team_id,
                 coalesce(nullif(trim(tc.team_name), ''), concat('Unknown Team #', tc.team_id::text)) as team_name,
-                coalesce(tc.active, false) as active,
+                (
+                    tc.start_date is not null
+                    and tc.start_date <= {COACHES_DATA_CUTOFF_SQL}
+                    and (tc.end_date is null or tc.end_date > {COACHES_DATA_CUTOFF_SQL})
+                ) as active,
                 coalesce(tc.temporary, false) as temporary,
+                tc.position_id,
                 tc.start_date,
-                tc.end_date
+                case
+                    when tc.start_date is not null and (tc.end_date is null or tc.end_date > {COACHES_DATA_CUTOFF_SQL})
+                        then {COACHES_DATA_CUTOFF_SQL}
+                    else tc.end_date
+                end as end_date,
+                tc.payload
             from mart.stg_team_coaches tc
             left join mart.dim_coach dc
               on dc.provider = tc.provider
              and dc.coach_id = tc.coach_id
+            left join raw.coaches rc
+              on rc.provider = tc.provider
+             and rc.coach_id = tc.coach_id
             where tc.coach_id is not null
+              and (tc.start_date is null or tc.end_date is null or tc.start_date <= tc.end_date)
+              and (tc.start_date is null or tc.start_date <= {COACHES_DATA_CUTOFF_SQL})
+              and (
+                %s::boolean
+                or {resolved_coach_name_sql} is not null
+              )
               and (
                 %s::text is null
-                or coalesce(nullif(trim(dc.coach_name), ''), concat('Unknown Coach #', tc.coach_id::text)) ilike %s
+                or {coach_name_sql} ilike %s
                 or coalesce(nullif(trim(tc.team_name), ''), concat('Unknown Team #', tc.team_id::text)) ilike %s
               )
         ),
@@ -249,6 +376,8 @@ def get_coaches(
                 coalesce(sum(case when fm.result = 'D' then 1 else 0 end), 0) as draws,
                 coalesce(sum(case when fm.result = 'L' then 1 else 0 end), 0) as losses,
                 coalesce(sum(fm.points), 0) as points,
+                coalesce(sum(fm.goals_for), 0) as goals_for,
+                coalesce(sum(fm.goals_against), 0) as goals_against,
                 max(fm.date_day) as last_match_date
             from filtered_tenures ft
             left join filtered_matches fm
@@ -279,6 +408,8 @@ def get_coaches(
             from tenure_stats ts
             order by
                 ts.coach_id,
+                (ts.matches > 0) desc,
+                ts.last_match_date desc nulls last,
                 ts.active desc,
                 coalesce(ts.end_date, date '2999-12-31') desc,
                 coalesce(ts.start_date, date '1900-01-01') desc,
@@ -306,6 +437,8 @@ def get_coaches(
                 coalesce(sum(ts.draws), 0) as draws,
                 coalesce(sum(ts.losses), 0) as losses,
                 coalesce(sum(ts.points), 0) as points,
+                coalesce(sum(ts.goals_for), 0) as goals_for,
+                coalesce(sum(ts.goals_against), 0) as goals_against,
                 case
                     when coalesce(sum(ts.matches), 0) > 0 then round(sum(ts.points)::numeric / sum(ts.matches), 4)
                     else null
@@ -369,6 +502,8 @@ def get_coaches(
             draws,
             losses,
             points,
+            goals_for,
+            goals_against,
             adjusted_ppm,
             points_per_match,
             last_match_date,
@@ -383,12 +518,14 @@ def get_coaches(
             season,
             count(*) over() as _total_count
         from ranked_rows
+        where matches >= %s
         order by {order_by_sql}
         limit %s offset %s;
     """
     rows = db_client.fetch_all(
         query,
         [
+            includeUnknown,
             search_pattern,
             search_pattern,
             search_pattern,
@@ -397,6 +534,7 @@ def get_coaches(
             filters.last_n,
             ADJUSTED_PPM_PRIOR_MATCHES,
             ADJUSTED_PPM_PRIOR_MATCHES,
+            minMatches,
             pageSize,
             offset,
         ],
@@ -419,6 +557,9 @@ def get_coaches(
             "draws": _to_int(row.get("draws")),
             "losses": _to_int(row.get("losses")),
             "points": _to_int(row.get("points")),
+            "goalsFor": _to_int(row.get("goals_for")),
+            "goalsAgainst": _to_int(row.get("goals_against")),
+            "goalDiff": _to_int(row.get("goals_for")) - _to_int(row.get("goals_against")),
             "adjustedPpm": _to_float(row.get("adjusted_ppm")),
             "pointsPerMatch": _to_float(row.get("points_per_match")),
             "lastMatchDate": row.get("last_match_date"),
@@ -469,6 +610,7 @@ def get_coach_profile(
         date_range_end=dateRangeEnd,
     )
     match_where_sql, match_where_params = _coach_match_scope_filters_sql(filters, tenure_alias="ft")
+    coach_name_sql = _coach_name_sql(include_pending_placeholder=True)
 
     query = f"""
         with all_filtered_tenures as (
@@ -476,20 +618,41 @@ def get_coach_profile(
                 tc.provider,
                 tc.coach_tenure_id,
                 tc.coach_id,
-                coalesce(nullif(trim(dc.coach_name), ''), concat('Unknown Coach #', tc.coach_id::text)) as coach_name,
-                nullif(trim(dc.image_path), '') as photo_url,
-                coalesce(dc.has_real_photo, false) as has_real_photo,
+                {coach_name_sql} as coach_name,
+                coalesce(nullif(trim(dc.image_path), ''), nullif(trim(rc.image_path), '')) as photo_url,
+                (
+                    coalesce(dc.has_real_photo, false)
+                    or (
+                        nullif(trim(rc.image_path), '') is not null
+                        and rc.image_path not ilike '%%placeholder%%'
+                    )
+                ) as has_real_photo,
                 tc.team_id,
                 coalesce(nullif(trim(tc.team_name), ''), concat('Unknown Team #', tc.team_id::text)) as team_name,
-                coalesce(tc.active, false) as active,
+                (
+                    tc.start_date is not null
+                    and tc.start_date <= {COACHES_DATA_CUTOFF_SQL}
+                    and (tc.end_date is null or tc.end_date > {COACHES_DATA_CUTOFF_SQL})
+                ) as active,
                 coalesce(tc.temporary, false) as temporary,
+                tc.position_id,
                 tc.start_date,
-                tc.end_date
+                case
+                    when tc.start_date is not null and (tc.end_date is null or tc.end_date > {COACHES_DATA_CUTOFF_SQL})
+                        then {COACHES_DATA_CUTOFF_SQL}
+                    else tc.end_date
+                end as end_date,
+                tc.payload
             from mart.stg_team_coaches tc
             left join mart.dim_coach dc
               on dc.provider = tc.provider
              and dc.coach_id = tc.coach_id
+            left join raw.coaches rc
+              on rc.provider = tc.provider
+             and rc.coach_id = tc.coach_id
             where tc.coach_id is not null
+              and (tc.start_date is null or tc.end_date is null or tc.start_date <= tc.end_date)
+              and (tc.start_date is null or tc.start_date <= {COACHES_DATA_CUTOFF_SQL})
         ),
         filtered_tenures as (
             select *
@@ -516,6 +679,8 @@ def get_coach_profile(
                 coalesce(sum(case when fm.result = 'D' then 1 else 0 end), 0) as draws,
                 coalesce(sum(case when fm.result = 'L' then 1 else 0 end), 0) as losses,
                 coalesce(sum(fm.points), 0) as points,
+                coalesce(sum(fm.goals_for), 0) as goals_for,
+                coalesce(sum(fm.goals_against), 0) as goals_against,
                 max(fm.date_day) as last_match_date
             from all_filtered_tenures ft
             left join filtered_matches fm
@@ -551,6 +716,8 @@ def get_coach_profile(
             from tenure_stats ts
             order by
                 ts.coach_id,
+                (ts.matches > 0) desc,
+                ts.last_match_date desc nulls last,
                 ts.active desc,
                 coalesce(ts.end_date, date '2999-12-31') desc,
                 coalesce(ts.start_date, date '1900-01-01') desc,
@@ -593,6 +760,8 @@ def get_coach_profile(
                 coalesce(sum(ts.draws), 0) as draws,
                 coalesce(sum(ts.losses), 0) as losses,
                 coalesce(sum(ts.points), 0) as points,
+                coalesce(sum(ts.goals_for), 0) as goals_for,
+                coalesce(sum(ts.goals_against), 0) as goals_against,
                 max(ts.last_match_date) as last_match_date,
                 case
                     when coalesce(sum(ts.matches), 0) > 0 and max(sa.avg_points_per_match) is not null then round(
@@ -619,6 +788,8 @@ def get_coach_profile(
             cs.draws as total_draws,
             cs.losses as total_losses,
             cs.points as total_points,
+            cs.goals_for as total_goals_for,
+            cs.goals_against as total_goals_against,
             cs.adjusted_ppm as total_adjusted_ppm,
             case
                 when cs.matches > 0 then round(cs.points::numeric / cs.matches, 4)
@@ -643,6 +814,8 @@ def get_coach_profile(
             ts.draws,
             ts.losses,
             ts.points,
+            ts.goals_for,
+            ts.goals_against,
             case
                 when ts.matches > 0 then round(ts.points::numeric / ts.matches, 4)
                 else null
@@ -701,6 +874,9 @@ def get_coach_profile(
             "draws": _to_int(row.get("draws")),
             "losses": _to_int(row.get("losses")),
             "points": _to_int(row.get("points")),
+            "goalsFor": _to_int(row.get("goals_for")),
+            "goalsAgainst": _to_int(row.get("goals_against")),
+            "goalDiff": _to_int(row.get("goals_for")) - _to_int(row.get("goals_against")),
             "pointsPerMatch": _to_float(row.get("points_per_match")),
             "lastMatchDate": row.get("last_match_date"),
             "context": _serialize_context(row.get("league_id"), row.get("league_name"), row.get("season")),
@@ -731,6 +907,9 @@ def get_coach_profile(
             "draws": _to_int(first_row.get("total_draws")),
             "losses": _to_int(first_row.get("total_losses")),
             "points": _to_int(first_row.get("total_points")),
+            "goalsFor": _to_int(first_row.get("total_goals_for")),
+            "goalsAgainst": _to_int(first_row.get("total_goals_against")),
+            "goalDiff": _to_int(first_row.get("total_goals_for")) - _to_int(first_row.get("total_goals_against")),
             "adjustedPpm": _to_float(first_row.get("total_adjusted_ppm")),
             "pointsPerMatch": _to_float(first_row.get("total_points_per_match")),
         },
