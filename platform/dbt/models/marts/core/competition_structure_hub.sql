@@ -1,3 +1,9 @@
+{{ config(
+    indexes=[
+        {'columns': ['competition_key', 'season_label', 'from_stage_id'], 'type': 'btree'}
+    ]
+) }}
+
 with season_config as (
     select
         competition_key,

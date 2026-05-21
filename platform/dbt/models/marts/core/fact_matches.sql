@@ -1,6 +1,18 @@
 -- depends_on: {{ ref('competition_season_config') }}
 -- depends_on: {{ ref('dim_stage') }}
-{{ config(materialized='incremental', unique_key='match_id', on_schema_change='sync_all_columns') }}
+{{ config(
+    materialized='incremental',
+    unique_key='match_id',
+    on_schema_change='sync_all_columns',
+    indexes=[
+        {'columns': ['match_id'], 'type': 'btree'},
+        {'columns': ['league_id', 'season', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+        {'columns': ['competition_key', 'season_label', 'stage_id', 'round_id'], 'type': 'btree'},
+        {'columns': ['home_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+        {'columns': ['away_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+        {'columns': ['league_id', 'season', 'round_number'], 'type': 'btree'}
+    ]
+) }}
 {% set lookback_hours = var('fact_matches_incremental_lookback_hours', 24) %}
 
 with base as (

@@ -176,11 +176,11 @@ Rollback simples:
 
 Nao armazenar imagem no banco.
 
-Assets de clubes, competicoes e jogadores:
+Assets de clubes, competicoes, jogadores e tecnicos:
 
 - artefato externo: `data/visual_assets`
-- manifests esperados: `manifests/clubs.json`, `manifests/competitions.json`,
-  `manifests/players.json`
+- manifests esperados: `manifests/clubs.json`, `manifests/coaches.json`,
+  `manifests/competitions.json`, `manifests/players.json`
 - rota runtime: `/api/visual-assets/{category}/{assetId}`
 - modo self-host no mesmo filesystem do Next:
 
@@ -212,7 +212,15 @@ Imagens de campeao:
 Validacao minima de assets:
 
 ```powershell
-node -e "const fs=require('fs'),p=require('path'); const root=process.env.FOOTBALL_VISUAL_ASSETS_ROOT || p.resolve('data/visual_assets'); for (const c of ['clubs','competitions','players']) { const m=JSON.parse(fs.readFileSync(p.join(root,'manifests',c+'.json'),'utf8')); const missing=m.entries.filter(e=>{ if (!e.local_path) return false; const rel=e.local_path.replace(/\\/g,'/').replace(/^data\/visual_assets\//,''); return !fs.existsSync(p.join(root,rel)); }); console.log(c, m.entries.length, 'missing=', missing.length); process.exitCode ||= missing.length ? 1 : 0; }"
+node -e "const fs=require('fs'),p=require('path'); const root=process.env.FOOTBALL_VISUAL_ASSETS_ROOT || p.resolve('data/visual_assets'); for (const c of ['clubs','coaches','competitions','players']) { const m=JSON.parse(fs.readFileSync(p.join(root,'manifests',c+'.json'),'utf8')); const missing=m.entries.filter(e=>{ if (!e.local_path) return false; const rel=e.local_path.replace(/\\/g,'/').replace(/^data\/visual_assets\//,''); return !fs.existsSync(p.join(root,rel)); }); console.log(c, m.entries.length, 'missing=', missing.length); process.exitCode ||= missing.length ? 1 : 0; }"
+```
+
+Backfill de tecnicos via Wikidata/Wikimedia Commons:
+
+```powershell
+python scripts/ingest_wikidata_coach_assets.py
+python scripts/ingest_wikidata_coach_assets.py --reconcile-manifest
+python scripts/ingest_wikidata_coach_assets.py --export-missing-csv quality/coaches_missing_assets.csv
 ```
 
 Sync especifico da vertical da Copa:

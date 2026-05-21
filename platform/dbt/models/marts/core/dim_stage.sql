@@ -1,3 +1,10 @@
+{{ config(
+    indexes=[
+        {'columns': ['competition_key', 'season_label', 'stage_id'], 'type': 'btree'},
+        {'columns': ['provider', 'stage_id'], 'type': 'btree'}
+    ]
+) }}
+
 with stages as (
     select * from {{ ref('stg_competition_stages') }}
 ),

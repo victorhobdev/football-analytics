@@ -1,0 +1,221 @@
+{
+  "run_id": "coach_alias_application_20260425T152648Z",
+  "executed": true,
+  "before": {
+    "counts": {
+      "active_coach_aliases": 4,
+      "active_team_aliases": 4,
+      "assigned_identity_distinct": 810,
+      "assigned_name_norm_distinct": 807,
+      "public_assignment_rows": 19267,
+      "rows_still_on_alias_identity": 0
+    },
+    "alias_rows": [
+      {
+        "coach_identity_alias_id": 1,
+        "canonical_name": "Tite",
+        "canonical_coach_identity_id": 5380719,
+        "alias_identity_name": "Adenor Bacchi",
+        "alias_coach_identity_id": 54,
+        "alias_source": "sportmonks",
+        "external_person_id": "474720",
+        "alias_name": "Adenor Bacchi",
+        "match_method": "manual_verified_same_person",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 2,
+        "canonical_name": "Rafael Paiva",
+        "canonical_coach_identity_id": 5380644,
+        "alias_identity_name": "Cledson Rafael de Paiva",
+        "alias_coach_identity_id": 31,
+        "alias_source": "sportmonks",
+        "external_person_id": "37690429",
+        "alias_name": "Cledson Rafael de Paiva",
+        "match_method": "manual_verified_same_person",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 3,
+        "canonical_name": "Abel Moreira Ferreira",
+        "canonical_coach_identity_id": 17,
+        "alias_identity_name": null,
+        "alias_coach_identity_id": null,
+        "alias_source": "wikidata",
+        "external_person_id": "Q318415",
+        "alias_name": "Abel Ferreira",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 4,
+        "canonical_name": "Abel Moreira Ferreira",
+        "canonical_coach_identity_id": 17,
+        "alias_identity_name": null,
+        "alias_coach_identity_id": null,
+        "alias_source": "wikidata_P286_team_to_person",
+        "external_person_id": "Q318415",
+        "alias_name": "Abel Ferreira",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      }
+    ],
+    "team_alias_rows": [
+      {
+        "team_identity_alias_id": 1,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "wikidata",
+        "external_team_id": "Q80964",
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 2,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "wikidata_P286_team_to_person",
+        "external_team_id": "Q80964",
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 3,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "manual_verified_name",
+        "external_team_id": null,
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_name",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 4,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "manual_verified_name",
+        "external_team_id": null,
+        "alias_name": "SE Palmeiras",
+        "match_method": "manual_verified_name",
+        "confidence": "1.0000"
+      }
+    ]
+  },
+  "after": {
+    "counts": {
+      "active_coach_aliases": 4,
+      "active_team_aliases": 4,
+      "assigned_identity_distinct": 810,
+      "assigned_name_norm_distinct": 807,
+      "public_assignment_rows": 19267,
+      "rows_still_on_alias_identity": 0
+    },
+    "alias_rows": [
+      {
+        "coach_identity_alias_id": 1,
+        "canonical_name": "Tite",
+        "canonical_coach_identity_id": 5380719,
+        "alias_identity_name": "Adenor Bacchi",
+        "alias_coach_identity_id": 54,
+        "alias_source": "sportmonks",
+        "external_person_id": "474720",
+        "alias_name": "Adenor Bacchi",
+        "match_method": "manual_verified_same_person",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 2,
+        "canonical_name": "Rafael Paiva",
+        "canonical_coach_identity_id": 5380644,
+        "alias_identity_name": "Cledson Rafael de Paiva",
+        "alias_coach_identity_id": 31,
+        "alias_source": "sportmonks",
+        "external_person_id": "37690429",
+        "alias_name": "Cledson Rafael de Paiva",
+        "match_method": "manual_verified_same_person",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 3,
+        "canonical_name": "Abel Moreira Ferreira",
+        "canonical_coach_identity_id": 17,
+        "alias_identity_name": null,
+        "alias_coach_identity_id": null,
+        "alias_source": "wikidata",
+        "external_person_id": "Q318415",
+        "alias_name": "Abel Ferreira",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "coach_identity_alias_id": 4,
+        "canonical_name": "Abel Moreira Ferreira",
+        "canonical_coach_identity_id": 17,
+        "alias_identity_name": null,
+        "alias_coach_identity_id": null,
+        "alias_source": "wikidata_P286_team_to_person",
+        "external_person_id": "Q318415",
+        "alias_name": "Abel Ferreira",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      }
+    ],
+    "team_alias_rows": [
+      {
+        "team_identity_alias_id": 1,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "wikidata",
+        "external_team_id": "Q80964",
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 2,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "wikidata_P286_team_to_person",
+        "external_team_id": "Q80964",
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_external_id",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 3,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "manual_verified_name",
+        "external_team_id": null,
+        "alias_name": "Sociedade Esportiva Palmeiras",
+        "match_method": "manual_verified_name",
+        "confidence": "1.0000"
+      },
+      {
+        "team_identity_alias_id": 4,
+        "team_name": "Palmeiras",
+        "team_id": 3422,
+        "alias_source": "manual_verified_name",
+        "external_team_id": null,
+        "alias_name": "SE Palmeiras",
+        "match_method": "manual_verified_name",
+        "confidence": "1.0000"
+      }
+    ]
+  },
+  "writes": {
+    "refreshed_canonical_identity_alias_payloads": 3,
+    "moved_source_refs": 0,
+    "moved_non_conflicting_tenures": 0,
+    "moved_fact_assignments": 0,
+    "updated_resolution_stage_rows": 0,
+    "updated_assignment_stage_rows": 0
+  },
+  "quality": {
+    "public_assignments_outside_window": 0,
+    "duplicate_match_team_rows": 0,
+    "rows_still_on_alias_identity": 0
+  }
+}

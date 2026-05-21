@@ -13,6 +13,8 @@ const HOP_BY_HOP_HEADERS = new Set([
   "transfer-encoding",
   "upgrade",
 ]);
+const CACHEABLE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
+const NO_STORE_CACHE_CONTROL = "no-store";
 
 function resolveBffOrigin(): string | null {
   const origin = process.env.FOOTBALL_BFF_ORIGIN?.trim() ?? process.env.BFF_ORIGIN?.trim();
@@ -37,14 +39,27 @@ function buildProxyHeaders(request: NextRequest): Headers {
   return headers;
 }
 
-function buildResponseHeaders(response: Response): Headers {
+function isCacheableRequest(request: NextRequest, pathSegments: string[]): boolean {
+  const method = request.method.toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    return false;
+  }
+
+  if (request.headers.has("authorization") || request.headers.has("cookie")) {
+    return false;
+  }
+
+  return pathSegments[0] === "api" && pathSegments[1] === "v1";
+}
+
+function buildResponseHeaders(response: Response, cacheControl: string): Headers {
   const headers = new Headers();
   response.headers.forEach((value, key) => {
     if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
       headers.set(key, value);
     }
   });
-  headers.set("Cache-Control", "no-store");
+  headers.set("Cache-Control", cacheControl);
   return headers;
 }
 
@@ -61,18 +76,22 @@ async function proxyBffRequest(
   const targetUrl = buildTargetUrl(origin, path, request.nextUrl.search);
   const method = request.method.toUpperCase();
   const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
-
-  const upstreamResponse = await fetch(targetUrl, {
+  const cacheable = isCacheableRequest(request, path);
+  const fetchOptions: RequestInit = {
     method,
     headers: buildProxyHeaders(request),
     body,
     redirect: "manual",
     cache: "no-store",
-  });
+  };
+
+  const upstreamResponse = await fetch(targetUrl, fetchOptions);
+  const cacheControl =
+    cacheable && upstreamResponse.ok ? CACHEABLE_CACHE_CONTROL : NO_STORE_CACHE_CONTROL;
 
   return new NextResponse(upstreamResponse.body, {
     status: upstreamResponse.status,
-    headers: buildResponseHeaders(upstreamResponse),
+    headers: buildResponseHeaders(upstreamResponse, cacheControl),
   });
 }
 

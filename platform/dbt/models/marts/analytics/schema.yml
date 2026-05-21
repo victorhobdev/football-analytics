@@ -164,6 +164,20 @@ models:
               to: ref('dim_team')
               field: team_sk
 
+  - name: player_serving_summary
+    description: "Resumo global por jogador para rotas de listagem e rankings sem recorte."
+    columns:
+      - name: player_id
+        tests:
+          - not_null
+          - unique
+      - name: matches_played
+        tests:
+          - not_null
+      - name: minutes_played
+        tests:
+          - not_null
+
   - name: player_season_summary
     description: "Resumo por temporada de estatisticas individuais."
     tests:

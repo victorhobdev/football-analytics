@@ -286,21 +286,29 @@ def execute_promotion(conn: psycopg.Connection[Any]) -> dict[str, int]:
             r.candidate_confidence,
             r.payload,
             coalesce(
-              r.coach_identity_id,
-              exact_ref.coach_identity_id,
-              generic_ref.coach_identity_id,
-              wikidata_identity.coach_identity_id
+              r_resolution.canonical_coach_identity_id,
+              exact_ref_resolution.canonical_coach_identity_id,
+              generic_ref_resolution.canonical_coach_identity_id,
+              wikidata_identity_resolution.canonical_coach_identity_id
             ) as coach_identity_id
           from mart.stg_external_coach_candidate_resolution r
+          left join mart.v_coach_identity_resolution r_resolution
+            on r_resolution.source_coach_identity_id = r.coach_identity_id
           left join mart.coach_identity_source_ref exact_ref
             on exact_ref.source = r.source
            and exact_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution exact_ref_resolution
+            on exact_ref_resolution.source_coach_identity_id = exact_ref.coach_identity_id
           left join mart.coach_identity_source_ref generic_ref
             on generic_ref.source = 'wikidata'
            and generic_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution generic_ref_resolution
+            on generic_ref_resolution.source_coach_identity_id = generic_ref.coach_identity_id
           left join mart.coach_identity wikidata_identity
             on wikidata_identity.provider = 'wikidata'
            and wikidata_identity.provider_coach_id = regexp_replace(r.external_person_id, '^Q', '')::bigint
+          left join mart.v_coach_identity_resolution wikidata_identity_resolution
+            on wikidata_identity_resolution.source_coach_identity_id = wikidata_identity.coach_identity_id
           where r.classification = 'promotable_candidate'
             and r.source = 'wikidata_P286_team_to_person'
             and r.external_person_id ~ '^Q[0-9]+$'
@@ -383,21 +391,29 @@ def execute_promotion(conn: psycopg.Connection[Any]) -> dict[str, int]:
             r.source_record_id,
             r.external_person_id,
             coalesce(
-              r.coach_identity_id,
-              exact_ref.coach_identity_id,
-              generic_ref.coach_identity_id,
-              wikidata_identity.coach_identity_id
+              r_resolution.canonical_coach_identity_id,
+              exact_ref_resolution.canonical_coach_identity_id,
+              generic_ref_resolution.canonical_coach_identity_id,
+              wikidata_identity_resolution.canonical_coach_identity_id
             ) as coach_identity_id
           from mart.stg_external_coach_candidate_resolution r
+          left join mart.v_coach_identity_resolution r_resolution
+            on r_resolution.source_coach_identity_id = r.coach_identity_id
           left join mart.coach_identity_source_ref exact_ref
             on exact_ref.source = r.source
            and exact_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution exact_ref_resolution
+            on exact_ref_resolution.source_coach_identity_id = exact_ref.coach_identity_id
           left join mart.coach_identity_source_ref generic_ref
             on generic_ref.source = 'wikidata'
            and generic_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution generic_ref_resolution
+            on generic_ref_resolution.source_coach_identity_id = generic_ref.coach_identity_id
           left join mart.coach_identity wikidata_identity
             on wikidata_identity.provider = 'wikidata'
            and wikidata_identity.provider_coach_id = regexp_replace(r.external_person_id, '^Q', '')::bigint
+          left join mart.v_coach_identity_resolution wikidata_identity_resolution
+            on wikidata_identity_resolution.source_coach_identity_id = wikidata_identity.coach_identity_id
           where r.external_person_id ~ '^Q[0-9]+$'
         ),
         tenure_rows as (
@@ -476,21 +492,29 @@ def execute_promotion(conn: psycopg.Connection[Any]) -> dict[str, int]:
             r.source,
             r.source_record_id,
             coalesce(
-              r.coach_identity_id,
-              exact_ref.coach_identity_id,
-              generic_ref.coach_identity_id,
-              wikidata_identity.coach_identity_id
+              r_resolution.canonical_coach_identity_id,
+              exact_ref_resolution.canonical_coach_identity_id,
+              generic_ref_resolution.canonical_coach_identity_id,
+              wikidata_identity_resolution.canonical_coach_identity_id
             ) as coach_identity_id
           from mart.stg_external_coach_candidate_resolution r
+          left join mart.v_coach_identity_resolution r_resolution
+            on r_resolution.source_coach_identity_id = r.coach_identity_id
           left join mart.coach_identity_source_ref exact_ref
             on exact_ref.source = r.source
            and exact_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution exact_ref_resolution
+            on exact_ref_resolution.source_coach_identity_id = exact_ref.coach_identity_id
           left join mart.coach_identity_source_ref generic_ref
             on generic_ref.source = 'wikidata'
            and generic_ref.external_person_id = r.external_person_id
+          left join mart.v_coach_identity_resolution generic_ref_resolution
+            on generic_ref_resolution.source_coach_identity_id = generic_ref.coach_identity_id
           left join mart.coach_identity wikidata_identity
             on wikidata_identity.provider = 'wikidata'
            and wikidata_identity.provider_coach_id = regexp_replace(r.external_person_id, '^Q', '')::bigint
+          left join mart.v_coach_identity_resolution wikidata_identity_resolution
+            on wikidata_identity_resolution.source_coach_identity_id = wikidata_identity.coach_identity_id
           where r.external_person_id ~ '^Q[0-9]+$'
         ),
         assignment_rows as (

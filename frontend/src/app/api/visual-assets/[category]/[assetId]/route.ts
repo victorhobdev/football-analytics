@@ -14,7 +14,7 @@ type ManifestFile = {
   entries?: ManifestEntry[];
 };
 
-const ALLOWED_CATEGORIES = new Set(["clubs", "competitions", "countries", "players"]);
+const ALLOWED_CATEGORIES = new Set(["clubs", "coaches", "competitions", "countries", "players"]);
 const ASSET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 type CachedManifest = {
   entries: ManifestEntry[];
@@ -23,6 +23,7 @@ type CachedManifest = {
 };
 
 const manifestCache = new Map<string, CachedManifest>();
+const manifestEntryIndexCache = new WeakMap<ManifestEntry[], Map<string, ManifestEntry>>();
 const REMOTE_MANIFEST_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function resolveConfiguredValue(...values: Array<string | undefined>): string | null {
@@ -249,25 +250,29 @@ async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
 }
 
 function findManifestEntry(entries: ManifestEntry[], assetId: string): ManifestEntry | null {
-  for (let index = entries.length - 1; index >= 0; index -= 1) {
-    const entry = entries[index];
-    if (typeof entry.local_path !== "string") {
-      continue;
-    }
+  let entryIndex = manifestEntryIndexCache.get(entries);
+  if (!entryIndex) {
+    entryIndex = new Map<string, ManifestEntry>();
+    for (const entry of entries) {
+      if (typeof entry.local_path !== "string") {
+        continue;
+      }
 
-    if (typeof entry.entity_key === "string" && entry.entity_key.trim() === assetId) {
-      return entry;
-    }
+      if (typeof entry.entity_key === "string" && entry.entity_key.trim() !== "") {
+        entryIndex.set(entry.entity_key.trim(), entry);
+      }
 
-    if (
-      (typeof entry.entity_id === "number" || typeof entry.entity_id === "string") &&
-      String(entry.entity_id).trim() === assetId
-    ) {
-      return entry;
+      if (typeof entry.entity_id === "number" || typeof entry.entity_id === "string") {
+        const entityId = String(entry.entity_id).trim();
+        if (entityId !== "") {
+          entryIndex.set(entityId, entry);
+        }
+      }
     }
+    manifestEntryIndexCache.set(entries, entryIndex);
   }
 
-  return null;
+  return entryIndex.get(assetId) ?? null;
 }
 
 function buildOverlayRelativePath(category: string, assetId: string): string {
