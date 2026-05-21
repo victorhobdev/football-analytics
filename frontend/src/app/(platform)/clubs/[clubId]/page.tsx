@@ -1,4 +1,5 @@
 import { TeamRouteResolver } from "@/app/(platform)/teams/[teamId]/TeamRouteResolver";
+import { loadTeamHonorsPreview } from "@/features/teams/server/teamHonorsPreview";
 
 type ClubDetailsPageProps = {
   params: Promise<{ clubId: string }>;
@@ -6,6 +7,7 @@ type ClubDetailsPageProps = {
 
 export default async function ClubDetailsPage({ params }: ClubDetailsPageProps) {
   const { clubId } = await params;
+  const honorsPreview = await loadTeamHonorsPreview(clubId);
 
-  return <TeamRouteResolver teamId={clubId} />;
+  return <TeamRouteResolver honorsPreview={honorsPreview} teamId={clubId} />;
 }

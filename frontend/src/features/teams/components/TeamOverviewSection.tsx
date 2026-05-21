@@ -3,16 +3,12 @@
 import Link from "next/link";
 
 import type { TeamProfile } from "@/features/teams/types";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import {
-  ProfileCoveragePill,
   ProfileKpi,
   ProfileMetricTile,
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
-import type { CoverageState } from "@/shared/types/coverage.types";
-import { formatDate } from "@/shared/utils/formatters";
 
 function formatPercentage(value: number | null | undefined): string {
   if (typeof value !== "number") {
@@ -63,7 +59,6 @@ function getFormTone(result: string) {
 }
 
 type TeamOverviewSectionProps = {
-  coverage: CoverageState;
   matchesHref: string;
   profile: TeamProfile;
   rankingsHref: string | null;
@@ -71,14 +66,22 @@ type TeamOverviewSectionProps = {
 };
 
 export function TeamOverviewSection({
-  coverage,
   matchesHref,
   profile,
   rankingsHref,
   seasonHubHref,
 }: TeamOverviewSectionProps) {
-  const { team, summary, standing, form, recentMatches } = profile;
-  const latestMatch = recentMatches?.[0] ?? null;
+  const { team, summary, standing, form, stats } = profile;
+  const bestTrendPeriod = [...(stats?.trend ?? [])].sort((left, right) => {
+    const rightPoints = right.points ?? -1;
+    const leftPoints = left.points ?? -1;
+
+    if (rightPoints !== leftPoints) {
+      return rightPoints - leftPoints;
+    }
+
+    return (right.goalDiff ?? -999) - (left.goalDiff ?? -999);
+  })[0];
   const winRate =
     summary.matchesPlayed && summary.matchesPlayed > 0 && typeof summary.wins === "number"
       ? (summary.wins / summary.matchesPlayed) * 100
@@ -90,14 +93,11 @@ export function TeamOverviewSection({
 
   return (
     <div className="space-y-6">
-      {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
-
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <ProfilePanel className="space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <ProfileCoveragePill coverage={coverage} />
                 <ProfileTag>{team.competitionName ?? "Competição"}</ProfileTag>
                 <ProfileTag>{team.seasonLabel ?? "Temporada"}</ProfileTag>
               </div>
@@ -105,7 +105,7 @@ export function TeamOverviewSection({
                 Resumo competitivo
               </h2>
               <p className="text-sm leading-6 text-[#57657a]">
-                Posição, forma recente e produção agregada do time nesta temporada.
+                Posição, forma consolidada e produção agregada do time nesta temporada.
               </p>
             </div>
 
@@ -144,7 +144,7 @@ export function TeamOverviewSection({
 
           <div className="space-y-3">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-              Forma recente
+              Forma consolidada
             </p>
             <div className="flex flex-wrap gap-3">
               {(form ?? []).length > 0 ? (
@@ -160,24 +160,24 @@ export function TeamOverviewSection({
                   );
                 })
               ) : (
-                <p className="text-sm text-[#57657a]">Ainda não há sequência recente suficiente para este time.</p>
+                <p className="text-sm text-[#57657a]">Ainda não há sequência suficiente para este time.</p>
               )}
             </div>
           </div>
         </ProfilePanel>
 
-        <ProfilePanel className="space-y-5" tone="accent">
+        <ProfilePanel className="profile-hero-clean space-y-5" tone="accent">
           <div className="space-y-2">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/65">
-              Última partida consolidada
+              Melhor período consolidado
             </p>
             <h2 className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-white">
-              {latestMatch?.opponentName ?? "Sem adversário"}
+              {bestTrendPeriod?.label ?? "Sem série mensal"}
             </h2>
             <p className="text-sm leading-6 text-white/75">
-              {latestMatch
-                ? `${formatDate(latestMatch.playedAt)} · ${latestMatch.venue === "home" ? "Casa" : "Fora"}`
-                : "A última partida consolidada ainda não está disponível."}
+              {bestTrendPeriod
+                ? `${bestTrendPeriod.matches ?? "-"} jogos · ${bestTrendPeriod.wins ?? "-"} vitórias · saldo ${formatGoalDiff(bestTrendPeriod.goalDiff)}`
+                : "A série mensal consolidada ainda não está disponível."}
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export function TeamOverviewSection({
             <ProfileMetricTile label="Jogos" value={summary.matchesPlayed ?? "-"} />
             <ProfileMetricTile label="Empates" value={summary.draws ?? "-"} />
             <ProfileMetricTile label="Derrotas" value={summary.losses ?? "-"} />
-            <ProfileMetricTile label="Resultado" value={latestMatch ? `${latestMatch.goalsFor ?? "-"} - ${latestMatch.goalsAgainst ?? "-"}` : "-"} />
+            <ProfileMetricTile label="Pontos no pico" value={bestTrendPeriod?.points ?? "-"} />
           </div>
         </ProfilePanel>
       </section>

@@ -376,7 +376,7 @@ export function usePlatformShellState(): PlatformShellState {
     let surfaceLabel = "Visão geral";
     let surfaceTitle = context ? `${context.competitionName} ${context.seasonLabel}` : "Explore o produto";
     let description =
-      "Use os atalhos da página e os filtros para navegar entre competições, partidas, rankings, jogadores e times.";
+      "Use os atalhos da página e os filtros para navegar entre competições, rankings, jogadores e times.";
     let helperText =
       "Os filtros mantêm o recorte ativo enquanto você troca de área.";
 
@@ -428,7 +428,6 @@ export function usePlatformShellState(): PlatformShellState {
           ),
           buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
           buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-          buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
         );
       }
     }
@@ -440,8 +439,8 @@ export function usePlatformShellState(): PlatformShellState {
         : "Entrada executiva do produto";
       description =
         context
-          ? "Comece pela competição atual e siga para partidas, times, jogadores ou rankings."
-          : "Comece por competições ou use a busca global para entrar direto em partidas, times e jogadores.";
+          ? "Comece pela competição atual e siga para times, jogadores ou rankings."
+          : "Comece por competições ou use a busca global para entrar direto em times e jogadores.";
       helperText = context
         ? "A página inicial mantém o recorte atual enquanto você abre as áreas principais."
         : "Escolha uma competição ou abra a busca global para começar.";
@@ -449,7 +448,6 @@ export function usePlatformShellState(): PlatformShellState {
         0,
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
       );
@@ -508,7 +506,6 @@ export function usePlatformShellState(): PlatformShellState {
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
       );
     } else if (isLegacyClubResolverPath(pathname) || isShortTeamResolverPath(pathname)) {
       surfaceLabel = "Compatibilidade";
@@ -527,7 +524,6 @@ export function usePlatformShellState(): PlatformShellState {
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
       );
     } else if (pathname === "/players") {
       surfaceLabel = "Jogadores";
@@ -547,7 +543,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Resumo, histórico e estatísticas do atleta.";
       helperText = context
-        ? "Use os atalhos para voltar a partidas, rankings, times e jogadores."
+        ? "Use os atalhos para voltar a rankings, times e jogadores."
         : "Abra jogadores ou competições para entrar em um contexto específico.";
     } else if (pathname === "/teams") {
       surfaceLabel = "Times";
@@ -567,7 +563,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Resumo, elenco, partidas e desempenho do time.";
       helperText = context
-        ? "Use os atalhos para voltar a partidas, rankings, jogadores e competição."
+        ? "Use os atalhos para voltar a rankings, jogadores e competição."
         : "Abra times ou competições para entrar em um contexto específico.";
     } else if (pathname === "/matches") {
       surfaceLabel = "Partidas";
@@ -586,7 +582,7 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Resumo, linha do tempo, escalações e estatísticas do jogo.";
       helperText =
-        "Volte para partidas, times, jogadores e rankings mantendo o mesmo recorte.";
+        "Volte para competição, times, jogadores e rankings mantendo o mesmo recorte.";
     } else if (pathname === "/rankings") {
       surfaceLabel = "Rankings";
       surfaceTitle = context
@@ -624,7 +620,6 @@ export function usePlatformShellState(): PlatformShellState {
           buildRankingsHubPath(sharedFilterInput),
         ),
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
       );
     } else if (pathname === "/head-to-head") {
       surfaceLabel = "Confronto direto";
@@ -640,7 +635,6 @@ export function usePlatformShellState(): PlatformShellState {
         0,
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
         buildSurfaceLink(
           pathname,
           searchParams,
@@ -655,13 +649,12 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "O domínio de técnicos já existe no produto, mas ainda não tem listagem pública sustentada pelo BFF atual.";
       helperText =
-        "Use times, partidas e competições como portas de entrada enquanto a descoberta pública de técnicos é fechada.";
+        "Use times e competições como portas de entrada enquanto a descoberta pública de técnicos é fechada.";
       breadcrumbs.push({ label: "Técnicos" });
       surfaceLinks.splice(
         0,
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
       );
     } else if (pathname.startsWith("/coaches/")) {
@@ -670,14 +663,13 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "O link direto de técnico já existe, mas o detalhe público ainda depende de um contrato dedicado para fechar histórico, ciclos e desempenho.";
       helperText =
-        "Use times, jogadores e partidas para navegar pelo contexto atual sem cair em rota quebrada.";
+        "Use times, jogadores e competições para navegar pelo contexto atual sem cair em rota quebrada.";
       breadcrumbs.push({ label: "Técnicos" });
       surfaceLinks.splice(
         0,
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
       );
     } else if (pathname === "/audit") {
       surfaceLabel = "Área interna";
@@ -685,14 +677,13 @@ export function usePlatformShellState(): PlatformShellState {
       description =
         "Esta rota não está aberta na navegação do produto.";
       helperText =
-        "Volte para o início, competições ou partidas para continuar.";
+        "Volte para o início ou competições para continuar.";
       breadcrumbs.push({ label: "Auditoria" });
       surfaceLinks.splice(
         0,
         surfaceLinks.length,
         buildSurfaceLink(pathname, searchParams, "Início", "/"),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
       );
     }
 

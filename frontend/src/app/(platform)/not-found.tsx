@@ -17,12 +17,6 @@ export default function PlatformNotFound() {
           >
             Abrir competições
           </Link>
-          <Link
-            className="button-pill button-pill-secondary"
-            href="/matches"
-          >
-            Abrir partidas
-          </Link>
         </>
       }
       title="Área não encontrada"

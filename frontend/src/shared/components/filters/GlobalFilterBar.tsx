@@ -25,6 +25,7 @@ import {
   SUPPORTED_SEASONS,
 } from "@/config/seasons.registry";
 import {
+  buildCanonicalTeamPath,
   buildCompetitionHubPath,
   buildSeasonHubPath,
   getContextQueryKeysToLockForPath,
@@ -66,6 +67,20 @@ function isSeasonHubRootPathname(pathname: string): boolean {
     /^\/competitions\/[^/]+\/seasons\/[^/]+\/?$/.test(pathname) ||
     isWorldCupEditionPathname(pathname)
   );
+}
+
+function resolveCanonicalTeamIdFromPathname(pathname: string): string | null {
+  const match = pathname.match(/^\/competitions\/[^/]+\/seasons\/[^/]+\/teams\/([^/]+)(?:\/|$)/);
+
+  if (!match) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
 }
 
 function parseVenue(value: string | null): VenueFilter {
@@ -489,8 +504,9 @@ export function GlobalFilterBar() {
     () => new Set(getContextQueryKeysToLockForPath(pathname)),
     [pathname],
   );
+  const canonicalTeamId = useMemo(() => resolveCanonicalTeamIdFromPathname(pathname), [pathname]);
   const isCompetitionContextLocked = lockedContextKeys.has("competitionId");
-  const isSeasonContextLocked = lockedContextKeys.has("seasonId");
+  const isSeasonContextLocked = canonicalTeamId === null && lockedContextKeys.has("seasonId");
   const hasLockedRouteContext = isCompetitionContextLocked || isSeasonContextLocked;
   const isCompetitionScopedPath = useMemo(
     () => /^\/competitions\/[^/]+(?:\/|$)/.test(pathname) || pathname === "/copa-do-mundo" || pathname.startsWith("/copa-do-mundo/"),
@@ -728,17 +744,21 @@ export function GlobalFilterBar() {
     setRoundId(null);
     setVenue("all");
     setTimeRange({ mode: "lastN", lastN: null });
-    replaceFiltersInUrl({
-      competitionId: nextCompetitionId,
-      seasonId: nextSeasonId,
-      teamId: null,
-      roundId: null,
-      venue: "all",
-      lastN: null,
-      dateRangeStart: null,
-      dateRangeEnd: null,
-    });
+    replaceFiltersInUrl(
+      {
+        competitionId: nextCompetitionId,
+        seasonId: nextSeasonId,
+        teamId: null,
+        roundId: null,
+        venue: "all",
+        lastN: null,
+        dateRangeStart: null,
+        dateRangeEnd: null,
+      },
+      canonicalTeamId ? `/teams/${encodeURIComponent(canonicalTeamId)}` : undefined,
+    );
   }, [
+    canonicalTeamId,
     competitionId,
     effectiveCompetitionId,
     effectiveSeasonId,
@@ -1002,16 +1022,29 @@ export function GlobalFilterBar() {
                     })
                   : null;
                 const nextSeasonId = nextSeason?.queryId ?? null;
-                const nextPathname = !isCompetitionScopedPath
-                  ? undefined
-                  : nextCompetition
-                    ? isCompetitionSeasonScopedPath && nextSeason
-                      ? buildSeasonHubPath({
+                const nextPathname = canonicalTeamId
+                  ? nextCompetition && nextSeason
+                    ? buildCanonicalTeamPath(
+                        {
+                          competitionId: nextCompetition.id,
                           competitionKey: nextCompetition.key,
+                          competitionName: nextCompetition.name,
+                          seasonId: nextSeason.queryId,
                           seasonLabel: nextSeason.label,
-                        })
-                      : buildCompetitionHubPath(nextCompetition.key)
-                    : "/competitions";
+                        },
+                        canonicalTeamId,
+                      )
+                    : `/teams/${encodeURIComponent(canonicalTeamId)}`
+                  : !isCompetitionScopedPath
+                    ? undefined
+                    : nextCompetition
+                      ? isCompetitionSeasonScopedPath && nextSeason
+                        ? buildSeasonHubPath({
+                            competitionKey: nextCompetition.key,
+                            seasonLabel: nextSeason.label,
+                          })
+                        : buildCompetitionHubPath(nextCompetition.key)
+                      : "/competitions";
 
                 setCompetitionId(nextCompetitionId);
                 setSeasonId(nextSeasonId);
@@ -1056,6 +1089,29 @@ export function GlobalFilterBar() {
               onChange={(nextValue) => {
                 const nextSeasonId = parseNullableText(nextValue);
                 const nextRoundId = roundId !== null ? null : roundId;
+                const nextSeason =
+                  selectedCompetition && nextSeasonId
+                    ? resolveSeasonForCompetition(selectedCompetition, {
+                        seasonId: nextSeasonId,
+                        seasonLabel:
+                          getSeasonByQueryId(nextSeasonId, selectedCompetition.seasonCalendar)
+                            ?.label ?? nextSeasonId,
+                      })
+                    : null;
+                const nextPathname = canonicalTeamId
+                  ? selectedCompetition && nextSeason
+                    ? buildCanonicalTeamPath(
+                        {
+                          competitionId: selectedCompetition.id,
+                          competitionKey: selectedCompetition.key,
+                          competitionName: selectedCompetition.name,
+                          seasonId: nextSeason.queryId,
+                          seasonLabel: nextSeason.label,
+                        },
+                        canonicalTeamId,
+                      )
+                    : `/teams/${encodeURIComponent(canonicalTeamId)}`
+                  : undefined;
 
                 setSeasonId(nextSeasonId);
                 if (teamId !== null) {
@@ -1068,7 +1124,7 @@ export function GlobalFilterBar() {
                   seasonId: nextSeasonId,
                   teamId: null,
                   roundId: nextRoundId,
-                });
+                }, nextPathname);
               }}
               options={seasonDropdownOptions}
               placeholder="Todas as temporadas"

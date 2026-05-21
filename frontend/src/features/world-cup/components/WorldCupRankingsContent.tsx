@@ -551,15 +551,13 @@ function EditorialCompactRow({
     visual ? "md:grid-cols-[auto_auto_minmax(0,1fr)_auto]" : "md:grid-cols-[auto_minmax(0,1fr)_auto]",
   );
 
-  const titleNode = href ? (
-    <Link
-      className="font-[family:var(--font-profile-headline)] text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
-      href={href}
+  const titleNode = (
+    <p
+      className={joinClasses(
+        "font-[family:var(--font-profile-headline)] text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1d160c]",
+        href ? "transition-colors group-hover:text-[#5f430a]" : null,
+      )}
     >
-      {title}
-    </Link>
-  ) : (
-    <p className="font-[family:var(--font-profile-headline)] text-[1.12rem] font-extrabold tracking-[-0.03em] text-[#1d160c]">
       {title}
     </p>
   );

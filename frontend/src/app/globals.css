@@ -209,6 +209,46 @@ svg {
   transform: none;
 }
 
+.profile-hero-clean {
+  border-color: rgba(255, 255, 255, 0.82) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(139, 214, 182, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(216, 227, 251, 0.52), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 249, 0.96) 58%, rgba(239, 248, 243, 0.94) 100%) !important;
+  color: var(--app-text) !important;
+  box-shadow: 0 34px 84px -58px rgba(17, 28, 45, 0.28) !important;
+}
+
+.profile-hero-clean [class*="text-white"] {
+  color: var(--app-primary) !important;
+}
+
+.profile-hero-clean [class*="text-white/"] {
+  color: rgba(17, 28, 45, 0.62) !important;
+}
+
+.profile-hero-clean [class*="bg-white/"] {
+  background-color: rgba(0, 53, 38, 0.06) !important;
+}
+
+.profile-hero-clean [class*="border-white/"] {
+  border-color: rgba(0, 53, 38, 0.1) !important;
+}
+
+.profile-hero-clean .button-pill,
+.profile-hero-clean a[class*="rounded-full"] {
+  border-color: rgba(0, 53, 38, 0.12) !important;
+  background-color: rgba(0, 53, 38, 0.06) !important;
+  color: var(--app-primary) !important;
+}
+
+.profile-hero-clean .button-pill:hover,
+.profile-hero-clean a[class*="rounded-full"]:hover {
+  border-color: rgba(0, 53, 38, 0.24) !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  color: var(--app-primary-strong) !important;
+}
+
 .world-cup-theme {
   background:
     radial-gradient(circle at top left, rgba(243, 223, 159, 0.12), transparent 28%),
