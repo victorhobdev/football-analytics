@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -458,6 +458,7 @@ export default function PlayersPage() {
   const normalizedMinMinutes = useMemo(() => parseMinMinutes(minMinutesInput), [minMinutesInput]);
 
   const queryClient = useQueryClient();
+  const prefetchedPlayerIdsRef = useRef<Set<string>>(new Set());
   const { competitionId, seasonId, venue } = useGlobalFiltersState();
   const resolvedContext = useResolvedCompetitionContext();
   const { params: timeRangeParams } = useTimeRange();
@@ -541,9 +542,14 @@ export default function PlayersPage() {
     (playerId: string) => {
       const normalizedPlayerId = playerId.trim();
 
-      if (normalizedPlayerId.length === 0) {
+      if (
+        normalizedPlayerId.length === 0 ||
+        prefetchedPlayerIdsRef.current.has(normalizedPlayerId)
+      ) {
         return;
       }
+
+      prefetchedPlayerIdsRef.current.add(normalizedPlayerId);
 
       void queryClient.prefetchQuery({
         queryKey: playersQueryKeys.profile(normalizedPlayerId, detailPrefetchFilters),
@@ -553,6 +559,10 @@ export default function PlayersPage() {
     },
     [detailPrefetchFilters, queryClient],
   );
+
+  useEffect(() => {
+    prefetchedPlayerIdsRef.current.clear();
+  }, [detailPrefetchFilters]);
 
   const getPlayerHref = useCallback(
     (playerId: string) =>

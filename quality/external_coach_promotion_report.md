@@ -10,9 +10,9 @@
 
 ## Preflight
 
-- `promotable_rows`: `8201`
-- `promotable_match_teams`: `8201`
-- `promotable_coach_keys`: `280`
+- `promotable_rows`: `163`
+- `promotable_match_teams`: `163`
+- `promotable_coach_keys`: `1`
 - `outside_window`: `0`
 - `would_overwrite_protected_assignment`: `0`
 - `unresolved_match_team_conflicts`: `0`
@@ -25,18 +25,18 @@
 
 ## Escritas
 
-- `identities`: `144`
-- `identity_refs`: `560`
-- `tenures`: `340`
-- `assignments`: `8201`
+- `identities`: `0`
+- `identity_refs`: `2`
+- `tenures`: `1`
+- `assignments`: `163`
 
 ## Antes e depois
 
-- `coach_identity`: `1959` -> `2103` (`+144`)
-- `coach_identity_source_ref`: `0` -> `560` (`+560`)
-- `coach_tenure`: `0` -> `340` (`+340`)
-- `fact_assignment`: `10903` -> `19104` (`+8201`)
-- `fact_public`: `10903` -> `19104` (`+8201`)
+- `coach_identity`: `2103` -> `2103` (`+0`)
+- `coach_identity_source_ref`: `560` -> `562` (`+2`)
+- `coach_tenure`: `340` -> `341` (`+1`)
+- `fact_assignment`: `19104` -> `19267` (`+163`)
+- `fact_public`: `19104` -> `19267` (`+163`)
 
 ## Qualidade pos-promocao
 

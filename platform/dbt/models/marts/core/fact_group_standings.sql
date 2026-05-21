@@ -1,3 +1,9 @@
+{{ config(
+    indexes=[
+        {'columns': ['competition_key', 'season_label', 'stage_id', 'group_id', 'position'], 'type': 'btree'}
+    ]
+) }}
+
 with standings as (
     select * from {{ ref('fact_standings_snapshots') }}
 ),

@@ -119,6 +119,83 @@ def _player_coverage(filters: GlobalFilters) -> dict[str, Any]:
     return build_coverage_from_counts(available, total, "Player stats coverage")
 
 
+def _can_use_player_serving_summary(filters: GlobalFilters) -> bool:
+    return (
+        not filters.competition_ids
+        and filters.season_id is None
+        and filters.round_id is None
+        and filters.stage_id is None
+        and filters.stage_format is None
+        and filters.venue == VenueFilter.all
+        and filters.last_n is None
+        and filters.date_start is None
+        and filters.date_end is None
+    )
+
+
+def _fetch_players_from_serving_summary(
+    *,
+    search_pattern: str | None,
+    team_id: int | None,
+    position_pattern: str | None,
+    min_minutes: int | None,
+    page_size: int,
+    offset: int,
+    sort_by: PlayersSortBy,
+    sort_direction: SortDirection,
+) -> list[dict[str, Any]]:
+    sort_column = {
+        "playerName": "pss.player_name",
+        "minutesPlayed": "pss.minutes_played",
+        "goals": "pss.goals",
+        "assists": "pss.assists",
+        "rating": "pss.rating",
+    }[sort_by]
+    sort_dir = "asc" if sort_direction == "asc" else "desc"
+
+    return db_client.fetch_all(
+        f"""
+        select
+            pss.player_id,
+            pss.player_name,
+            pss.team_id,
+            pss.team_name,
+            pss.position_name,
+            pss.nationality,
+            pss.team_count,
+            pss.recent_teams,
+            pss.matches_played,
+            pss.minutes_played,
+            pss.goals,
+            pss.assists,
+            pss.shots_total,
+            pss.yellow_cards,
+            pss.red_cards,
+            pss.rating,
+            count(*) over() as _total_count
+        from mart.player_serving_summary pss
+        where (%s::text is null or {_normalized_search_sql("pss.player_name")} like %s)
+          and (%s::bigint is null or pss.team_id = %s)
+          and (%s::text is null or coalesce(pss.position_name, '') ilike %s)
+          and (%s::numeric is null or pss.minutes_played >= %s)
+        order by {sort_column} {sort_dir}, pss.player_id asc
+        limit %s offset %s;
+        """,
+        [
+            search_pattern,
+            search_pattern,
+            team_id,
+            team_id,
+            position_pattern,
+            position_pattern,
+            min_minutes,
+            min_minutes,
+            page_size,
+            offset,
+        ],
+    )
+
+
 def _normalize_text_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
@@ -348,7 +425,19 @@ def get_players(
     search_pattern = f"%{normalized_search}%" if normalized_search else None
     position_pattern = f"%{position.strip()}%" if position and position.strip() else None
 
-    query = f"""
+    if _can_use_player_serving_summary(global_filters):
+        rows = _fetch_players_from_serving_summary(
+            search_pattern=search_pattern,
+            team_id=team_id_int,
+            position_pattern=position_pattern,
+            min_minutes=minMinutes,
+            page_size=pageSize,
+            offset=offset,
+            sort_by=sortBy,
+            sort_direction=sortDirection,
+        )
+    else:
+        query = f"""
         with scoped as (
             select
                 pms.player_id,
@@ -478,26 +567,26 @@ def get_players(
         from final_rows f
         order by {sort_column} {sort_dir}, f.player_id asc
         limit %s offset %s;
-    """
+        """
 
-    rows = db_client.fetch_all(
-        query,
-        [
-            *where_params,
-            global_filters.last_n,
-            global_filters.last_n,
-            search_pattern,
-            search_pattern,
-            team_id_int,
-            team_id_int,
-            position_pattern,
-            position_pattern,
-            minMinutes,
-            minMinutes,
-            pageSize,
-            offset,
-        ],
-    )
+        rows = db_client.fetch_all(
+            query,
+            [
+                *where_params,
+                global_filters.last_n,
+                global_filters.last_n,
+                search_pattern,
+                search_pattern,
+                team_id_int,
+                team_id_int,
+                position_pattern,
+                position_pattern,
+                minMinutes,
+                minMinutes,
+                pageSize,
+                offset,
+            ],
+        )
 
     total_count = int(rows[0]["_total_count"]) if rows else 0
     pagination = build_pagination(page, pageSize, total_count)

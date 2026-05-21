@@ -3,7 +3,9 @@
     unique_key='fixture_player_stat_id',
     on_schema_change='sync_all_columns',
     indexes=[
-        {'columns': ['match_id', 'team_id'], 'type': 'btree'}
+        {'columns': ['match_id', 'team_id'], 'type': 'btree'},
+        {'columns': ['player_id', 'match_date desc', 'match_id desc'], 'type': 'btree'},
+        {'columns': ['match_id', 'player_id'], 'type': 'btree'}
     ]
 ) }}
 {% set lookback_hours = var('fact_fixture_player_stats_incremental_lookback_hours', 24) %}

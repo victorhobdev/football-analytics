@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Link from "next/link";
 
@@ -446,6 +446,7 @@ export default function MatchesPage() {
   const [search, setSearch] = useState("");
   const [sortDirection, setSortDirection] = useState<MatchesListSortDirection>("desc");
   const queryClient = useQueryClient();
+  const prefetchedMatchIdsRef = useRef<Set<string>>(new Set());
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
   const resolvedContext = useResolvedCompetitionContext();
@@ -494,9 +495,14 @@ export default function MatchesPage() {
     (matchId: string) => {
       const normalizedMatchId = matchId.trim();
 
-      if (normalizedMatchId.length === 0) {
+      if (
+        normalizedMatchId.length === 0 ||
+        prefetchedMatchIdsRef.current.has(normalizedMatchId)
+      ) {
         return;
       }
+
+      prefetchedMatchIdsRef.current.add(normalizedMatchId);
 
       void queryClient.prefetchQuery({
         queryKey: matchesQueryKeys.center(normalizedMatchId, detailPrefetchFilters),
@@ -506,6 +512,10 @@ export default function MatchesPage() {
     },
     [detailPrefetchFilters, queryClient],
   );
+
+  useEffect(() => {
+    prefetchedMatchIdsRef.current.clear();
+  }, [detailPrefetchFilters]);
 
   const buildMatchHref = useCallback(
     (match: MatchListItem) =>

@@ -433,6 +433,20 @@ def _player_scope_filters_sql(filters: GlobalFilters) -> tuple[str, list[Any]]:
     return " and ".join(where_clauses), params
 
 
+def _can_use_player_serving_summary(filters: GlobalFilters) -> bool:
+    return (
+        not filters.competition_ids
+        and filters.season_id is None
+        and filters.round_id is None
+        and filters.stage_id is None
+        and filters.stage_format is None
+        and filters.venue == VenueFilter.all
+        and filters.last_n is None
+        and filters.date_start is None
+        and filters.date_end is None
+    )
+
+
 def _player_ranking_coverage(filters: GlobalFilters) -> dict[str, Any]:
     match_where: list[str] = ["1=1"]
     match_params: list[Any] = []
@@ -540,6 +554,94 @@ def _team_pass_accuracy_coverage(filters: GlobalFilters) -> dict[str, Any]:
     )
 
 
+def _fetch_player_ranking_rows_from_serving_summary(
+    *,
+    ranking_config: dict[str, Any],
+    search: str | None,
+    min_sample_value: int | None,
+    page: int,
+    page_size: int,
+    sort_direction: str,
+) -> tuple[list[dict[str, Any]], int, str | None]:
+    value_column = ranking_config["valueColumn"]
+    metric_expression = {
+        "rating": "pss.rating",
+        "goals": "pss.goals",
+        "assists": "pss.assists",
+        "shots_total": "pss.shots_total",
+        "shots_on_goal": "pss.shots_on_goal",
+        "yellow_cards": "pss.yellow_cards",
+        "cards_total": "pss.cards_total",
+    }[value_column]
+
+    normalized_search = _normalize_search_value(search)
+    search_pattern = f"%{normalized_search}%" if normalized_search else None
+    offset = (page - 1) * page_size
+    order_dir = "asc" if sort_direction == "asc" else "desc"
+    rank_order_sql = f"c.metric_value {order_dir} nulls last, lower(c.player_name) asc nulls last, c.player_id asc"
+    final_order_sql = "r.rank asc, lower(r.player_name) asc nulls last, r.player_id asc"
+
+    rows = db_client.fetch_all(
+        f"""
+        with constrained as (
+            select
+                pss.player_id,
+                pss.player_name,
+                pss.team_id,
+                pss.team_name,
+                pss.team_count,
+                pss.recent_teams_5 as recent_teams,
+                pss.matches_played,
+                pss.minutes_played,
+                {metric_expression} as metric_value,
+                case
+                    when pss.minutes_played > 0 and {metric_expression} is not null
+                        then round(({metric_expression} * 90) / pss.minutes_played, 2)
+                    else null
+                end as metric_per90,
+                pss.data_updated_at
+            from mart.player_serving_summary pss
+            where (%s::text is null or {_normalized_search_sql("pss.player_name")} like %s)
+              and (%s::numeric is null or pss.minutes_played >= %s)
+        ),
+        ranked as (
+            select
+                c.player_id,
+                c.player_name,
+                c.team_id,
+                c.team_name,
+                c.team_count,
+                c.recent_teams,
+                c.matches_played,
+                c.minutes_played,
+                c.metric_value,
+                c.metric_per90,
+                c.data_updated_at,
+                dense_rank() over (order by {rank_order_sql}) as rank
+            from constrained c
+        )
+        select
+            r.*,
+            count(*) over() as _total_count,
+            max(r.data_updated_at) over() as _max_updated_at
+        from ranked r
+        order by {final_order_sql}
+        limit %s offset %s;
+        """,
+        [
+            search_pattern,
+            search_pattern,
+            min_sample_value,
+            min_sample_value,
+            page_size,
+            offset,
+        ],
+    )
+    total_count = int(rows[0]["_total_count"]) if rows else 0
+    max_updated_at = rows[0].get("_max_updated_at") if rows else None
+    return rows, total_count, max_updated_at.isoformat() if isinstance(max_updated_at, datetime) else max_updated_at
+
+
 def _fetch_player_ranking_rows(
     *,
     ranking_config: dict[str, Any],
@@ -550,6 +652,16 @@ def _fetch_player_ranking_rows(
     page_size: int,
     sort_direction: str,
 ) -> tuple[list[dict[str, Any]], int, str | None]:
+    if _can_use_player_serving_summary(filters):
+        return _fetch_player_ranking_rows_from_serving_summary(
+            ranking_config=ranking_config,
+            search=search,
+            min_sample_value=min_sample_value,
+            page=page,
+            page_size=page_size,
+            sort_direction=sort_direction,
+        )
+
     where_sql, where_params = _player_scope_filters_sql(filters)
     value_column = ranking_config["valueColumn"]
     metric_expression = {

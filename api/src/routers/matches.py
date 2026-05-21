@@ -58,6 +58,98 @@ def _match_filters_sql(filters: GlobalFilters) -> tuple[str, list[Any]]:
     return " and ".join(clauses), params
 
 
+def _can_use_unfiltered_match_list(
+    *,
+    filters: GlobalFilters,
+    team_id: int | None,
+    search_pattern: str | None,
+    status_pattern: str | None,
+) -> bool:
+    return (
+        not filters.competition_ids
+        and filters.season_id is None
+        and filters.round_id is None
+        and filters.stage_id is None
+        and filters.stage_format is None
+        and filters.venue == VenueFilter.all
+        and filters.last_n is None
+        and filters.date_start is None
+        and filters.date_end is None
+        and team_id is None
+        and search_pattern is None
+        and status_pattern is None
+    )
+
+
+def _fetch_unfiltered_match_list(
+    *,
+    page_size: int,
+    offset: int,
+    sort_column: str,
+    sort_direction: SortDirection,
+) -> list[dict[str, Any]]:
+    sort_dir = "asc" if sort_direction == "asc" else "desc"
+    return db_client.fetch_all(
+        f"""
+        with enriched as (
+            select
+                fm.match_id::text as match_id,
+                fm.match_id::text as fixture_id,
+                fm.league_id::text as competition_id,
+                fm.competition_key,
+                coalesce(dc.league_name, fm.league_id::text) as competition_name,
+                fm.competition_type,
+                fm.season::text as season_id,
+                fm.season_label,
+                fm.round_number::text as round_id,
+                fm.round_name,
+                fm.stage_id::text as stage_id,
+                coalesce(fm.stage_name, ds.stage_name) as stage_name,
+                ds.stage_format,
+                fm.group_id::text as group_id,
+                nullif(trim(rf.group_name), '') as group_name,
+                fm.tie_id::text as tie_id,
+                ftr.tie_order,
+                ftr.match_count as tie_match_count,
+                fm.leg_number,
+                fm.is_knockout,
+                rf.date_utc as kickoff_at,
+                coalesce(rf.status_short, rf.status_long) as status,
+                dv.venue_name as venue_name,
+                fm.home_team_id::text as home_team_id,
+                home_team.team_name as home_team_name,
+                fm.away_team_id::text as away_team_id,
+                away_team.team_name as away_team_name,
+                fm.home_goals as home_score,
+                fm.away_goals as away_score
+            from mart.fact_matches fm
+            left join raw.fixtures rf
+              on rf.fixture_id = fm.match_id
+            left join mart.dim_competition dc
+              on dc.league_id = fm.league_id
+            left join mart.dim_stage ds
+              on ds.provider = fm.provider
+             and ds.stage_id = fm.stage_id
+            left join mart.fact_tie_results ftr
+              on ftr.tie_id = fm.tie_id
+            left join mart.dim_team home_team
+              on home_team.team_id = fm.home_team_id
+            left join mart.dim_team away_team
+              on away_team.team_id = fm.away_team_id
+            left join mart.dim_venue dv
+              on dv.venue_id = rf.venue_id
+        )
+        select
+            f.*,
+            count(*) over() as _total_count
+        from enriched f
+        order by {sort_column} {sort_dir} nulls last, f.match_id desc
+        limit %s offset %s;
+        """,
+        [page_size, offset],
+    )
+
+
 def _to_float(value: Any) -> float | None:
     if value is None:
         return None
@@ -351,7 +443,20 @@ def get_matches(
     sort_dir = "asc" if sortDirection == "asc" else "desc"
     offset = (page - 1) * pageSize
 
-    query = f"""
+    if _can_use_unfiltered_match_list(
+        filters=global_filters,
+        team_id=team_id_int,
+        search_pattern=search_pattern,
+        status_pattern=status_pattern,
+    ):
+        rows = _fetch_unfiltered_match_list(
+            page_size=pageSize,
+            offset=offset,
+            sort_column=sort_column,
+            sort_direction=sortDirection,
+        )
+    else:
+        query = f"""
         with scoped_matches as (
             select
                 fm.match_id,
@@ -443,22 +548,22 @@ def get_matches(
         from filtered_rows f
         order by {sort_column} {sort_dir} nulls last, f.match_id desc
         limit %s offset %s;
-    """
-    rows = db_client.fetch_all(
-        query,
-        [
-            *where_params,
-            global_filters.last_n,
-            global_filters.last_n,
-            search_pattern,
-            search_pattern,
-            search_pattern,
-            status_pattern,
-            status_pattern,
-            pageSize,
-            offset,
-        ],
-    )
+        """
+        rows = db_client.fetch_all(
+            query,
+            [
+                *where_params,
+                global_filters.last_n,
+                global_filters.last_n,
+                search_pattern,
+                search_pattern,
+                search_pattern,
+                status_pattern,
+                status_pattern,
+                pageSize,
+                offset,
+            ],
+        )
     total_count = int(rows[0]["_total_count"]) if rows else 0
     pagination = build_pagination(page, pageSize, total_count)
 

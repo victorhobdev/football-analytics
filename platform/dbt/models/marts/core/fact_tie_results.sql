@@ -1,3 +1,9 @@
+{{ config(
+    indexes=[
+        {'columns': ['competition_key', 'season_label', 'stage_id', 'tie_id'], 'type': 'btree'}
+    ]
+) }}
+
 with tie_results as (
     select * from {{ ref('int_tie_results') }}
 )
