@@ -2130,7 +2130,16 @@ function PlayerPhoto({
   playerName: string;
   size?: number;
 }) {
-  const src = playerId ? `/api/visual-assets/players/${encodeURIComponent(playerId)}` : null;
+  const baseSrc = playerId ? `/api/visual-assets/players/${encodeURIComponent(playerId)}` : null;
+  const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const src = useMemo(() => {
+    if (!baseSrc) {
+      return null;
+    }
+
+    return retryAttempt > 0 ? `${baseSrc}${baseSrc.includes("?") ? "&" : "?"}retry=${retryAttempt}` : baseSrc;
+  }, [baseSrc, retryAttempt]);
   const initials = playerName
     .split(/\s+/)
     .filter(Boolean)
@@ -2138,17 +2147,37 @@ function PlayerPhoto({
     .map((t) => t[0]?.toUpperCase() ?? "")
     .join("");
 
+  useEffect(() => {
+    setHasError(false);
+    setRetryAttempt(0);
+  }, [baseSrc]);
+
+  const handleError = () => {
+    if (!baseSrc) {
+      setHasError(true);
+      return;
+    }
+
+    if (retryAttempt === 0) {
+      setRetryAttempt(1);
+      return;
+    }
+
+    setHasError(true);
+  };
+
   return (
     <span
       className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-400/30 bg-[#003526]"
       style={{ width: size, height: size }}
     >
       <span className="text-sm font-bold text-white/70">{initials}</span>
-      {src ? (
+      {src && !hasError ? (
         <img
           alt={playerName}
           className="absolute inset-0 h-full w-full object-cover bg-[#003526]"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          key={src}
+          onError={handleError}
           src={src}
         />
       ) : null}

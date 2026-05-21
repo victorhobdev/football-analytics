@@ -117,6 +117,33 @@ function resolvePublicAssetUrl(localPath: string): string | null {
   return new URL(relativeAssetPath, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).toString();
 }
 
+async function fetchPublicAsset(publicAssetUrl: string, fallbackContentType?: string): Promise<NextResponse> {
+  const upstreamResponse = await fetch(publicAssetUrl, {
+    headers: { Accept: "image/*,*/*;q=0.8" },
+    cache: "force-cache",
+    next: { revalidate: 86_400 },
+  });
+
+  if (!upstreamResponse.ok) {
+    return NextResponse.json(
+      { message: "Asset não encontrado." },
+      { status: upstreamResponse.status },
+    );
+  }
+
+  const headers = new Headers();
+  headers.set("Cache-Control", "public, max-age=86400, immutable");
+  headers.set(
+    "Content-Type",
+    upstreamResponse.headers.get("Content-Type") ?? fallbackContentType ?? "image/png",
+  );
+
+  return new NextResponse(upstreamResponse.body, {
+    status: upstreamResponse.status,
+    headers,
+  });
+}
+
 async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
   const remoteManifestUrl = resolveRemoteManifestUrl(category);
   if (remoteManifestUrl) {
@@ -200,12 +227,7 @@ export async function GET(
 
   const publicAssetUrl = resolvePublicAssetUrl(entry.local_path);
   if (publicAssetUrl) {
-    return NextResponse.redirect(publicAssetUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "public, max-age=86400, immutable",
-      },
-    });
+    return fetchPublicAsset(publicAssetUrl, entry.content_type);
   }
 
   const assetPath = resolveAssetPath(entry.local_path);

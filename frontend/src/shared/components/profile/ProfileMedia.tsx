@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
 
@@ -20,6 +20,14 @@ type ProfileMediaProps = {
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function appendRetryQueryParam(url: string, attempt: number): string {
+  if (attempt <= 0) {
+    return url;
+  }
+
+  return `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}`;
 }
 
 export function buildVisualAssetUrl(
@@ -51,7 +59,31 @@ export function ProfileMedia({
   tone = "base",
 }: ProfileMediaProps) {
   const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const assetUrl = buildVisualAssetUrl(category, assetId);
+  const resolvedAssetUrl = useMemo(
+    () => (assetUrl ? appendRetryQueryParam(assetUrl, retryAttempt) : null),
+    [assetUrl, retryAttempt],
+  );
+
+  useEffect(() => {
+    setHasError(false);
+    setRetryAttempt(0);
+  }, [assetUrl]);
+
+  const handleError = () => {
+    if (!assetUrl) {
+      setHasError(true);
+      return;
+    }
+
+    if (retryAttempt === 0) {
+      setRetryAttempt(1);
+      return;
+    }
+
+    setHasError(true);
+  };
 
   return (
     <div
@@ -64,16 +96,15 @@ export function ProfileMedia({
         className,
       )}
     >
-      {assetUrl && !hasError ? (
+      {resolvedAssetUrl && !hasError ? (
         <Image
           alt={alt}
           className={joinClasses("object-contain p-2", imageClassName)}
           fill
-          onError={() => {
-            setHasError(true);
-          }}
+          key={resolvedAssetUrl}
+          onError={handleError}
           sizes="96px"
-          src={assetUrl}
+          src={resolvedAssetUrl}
           unoptimized
         />
       ) : (
