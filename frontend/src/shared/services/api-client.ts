@@ -49,12 +49,35 @@ function resolveBffBaseUrl(): string {
   }
 
   throw new ApiClientError(
-    "NEXT_PUBLIC_BFF_BASE_URL nao configurado. Defina a variavel no arquivo .env.local.",
+    "NEXT_PUBLIC_BFF_BASE_URL nao configurado. Defina a variavel no ambiente.",
     { code: "CONFIG_ERROR" },
   );
 }
 
-function appendQueryParams(url: URL, params?: QueryParams): void {
+function normalizeBaseUrl(baseUrl: string): string {
+  if (baseUrl === "/") {
+    return "";
+  }
+
+  return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+}
+
+function normalizePath(path: string): string {
+  if (!path) {
+    return "/";
+  }
+
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
+function joinBaseAndPath(baseUrl: string, path: string): string {
+  const normalizedBase = normalizeBaseUrl(baseUrl);
+  const normalizedPath = normalizePath(path);
+
+  return `${normalizedBase}${normalizedPath}`;
+}
+
+function appendQueryParamsToSearchParams(searchParams: URLSearchParams, params?: QueryParams): void {
   if (!params) {
     return;
   }
@@ -71,17 +94,27 @@ function appendQueryParams(url: URL, params?: QueryParams): void {
         continue;
       }
 
-      url.searchParams.append(key, String(item));
+      searchParams.append(key, String(item));
     }
   }
 }
 
 function buildRequestUrl(path: string, params?: QueryParams): string {
   const baseUrl = resolveBffBaseUrl();
-  const url = new URL(path, baseUrl);
-  appendQueryParams(url, params);
+  const joinedUrl = joinBaseAndPath(baseUrl, path);
+  const isAbsoluteUrl = /^https?:\/\//i.test(joinedUrl);
 
-  return url.toString();
+  if (isAbsoluteUrl) {
+    const url = new URL(joinedUrl);
+    appendQueryParamsToSearchParams(url.searchParams, params);
+    return url.toString();
+  }
+
+  const searchParams = new URLSearchParams();
+  appendQueryParamsToSearchParams(searchParams, params);
+
+  const queryString = searchParams.toString();
+  return queryString.length > 0 ? `${joinedUrl}?${queryString}` : joinedUrl;
 }
 
 function isPlainJsonObject(value: unknown): value is JsonObjectBody {
