@@ -1,0 +1,337 @@
+source,coach_name,team_name,start_date,end_date,confidence,source_url,source_record_id,role
+wikidata_P6087_person_to_team,Miguel Ângelo da Luz,Clube de Regatas do Flamengo,1994-01-01,1996-01-01,0.72,http://www.wikidata.org/entity/statement/Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,head_coach
+wikidata_P6087_person_to_team,Miguel Ângelo da Luz,Clube de Regatas do Flamengo,1994-01-01,2002-01-01,0.72,http://www.wikidata.org/entity/statement/Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,head_coach
+wikidata_P6087_person_to_team,Miguel Ângelo da Luz,Clube de Regatas do Flamengo,2000-01-01,1996-01-01,0.72,http://www.wikidata.org/entity/statement/Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,head_coach
+wikidata_P6087_person_to_team,Miguel Ângelo da Luz,Clube de Regatas do Flamengo,2000-01-01,2002-01-01,0.72,http://www.wikidata.org/entity/statement/Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,Q10329925-ced2bbab-4e49-2fb9-475d-83a3b967844d,head_coach
+wikidata_P6087_person_to_team,Jorge Sampaoli,Clube de Regatas do Flamengo,2023-04-14,2023-09-28,0.72,http://www.wikidata.org/entity/statement/Q1089864-ebbc3b42-4254-ae8b-5da4-6129edbb83f3,Q1089864-ebbc3b42-4254-ae8b-5da4-6129edbb83f3,head_coach
+wikidata_P6087_person_to_team,Rogério Ceni,Clube de Regatas do Flamengo,2020-01-01,2021-01-01,0.72,http://www.wikidata.org/entity/statement/Q1249859-8231f589-4af1-b6c2-bab0-8911bada9bb6,Q1249859-8231f589-4af1-b6c2-bab0-8911bada9bb6,head_coach
+wikidata_P6087_person_to_team,Renato Gaúcho,Clube de Regatas do Flamengo,,,0.58,http://www.wikidata.org/entity/statement/Q1345763-811cd622-4f70-6a36-ad80-aa5e2f8ebc06,Q1345763-811cd622-4f70-6a36-ad80-aa5e2f8ebc06,head_coach
+wikidata_P6087_person_to_team,Nelsinho Baptista,Clube de Regatas do Flamengo,2003-01-01,,0.72,http://www.wikidata.org/entity/statement/Q1362325-9865d7c0-4b1a-7b08-07ee-b89fb0e53c3f,Q1362325-9865d7c0-4b1a-7b08-07ee-b89fb0e53c3f,head_coach
+wikidata_P6087_person_to_team,Dorival Júnior,Clube de Regatas do Flamengo,2012-01-01,2013-01-01,0.72,http://www.wikidata.org/entity/statement/Q1608978-74304529-4ad8-ef00-2f3b-bd0bce88c502,Q1608978-74304529-4ad8-ef00-2f3b-bd0bce88c502,head_coach
+wikidata_P6087_person_to_team,Dorival Júnior,Clube de Regatas do Flamengo,2018-01-01,,0.72,http://www.wikidata.org/entity/statement/Q1608978-72697625-433c-ef6c-167c-b3e93eab7c65,Q1608978-72697625-433c-ef6c-167c-b3e93eab7c65,head_coach
+wikidata_P6087_person_to_team,Dorival Júnior,Clube de Regatas do Flamengo,2022-01-01,,0.72,http://www.wikidata.org/entity/statement/Q1608978-199d44cf-4dc1-1f30-a547-2bcc8595ce10,Q1608978-199d44cf-4dc1-1f30-a547-2bcc8595ce10,head_coach
+wikidata_P6087_person_to_team,Freddy Rincón,Associação Atlética Flamengo,,,0.58,http://www.wikidata.org/entity/statement/Q225837-dce6f26e-4a4c-fa3b-0f97-9c17ee91693a,Q225837-dce6f26e-4a4c-fa3b-0f97-9c17ee91693a,head_coach
+wikidata_P6087_person_to_team,Filipe Luís,Clube de Regatas do Flamengo (categorias de base),2024-01-01,2024-01-01,0.72,http://www.wikidata.org/entity/statement/Q350547-ef47b98c-4395-8250-bce3-a15272496679,Q350547-ef47b98c-4395-8250-bce3-a15272496679,head_coach
+wikidata_P6087_person_to_team,Filipe Luís,Clube de Regatas do Flamengo,2024-01-01,,0.72,http://www.wikidata.org/entity/statement/Q350547-38822cf2-4c5a-54fd-3800-47f8fd70097e,Q350547-38822cf2-4c5a-54fd-3800-47f8fd70097e,head_coach
+wikidata_P6087_person_to_team,Jaime de Almeida,Clube de Regatas do Flamengo,,,0.58,http://www.wikidata.org/entity/statement/Q3806195-A70A8FF7-6B20-4D45-A964-E1A2477C72CE,Q3806195-A70A8FF7-6B20-4D45-A964-E1A2477C72CE,head_coach
+wikidata_P6087_person_to_team,Deivid de Souza,Clube de Regatas do Flamengo,2014-07-01,2015-05-01,0.72,http://www.wikidata.org/entity/statement/Q508316-ea9a24d7-4dc7-85d7-2fe3-ddfeb1f0c506,Q508316-ea9a24d7-4dc7-85d7-2fe3-ddfeb1f0c506,head_coach
+wikidata_P6087_person_to_team,Deivid de Souza,Clube de Regatas do Flamengo,2015-04-01,2015-04-01,0.72,http://www.wikidata.org/entity/statement/Q508316-29e0ddbe-4adc-8ee2-eaf1-4c12716b982c,Q508316-29e0ddbe-4adc-8ee2-eaf1-4c12716b982c,head_coach
+wikidata_P6087_person_to_team,Jorge Jesus,Clube de Regatas do Flamengo,2019-06-01,2020-07-17,0.72,http://www.wikidata.org/entity/statement/Q527550-30f99617-4e59-5cf4-6d07-ee0503c7d6f1,Q527550-30f99617-4e59-5cf4-6d07-ee0503c7d6f1,head_coach
+wikidata_P6087_person_to_team,Evaristo de Macedo,Clube de Regatas do Flamengo,1993-01-01,1995-01-01,0.72,http://www.wikidata.org/entity/statement/Q553061-6f02318d-48fb-e741-c7b0-9df90ab73640,Q553061-6f02318d-48fb-e741-c7b0-9df90ab73640,head_coach
+wikidata_P6087_person_to_team,Evaristo de Macedo,Clube de Regatas do Flamengo,1999-01-01,1999-01-01,0.72,http://www.wikidata.org/entity/statement/Q553061-b5d97522-47cc-0483-6e81-4c0d7947c2ee,Q553061-b5d97522-47cc-0483-6e81-4c0d7947c2ee,head_coach
+wikidata_P6087_person_to_team,Evaristo de Macedo,Clube de Regatas do Flamengo,2002-01-01,2003-01-01,0.72,http://www.wikidata.org/entity/statement/Q553061-fa6fc077-4dc5-cb13-9dab-c3a99e1dd914,Q553061-fa6fc077-4dc5-cb13-9dab-c3a99e1dd914,head_coach
+wikidata_P6087_person_to_team,Modesto Bría,Clube de Regatas do Flamengo,,,0.58,http://www.wikidata.org/entity/statement/Q6889211-240F7194-1F17-40DB-982D-EC7062CB2440,Q6889211-240F7194-1F17-40DB-982D-EC7062CB2440,head_coach
+wikidata_P6087_person_to_team,Rogério Lourenço,Clube de Regatas do Flamengo,2010-04-01,2010-08-01,0.72,http://www.wikidata.org/entity/statement/Q7359591-1240c2c8-434f-cc9f-3f49-ad48eeaf2c99,Q7359591-1240c2c8-434f-cc9f-3f49-ad48eeaf2c99,head_coach
+wikidata_P6087_person_to_team,Mano Menezes,Clube de Regatas do Flamengo,2013-01-01,,0.72,http://www.wikidata.org/entity/statement/Q81115-bbe8d708-499e-802c-e139-86c2c9ca65dd,Q81115-bbe8d708-499e-802c-e139-86c2c9ca65dd,head_coach
+wikidata_P6087_person_to_team,Tite,Clube de Regatas do Flamengo,2023-01-01,,0.72,http://www.wikidata.org/entity/statement/Q40652-5b1ba714-4c5e-3684-0a9b-d7c07c5cd816,Q40652-5b1ba714-4c5e-3684-0a9b-d7c07c5cd816,head_coach
+wikidata_P286_team_to_person,Maurício Souza,Clube de Regatas do Flamengo,2021-11-29,2021-12-29,0.72,http://www.wikidata.org/entity/statement/Q17479-ade99162-4a6f-07db-4e21-0b5b6de39dbf,Q17479-ade99162-4a6f-07db-4e21-0b5b6de39dbf,head_coach
+wikidata_P286_team_to_person,Jorge Sampaoli,Clube de Regatas do Flamengo,2023-04-17,2023-09-28,0.72,http://www.wikidata.org/entity/statement/Q17479-06b52731-43ed-2abd-c163-0d4892aba784,Q17479-06b52731-43ed-2abd-c163-0d4892aba784,head_coach
+wikidata_P286_team_to_person,Rogério Ceni,Clube de Regatas do Flamengo,2020-11-10,2021-07-10,0.72,http://www.wikidata.org/entity/statement/Q17479-39d0f50b-4291-c026-be53-ced13e933f70,Q17479-39d0f50b-4291-c026-be53-ced13e933f70,head_coach
+wikidata_P286_team_to_person,Dorival Júnior,Clube de Regatas do Flamengo,2022-06-10,2022-11-25,0.72,http://www.wikidata.org/entity/statement/Q17479-865f5fc3-4e37-1495-9da3-163c56279e2b,Q17479-865f5fc3-4e37-1495-9da3-163c56279e2b,head_coach
+wikidata_P286_team_to_person,Domènec Torrent,Clube de Regatas do Flamengo,2020-07-31,2020-11-09,0.72,http://www.wikidata.org/entity/statement/Q17479-dd9e06c9-4878-74c8-4ae1-e9d21ff9b932,Q17479-dd9e06c9-4878-74c8-4ae1-e9d21ff9b932,head_coach
+wikidata_P286_team_to_person,Paulo Sousa,Clube de Regatas do Flamengo,2021-12-29,2022-06-10,0.72,http://www.wikidata.org/entity/statement/Q17479-bf8a203a-4d0f-f87e-55f8-32f3972903a8,Q17479-bf8a203a-4d0f-f87e-55f8-32f3972903a8,head_coach
+wikidata_P286_team_to_person,Filipe Luís,Clube de Regatas do Flamengo,2024-09-30,2026-03-02,0.72,http://www.wikidata.org/entity/statement/Q17479-36fadbd1-47f9-bdbc-3c8c-3e47c0e4bc8a,Q17479-36fadbd1-47f9-bdbc-3c8c-3e47c0e4bc8a,head_coach
+wikidata_P286_team_to_person,Jorge Jesus,Clube de Regatas do Flamengo,2019-06-01,2020-07-17,0.72,http://www.wikidata.org/entity/statement/Q17479-5938ca94-46d3-29f6-25bc-177297e489f0,Q17479-5938ca94-46d3-29f6-25bc-177297e489f0,head_coach
+wikidata_P286_team_to_person,Vítor Pereira,Clube de Regatas do Flamengo,2023-01-01,2023-04-10,0.72,http://www.wikidata.org/entity/statement/Q17479-1b5a15cf-4bd9-292b-ef0f-2dbf4dc1e7d4,Q17479-1b5a15cf-4bd9-292b-ef0f-2dbf4dc1e7d4,head_coach
+wikidata_P286_team_to_person,Reinaldo Llanta,Clube de Regatas do Flamengo,2017-08-14,2018-01-07,0.72,http://www.wikidata.org/entity/statement/q17479-670BAEE4-C9B6-44B1-B8BE-15B99FB26B2B,q17479-670BAEE4-C9B6-44B1-B8BE-15B99FB26B2B,head_coach
+wikidata_P286_team_to_person,Tite,Clube de Regatas do Flamengo,2023-10-09,2024-09-30,0.72,http://www.wikidata.org/entity/statement/Q17479-058603b5-4743-d7f8-6f3e-dc215ebf55a7,Q17479-058603b5-4743-d7f8-6f3e-dc215ebf55a7,head_coach
+dbpedia_managerClub,Paulo César Carpegiani,CR Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_César_Carpegiani,http://dbpedia.org/resource/Paulo_César_Carpegiani::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Cândido de Oliveira,CR Flamengo,,,0.42,http://dbpedia.org/resource/Cândido_de_Oliveira,http://dbpedia.org/resource/Cândido_de_Oliveira::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Cláudio Coutinho,CR Flamengo,,,0.42,http://dbpedia.org/resource/Cláudio_Coutinho,http://dbpedia.org/resource/Cláudio_Coutinho::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Fábio Moreno,CR Flamengo,,,0.42,http://dbpedia.org/resource/Fábio_Moreno,http://dbpedia.org/resource/Fábio_Moreno::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Gilmar Popoca,CR Flamengo,,,0.42,http://dbpedia.org/resource/Gilmar_Popoca,http://dbpedia.org/resource/Gilmar_Popoca::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Valdir Espinosa,CR Flamengo,,,0.42,http://dbpedia.org/resource/Valdir_Espinosa,http://dbpedia.org/resource/Valdir_Espinosa::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Paulo Silas,CR Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_Silas,http://dbpedia.org/resource/Paulo_Silas::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Nelson Simões,CR Flamengo,,,0.42,http://dbpedia.org/resource/Nelson_Simões,http://dbpedia.org/resource/Nelson_Simões::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Moacir Pereira,CR Flamengo,,,0.42,http://dbpedia.org/resource/Moacir_Pereira,http://dbpedia.org/resource/Moacir_Pereira::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Waldemar Lemos,CR Flamengo,,,0.42,http://dbpedia.org/resource/Waldemar_Lemos,http://dbpedia.org/resource/Waldemar_Lemos::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Ricardo Gomes,CR Flamengo,,,0.42,http://dbpedia.org/resource/Ricardo_Gomes,http://dbpedia.org/resource/Ricardo_Gomes::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Rodrigo Caio,CR Flamengo,,,0.42,http://dbpedia.org/resource/Rodrigo_Caio,http://dbpedia.org/resource/Rodrigo_Caio::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Modesto Bria,CR Flamengo,,,0.42,http://dbpedia.org/resource/Modesto_Bria,http://dbpedia.org/resource/Modesto_Bria::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Deivid,CR Flamengo,,,0.42,http://dbpedia.org/resource/Deivid,http://dbpedia.org/resource/Deivid::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Marcelo Cabo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Marcelo_Cabo,http://dbpedia.org/resource/Marcelo_Cabo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Reinaldo Rueda,CR Flamengo,,,0.42,http://dbpedia.org/resource/Reinaldo_Rueda,http://dbpedia.org/resource/Reinaldo_Rueda::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Rodrigo Caetano,CR Flamengo,,,0.42,http://dbpedia.org/resource/Rodrigo_Caetano,http://dbpedia.org/resource/Rodrigo_Caetano::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Sebastião Rocha (football manager),CR Flamengo,,,0.42,http://dbpedia.org/resource/Sebastião_Rocha_(football_manager),http://dbpedia.org/resource/Sebastião_Rocha_(football_manager)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Washington Rodrigues,CR Flamengo,,,0.42,http://dbpedia.org/resource/Washington_Rodrigues,http://dbpedia.org/resource/Washington_Rodrigues::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Izidor Kürschner,CR Flamengo,,,0.42,http://dbpedia.org/resource/Izidor_Kürschner,http://dbpedia.org/resource/Izidor_Kürschner::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Flávio Costa,CR Flamengo,,,0.42,http://dbpedia.org/resource/Flávio_Costa,http://dbpedia.org/resource/Flávio_Costa::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Dino Sani,CR Flamengo,,,0.42,http://dbpedia.org/resource/Dino_Sani,http://dbpedia.org/resource/Dino_Sani::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Jayme de Almeida,CR Flamengo,,,0.42,http://dbpedia.org/resource/Jayme_de_Almeida,http://dbpedia.org/resource/Jayme_de_Almeida::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"João Pedro (footballer, born 1989)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/João_Pedro_(footballer,_born_1989)","http://dbpedia.org/resource/João_Pedro_(footballer,_born_1989)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Sídnei Lobo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Sídnei_Lobo,http://dbpedia.org/resource/Sídnei_Lobo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Joel Santana,CR Flamengo,,,0.42,http://dbpedia.org/resource/Joel_Santana,http://dbpedia.org/resource/Joel_Santana::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Sebastião Lazaroni,CR Flamengo,,,0.42,http://dbpedia.org/resource/Sebastião_Lazaroni,http://dbpedia.org/resource/Sebastião_Lazaroni::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Ney Franco,CR Flamengo,,,0.42,http://dbpedia.org/resource/Ney_Franco,http://dbpedia.org/resource/Ney_Franco::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Sidney Pullen,CR Flamengo,,,0.42,http://dbpedia.org/resource/Sidney_Pullen,http://dbpedia.org/resource/Sidney_Pullen::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Paulo Pereira (footballer),CR Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_Pereira_(footballer),http://dbpedia.org/resource/Paulo_Pereira_(footballer)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Maurício Barbieri,CR Flamengo,,,0.42,http://dbpedia.org/resource/Maurício_Barbieri,http://dbpedia.org/resource/Maurício_Barbieri::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Andrade (footballer, born 1957)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Andrade_(footballer,_born_1957)","http://dbpedia.org/resource/Andrade_(footballer,_born_1957)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Otto Bumbel,CR Flamengo,,,0.42,http://dbpedia.org/resource/Otto_Bumbel,http://dbpedia.org/resource/Otto_Bumbel::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Armando Renganeschi,CR Flamengo,,,0.42,http://dbpedia.org/resource/Armando_Renganeschi,http://dbpedia.org/resource/Armando_Renganeschi::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Maurício Souza (footballer),CR Flamengo,,,0.42,http://dbpedia.org/resource/Maurício_Souza_(footballer),http://dbpedia.org/resource/Maurício_Souza_(footballer)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Paulo Autuori,CR Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_Autuori,http://dbpedia.org/resource/Paulo_Autuori::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Juan (footballer, born 1979)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Juan_(footballer,_born_1979)","http://dbpedia.org/resource/Juan_(footballer,_born_1979)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Rogério Ceni,CR Flamengo,,,0.42,http://dbpedia.org/resource/Rogério_Ceni,http://dbpedia.org/resource/Rogério_Ceni::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Liminha (footballer, born 1944)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Liminha_(footballer,_born_1944)","http://dbpedia.org/resource/Liminha_(footballer,_born_1944)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Gérson Andreotti,CR Flamengo,,,0.42,http://dbpedia.org/resource/Gérson_Andreotti,http://dbpedia.org/resource/Gérson_Andreotti::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Mário Braga,CR Flamengo,,,0.42,http://dbpedia.org/resource/Mário_Braga,http://dbpedia.org/resource/Mário_Braga::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Jaime de Almeida  Jaime de Almeida  1,CR Flamengo,,,0.42,http://dbpedia.org/resource/Jaime_de_Almeida__Jaime_de_Almeida__1,http://dbpedia.org/resource/Jaime_de_Almeida__Jaime_de_Almeida__1::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Jorginho (footballer, born 1964)  Jorginho  1",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Jorginho_(footballer,_born_1964)__Jorginho__1","http://dbpedia.org/resource/Jorginho_(footballer,_born_1964)__Jorginho__1::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Paulo Henrique Filho  Paulo Henrique Filho  1,CR Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_Henrique_Filho__Paulo_Henrique_Filho__1,http://dbpedia.org/resource/Paulo_Henrique_Filho__Paulo_Henrique_Filho__1::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Zé Ricardo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Zé_Ricardo,http://dbpedia.org/resource/Zé_Ricardo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Iván Palanco,CR Flamengo,,,0.42,http://dbpedia.org/resource/Iván_Palanco,http://dbpedia.org/resource/Iván_Palanco::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Carlinhos (footballer, born 1937)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Carlinhos_(footballer,_born_1937)","http://dbpedia.org/resource/Carlinhos_(footballer,_born_1937)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Carlos Alberto Torres,CR Flamengo,,,0.42,http://dbpedia.org/resource/Carlos_Alberto_Torres,http://dbpedia.org/resource/Carlos_Alberto_Torres::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Edinho (footballer, born 1955)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Edinho_(footballer,_born_1955)","http://dbpedia.org/resource/Edinho_(footballer,_born_1955)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Aílton Ferraz,CR Flamengo,,,0.42,http://dbpedia.org/resource/Aílton_Ferraz,http://dbpedia.org/resource/Aílton_Ferraz::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Vanderlei Luxemburgo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Vanderlei_Luxemburgo,http://dbpedia.org/resource/Vanderlei_Luxemburgo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Marcos Paquetá,CR Flamengo,,,0.42,http://dbpedia.org/resource/Marcos_Paquetá,http://dbpedia.org/resource/Marcos_Paquetá::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,César Sampaio,CR Flamengo,,,0.42,http://dbpedia.org/resource/César_Sampaio,http://dbpedia.org/resource/César_Sampaio::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Paulo Henrique (footballer, born 1943)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Paulo_Henrique_(footballer,_born_1943)","http://dbpedia.org/resource/Paulo_Henrique_(footballer,_born_1943)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Antônio Lopes,CR Flamengo,,,0.42,http://dbpedia.org/resource/Antônio_Lopes,http://dbpedia.org/resource/Antônio_Lopes::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Charlie Williams (footballer, born 1873)",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Charlie_Williams_(footballer,_born_1873)","http://dbpedia.org/resource/Charlie_Williams_(footballer,_born_1873)::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Valinhos (footballer),CR Flamengo,,,0.42,http://dbpedia.org/resource/Valinhos_(footballer),http://dbpedia.org/resource/Valinhos_(footballer)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Marcelo Salles,CR Flamengo,,,0.42,http://dbpedia.org/resource/Marcelo_Salles,http://dbpedia.org/resource/Marcelo_Salles::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Joubert (footballer),CR Flamengo,,,0.42,http://dbpedia.org/resource/Joubert_(footballer),http://dbpedia.org/resource/Joubert_(footballer)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Léo Júnior,CR Flamengo,,,0.42,http://dbpedia.org/resource/Léo_Júnior,http://dbpedia.org/resource/Léo_Júnior::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Mário Zagallo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Mário_Zagallo,http://dbpedia.org/resource/Mário_Zagallo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Vinícius Bergantin,CR Flamengo,,,0.42,http://dbpedia.org/resource/Vinícius_Bergantin,http://dbpedia.org/resource/Vinícius_Bergantin::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Ernesto Paulo,CR Flamengo,,,0.42,http://dbpedia.org/resource/Ernesto_Paulo,http://dbpedia.org/resource/Ernesto_Paulo::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,PC Gusmão,CR Flamengo,,,0.42,http://dbpedia.org/resource/PC_Gusmão,http://dbpedia.org/resource/PC_Gusmão::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Rogério Lourenço,CR Flamengo,,,0.42,http://dbpedia.org/resource/Rogério_Lourenço,http://dbpedia.org/resource/Rogério_Lourenço::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Manuel Cordeiro,CR Flamengo,,,0.42,http://dbpedia.org/resource/Manuel_Cordeiro,http://dbpedia.org/resource/Manuel_Cordeiro::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Jayme Valente,CR Flamengo,,,0.42,http://dbpedia.org/resource/Jayme_Valente,http://dbpedia.org/resource/Jayme_Valente::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Oswaldo de Oliveira,CR Flamengo,,,0.42,http://dbpedia.org/resource/Oswaldo_de_Oliveira,http://dbpedia.org/resource/Oswaldo_de_Oliveira::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Cristóvão Borges,CR Flamengo,,,0.42,http://dbpedia.org/resource/Cristóvão_Borges,http://dbpedia.org/resource/Cristóvão_Borges::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,João Carlos (football manager),CR Flamengo,,,0.42,http://dbpedia.org/resource/João_Carlos_(football_manager),http://dbpedia.org/resource/João_Carlos_(football_manager)::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Matheus Bachi,CR Flamengo,,,0.42,http://dbpedia.org/resource/Matheus_Bachi,http://dbpedia.org/resource/Matheus_Bachi::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,Filipe Luís  Filipe Luís  1,CR Flamengo,,,0.42,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1::http://dbpedia.org/resource/CR_Flamengo,manager
+dbpedia_managerClub,"Adílio (footballer, born 1956)  Adílio  1",CR Flamengo,,,0.42,"http://dbpedia.org/resource/Adílio_(footballer,_born_1956)__Adílio__1","http://dbpedia.org/resource/Adílio_(footballer,_born_1956)__Adílio__1::http://dbpedia.org/resource/CR_Flamengo",manager
+dbpedia_managerClub,Luís Andrade,Clube de Regatas do Flamengo (women),,,0.42,http://dbpedia.org/resource/Luís_Andrade,http://dbpedia.org/resource/Luís_Andrade::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(women),manager
+dbpedia_managerClub,Rosana (footballer),Clube de Regatas do Flamengo (women),,,0.42,http://dbpedia.org/resource/Rosana_(footballer),http://dbpedia.org/resource/Rosana_(footballer)::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(women),manager
+dbpedia_managerClub,"Murilo (footballer, born 1939)",Esporte Clube Flamengo,,,0.42,"http://dbpedia.org/resource/Murilo_(footballer,_born_1939)","http://dbpedia.org/resource/Murilo_(footballer,_born_1939)::http://dbpedia.org/resource/Esporte_Clube_Flamengo",manager
+dbpedia_managerClub,Athirson,Esporte Clube Flamengo,,,0.42,http://dbpedia.org/resource/Athirson,http://dbpedia.org/resource/Athirson::http://dbpedia.org/resource/Esporte_Clube_Flamengo,manager
+dbpedia_managerClub,"Mirandinha (footballer, born 1959)",Esporte Clube Flamengo,,,0.42,"http://dbpedia.org/resource/Mirandinha_(footballer,_born_1959)","http://dbpedia.org/resource/Mirandinha_(footballer,_born_1959)::http://dbpedia.org/resource/Esporte_Clube_Flamengo",manager
+dbpedia_managerClub,Paulo Schardong,Esporte Clube Flamengo,,,0.42,http://dbpedia.org/resource/Paulo_Schardong,http://dbpedia.org/resource/Paulo_Schardong::http://dbpedia.org/resource/Esporte_Clube_Flamengo,manager
+dbpedia_managerClub,Daniel Frasson,Esporte Clube Flamengo,,,0.42,http://dbpedia.org/resource/Daniel_Frasson,http://dbpedia.org/resource/Daniel_Frasson::http://dbpedia.org/resource/Esporte_Clube_Flamengo,manager
+dbpedia_managerClub,Josué Teixeira,Esporte Clube Flamengo,,,0.42,http://dbpedia.org/resource/Josué_Teixeira,http://dbpedia.org/resource/Josué_Teixeira::http://dbpedia.org/resource/Esporte_Clube_Flamengo,manager
+dbpedia_managerClub,"Zé Mário (footballer, born 1949)",Esporte Clube Flamengo,,,0.42,"http://dbpedia.org/resource/Zé_Mário_(footballer,_born_1949)","http://dbpedia.org/resource/Zé_Mário_(footballer,_born_1949)::http://dbpedia.org/resource/Esporte_Clube_Flamengo",manager
+dbpedia_managerClub,Daniel Neri,Flamengo Sport Club de Arcoverde,,,0.42,http://dbpedia.org/resource/Daniel_Neri,http://dbpedia.org/resource/Daniel_Neri::http://dbpedia.org/resource/Flamengo_Sport_Club_de_Arcoverde,manager
+dbpedia_managerClub,"Nilson (footballer, born 1975)",Flamengo Sport Club de Arcoverde,,,0.42,"http://dbpedia.org/resource/Nilson_(footballer,_born_1975)","http://dbpedia.org/resource/Nilson_(footballer,_born_1975)::http://dbpedia.org/resource/Flamengo_Sport_Club_de_Arcoverde",manager
+dbpedia_managerClub,Dico Woolley,Flamengo Sport Club de Arcoverde,,,0.42,http://dbpedia.org/resource/Dico_Woolley,http://dbpedia.org/resource/Dico_Woolley::http://dbpedia.org/resource/Flamengo_Sport_Club_de_Arcoverde,manager
+dbpedia_managerClub,Raphael Laruccia,Associação Atlética Flamengo,,,0.42,http://dbpedia.org/resource/Raphael_Laruccia,http://dbpedia.org/resource/Raphael_Laruccia::http://dbpedia.org/resource/Associação_Atlética_Flamengo,manager
+dbpedia_managerClub,Freddy Rincón,Associação Atlética Flamengo,,,0.42,http://dbpedia.org/resource/Freddy_Rincón,http://dbpedia.org/resource/Freddy_Rincón::http://dbpedia.org/resource/Associação_Atlética_Flamengo,manager
+dbpedia_managerClub,Clever Hunda,Uniao Flamengo Santos F.C.,,,0.42,http://dbpedia.org/resource/Clever_Hunda,http://dbpedia.org/resource/Clever_Hunda::http://dbpedia.org/resource/Uniao_Flamengo_Santos_F.C.,manager
+dbpedia_managerClub,Mário Jorge (football manager),Clube de Regatas do Flamengo (youth),,,0.42,http://dbpedia.org/resource/Mário_Jorge_(football_manager),http://dbpedia.org/resource/Mário_Jorge_(football_manager)::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Mário Jorge (football manager),CR Flamengo (youth),,,0.42,http://dbpedia.org/resource/Mário_Jorge_(football_manager),http://dbpedia.org/resource/Mário_Jorge_(football_manager)::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Eduardo Zuma,Clube de Regatas do Flamengo (youth),,,0.42,http://dbpedia.org/resource/Eduardo_Zuma,http://dbpedia.org/resource/Eduardo_Zuma::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Eduardo Zuma,CR Flamengo (youth),,,0.42,http://dbpedia.org/resource/Eduardo_Zuma,http://dbpedia.org/resource/Eduardo_Zuma::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Iván Palanco,Clube de Regatas do Flamengo (youth),,,0.42,http://dbpedia.org/resource/Iván_Palanco,http://dbpedia.org/resource/Iván_Palanco::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Iván Palanco,CR Flamengo (youth),,,0.42,http://dbpedia.org/resource/Iván_Palanco,http://dbpedia.org/resource/Iván_Palanco::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Filipe Luís  Filipe Luís  1,Clube de Regatas do Flamengo (youth),,,0.42,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Filipe Luís  Filipe Luís  1,CR Flamengo (youth),,,0.42,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1,http://dbpedia.org/resource/Filipe_Luís__Filipe_Luís__1::http://dbpedia.org/resource/Clube_de_Regatas_do_Flamengo_(youth),manager
+dbpedia_managerClub,Leston Júnior,Flamengo Esporte Clube,,,0.42,http://dbpedia.org/resource/Leston_Júnior,http://dbpedia.org/resource/Leston_Júnior::http://dbpedia.org/resource/Flamengo_Esporte_Clube,manager
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::2,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::4,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::7,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::247,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::307,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::881,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1301,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1317,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1331,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1347,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1351,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1357,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1361,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1367,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1371,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1377,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1381,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1391,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1401,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1407,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1411,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1417,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1421,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1427,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1431,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1437,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1451,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1461,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1467,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1472,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1494,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1539,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1548,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1698,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1709,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_CR_Flamengo_managers,en::List of CR Flamengo managers::line::1714,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_Brazil_national_football_team_managers,en::List of Brazil national football team managers::line::609,raw_text_candidate
+mediawiki_infobox_en,"Vítor Pereira (footballer, born 1968)",[[CR Flamengo,2023-01-01,2023-12-31,0.5,"https://en.wikipedia.org/wiki/Vítor_Pereira_(footballer,_born_1968)","en::Vítor Pereira (footballer, born 1968)::manager::16",manager
+mediawiki_infobox_en,Tite (football manager),[[CR Flamengo,2023-01-01,2024-12-31,0.5,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::manager::20,manager
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::82,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::98,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::143,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::166,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::188,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::200,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::201,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::458,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::501,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/Tite_(football_manager),en::Tite (football manager)::line::606,raw_text_candidate
+mediawiki_raw_line_en,,,,,0.18,https://en.wikipedia.org/wiki/List_of_Santos_FC_managers,en::List of Santos FC managers::line::5,raw_text_candidate
+mediawiki_infobox_en,Telê Santana,[[Clube de Regatas do Flamengo,1988-01-01,1989-12-31,0.5,https://en.wikipedia.org/wiki/Telê_Santana,en::Telê Santana::manager::12,manager
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::4,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::6,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::8,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::10,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::12,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::13,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::14,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::19,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::836,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1082,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1154,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1204,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1259,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1354,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1461,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1473,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1483,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1532,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1553,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1573,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1592,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1601,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1614,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1621,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1624,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1632,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1642,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1655,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1662,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1665,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1672,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1685,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1692,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1695,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1704,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1714,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1717,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1724,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1727,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1735,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1738,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1745,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1748,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1758,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1768,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1778,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1788,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1791,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1804,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1807,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1817,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1824,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1834,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1844,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1847,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1858,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1861,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1868,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1878,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1881,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1888,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1898,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1908,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1911,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1920,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1933,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1940,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1953,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1960,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1973,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::1991,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2009,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2019,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2039,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2042,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2045,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2179,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2184,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2387,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2397,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_do_Clube_de_Regatas_do_Flamengo,pt::Lista de treinadores do Clube de Regatas do Flamengo::line::2398,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::68,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::72,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::74,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::92,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::126,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::146,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::148,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::164,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::218,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::219,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::223,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::238,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::239,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::243,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::246,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_dos_treinadores_vencedores_do_Campeonato_Brasileiro_de_Futebol,pt::Lista dos treinadores vencedores do Campeonato Brasileiro de Futebol::line::247,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::50,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::51,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::64,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::68,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::69,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::227,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::273,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::349,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Cuca_(treinador_de_futebol),pt::Cuca (treinador de futebol)::line::460,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Lista_de_treinadores_da_Seleção_Brasileira_de_Futebol,pt::Lista de treinadores da Seleção Brasileira de Futebol::line::829,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Felipão_(treinador_de_futebol),pt::Felipão (treinador de futebol)::line::225,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Felipão_(treinador_de_futebol),pt::Felipão (treinador de futebol)::line::242,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::94,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::171,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::175,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::204,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::228,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::229,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::233,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::237,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::239,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::976,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::1017,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Tite_(treinador_de_futebol),pt::Tite (treinador de futebol)::line::1069,raw_text_candidate
+mediawiki_infobox_en,Candinho,[[Clube de Regatas do Flamengo,1988-01-01,1988-12-31,0.5,https://en.wikipedia.org/wiki/Candinho,en::Candinho::manager::11,manager
+mediawiki_infobox_en,Gentil Cardoso,[[CR Flamengo,1949-01-01,1950-12-31,0.5,https://en.wikipedia.org/wiki/Gentil_Cardoso,en::Gentil Cardoso::manager::15,manager
+mediawiki_infobox_en,Flávio Costa,[[Clube de Regatas do Flamengo,1934-01-01,1937-12-31,0.5,https://en.wikipedia.org/wiki/Flávio_Costa,en::Flávio Costa::manager::1,manager
+mediawiki_infobox_en,Flávio Costa,[[Clube de Regatas do Flamengo,1938-01-01,1945-12-31,0.5,https://en.wikipedia.org/wiki/Flávio_Costa,en::Flávio Costa::manager::4,manager
+mediawiki_infobox_en,Flávio Costa,[[Clube de Regatas do Flamengo,1946-01-01,1946-12-31,0.5,https://en.wikipedia.org/wiki/Flávio_Costa,en::Flávio Costa::manager::6,manager
+mediawiki_infobox_en,Flávio Costa,[[Clube de Regatas do Flamengo,1951-01-01,1952-12-31,0.5,https://en.wikipedia.org/wiki/Flávio_Costa,en::Flávio Costa::manager::8,manager
+mediawiki_infobox_en,Flávio Costa,[[Clube de Regatas do Flamengo,1962-01-01,1965-12-31,0.5,https://en.wikipedia.org/wiki/Flávio_Costa,en::Flávio Costa::manager::15,manager
+mediawiki_infobox_en,Cláudio Coutinho,Flamengo,1978-01-01,1980-12-31,0.5,https://en.wikipedia.org/wiki/Cláudio_Coutinho,en::Cláudio Coutinho::manager::2,manager
+mediawiki_infobox_en,Evaristo (footballer),[[Clube de Regatas do Flamengo,1993-01-01,1995-12-31,0.5,https://en.wikipedia.org/wiki/Evaristo_(footballer),en::Evaristo (footballer)::manager::18,manager
+mediawiki_infobox_en,Evaristo (footballer),[[Clube de Regatas do Flamengo,1998-01-01,1998-12-31,0.5,https://en.wikipedia.org/wiki/Evaristo_(footballer),en::Evaristo (footballer)::manager::23,manager
+mediawiki_infobox_en,Evaristo (footballer),[[Clube de Regatas do Flamengo,2002-01-01,2003-12-31,0.5,https://en.wikipedia.org/wiki/Evaristo_(footballer),en::Evaristo (footballer)::manager::27,manager
+mediawiki_infobox_en,Ricardo Gomes,[[Clube de Regatas do Flamengo,2004-01-01,2004-12-31,0.5,https://en.wikipedia.org/wiki/Ricardo_Gomes,en::Ricardo Gomes::manager::9,manager
+mediawiki_infobox_en,Dorival Júnior,[[CR Flamengo,2012-01-01,2013-12-31,0.5,https://en.wikipedia.org/wiki/Dorival_Júnior,en::Dorival Júnior::manager::15,manager
+mediawiki_infobox_en,Dorival Júnior,[[CR Flamengo,2018-01-01,2018-12-31,0.5,https://en.wikipedia.org/wiki/Dorival_Júnior,en::Dorival Júnior::manager::21,manager
+mediawiki_infobox_en,Dorival Júnior,[[CR Flamengo,2022-01-01,2022-12-31,0.5,https://en.wikipedia.org/wiki/Dorival_Júnior,en::Dorival Júnior::manager::24,manager
+mediawiki_infobox_en,Sebastião Lazaroni,[[CR Flamengo,1984-01-01,1986-12-31,0.5,https://en.wikipedia.org/wiki/Sebastião_Lazaroni,en::Sebastião Lazaroni::manager::1,manager
+mediawiki_infobox_en,Vanderlei Luxemburgo,[[Clube de Regatas do Flamengo,1991-01-01,1991-12-31,0.5,https://en.wikipedia.org/wiki/Vanderlei_Luxemburgo,en::Vanderlei Luxemburgo::manager::9,manager
+mediawiki_infobox_en,Vanderlei Luxemburgo,[[Clube de Regatas do Flamengo,1995-01-01,1995-12-31,0.5,https://en.wikipedia.org/wiki/Vanderlei_Luxemburgo,en::Vanderlei Luxemburgo::manager::12,manager
+mediawiki_infobox_en,Vanderlei Luxemburgo,[[Clube de Regatas do Flamengo,2010-01-01,2012-12-31,0.5,https://en.wikipedia.org/wiki/Vanderlei_Luxemburgo,en::Vanderlei Luxemburgo::manager::27,manager
+mediawiki_infobox_en,Vanderlei Luxemburgo,[[Clube de Regatas do Flamengo,2014-01-01,2015-12-31,0.5,https://en.wikipedia.org/wiki/Vanderlei_Luxemburgo,en::Vanderlei Luxemburgo::manager::30,manager
+mediawiki_infobox_en,Mano Menezes,[[Clube de Regatas do Flamengo,2013-01-01,2013-12-31,0.5,https://en.wikipedia.org/wiki/Mano_Menezes,en::Mano Menezes::manager::16,manager
+mediawiki_infobox_en,Aymoré Moreira,[[Clube de Regatas do Flamengo,1967-01-01,1968-12-31,0.5,https://en.wikipedia.org/wiki/Aymoré_Moreira,en::Aymoré Moreira::manager::15,manager
+mediawiki_infobox_en,Ernesto Paulo,[[Clube de Regatas do Flamengo,1990-01-01,1990-12-31,0.5,https://en.wikipedia.org/wiki/Ernesto_Paulo,en::Ernesto Paulo::manager::4,manager
+mediawiki_infobox_en,Ramón Platero,[[CR Flamengo,1921-01-01,1922-12-31,0.5,https://en.wikipedia.org/wiki/Ramón_Platero,en::Ramón Platero::manager::4,manager
+mediawiki_infobox_en,Yustrich,[[Clube de Regatas do Flamengo,1970-01-01,1971-12-31,0.5,https://en.wikipedia.org/wiki/Yustrich,en::Yustrich::manager::11,manager
+mediawiki_infobox_en,Mário Zagallo,[[Clube de Regatas do Flamengo,1972-01-01,1974-12-31,0.5,https://en.wikipedia.org/wiki/Mário_Zagallo,en::Mário Zagallo::manager::6,manager
+mediawiki_infobox_en,Mário Zagallo,[[Clube de Regatas do Flamengo,1984-01-01,1985-12-31,0.5,https://en.wikipedia.org/wiki/Mário_Zagallo,en::Mário Zagallo::manager::13,manager
+mediawiki_infobox_en,Mário Zagallo,[[Clube de Regatas do Flamengo,2000-01-01,2001-12-31,0.5,https://en.wikipedia.org/wiki/Mário_Zagallo,en::Mário Zagallo::manager::21,manager
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Gradim_(treinador_de_futebol),pt::Gradim (treinador de futebol)::line::30,raw_text_candidate
+mediawiki_raw_line_pt,,,,,0.18,https://pt.wikipedia.org/wiki/Gradim_(treinador_de_futebol),pt::Gradim (treinador de futebol)::line::158,raw_text_candidate

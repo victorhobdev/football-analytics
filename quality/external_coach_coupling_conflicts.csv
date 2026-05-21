@@ -1,0 +1,13 @@
+match_id,team_id,competition_key,season,match_date,conflict_candidate_count,coach_names,sources
+18165849,1099,la_liga,2021,2021-11-29,2,Pablo Manusovich | Sergio Mantecón,wikidata_P286_team_to_person
+18870319,364,primeira_liga,2023,2023-08-12,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870324,364,primeira_liga,2023,2023-08-19,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870334,364,primeira_liga,2023,2023-08-26,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870340,364,primeira_liga,2023,2023-09-01,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870348,364,primeira_liga,2023,2023-09-17,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870358,364,primeira_liga,2023,2023-09-23,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870365,364,primeira_liga,2023,2023-10-02,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870382,364,primeira_liga,2023,2023-10-07,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870386,364,primeira_liga,2023,2023-10-28,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870398,364,primeira_liga,2023,2023-11-04,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
+18870405,364,primeira_liga,2023,2023-11-12,2,Daniel Sousa | Vítor Campelos,wikidata_P286_team_to_person
