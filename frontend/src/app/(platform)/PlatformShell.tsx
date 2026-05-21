@@ -44,8 +44,20 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+const WORLD_CUP_NON_EDITION_SEGMENTS = new Set(["selecoes", "rankings", "finais"]);
+
 function isCanonicalCompetitionSeasonRoute(pathname: string): boolean {
   return /^\/competitions\/[^/]+\/seasons\/[^/]+$/.test(pathname);
+}
+
+function isWorldCupEditionRoute(pathname: string): boolean {
+  const match = pathname.match(/^\/copa-do-mundo\/([^/]+)$/);
+
+  if (!match) {
+    return false;
+  }
+
+  return !WORLD_CUP_NON_EDITION_SEGMENTS.has(match[1]);
 }
 
 function isActiveNavLink(pathname: string, href: string): boolean {
@@ -262,7 +274,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const canonicalSeasonCoverageCount = SUPPORTED_SEASON_COVERAGE_COUNT;
   const isHomeRoute = pathname === "/";
   const isCompetitionsIndexRoute = pathname === "/competitions";
-  const isCanonicalSeasonRoute = isCanonicalCompetitionSeasonRoute(pathname);
+  const isCanonicalSeasonRoute =
+    isCanonicalCompetitionSeasonRoute(pathname) || isWorldCupEditionRoute(pathname);
   const surfaceContentWidthClassName = isCanonicalSeasonRoute ? "max-w-[95rem]" : "max-w-7xl";
   const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute;
   const [isSearchOpen, setIsSearchOpen] = useState(false);

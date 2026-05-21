@@ -100,6 +100,7 @@ docker-compose.override.yml
 *.sqlite
 *.db
 *.sqlite3
+transfermarkt-datasets.duckdb
 artifacts/
 data/
 tmp/
