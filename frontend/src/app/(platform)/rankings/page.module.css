@@ -1,0 +1,428 @@
+.pageRoot {
+  --rankings-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --rankings-ring: 0 0 0 4px rgba(0, 78, 57, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.pageHeader,
+.catalogStack {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7d889e;
+}
+
+.breadcrumbLink,
+.catalogCard {
+  transition:
+    transform 180ms var(--rankings-ease-out),
+    background-color 180ms var(--rankings-ease-out),
+    color 180ms var(--rankings-ease-out),
+    border-color 180ms var(--rankings-ease-out),
+    box-shadow 180ms var(--rankings-ease-out);
+}
+
+.breadcrumbLink {
+  color: #7d889e;
+}
+
+.breadcrumbDivider {
+  color: #b1bccf;
+}
+
+.breadcrumbCurrent {
+  color: #0b6a56;
+}
+
+.headerGrid {
+  display: grid;
+  gap: 1rem;
+  align-items: end;
+}
+
+.headerCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  max-width: 42rem;
+}
+
+.headerEyebrow,
+.metricLabel,
+.sectionEyebrow,
+.statLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #69778d;
+}
+
+.headerTitle,
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-app-headline);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  color: #003526;
+}
+
+.headerTitle {
+  font-size: clamp(2.45rem, 2.1rem + 1vw, 3.25rem);
+}
+
+.sectionTitle {
+  margin-top: 0.35rem;
+  font-size: clamp(1.95rem, 1.72rem + 0.45vw, 2.25rem);
+}
+
+.headerLead,
+.sectionDescription,
+.catalogCardDescription {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #57657a;
+}
+
+.sectionDescription,
+.catalogCardDescription {
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.sectionCount,
+.metaPill,
+.coverageBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sectionCount,
+.metaPill {
+  background: rgba(216, 227, 251, 0.68);
+  color: #33425b;
+}
+
+.coverageBadge {
+  background: rgba(166, 242, 209, 0.72);
+  color: #00513b;
+}
+
+.metricsGrid {
+  display: grid;
+  gap: 0.8rem;
+  justify-self: end;
+  width: min(100%, 11rem);
+}
+
+.metricCard {
+  display: flex;
+  min-height: 7rem;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, rgba(240, 243, 255, 0.94), rgba(248, 251, 255, 0.88));
+  padding: 1rem 1.15rem;
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 18px 38px -34px rgba(17, 28, 45, 0.2);
+}
+
+.metricValue {
+  margin: auto 0;
+  font-family: var(--font-app-headline);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  color: #0f2035;
+  text-align: center;
+}
+
+.metricLabel {
+  margin-top: auto;
+  text-align: center;
+}
+
+.catalogStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.catalogPanel {
+  border-radius: 1.55rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.94));
+  padding: 1.5rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 24px 52px -42px rgba(17, 28, 45, 0.18);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.sectionHeaderLead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-width: 42rem;
+}
+
+.sectionHeaderActions {
+  display: flex;
+  align-items: center;
+}
+
+.catalogGrid {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.catalogCard {
+  display: block;
+  border-radius: 1.45rem;
+  background:
+    radial-gradient(circle at top left, rgba(139, 214, 182, 0.12), transparent 36%),
+    radial-gradient(circle at top right, rgba(216, 227, 251, 0.5), transparent 34%),
+    linear-gradient(180deg, rgba(244, 250, 246, 0.96), rgba(255, 255, 255, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 22px 44px -38px rgba(17, 28, 45, 0.18);
+}
+
+.catalogCardContent {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.15rem;
+}
+
+.catalogCardHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.cardIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardMarkFrame {
+  display: flex;
+  width: 3.35rem;
+  height: 3.35rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 12px 26px -24px rgba(17, 28, 45, 0.24);
+}
+
+.cardIcon {
+  width: 1.7rem;
+  height: 1.7rem;
+  color: #003526;
+}
+
+.catalogCardBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.catalogCardTitle {
+  margin: 0;
+  font-family: var(--font-app-headline);
+  font-size: clamp(1.8rem, 1.45rem + 0.42vw, 2.15rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: #003526;
+}
+
+.statsGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statTile {
+  display: flex;
+  min-height: 6.6rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(223, 229, 237, 0.82);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 0.85rem 0.95rem;
+  text-align: center;
+}
+
+.statTileLeader {
+  justify-content: center;
+}
+
+.statValue {
+  margin: 0.4rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #162235;
+}
+
+.statValueLeader {
+  margin: 0;
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+  min-width: 0;
+  min-height: 0;
+}
+
+.leaderTileBody {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.leaderMedia {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-color: rgba(191, 201, 195, 0.45);
+  background: rgba(240, 243, 255, 0.94);
+}
+
+.leaderMediaImage {
+  padding: 0.35rem;
+}
+
+.leaderMediaFallback {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid rgba(223, 229, 237, 0.82);
+}
+
+.cardFooterLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #003526;
+}
+
+.cardFooterArrow {
+  color: #0b6a56;
+}
+
+.breadcrumbLink:focus-visible,
+.catalogCard:focus-visible {
+  outline: none;
+  box-shadow: var(--rankings-ring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .breadcrumbLink:hover {
+    color: #0b6a56;
+  }
+
+  .catalogCard:hover {
+    transform: translateY(-0.12rem);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      0 28px 50px -36px rgba(17, 28, 45, 0.2);
+  }
+}
+
+@media (min-width: 768px) {
+  .headerGrid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  }
+
+  .metricsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalogGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .headerTitle {
+    font-size: clamp(2.15rem, 12vw, 2.8rem);
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumbLink,
+  .catalogCard {
+    transition-duration: 1ms !important;
+  }
+}

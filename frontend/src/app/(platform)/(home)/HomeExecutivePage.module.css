@@ -133,8 +133,7 @@
 .primaryCta,
 .secondaryCta,
 .sectionAction,
-.footerLink,
-.editorialCta {
+.footerLink {
   transition:
     transform 180ms var(--home-ease-out),
     box-shadow 180ms var(--home-ease-out),
@@ -208,9 +207,7 @@
 .panelTag,
 .sectionCount,
 .quickLinkBadge,
-.metaPill,
-.editorialBadgeStrong,
-.editorialBadgeSoft {
+.metaPill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -253,8 +250,7 @@
 
 .metricLabel,
 .metricDetail,
-.statLabel,
-.editorialMetricLabel {
+.statLabel {
   margin: 0;
   color: #57657a;
 }
@@ -272,8 +268,7 @@
 }
 
 .metricValue,
-.statValue,
-.editorialMetricValue {
+.statValue {
   margin: 0.55rem 0 0;
   font-family: var(--font-app-headline);
   font-weight: 800;
@@ -303,7 +298,6 @@
 
 .quickActionsShell,
 .sectionPanel,
-.editorialShell,
 .footerShell {
   position: relative;
   overflow: hidden;
@@ -330,7 +324,6 @@
 
 .quickLinkCard,
 .competitionCard,
-.editorialCard,
 .interactiveCard {
   transition:
     transform 180ms var(--home-ease-out),
@@ -388,8 +381,7 @@
 
 .quickLinkFooter,
 .cardFooterLabel,
-.sectionAction,
-.editorialCta {
+.sectionAction {
   font-size: 0.84rem;
   font-weight: 700;
   color: #003526;
@@ -401,8 +393,7 @@
 }
 
 .quickLinkArrow,
-.cardFooterArrow,
-.editorialArrow {
+.cardFooterArrow {
   color: #003526;
   transition: transform 160ms var(--home-ease-out);
 }
@@ -543,58 +534,6 @@
   gap: 1.15rem;
 }
 
-.secondarySurfaceCard {
-  min-height: clamp(17rem, 18vw, 18.4rem);
-}
-
-.secondarySurfaceCard::before {
-  height: 6.4rem;
-}
-
-.secondarySurfaceCardHeader,
-.secondarySurfaceCardBody,
-.secondarySurfaceCardFooter {
-  display: flex;
-  justify-content: center;
-}
-
-.secondarySurfaceCardHeader {
-  padding-top: 0.15rem;
-}
-
-.secondarySurfaceMark {
-  font-family: var(--font-app-headline);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #003526;
-}
-
-.secondarySurfaceCardBody {
-  flex: 1;
-  align-items: center;
-  text-align: center;
-}
-
-.secondarySurfaceTitle {
-  max-width: 11ch;
-  margin: 0;
-  font-family: var(--font-app-headline);
-  font-size: clamp(1.6rem, 1.42rem + 0.36vw, 1.85rem);
-  font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-  color: #003526;
-  text-wrap: balance;
-}
-
-.secondarySurfaceCardFooter {
-  align-items: center;
-  gap: 0.45rem;
-  text-align: center;
-}
-
 .statsGrid {
   display: grid;
   gap: 0.75rem;
@@ -605,15 +544,19 @@
   display: flex;
   min-height: 5.9rem;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(191, 201, 195, 0.22);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.84);
   padding: 0.85rem 0.95rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  gap: 0.55rem;
+  text-align: center;
 }
 
 .statValue {
+  margin: 0;
   font-size: 1.55rem;
   line-height: 1;
 }
@@ -621,140 +564,6 @@
 .cardFooter {
   padding-top: 1.15rem;
   border-top: 1px solid rgba(191, 201, 195, 0.18);
-}
-
-.cardFooter.secondarySurfaceCardFooter {
-  justify-content: center;
-  gap: 0.45rem;
-  text-align: center;
-}
-
-.editorialShell {
-  background:
-    radial-gradient(circle at top right, rgba(216, 227, 251, 0.58), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(241, 246, 255, 0.76));
-}
-
-.editorialHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.editorialCard {
-  position: relative;
-  min-height: 29rem;
-  overflow: hidden;
-  border: 1px solid rgba(191, 201, 195, 0.18);
-  border-radius: 2rem;
-  background: #003526;
-  box-shadow: 0 26px 52px -40px rgba(0, 53, 38, 0.46);
-}
-
-.editorialImage {
-  transition:
-    transform 240ms var(--home-ease-out),
-    filter 240ms var(--home-ease-out);
-}
-
-.editorialFallback {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #003526 0%, #004e39 100%);
-}
-
-.editorialOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 53, 38, 0.14) 0%,
-    rgba(0, 53, 38, 0.32) 40%,
-    rgba(0, 53, 38, 0.94) 100%
-  );
-}
-
-.editorialContent {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: clamp(1.2rem, 2vw, 1.6rem);
-  color: #ffffff;
-}
-
-.editorialBadgeStrong {
-  background: rgba(16, 185, 129, 0.92);
-  color: #ffffff;
-}
-
-.editorialBadgeSoft {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-}
-
-.editorialEyebrow {
-  margin: 0;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(236, 255, 244, 0.88);
-}
-
-.editorialFooter {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: auto;
-}
-
-.editorialMetricList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.editorialMetricPill {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(7, 19, 16, 0.34);
-  padding: 0.55rem 0.8rem;
-  backdrop-filter: blur(14px);
-}
-
-.editorialMetricValue {
-  font-size: 1rem;
-  line-height: 1;
-  color: #ffffff;
-}
-
-.editorialMetricLabel {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(236, 255, 244, 0.82);
-}
-
-.editorialCta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  align-self: flex-start;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  padding: 0.72rem 0.95rem;
-  backdrop-filter: blur(10px);
 }
 
 .footerShell {
@@ -777,8 +586,7 @@
 .primaryCta:focus-visible,
 .secondaryCta:focus-visible,
 .sectionAction:focus-visible,
-.footerLink:focus-visible,
-.editorialCta:focus-visible {
+.footerLink:focus-visible {
   outline: none;
   box-shadow: var(--home-ring);
 }
@@ -787,8 +595,7 @@
   .primaryCta:hover,
   .secondaryCta:hover,
   .sectionAction:hover,
-  .footerLink:hover,
-  .editorialCta:hover {
+  .footerLink:hover {
     transform: translateY(-0.125rem);
   }
 
@@ -807,14 +614,12 @@
   .primaryCta:hover .inlineArrow,
   .sectionAction:hover .inlineArrow,
   .quickLinkCard:hover .quickLinkArrow,
-  .competitionCard:hover .cardFooterArrow,
-  .editorialCta:hover .editorialArrow {
+  .competitionCard:hover .cardFooterArrow {
     transform: translateX(0.22rem);
   }
 
   .quickLinkCard:hover,
-  .competitionCard:hover,
-  .editorialCard:hover {
+  .competitionCard:hover {
     transform: translateY(-0.22rem);
   }
 
@@ -838,22 +643,12 @@
   .competitionCard:hover .competitionLogo {
     transform: scale(1.04);
   }
-
-  .editorialCard:hover {
-    box-shadow: 0 32px 64px -40px rgba(0, 53, 38, 0.52);
-  }
-
-  .editorialCard:hover .editorialImage {
-    transform: scale(1.04);
-    filter: saturate(1.06);
-  }
 }
 
 .primaryCta:active,
 .secondaryCta:active,
 .sectionAction:active,
 .footerLink:active,
-.editorialCta:active,
 .interactiveCard:active {
   transform: scale(0.98);
 }
@@ -866,12 +661,6 @@
 
   .quickActionsHeader {
     align-items: flex-end;
-  }
-
-  .editorialFooter {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
   }
 }
 
@@ -911,9 +700,7 @@
   .coverageBadge,
   .sectionCount,
   .quickLinkBadge,
-  .metaPill,
-    .editorialBadgeStrong,
-    .editorialBadgeSoft {
+  .metaPill {
     letter-spacing: 0.12em;
   }
 
@@ -946,18 +733,14 @@
   .secondaryCta,
   .sectionAction,
   .footerLink,
-  .editorialCta,
   .quickLinkCard,
   .competitionCard,
-  .editorialCard,
   .inlineArrow,
   .quickLinkArrow,
   .cardFooterArrow,
-  .editorialArrow,
   .quickLinkIconWrap,
   .competitionLogoFrame,
-  .competitionLogo,
-  .editorialImage {
+  .competitionLogo {
     transition-duration: 1ms !important;
   }
 
@@ -965,7 +748,6 @@
   .secondaryCta:active,
   .sectionAction:active,
   .footerLink:active,
-  .editorialCta:active,
   .interactiveCard:active {
     transform: none;
   }

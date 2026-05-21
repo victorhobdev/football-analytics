@@ -3,8 +3,9 @@
 import Link from "next/link";
 
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
-import { ProfileKpi, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/components/profile/ProfilePrimitives";
+import { ProfileKpi, ProfileShell, ProfileTag } from "@/shared/components/profile/ProfilePrimitives";
 
+import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { WorldCupFinalsSection } from "@/features/world-cup/components/WorldCupFinalsSection";
 import { useWorldCupRankings } from "@/features/world-cup/hooks/useWorldCupRankings";
 import { buildWorldCupHubPath } from "@/features/world-cup/routes";
@@ -58,6 +59,7 @@ export function WorldCupFinalsContent() {
   }
 
   const { finals } = rankingsQuery.data;
+  const penaltyDecisionsCount = finals.items.filter((item) => item.resolutionType === "penalties").length;
 
   return (
     <ProfileShell className="world-cup-theme space-y-6" variant="plain">
@@ -73,38 +75,34 @@ export function WorldCupFinalsContent() {
         <span>Finais</span>
       </div>
 
-      <ProfilePanel className="world-cup-hero space-y-6" tone="accent">
-        <div className="flex flex-wrap items-center gap-2">
-          <ProfileTag className="world-cup-hero-tag">Finais</ProfileTag>
-          <ProfileTag className="world-cup-hero-tag">Historia</ProfileTag>
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] xl:items-end">
-          <div className="space-y-4">
-            <h1 className="font-[family:var(--font-profile-headline)] text-[2.8rem] font-extrabold leading-none tracking-[-0.07em] text-white md:text-[3.5rem]">
-              Finais historicas
-            </h1>
-            <p className="max-w-3xl text-sm/6 text-white/78 md:text-[0.96rem]/7">
-              Recorte dedicado das decisoes de Copa com ano, placar, local e sinalizacao honesta quando nao houve final unica.
-            </p>
-          </div>
-
-          <aside className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+      <WorldCupArchiveHero
+        aside={
+          <>
             <ProfileKpi
-              hint="Finais unicas com placar e local registrados"
+              hint="Decisões históricas carregadas nesta curadoria"
               invert
-              label="Finais"
+              label="Decisões"
               value={formatWholeNumber(finals.items.length)}
             />
             <ProfileKpi
-              hint="Edicoes fora da lista por ambiguidade de formato"
+              hint="Finais resolvidas nas penalidades"
               invert
-              label="Omissoes"
-              value={formatWholeNumber(finals.omittedEditions.length)}
+              label="Pênaltis"
+              value={formatWholeNumber(penaltyDecisionsCount)}
             />
-          </aside>
-        </div>
-      </ProfilePanel>
+          </>
+        }
+        asideClassName="grid gap-3 sm:grid-cols-2 xl:grid-cols-1"
+        description="Ano, confronto, placar e contexto da decisão de cada Copa. Em 1950, a leitura usa Brasil x Uruguai como jogo que definiu o título."
+        footer={
+          <>
+            <ProfileTag className="world-cup-hero-tag">Finais</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Decisões</ProfileTag>
+          </>
+        }
+        kicker="Arquivo histórico"
+        title="Finais históricas"
+      />
 
       <WorldCupFinalsSection finals={finals.items} omittedEditions={finals.omittedEditions} tone="base" />
     </ProfileShell>

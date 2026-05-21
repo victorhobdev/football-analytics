@@ -111,6 +111,13 @@ _CANONICAL_COMPETITIONS = (
         source_ids=(462,),
         season_calendar="split_year",
     ),
+    CanonicalCompetition(
+        competition_id=0,
+        competition_key="fifa_world_cup_mens",
+        default_name="Copa do Mundo FIFA",
+        source_ids=(7000547241627854950,),
+        season_calendar="annual",
+    ),
 )
 
 _CANONICAL_COMPETITIONS_BY_ID: dict[int, CanonicalCompetition] = {

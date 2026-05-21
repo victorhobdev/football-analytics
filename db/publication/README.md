@@ -215,6 +215,49 @@ Validacao minima de assets:
 node -e "const fs=require('fs'),p=require('path'); const root=process.env.FOOTBALL_VISUAL_ASSETS_ROOT || p.resolve('data/visual_assets'); for (const c of ['clubs','competitions','players']) { const m=JSON.parse(fs.readFileSync(p.join(root,'manifests',c+'.json'),'utf8')); const missing=m.entries.filter(e=>{ if (!e.local_path) return false; const rel=e.local_path.replace(/\\/g,'/').replace(/^data\/visual_assets\//,''); return !fs.existsSync(p.join(root,rel)); }); console.log(c, m.entries.length, 'missing=', missing.length); process.exitCode ||= missing.length ? 1 : 0; }"
 ```
 
+Sync especifico da vertical da Copa:
+
+1. Atualizar os manifests oficiais de override e validar os arquivos locais:
+
+```powershell
+python tools/world_cup_assets_sync.py
+```
+
+2. Sincronizar o delta da Copa para o root de producao dos visual assets:
+
+```powershell
+python tools/world_cup_assets_sync.py --target-root /srv/football-analytics/visual_assets
+```
+
+3. No modo self-host do Next + API na mesma VM, apontar:
+
+```text
+FOOTBALL_VISUAL_ASSETS_ROOT=/srv/football-analytics/visual_assets
+```
+
+4. No modo Vercel + assets estaticos servidos por Nginx/CDN, publicar o mesmo
+   `target_root` em `/visual_assets` e configurar:
+
+```text
+FOOTBALL_VISUAL_ASSETS_MANIFEST_BASE_URL=https://assets.example.com/visual_assets/manifests/
+FOOTBALL_VISUAL_ASSETS_PUBLIC_BASE_URL=https://assets.example.com/visual_assets/
+```
+
+5. Validar o bundle sincronizado:
+
+```powershell
+python tools/world_cup_assets_sync.py --target-root /srv/football-analytics/visual_assets
+curl http://127.0.0.1:3001/api/visual-assets/competitions/wc_mens
+curl http://127.0.0.1:3001/api/visual-assets/clubs/world-cup-brazil
+curl http://127.0.0.1:3001/api/visual-assets/players/7040061729933986054
+```
+
+O script materializa `competitions.overrides.json`, `clubs.overrides.json` e
+atualiza `players.overrides.json` com os assets publicados da Copa, preservando
+overrides manuais e aliases `USE_BASE` ja aprovados. O sync copia apenas os
+manifests e arquivos referenciados por esses overrides, evitando reempacotar o
+acervo inteiro.
+
 Checagens HTTP:
 
 ```text

@@ -15,7 +15,7 @@ import { buildCompetitionHubPath } from "@/shared/utils/context-routing";
 
 import styles from "./page.module.css";
 
-type ScopeFilter = "all" | "domestic" | "continental";
+type ScopeFilter = "all" | "domestic" | "international" | "global";
 type TypeFilter = "all" | CompetitionDef["type"];
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
@@ -43,12 +43,16 @@ function describeCompetitionTypeLabel(competition: CompetitionDef): string {
     return "Copa";
   }
 
-  return "Continental";
+  return competition.scope === "global" ? "Mundial" : "Internacional";
 }
 
 function describeCompetitionScopeLabel(competition: CompetitionDef): string {
-  if (competition.type === "international_cup") {
-    return "Continental elite";
+  if (competition.scope === "global") {
+    return "Torneio global";
+  }
+
+  if (competition.scope === "continental") {
+    return "Torneio continental";
   }
 
   if (competition.type === "domestic_cup") {
@@ -63,8 +67,12 @@ function describeScopeFilterLabel(value: ScopeFilter): string {
     return "Nacionais";
   }
 
-  if (value === "continental") {
-    return "Continentais";
+  if (value === "international") {
+    return "Internacionais";
+  }
+
+  if (value === "global") {
+    return "Mundiais";
   }
 
   return "Todas";
@@ -80,7 +88,7 @@ function describeTypeFilterLabel(value: TypeFilter): string {
   }
 
   if (value === "international_cup") {
-    return "Continentais";
+    return "Internacionais";
   }
 
   return "Todos";
@@ -109,10 +117,10 @@ function getCompetitionRegionLabel(competition: CompetitionDef): string {
 }
 
 function buildCompetitionGroups(competitions: CompetitionDef[]) {
-  const domestic = competitions.filter((competition) => competition.type !== "international_cup");
-  const continental = competitions.filter((competition) => competition.type === "international_cup");
+  const domestic = competitions.filter((competition) => competition.scope === "domestic");
+  const international = competitions.filter((competition) => competition.scope !== "domestic");
 
-  return { continental, domestic };
+  return { domestic, international };
 }
 
 function buildCompetitionCardHref(competition: CompetitionDef): string {
@@ -330,7 +338,8 @@ export default function CompetitionsIndexPage() {
     (total, competition) => total + listSeasonsForCompetition(competition).length,
     0,
   );
-  const { continental, domestic } = buildCompetitionGroups(allCompetitions);
+  const { domestic, international } = buildCompetitionGroups(allCompetitions);
+  const globalCompetitions = allCompetitions.filter((competition) => competition.scope === "global");
   const normalizedSearchQuery = normalizeSearchValue(searchQuery);
 
   const regionOptions = useMemo(() => {
@@ -340,11 +349,15 @@ export default function CompetitionsIndexPage() {
 
   const filteredCompetitions = useMemo(() => {
     return allCompetitions.filter((competition) => {
-      if (scopeFilter === "domestic" && competition.type === "international_cup") {
+      if (scopeFilter === "domestic" && competition.scope !== "domestic") {
         return false;
       }
 
-      if (scopeFilter === "continental" && competition.type !== "international_cup") {
+      if (scopeFilter === "international" && competition.scope === "domestic") {
+        return false;
+      }
+
+      if (scopeFilter === "global" && competition.scope !== "global") {
         return false;
       }
 
@@ -418,9 +431,9 @@ export default function CompetitionsIndexPage() {
             <div className={styles.headerTags}>
               <span className={styles.headerTag}>{formatWholeNumber(domestic.length)} nacionais</span>
               <span className={styles.headerTag}>
-                {formatWholeNumber(continental.length)} continentais
+                {formatWholeNumber(international.length)} internacionais
               </span>
-              <span className={styles.headerTag}>Catálogo canônico</span>
+              <span className={styles.headerTag}>{formatWholeNumber(globalCompetitions.length)} mundiais</span>
             </div>
           </div>
 
@@ -472,7 +485,8 @@ export default function CompetitionsIndexPage() {
             >
               <option value="all">Todas</option>
               <option value="domestic">Nacionais</option>
-              <option value="continental">Continentais</option>
+              <option value="international">Internacionais</option>
+              <option value="global">Mundiais</option>
             </select>
           </label>
 
@@ -488,7 +502,7 @@ export default function CompetitionsIndexPage() {
               <option value="all">Todos</option>
               <option value="domestic_league">Ligas</option>
               <option value="domestic_cup">Copas</option>
-              <option value="international_cup">Continentais</option>
+              <option value="international_cup">Internacionais</option>
             </select>
           </label>
 
@@ -512,7 +526,7 @@ export default function CompetitionsIndexPage() {
         </div>
 
         <button
-          className={styles.clearButton}
+          className={joinClasses("button-pill", hasActiveFilters ? "button-pill-primary" : "button-pill-secondary")}
           disabled={!hasActiveFilters}
           onClick={resetFilters}
           type="button"

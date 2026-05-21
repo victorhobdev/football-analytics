@@ -128,7 +128,7 @@ export function DataTable<TData extends object>({
     ? "flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(216,227,251,0.68)] bg-[rgba(240,243,255,0.7)] px-4 py-3 text-sm text-[#57657a]"
     : "flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-3 py-2 text-sm";
   const buttonClasses = isProfileVariant
-    ? "rounded-full border border-[rgba(112,121,116,0.22)] bg-white/84 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50"
+    ? "button-pill button-pill-secondary font-medium disabled:cursor-not-allowed disabled:opacity-50"
     : "rounded border border-slate-300 px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50";
   const selectClasses = isProfileVariant
     ? "rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 px-3 py-1.5 text-[#1f2d40]"

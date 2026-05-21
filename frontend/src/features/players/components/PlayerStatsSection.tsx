@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlayerProfileStats, PlayerStatsSummary } from "@/features/players/types";
+import type { PlayerProfileMeta, PlayerProfileStats, PlayerStatsSummary } from "@/features/players/types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
@@ -12,6 +12,7 @@ import type { CoverageState } from "@/shared/types/coverage.types";
 
 type PlayerStatsSectionProps = {
   coverage: CoverageState;
+  profileMeta?: PlayerProfileMeta | null;
   stats: PlayerProfileStats | null | undefined;
   summary: PlayerStatsSummary;
 };
@@ -34,6 +35,7 @@ function formatPercentage(value: number | null | undefined): string {
 
 export function PlayerStatsSection({
   coverage,
+  profileMeta,
   stats,
   summary,
 }: PlayerStatsSectionProps) {
@@ -50,8 +52,12 @@ export function PlayerStatsSection({
       <div className="space-y-4">
         {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
-          title="Estatísticas indisponíveis"
-          description="Não há métricas suficientes para montar esta leitura do jogador agora."
+          title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem histórico estatístico" : "Estatísticas indisponíveis"}
+          description={
+            profileMeta && !profileMeta.hasHistoricalStats
+              ? "Este perfil segue válido, mas não possui histórico estatístico consolidado para esta seção."
+              : "Não há métricas suficientes para montar esta leitura do jogador agora."
+          }
         />
       </div>
     );

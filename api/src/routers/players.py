@@ -16,9 +16,52 @@ router = APIRouter(prefix="/api/v1/players", tags=["players"])
 PlayersSortBy = Literal["playerName", "minutesPlayed", "goals", "assists", "rating"]
 SortDirection = Literal["asc", "desc"]
 
+SEARCH_NORMALIZATION_SOURCE = "áàâãäéèêëíìîïóòôõöúùûüçñ"
+SEARCH_NORMALIZATION_TARGET = "aaaaaeeeeiiiiooooouuuucn"
+
 
 def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
+
+
+def _normalize_search_value(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    normalized_value = value.strip().lower().translate(
+        str.maketrans(SEARCH_NORMALIZATION_SOURCE, SEARCH_NORMALIZATION_TARGET)
+    )
+    return normalized_value or None
+
+
+def _normalized_search_sql(expression: str) -> str:
+    return (
+        f"translate(lower(coalesce({expression}, '')), "
+        f"'{SEARCH_NORMALIZATION_SOURCE}', '{SEARCH_NORMALIZATION_TARGET}')"
+    )
+
+
+def _normalize_recent_teams(value: Any) -> list[dict[str, str | None]]:
+    if not isinstance(value, list):
+        return []
+
+    items: list[dict[str, str | None]] = []
+    for entry in value[:3]:
+        if not isinstance(entry, dict):
+            continue
+
+        team_id = entry.get("teamId")
+        if team_id is None:
+            continue
+
+        items.append(
+            {
+                "teamId": str(team_id),
+                "teamName": str(entry["teamName"]) if entry.get("teamName") is not None else None,
+            }
+        )
+
+    return items
 
 
 def _to_player_id(player_id: str) -> int:
@@ -73,6 +116,151 @@ def _player_coverage(filters: GlobalFilters) -> dict[str, Any]:
     available = int(row.get("available_count") or 0)
     total = int(row.get("total_count") or 0)
     return build_coverage_from_counts(available, total, "Player stats coverage")
+
+
+def _normalize_text_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    items: list[str] = []
+    for entry in value:
+        if entry is None:
+            continue
+        normalized = str(entry).strip()
+        if normalized:
+            items.append(normalized)
+    return items
+
+
+def _fetch_player_profile_meta(player_id: int) -> dict[str, Any]:
+    # Perfis de jogador seguem válidos mesmo quando o histórico estatístico não existe.
+    # O frontend consome esse bloco para distinguir perfil SportMonks com histórico,
+    # perfil SportMonks sem histórico e perfil local da Copa.
+    row = db_client.fetch_one(
+        """
+        with history_state as (
+            select exists(
+                select 1
+                from mart.player_match_summary
+                where player_id = %s
+            ) as has_historical_stats
+        ),
+        linked_wc as (
+            select distinct
+                wc_player_id,
+                match_method
+            from raw.wc_player_identity_map
+            where match_confidence = 'confirmed'
+              and sportmonks_player_id = %s
+        ),
+        wc_squad_rows as (
+            select distinct
+                ws.team_name,
+                ws.season_label,
+                ws.position_name
+            from raw.wc_squads ws
+            join linked_wc lw
+              on lw.wc_player_id = ws.player_id
+        ),
+        wc_positions_ranked as (
+            select
+                position_name,
+                row_number() over (
+                    order by
+                        count(*) desc,
+                        max(season_label) desc,
+                        position_name asc
+                ) as rn
+            from wc_squad_rows
+            where position_name is not null
+              and btrim(position_name) <> ''
+            group by position_name
+        ),
+        wc_goals as (
+            select count(*)::int as goal_count
+            from raw.wc_goals wg
+            join linked_wc lw
+              on lw.wc_player_id = wg.player_id
+        )
+        select
+            case
+                when exists(
+                    select 1
+                    from linked_wc
+                    where match_method = 'manual_local_profile_no_sportmonks_record'
+                ) then 'world_cup_local'
+                when (select has_historical_stats from history_state) then 'sportmonks_with_history'
+                else 'sportmonks_without_history'
+            end as profile_type,
+            case
+                when exists(
+                    select 1
+                    from linked_wc
+                    where match_method = 'manual_local_profile_no_sportmonks_record'
+                ) then 'world_cup_local'
+                else 'sportmonks'
+            end as data_source,
+            (select has_historical_stats from history_state) as has_historical_stats,
+            case
+                when (select has_historical_stats from history_state) then 'available'
+                else 'unavailable'
+            end as history_availability,
+            exists(select 1 from linked_wc) as is_world_cup_linked,
+            coalesce(
+                (
+                    select array_agg(distinct team_name order by team_name)
+                    from wc_squad_rows
+                    where team_name is not null
+                      and btrim(team_name) <> ''
+                ),
+                array[]::text[]
+            ) as world_cup_team_names,
+            coalesce(
+                (
+                    select array_agg(distinct season_label order by season_label)
+                    from wc_squad_rows
+                    where season_label is not null
+                      and btrim(season_label) <> ''
+                ),
+                array[]::text[]
+            ) as world_cup_edition_labels,
+            (
+                select position_name
+                from wc_positions_ranked
+                where rn = 1
+            ) as world_cup_primary_position,
+            coalesce((select goal_count from wc_goals), 0) as world_cup_goal_count
+        """,
+        [player_id, player_id],
+    ) or {}
+
+    team_names = _normalize_text_list(row.get("world_cup_team_names"))
+    edition_labels = _normalize_text_list(row.get("world_cup_edition_labels"))
+    primary_position_raw = row.get("world_cup_primary_position")
+    primary_position = str(primary_position_raw).strip() if primary_position_raw is not None else None
+    if primary_position == "":
+        primary_position = None
+
+    is_world_cup_linked = bool(row.get("is_world_cup_linked"))
+    world_cup_summary: dict[str, Any] | None = None
+    if is_world_cup_linked:
+        world_cup_summary = {
+            "teamNames": team_names,
+            "teamCount": len(team_names),
+            "editionLabels": edition_labels,
+            "editionCount": len(edition_labels),
+            "goalCount": int(row.get("world_cup_goal_count") or 0),
+            "primaryPosition": primary_position,
+        }
+
+    return {
+        "profileType": row.get("profile_type") or "sportmonks_without_history",
+        "dataSource": row.get("data_source") or "sportmonks",
+        "hasHistoricalStats": bool(row.get("has_historical_stats")),
+        "historyAvailability": row.get("history_availability") or "unavailable",
+        "isWorldCupLinked": is_world_cup_linked,
+        "worldCup": world_cup_summary,
+    }
 
 
 @router.get("")
@@ -133,7 +321,8 @@ def get_players(
                 details={"teamId": teamId},
             )
         team_id_int = int(teamId)
-    search_pattern = f"%{search.strip()}%" if search and search.strip() else None
+    normalized_search = _normalize_search_value(search)
+    search_pattern = f"%{normalized_search}%" if normalized_search else None
     position_pattern = f"%{position.strip()}%" if position and position.strip() else None
 
     query = f"""
@@ -172,6 +361,7 @@ def get_players(
                 fs.player_id,
                 max(fs.player_name) as player_name,
                 count(distinct fs.match_id) as matches_played,
+                count(distinct fs.team_id) filter (where fs.team_id is not null)::int as team_count,
                 sum(fs.minutes_played)::numeric as minutes_played,
                 sum(fs.goals)::numeric as goals,
                 sum(fs.assists)::numeric as assists,
@@ -191,6 +381,44 @@ def get_players(
             from filtered_scoped fs
             order by fs.player_id, fs.match_date desc, fs.match_id desc
         ),
+        recent_teams as (
+            select
+                ranked_teams.player_id,
+                json_agg(
+                    json_build_object(
+                        'teamId', ranked_teams.team_id::text,
+                        'teamName', ranked_teams.team_name
+                    )
+                    order by ranked_teams.last_match_date desc, ranked_teams.last_match_id desc
+                ) as recent_teams
+            from (
+                select
+                    team_context.player_id,
+                    team_context.team_id,
+                    team_context.team_name,
+                    team_context.last_match_date,
+                    team_context.last_match_id,
+                    row_number() over (
+                        partition by team_context.player_id
+                        order by team_context.last_match_date desc, team_context.last_match_id desc
+                    ) as recent_team_rank
+                from (
+                    select
+                        fs.player_id,
+                        fs.team_id,
+                        coalesce(max(fs.team_name), max(dt.team_name)) as team_name,
+                        max(fs.match_date) as last_match_date,
+                        max(fs.match_id) as last_match_id
+                    from filtered_scoped fs
+                    left join mart.dim_team dt
+                      on dt.team_id = fs.team_id
+                    where fs.team_id is not null
+                    group by fs.player_id, fs.team_id
+                ) team_context
+            ) ranked_teams
+            where ranked_teams.recent_team_rank <= 3
+            group by ranked_teams.player_id
+        ),
         final_rows as (
             select
                 a.player_id,
@@ -199,6 +427,8 @@ def get_players(
                 lc.team_name,
                 lc.position_name,
                 dp.nationality,
+                a.team_count,
+                rt.recent_teams,
                 a.matches_played,
                 a.minutes_played,
                 a.goals,
@@ -210,9 +440,11 @@ def get_players(
             from aggregated a
             left join latest_context lc
               on lc.player_id = a.player_id
+            left join recent_teams rt
+              on rt.player_id = a.player_id
             left join mart.dim_player dp
               on dp.player_id = a.player_id
-            where (%s::text is null or a.player_name ilike %s)
+            where (%s::text is null or {_normalized_search_sql("a.player_name")} like %s)
               and (%s::bigint is null or lc.team_id = %s)
               and (%s::text is null or coalesce(lc.position_name, '') ilike %s)
               and (%s::numeric is null or a.minutes_played >= %s)
@@ -254,6 +486,13 @@ def get_players(
             "playerName": row["player_name"],
             "teamId": str(row["team_id"]) if row.get("team_id") is not None else None,
             "teamName": row.get("team_name"),
+            "teamCount": int(row.get("team_count") or 0) if row.get("team_count") is not None else None,
+            "teamContextLabel": (
+                f"{int(row['team_count'])} clubes"
+                if row.get("team_count") is not None and int(row["team_count"]) > 1
+                else row.get("team_name")
+            ),
+            "recentTeams": _normalize_recent_teams(row.get("recent_teams")),
             "position": row.get("position_name"),
             "nationality": row.get("nationality"),
             "matchesPlayed": int(row.get("matches_played") or 0),
@@ -522,6 +761,16 @@ def get_player_profile(
             status=404,
             details={"playerId": playerId},
         )
+
+    profile_meta = _fetch_player_profile_meta(player_id)
+    world_cup_summary = profile_meta.get("worldCup") if isinstance(profile_meta.get("worldCup"), dict) else None
+    world_cup_team_names = world_cup_summary.get("teamNames") if isinstance(world_cup_summary, dict) else []
+    fallback_team_name = (
+        world_cup_team_names[0]
+        if isinstance(world_cup_team_names, list) and len(world_cup_team_names) == 1
+        else None
+    )
+    fallback_position = world_cup_summary.get("primaryPosition") if isinstance(world_cup_summary, dict) else None
 
     where_sql, where_params = _player_scope_filters_sql(global_filters)
     summary_query = f"""
@@ -912,15 +1161,22 @@ def get_player_profile(
         }
         stats_coverage = _with_coverage_label(coverage, "Player stats coverage")
 
-    overview_coverage = _with_coverage_label(coverage, "Player overview coverage")
-    matches_coverage = _with_coverage_label(coverage, "Player matches coverage")
+    has_historical_stats = bool(profile_meta.get("hasHistoricalStats"))
+    if has_historical_stats:
+        overview_coverage = _with_coverage_label(coverage, "Player overview coverage")
+        matches_coverage = _with_coverage_label(coverage, "Player matches coverage")
+    else:
+        overview_coverage = {"status": "complete", "label": "Perfil disponível"}
+        matches_coverage = {"status": "empty", "label": "Partidas indisponíveis"}
+        history_coverage = {"status": "empty", "label": "Histórico indisponível"} if includeHistory else None
+        stats_coverage = {"status": "empty", "label": "Estatísticas indisponíveis"} if includeStats else None
 
     player_payload = {
         "playerId": str(player_ref["player_id"]),
         "playerName": player_ref["player_name"],
         "teamId": str(summary_row["team_id"]) if summary_row.get("team_id") is not None else None,
-        "teamName": summary_row.get("team_name"),
-        "position": summary_row.get("position_name"),
+        "teamName": summary_row.get("team_name") or fallback_team_name,
+        "position": summary_row.get("position_name") or fallback_position,
         "nationality": player_ref.get("nationality"),
         "lastMatchAt": summary_row.get("last_match_date"),
     }
@@ -942,6 +1198,7 @@ def get_player_profile(
     data: dict[str, Any] = {
         "player": player_payload,
         "summary": summary_payload,
+        "profileMeta": profile_meta,
         "sectionCoverage": {
             "overview": overview_coverage,
         },
@@ -974,18 +1231,22 @@ def get_player_profile(
             "label": "Player stats coverage",
         }
 
-    aggregate_coverage = _merge_coverages(
-        "Player profile coverage",
-        [
-            section_coverage
-            for section_coverage in [
-                overview_coverage,
-                matches_coverage if includeRecentMatches else None,
-                history_coverage if includeHistory else None,
-                stats_coverage if includeStats else None,
-            ]
-            if section_coverage is not None
-        ],
+    aggregate_coverage = (
+        {"status": "complete", "label": "Perfil disponível"}
+        if not has_historical_stats
+        else _merge_coverages(
+            "Player profile coverage",
+            [
+                section_coverage
+                for section_coverage in [
+                    overview_coverage,
+                    matches_coverage if includeRecentMatches else None,
+                    history_coverage if includeHistory else None,
+                    stats_coverage if includeStats else None,
+                ]
+                if section_coverage is not None
+            ],
+        )
     )
 
     return build_api_response(

@@ -6,6 +6,7 @@ import { PlatformStateSurface } from "@/shared/components/feedback/PlatformState
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 import { ProfileAlert, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/components/profile/ProfilePrimitives";
 
+import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupTeam } from "@/features/world-cup/hooks/useWorldCupTeam";
 import { buildWorldCupEditionPath, buildWorldCupHubPath, buildWorldCupTeamsPath } from "@/features/world-cup/routes";
 import type { WorldCupTeamParticipation, WorldCupTeamSummary } from "@/features/world-cup/types/world-cup.types";
@@ -129,7 +130,7 @@ function SummaryCard({
           <SummaryIcon kind={kind} />
         </span>
       </div>
-      <p className="mt-4 text-sm/6 text-[#57657a]">{support}</p>
+      <p className={joinClasses("mt-4 text-sm/6 text-[#57657a]", kind === "titles" ? "text-center" : "")}>{support}</p>
     </article>
   );
 }
@@ -158,9 +159,9 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
         </div>
 
         <div className="grid gap-3 lg:grid-cols-[9rem_minmax(0,1fr)]">
-          <div className="rounded-[1.15rem] border border-[rgba(191,201,195,0.36)] bg-[rgba(246,248,252,0.88)] px-4 py-3">
-            <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Jogos</p>
-            <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none text-[#111c2d]">
+          <div className="relative grid min-h-[6.75rem] place-items-center rounded-[1.15rem] border border-[rgba(191,201,195,0.36)] bg-[rgba(246,248,252,0.88)] px-4 py-3">
+            <p className="absolute left-4 top-3 text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Jogos</p>
+            <p className="text-center font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none text-[#111c2d]">
               {participation.matchesCount}
             </p>
           </div>
@@ -171,10 +172,9 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
                 alt={topScorerName}
                 assetId={participation.topScorer?.playerId}
                 category="players"
-                className="h-14 w-14 rounded-[1.1rem]"
+                className="h-14 w-14"
                 fallback={buildFallbackLabel(topScorerName)}
-                imageClassName="p-2"
-                shape="rounded"
+                shape="circle"
               />
               <div className="min-w-0">
                 <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Artilheiro</p>
@@ -187,7 +187,7 @@ function ParticipationCard({ participation }: { participation: WorldCupTeamParti
 
         <div className="flex items-center xl:justify-end">
           <Link
-            className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_36px_-20px_rgba(0,53,38,0.58)] transition-colors hover:bg-[#00513b]"
+            className="button-pill button-pill-secondary"
             href={buildWorldCupEditionPath(participation.seasonLabel)}
           >
             Abrir edição
@@ -240,6 +240,11 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
 
   const { team, participations, historicalScorers } = teamQuery.data;
   const orderedParticipations = [...participations].sort((left, right) => right.year - left.year);
+  const championYearsLabel = [...participations]
+    .filter((participation) => participation.resultLabel === "Campeão")
+    .map((participation) => participation.year)
+    .sort((left, right) => left - right)
+    .join(" - ");
 
   return (
     <ProfileShell className="world-cup-theme space-y-6" variant="plain">
@@ -259,30 +264,9 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
         <span>{team.teamName ?? "Seleção"}</span>
       </div>
 
-      <ProfilePanel className="world-cup-hero overflow-hidden" tone="accent">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)] xl:items-center">
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <ProfileTag className="world-cup-hero-tag">Copa do Mundo</ProfileTag>
-              <ProfileTag className="world-cup-hero-tag">Seleção</ProfileTag>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/72">Seleção histórica</p>
-              <h1 className="font-[family:var(--font-profile-headline)] text-[3rem] font-extrabold leading-[0.95] tracking-[-0.08em] text-white md:text-[4rem]">
-                {team.teamName ?? "Seleção"}
-              </h1>
-              <p className="max-w-2xl text-sm/7 text-white/80 md:text-[1rem]/7">{buildHeroMeta(team)}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/84">
-              <span className="rounded-full border border-white/12 bg-white/10 px-3 py-2">
-                Janela {team.firstEdition}–{team.lastEdition}
-              </span>
-            </div>
-          </div>
-
-          <aside className="relative isolate overflow-hidden rounded-[1.9rem] border border-white/12 bg-white/10 p-5 shadow-[0_28px_64px_-44px_rgba(2,12,9,0.58)] backdrop-blur-xl">
+      <WorldCupArchiveHero
+        aside={
+          <>
             <div className="absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent_68%)]" />
             <span className="pointer-events-none absolute -right-4 bottom-[-1.5rem] text-[5.8rem] font-black uppercase tracking-[-0.08em] text-white/10 md:text-[7rem]">
               {buildFallbackLabel(team.teamName)}
@@ -323,9 +307,22 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
                 </div>
               </div>
             </div>
-          </aside>
-        </div>
-      </ProfilePanel>
+          </>
+        }
+        asideClassName="relative isolate overflow-hidden"
+        description={buildHeroMeta(team)}
+        footer={
+          <>
+            <ProfileTag className="world-cup-hero-tag">Copa do Mundo</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Seleção</ProfileTag>
+            <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/84">
+              Janela {team.firstEdition}–{team.lastEdition}
+            </span>
+          </>
+        }
+        kicker="Seleção histórica"
+        title={team.teamName ?? "Seleção"}
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard
@@ -337,7 +334,7 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
         <SummaryCard
           kind="titles"
           label="Títulos"
-          support="No recorte exibido"
+          support={championYearsLabel || "Sem títulos"}
           value={formatWholeNumber(team.titlesCount)}
         />
         <SummaryCard

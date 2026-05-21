@@ -146,7 +146,7 @@ export function PlatformStateSurface({
         <ProfilePanel className="flex flex-wrap items-center gap-3" tone="soft">
           {actionHref && actionLabel ? (
             <Link
-              className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-primary"
               href={actionHref}
             >
               {actionLabel}

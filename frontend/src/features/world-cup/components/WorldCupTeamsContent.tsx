@@ -4,8 +4,9 @@ import Link from "next/link";
 
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
-import { ProfileAlert, ProfileKpi, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/components/profile/ProfilePrimitives";
+import { ProfileKpi, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/components/profile/ProfilePrimitives";
 
+import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupTeams } from "@/features/world-cup/hooks/useWorldCupTeams";
 import { buildWorldCupHubPath, buildWorldCupTeamPath } from "@/features/world-cup/routes";
 import type { WorldCupTeamListItem } from "@/features/world-cup/types/world-cup.types";
@@ -49,7 +50,7 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
     >
       <div className="flex items-start gap-3">
         <ProfileMedia
-          alt={team.teamName ?? "Selecao"}
+          alt={team.teamName ?? "Seleção"}
           assetId={team.teamId}
           category="clubs"
           className="h-14 w-14 rounded-full"
@@ -59,7 +60,7 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
         />
         <div className="min-w-0 flex-1">
           <p className="font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
-            {team.teamName ?? "Selecao nao identificada"}
+            {team.teamName ?? "Seleção não identificada"}
           </p>
           <p className="mt-1 text-sm/6 text-[#57657a]">
             Melhor campanha: {team.bestResultLabel}
@@ -68,19 +69,19 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3">
+        <div className="flex min-h-[6.8rem] flex-col items-center justify-center rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3 text-center">
           <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Copas</p>
           <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-            {team.participationsCount}
+            {formatWholeNumber(team.participationsCount)}
           </p>
         </div>
-        <div className="rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3">
-          <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Titulos</p>
+        <div className="flex min-h-[6.8rem] flex-col items-center justify-center rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3 text-center">
+          <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Títulos</p>
           <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-            {team.titlesCount}
+            {formatWholeNumber(team.titlesCount)}
           </p>
         </div>
-        <div className="rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3">
+        <div className="flex min-h-[6.8rem] flex-col items-center justify-center rounded-[1rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(246,248,252,0.88)] px-3 py-3 text-center">
           <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Janela</p>
           <p className="mt-2 font-[family:var(--font-profile-headline)] text-lg font-extrabold text-[#111c2d]">
             {team.firstEdition}–{team.lastEdition}
@@ -89,7 +90,7 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
       </div>
 
       <div className="mt-5 flex items-center justify-between border-t border-[rgba(191,201,195,0.38)] pt-4 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-        <span>Abrir historico</span>
+        <span>Abrir histórico</span>
         <span className="transition-transform group-hover:translate-x-1">-&gt;</span>
       </div>
     </Link>
@@ -102,10 +103,10 @@ export function WorldCupTeamsContent() {
   if (teamsQuery.isLoading && !teamsQuery.data) {
     return (
       <PlatformStateSurface
-        description="Estamos consolidando todas as selecoes que ja participaram de Copas do Mundo."
+        description="Estamos consolidando todas as seleções que já participaram da Copa do Mundo."
         kicker="Copa do Mundo"
         loading
-        title="Carregando selecoes"
+        title="Carregando seleções"
       />
     );
   }
@@ -115,9 +116,9 @@ export function WorldCupTeamsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="Nao foi possivel carregar a grade de selecoes agora."
+        description="Não foi possível carregar a grade de seleções neste momento."
         kicker="Copa do Mundo"
-        title="Falha ao listar selecoes"
+        title="Falha ao listar seleções"
         tone="critical"
       />
     );
@@ -128,9 +129,9 @@ export function WorldCupTeamsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="A vertical nao retornou selecoes suficientes para montar esta lista."
+        description="A vertical não retornou seleções suficientes para montar esta lista."
         kicker="Copa do Mundo"
-        title="Lista indisponivel"
+        title="Lista indisponível"
         tone="warning"
       />
     );
@@ -143,59 +144,53 @@ export function WorldCupTeamsContent() {
     <ProfileShell className="world-cup-theme space-y-6" variant="plain">
       <div className="flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
         <Link className="transition-colors hover:text-[#003526]" href="/">
-          Inicio
+          Início
         </Link>
         <span className="text-[#8fa097]">/</span>
         <Link className="transition-colors hover:text-[#003526]" href={buildWorldCupHubPath()}>
           Copa do Mundo
         </Link>
         <span className="text-[#8fa097]">/</span>
-        <span>Selecoes</span>
+        <span>Seleções</span>
       </div>
 
-      <ProfilePanel className="world-cup-hero space-y-6" tone="accent">
-        <div className="flex flex-wrap items-center gap-2">
-          <ProfileTag className="world-cup-hero-tag">Selecoes</ProfileTag>
-          <ProfileTag className="world-cup-hero-tag">Historico</ProfileTag>
-          <ProfileTag className="world-cup-hero-tag">Copas</ProfileTag>
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] xl:items-end">
-          <div className="space-y-4">
-            <h1 className="font-[family:var(--font-profile-headline)] text-[2.8rem] font-extrabold leading-none tracking-[-0.07em] text-white md:text-[3.5rem]">
-              Explorar por selecao
-            </h1>
-            <p className="max-w-3xl text-sm/6 text-white/78 md:text-[0.96rem]/7">
-              Grade histórica com as seleções exibidas na vertical. Alemanha reúne Germany + West Germany; as demais
-              linhagens seguem o contrato atual.
-            </p>
-          </div>
-
-          <aside className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+      <WorldCupArchiveHero
+        aside={
+          <>
             <ProfileKpi
               hint="Participantes com pelo menos uma Copa registrada"
               invert
-              label="Selecoes"
+              label="Seleções"
               value={formatWholeNumber(teams.length)}
             />
             <ProfileKpi
-              hint="Selecoes com pelo menos um titulo"
+              hint="Seleções com pelo menos um título"
               invert
-              label="Campeas"
+              label="Campeãs"
               value={formatWholeNumber(titleWinnersCount)}
             />
-          </aside>
-        </div>
-      </ProfilePanel>
+          </>
+        }
+        asideClassName="grid gap-3 sm:grid-cols-2 xl:grid-cols-1"
+        footer={
+          <>
+            <ProfileTag className="world-cup-hero-tag">Arquivo histórico</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Seleções</ProfileTag>
+            <ProfileTag className="world-cup-hero-tag">Copas</ProfileTag>
+          </>
+        }
+        kicker="Copa do Mundo"
+        title="Explorar por seleção"
+      />
 
       <ProfilePanel className="space-y-5" tone="base">
         <header className="space-y-2">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">Grade de selecoes</p>
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">Grade de seleções</p>
           <h2 className="font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.045em] text-[#111c2d]">
-            {formatWholeNumber(teams.length)} selecoes com participacao
+            {formatWholeNumber(teams.length)} seleções com participação
           </h2>
           <p className="max-w-3xl text-sm/6 text-[#57657a]">
-            Cada card resume participacoes, titulos e melhor campanha, com abertura direta para a pagina da selecao.
+            Cada card resume participações, títulos e a melhor campanha, com acesso direto à página da seleção.
           </p>
         </header>
 
