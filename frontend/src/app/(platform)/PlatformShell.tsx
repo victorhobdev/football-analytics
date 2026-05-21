@@ -31,6 +31,7 @@ type PlatformShellProps = {
 type ShellIconName =
   | "analytics"
   | "competition"
+  | "worldCup"
   | "match"
   | "player"
   | "team"
@@ -56,6 +57,10 @@ function isActiveNavLink(pathname: string, href: string): boolean {
 
   if (hrefPathname === "/competitions") {
     return pathname.startsWith("/competitions");
+  }
+
+  if (hrefPathname === "/copa-do-mundo") {
+    return pathname.startsWith("/copa-do-mundo");
   }
 
   if (hrefPathname.startsWith("/rankings/")) {
@@ -194,6 +199,20 @@ function ShellIcon({ className, icon }: { className?: string; icon: ShellIconNam
     );
   }
 
+  if (icon === "worldCup") {
+    return (
+      <svg aria-hidden="true" className={sharedClasses} fill="none" viewBox="0 0 24 24">
+        <path
+          d="M8 5.5h8M9 3.5h6M8.5 5.5v3.2c0 1.8 1.2 3.3 3.5 4.3 2.3-1 3.5-2.5 3.5-4.3V5.5M7 18.5h10M10 14.5V18.5M14 14.5V18.5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.8"
+        />
+      </svg>
+    );
+  }
+
   if (icon === "menu") {
     return (
       <svg aria-hidden="true" className={sharedClasses} fill="none" viewBox="0 0 24 24">
@@ -261,6 +280,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
   const platformNavLinks = [
     { href: "/", icon: "analytics" as const, label: "Início" },
+    { href: "/copa-do-mundo", icon: "worldCup" as const, label: "Copa do Mundo" },
     { href: "/competitions", icon: "competition" as const, label: "Competições" },
     { href: buildRankingPath("player-goals", sharedFilters), icon: "analytics" as const, label: "Rankings" },
     { href: buildMatchesPath(sharedFilters), icon: "match" as const, label: "Partidas" },
@@ -269,6 +289,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
   ] as const;
 
   const topNavLinks = [
+    { href: "/copa-do-mundo", label: "Copa do Mundo" },
     { href: "/competitions", label: "Competições" },
     { href: buildRankingPath("player-goals", sharedFilters), label: "Rankings" },
     { href: buildMatchesPath(sharedFilters), label: "Partidas" },
@@ -392,8 +413,12 @@ export function PlatformShell({ children }: PlatformShellProps) {
                   className={joinClasses(
                     "flex items-center gap-3 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
                     isActive
-                      ? "border-r-4 border-emerald-400 bg-emerald-900/15 text-emerald-300"
-                      : "text-slate-400 hover:bg-slate-900/55 hover:text-emerald-100",
+                      ? item.href === "/copa-do-mundo"
+                        ? "border-r-4 border-[var(--wc-accent)] bg-[rgba(138,109,24,0.18)] text-[var(--wc-accent-soft)]"
+                        : "border-r-4 border-emerald-400 bg-emerald-900/15 text-emerald-300"
+                      : item.href === "/copa-do-mundo"
+                        ? "text-[var(--wc-accent-soft)]/85 hover:bg-[rgba(138,109,24,0.14)] hover:text-[var(--wc-accent-soft)]"
+                        : "text-slate-400 hover:bg-slate-900/55 hover:text-emerald-100",
                   )}
                   href={item.href}
                   key={item.href}
@@ -403,6 +428,11 @@ export function PlatformShell({ children }: PlatformShellProps) {
                 >
                   <ShellIcon icon={item.icon} />
                   <span>{item.label}</span>
+                  {item.href === "/copa-do-mundo" ? (
+                    <span className="world-cup-nav-badge ml-auto rounded-full px-2 py-0.5 text-[0.56rem] font-bold uppercase tracking-[0.16em]">
+                      Copa
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
@@ -518,15 +548,23 @@ export function PlatformShell({ children }: PlatformShellProps) {
                 return (
                   <Link
                     className={joinClasses(
-                      "inline-flex h-full items-center border-b-[3px] px-1 pt-1 text-[1.02rem] font-medium transition-colors",
+                      "inline-flex h-full items-center gap-2 border-b-[3px] px-1 pt-1 text-[1.02rem] font-medium transition-colors",
                       isActive
-                        ? "border-[#0b6a56] text-[#0b6a56]"
+                        ? item.href === "/copa-do-mundo"
+                          ? "border-[var(--wc-accent)] text-[var(--wc-accent-strong)]"
+                          : "border-[#0b6a56] text-[#0b6a56]"
+                        : item.href === "/copa-do-mundo"
+                          ? "border-transparent text-[var(--wc-accent-strong)] hover:text-[var(--wc-accent)]"
                         : "border-transparent text-[#6a7485] hover:text-[#0b6a56]",
                     )}
                     href={item.href}
                     key={item.href}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {"badge" in item && item.badge ? (
+                      <span className="world-cup-nav-badge rounded-full px-2 py-1 text-[0.54rem] font-bold uppercase tracking-[0.16em]">
+                      </span>
+                    ) : null}
                   </Link>
                 );
               })}

@@ -5,6 +5,12 @@ import { useMemo } from "react";
 import { usePathname, useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 
 import { getCompetitionById, getCompetitionByKey } from "@/config/competitions.registry";
+import {
+  buildWorldCupFinalsPath,
+  buildWorldCupHubPath,
+  buildWorldCupRankingsPath,
+  buildWorldCupTeamsPath,
+} from "@/features/world-cup/routes";
 import { getRankingDefinition } from "@/config/ranking.registry";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -91,6 +97,22 @@ function isPathActive(
 
   if (hrefPathname === "/competitions") {
     return pathname.startsWith("/competitions");
+  }
+
+  if (hrefPathname === "/copa-do-mundo") {
+    return pathname === "/copa-do-mundo";
+  }
+
+  if (hrefPathname === "/copa-do-mundo/selecoes") {
+    return pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
+  }
+
+  if (hrefPathname === "/copa-do-mundo/rankings") {
+    return pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
+  }
+
+  if (hrefPathname === "/copa-do-mundo/finais") {
+    return pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
   }
 
   if (isCanonicalSeasonHubPath(hrefPathname)) {
@@ -328,6 +350,7 @@ export function usePlatformShellState(): PlatformShellState {
       dateRangeEnd: timeRangeParams.dateRangeEnd,
     };
 
+    const isWorldCupRoute = pathname === "/copa-do-mundo" || pathname.startsWith("/copa-do-mundo/");
     const competitionHubHref = competitionOnly
       ? buildCompetitionHubPath(competitionOnly.key)
       : "/competitions";
@@ -353,36 +376,57 @@ export function usePlatformShellState(): PlatformShellState {
     let helperText =
       "Os filtros mantêm o recorte ativo enquanto você troca de área.";
 
-    if (competitionOnly) {
+    if (isWorldCupRoute) {
+      breadcrumbs.splice(0, breadcrumbs.length, {
+        label: pathname === "/copa-do-mundo" ? "Copa do Mundo" : "Copa do Mundo",
+        href: "/copa-do-mundo",
+      });
+      surfaceLinks.splice(
+        0,
+        surfaceLinks.length,
+        buildSurfaceLink(pathname, searchParams, "Hub da Copa", buildWorldCupHubPath()),
+        buildSurfaceLink(pathname, searchParams, "Seleções", buildWorldCupTeamsPath()),
+        buildSurfaceLink(pathname, searchParams, "Rankings", buildWorldCupRankingsPath()),
+        buildSurfaceLink(pathname, searchParams, "Finais", buildWorldCupFinalsPath()),
+      );
+      surfaceLabel = "Copa do Mundo";
+      surfaceTitle = "Entrada dedicada da Copa do Mundo";
+      description =
+        "A vertical da Copa ocupa entrada própria no produto e segue rota base dedicada, fora da hierarquia de ligas.";
+      helperText =
+        "Use esta rota como base estável da vertical enquanto o hub e as subpáginas são materializados.";
+    } else if (competitionOnly) {
       breadcrumbs.push({
         label: competitionOnly.shortName,
         href: competitionHubHref,
       });
     }
 
-    if (context) {
-      breadcrumbs.push({
-        label: context.seasonLabel,
-        href: buildSeasonHubPath(context),
-      });
-      surfaceLinks.push(
-        ...buildSeasonSurfaceLinks(pathname, searchParams, context, sharedFilterInput),
-      );
-    } else if (competitionOnly) {
-      surfaceLinks.push(buildSurfaceLink(pathname, searchParams, "Competição", competitionHubHref));
-    } else {
-      surfaceLinks.push(
-        buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-        buildSurfaceLink(
-          pathname,
-          searchParams,
-          "Rankings",
-          buildRankingPath("player-goals", sharedFilterInput),
-        ),
-        buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
-      );
+    if (!isWorldCupRoute) {
+      if (context) {
+        breadcrumbs.push({
+          label: context.seasonLabel,
+          href: buildSeasonHubPath(context),
+        });
+        surfaceLinks.push(
+          ...buildSeasonSurfaceLinks(pathname, searchParams, context, sharedFilterInput),
+        );
+      } else if (competitionOnly) {
+        surfaceLinks.push(buildSurfaceLink(pathname, searchParams, "Competição", competitionHubHref));
+      } else {
+        surfaceLinks.push(
+          buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
+          buildSurfaceLink(
+            pathname,
+            searchParams,
+            "Rankings",
+            buildRankingPath("player-goals", sharedFilterInput),
+          ),
+          buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
+          buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
+          buildSurfaceLink(pathname, searchParams, "Partidas", buildMatchesPath(sharedFilterInput)),
+        );
+      }
     }
 
     if (pathname === "/") {
@@ -405,6 +449,13 @@ export function usePlatformShellState(): PlatformShellState {
         buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
         buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
       );
+    } else if (pathname === "/copa-do-mundo") {
+      surfaceLabel = "Copa do Mundo";
+      surfaceTitle = "Entrada dedicada da Copa do Mundo";
+      description =
+        "A vertical da Copa já está posicionada como item de primeiro nível e abre por esta rota base dedicada.";
+      helperText =
+        "O hub completo da vertical será carregado sobre esta mesma rota.";
     } else if (pathname === "/competitions") {
       surfaceLabel = "Competições";
       surfaceTitle = "Campeonatos disponíveis";
