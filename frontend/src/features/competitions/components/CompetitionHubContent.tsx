@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -9,17 +9,19 @@ import {
   getCompetitionVisualAssetId,
   type CompetitionDef,
 } from "@/config/competitions.registry";
+import { getRankingDefinition } from "@/config/ranking.registry";
 import {
   getLatestSeasonForCompetition,
   listSeasonsForCompetition,
   type SeasonDef,
 } from "@/config/seasons.registry";
 import {
-  useCompetitionAnalytics,
   useCompetitionHistoricalStats,
   useCompetitionStructure,
   useStageTies,
 } from "@/features/competitions/hooks";
+import { fetchRanking } from "@/features/rankings/services/rankings.service";
+import type { RankingTableRow } from "@/features/rankings/types";
 import type {
   CompetitionHistoricalStatGroup,
   CompetitionHistoricalStatItem,
@@ -40,6 +42,7 @@ import {
 } from "@/shared/components/profile/ProfilePrimitives";
 import { CompetitionRouteContextSync } from "@/shared/components/routing/CompetitionRouteContextSync";
 import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
+import type { ApiResponse } from "@/shared/types/api-response.types";
 import {
   buildPlayerResolverPath,
   buildSeasonHubPath,
@@ -52,6 +55,23 @@ type CompetitionHubContentProps = {
 
 const HISTORICAL_STATS_AS_OF_YEAR = 2025;
 const HISTORICAL_TABLE_LIMIT = 6;
+
+type EditionTopScorer = {
+  entityId: string;
+  entityName: string;
+  goals: number;
+  teamId?: string | null;
+  teamName?: string | null;
+};
+
+type EditionTopScorerData = {
+  scorer: EditionTopScorer | null;
+};
+
+type RunnerUpSummary = {
+  teamId?: string | null;
+  teamName?: string | null;
+};
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -80,10 +100,6 @@ function buildFallbackLabel(value: string): string {
     .toUpperCase();
 }
 
-function describeSeasonCalendar(competition: CompetitionDef): string {
-  return competition.seasonCalendar === "annual" ? "Ano a ano" : "Temporada cruzada";
-}
-
 function describeCompetitionType(competition: CompetitionDef): string {
   if (competition.type === "domestic_league") {
     return "Liga nacional";
@@ -96,24 +112,125 @@ function describeCompetitionType(competition: CompetitionDef): string {
   return "Copa internacional";
 }
 
-function describeCompetitionFormatFallback(competition: CompetitionDef): string {
-  if (competition.type === "domestic_league") {
-    return "Pontos corridos";
-  }
-
-  if (competition.type === "domestic_cup") {
-    return "Mata-mata";
-  }
-
-  return "Competicao continental";
-}
-
 function formatWholeNumber(value: number | null | undefined): string {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return "-";
   }
 
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
+}
+
+function compareEditionTopScorers(left: RankingTableRow, right: RankingTableRow): number {
+  const leftGoals =
+    typeof left.metricValue === "number" && Number.isFinite(left.metricValue)
+      ? left.metricValue
+      : Number.NEGATIVE_INFINITY;
+  const rightGoals =
+    typeof right.metricValue === "number" && Number.isFinite(right.metricValue)
+      ? right.metricValue
+      : Number.NEGATIVE_INFINITY;
+
+  if (leftGoals !== rightGoals) {
+    return rightGoals - leftGoals;
+  }
+
+  const leftMinutes =
+    typeof left.minutesPlayed === "number" && Number.isFinite(left.minutesPlayed)
+      ? left.minutesPlayed
+      : Number.POSITIVE_INFINITY;
+  const rightMinutes =
+    typeof right.minutesPlayed === "number" && Number.isFinite(right.minutesPlayed)
+      ? right.minutesPlayed
+      : Number.POSITIVE_INFINITY;
+
+  if (leftMinutes !== rightMinutes) {
+    return leftMinutes - rightMinutes;
+  }
+
+  const leftName = (left.entityName ?? left.entityId ?? "").trim();
+  const rightName = (right.entityName ?? right.entityId ?? "").trim();
+  const nameComparison = leftName.localeCompare(rightName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.entityId.localeCompare(right.entityId, "pt-BR", { sensitivity: "base" });
+}
+
+async function fetchSeasonTopScorer(
+  competition: CompetitionDef,
+  season: SeasonDef,
+): Promise<ApiResponse<EditionTopScorerData>> {
+  const rankingDefinition = getRankingDefinition("player-goals");
+
+  if (!rankingDefinition) {
+    return {
+      data: { scorer: null },
+      meta: {
+        coverage: {
+          label: "Ranking player-goals indisponivel no registry.",
+          status: "unknown",
+        },
+      },
+    };
+  }
+
+  let page = 1;
+  let totalPages = 1;
+  let firstResponse: ApiResponse<{ rows: RankingTableRow[] }> | null = null;
+  const rows: RankingTableRow[] = [];
+
+  do {
+    const response = await fetchRanking({
+      rankingDefinition,
+      filters: {
+        competitionId: competition.id,
+        freshnessClass: "season",
+        minSampleValue: 0,
+        page,
+        pageSize: 100,
+        seasonId: season.queryId,
+        sortDirection: "desc",
+      },
+    });
+
+    firstResponse ??= response;
+    rows.push(...(response.data.rows ?? []));
+    totalPages = response.meta?.pagination?.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  const scorerRow = [...rows].sort(compareEditionTopScorers)[0] ?? null;
+
+  return {
+    data: {
+      scorer: scorerRow
+        ? {
+            entityId: scorerRow.entityId,
+            entityName: scorerRow.entityName?.trim() || scorerRow.entityId,
+            goals:
+              typeof scorerRow.metricValue === "number" && Number.isFinite(scorerRow.metricValue)
+                ? scorerRow.metricValue
+                : 0,
+            teamId: typeof scorerRow.teamId === "string" ? scorerRow.teamId : null,
+            teamName: typeof scorerRow.teamName === "string" ? scorerRow.teamName : null,
+          }
+        : null,
+    },
+    meta: firstResponse?.meta,
+  };
+}
+
+function useSeasonTopScorer(competition: CompetitionDef, season: SeasonDef) {
+  return useQueryWithCoverage<EditionTopScorerData>({
+    enabled: Boolean(competition.id && season.queryId),
+    gcTime: 30 * 60 * 1000,
+    isDataEmpty: (data) => data.scorer === null,
+    queryFn: () => fetchSeasonTopScorer(competition, season),
+    queryKey: ["competition-hub-season-top-scorer", competition.id, season.queryId],
+    staleTime: 10 * 60 * 1000,
+  });
 }
 
 function formatHistoricalValue(item: CompetitionHistoricalStatItem): string {
@@ -130,6 +247,24 @@ function formatHistoricalValue(item: CompetitionHistoricalStatItem): string {
   }
 
   return "-";
+}
+
+function formatHistoricalRecordValue(
+  item: CompetitionHistoricalStatItem,
+  options?: { uppercase?: boolean },
+): string {
+  let value = formatHistoricalValue(item);
+
+  if (item.statCode === "player_most_appearances") {
+    const numericValue =
+      typeof item.value === "number" && Number.isFinite(item.value)
+        ? formatWholeNumber(item.value)
+        : value.replace(/\s*appearances?/i, "").trim();
+
+    value = `${numericValue} partidas`.trim();
+  }
+
+  return options?.uppercase ? value.toUpperCase() : value;
 }
 
 function isHistoricalStatsDataEmpty(data: ReturnType<typeof useCompetitionHistoricalStats>["data"]) {
@@ -171,16 +306,22 @@ function buildHistoricalEntityHref(
 }
 
 function HistoricalEntityLabel({
+  className,
   competition,
   item,
 }: {
+  className?: string;
   competition: CompetitionDef;
   item: CompetitionHistoricalStatItem;
 }) {
   const href = buildHistoricalEntityHref(item, competition);
 
   if (!href || !item.entityId) {
-    return <span className="truncate font-semibold text-[#111c2d]">{item.entityName}</span>;
+    return (
+      <span className={joinClasses("truncate font-semibold text-[#111c2d]", className)}>
+        {item.entityName}
+      </span>
+    );
   }
 
   const mediaCategory = item.entityType === "player" ? "players" : "clubs";
@@ -199,7 +340,7 @@ function HistoricalEntityLabel({
         imageClassName="p-1"
         shape="circle"
       />
-      <span className="truncate">{item.entityName}</span>
+      <span className={joinClasses("truncate", className)}>{item.entityName}</span>
     </Link>
   );
 }
@@ -257,9 +398,11 @@ function HistoricalStatsTable({
 }
 
 function HistoricalRecordCard({
+  uppercaseContent = false,
   competition,
   item,
 }: {
+  uppercaseContent?: boolean;
   competition: CompetitionDef;
   item: CompetitionHistoricalStatItem;
 }) {
@@ -268,11 +411,20 @@ function HistoricalRecordCard({
       <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
         {item.label}
       </p>
-      <p className="mt-3 font-[family:var(--font-profile-headline)] text-[1.85rem] font-extrabold leading-none tracking-[-0.04em] text-[#111c2d]">
-        {formatHistoricalValue(item)}
+      <p
+        className={joinClasses(
+          "mt-3 font-[family:var(--font-profile-headline)] text-[1.85rem] font-extrabold leading-none tracking-[-0.04em] text-[#111c2d]",
+          uppercaseContent && "uppercase",
+        )}
+      >
+        {formatHistoricalRecordValue(item, { uppercase: uppercaseContent })}
       </p>
       <div className="mt-4 flex min-w-0 items-center gap-2 text-sm">
-        <HistoricalEntityLabel competition={competition} item={item} />
+        <HistoricalEntityLabel
+          className={uppercaseContent ? "uppercase" : undefined}
+          competition={competition}
+          item={item}
+        />
       </div>
       {item.seasonLabel ? (
         <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#57657a]">
@@ -287,10 +439,12 @@ function HistoricalRecordGroup({
   competition,
   group,
   title,
+  uppercaseContent = false,
 }: {
   competition: CompetitionDef;
   group: CompetitionHistoricalStatGroup;
   title: string;
+  uppercaseContent?: boolean;
 }) {
   if (group.items.length === 0) {
     return null;
@@ -307,6 +461,7 @@ function HistoricalRecordGroup({
             competition={competition}
             item={item}
             key={`${item.statCode}-${item.entityName}-${item.seasonLabel ?? index}`}
+            uppercaseContent={uppercaseContent}
           />
         ))}
       </div>
@@ -345,12 +500,8 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
             Historico
           </p>
           <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold tracking-[-0.05em] text-[#111c2d]">
-            Recordes da competicao
+            RECORDES DA COMPETIÇÃO
           </h2>
-          <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
-            Dados historicos extraidos da Wikipedia, com IDs internos usados apenas quando a
-            correspondencia foi resolvida com seguranca.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ProfileCoveragePill coverage={historicalStatsQuery.coverage} />
@@ -379,6 +530,7 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
         competition={competition}
         group={data.playerRecords}
         title="Recordes individuais"
+        uppercaseContent
       />
     </ProfilePanel>
   );
@@ -388,8 +540,85 @@ function resolveChampionFromStandings(rows: StandingsTableRow[]): StandingsTable
   return rows.find((row) => row.position === 1) ?? rows[0] ?? null;
 }
 
+function resolveRunnerUpFromStandings(rows: StandingsTableRow[]): StandingsTableRow | null {
+  const sortedRows = [...rows].sort((left, right) => left.position - right.position);
+
+  return (
+    sortedRows.find((row) => row.position === 2) ??
+    sortedRows.find((row) => row.position > 1) ??
+    sortedRows[1] ??
+    null
+  );
+}
+
 function resolveChampionTie(ties: StageTie[]): StageTie | null {
   return ties.find((tie) => tie.winnerTeamId || tie.winnerTeamName) ?? ties[0] ?? null;
+}
+
+function normalizeComparableText(value: string | null | undefined): string | null {
+  const trimmedValue = value?.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  return trimmedValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function isResolvedTieTeam(
+  teamId: string | null | undefined,
+  teamName: string | null | undefined,
+  winnerTeamId: string | null | undefined,
+  winnerTeamName: string | null | undefined,
+): boolean {
+  if (winnerTeamId && teamId && winnerTeamId === teamId) {
+    return true;
+  }
+
+  const normalizedTeamName = normalizeComparableText(teamName);
+  const normalizedWinnerTeamName = normalizeComparableText(winnerTeamName);
+
+  return Boolean(
+    normalizedTeamName &&
+      normalizedWinnerTeamName &&
+      normalizedTeamName === normalizedWinnerTeamName,
+  );
+}
+
+function resolveRunnerUpFromTie(tie: StageTie | null): RunnerUpSummary | null {
+  if (!tie) {
+    return null;
+  }
+
+  if (
+    isResolvedTieTeam(
+      tie.homeTeamId,
+      tie.homeTeamName,
+      tie.winnerTeamId,
+      tie.winnerTeamName,
+    )
+  ) {
+    return {
+      teamId: tie.awayTeamId,
+      teamName: tie.awayTeamName,
+    };
+  }
+
+  if (
+    isResolvedTieTeam(
+      tie.awayTeamId,
+      tie.awayTeamName,
+      tie.winnerTeamId,
+      tie.winnerTeamName,
+    )
+  ) {
+    return {
+      teamId: tie.homeTeamId,
+      teamName: tie.homeTeamName,
+    };
+  }
+
+  return null;
 }
 
 function useSeasonChampionStandings(
@@ -423,10 +652,21 @@ function CompetitionHero({
   latestSeason: SeasonDef | null;
   seasonsCount: number;
 }) {
+  const historicalStatsQuery = useCompetitionHistoricalStats({
+    competitionKey: competition.key,
+    asOfYear: HISTORICAL_STATS_AS_OF_YEAR,
+  });
   const visualAssetId = getCompetitionVisualAssetId(competition);
   const artwork = latestSeason
     ? resolveSeasonChampionArtwork(competition.key, latestSeason.label)
     : null;
+  const allTimeChampion = historicalStatsQuery.data?.champions.items[0] ?? null;
+  const allTimeChampionName = historicalStatsQuery.isLoading
+    ? "..."
+    : (allTimeChampion?.entityName ?? "Nao identificado");
+  const allTimeChampionTitles = historicalStatsQuery.isLoading
+    ? "..."
+    : (allTimeChampion ? formatHistoricalValue(allTimeChampion) : "-");
 
   return (
     <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/65 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(247,250,248,0.96)_48%,rgba(237,246,241,0.94)_100%)] p-5 shadow-[0_34px_88px_-58px_rgba(17,28,45,0.28)] md:p-6 xl:p-8">
@@ -479,7 +719,7 @@ function CompetitionHero({
             </div>
             <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-                Ultima edicao
+                Ultima edição
               </p>
               <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold text-[#111c2d]">
                 {latestSeason?.label ?? "-"}
@@ -487,11 +727,29 @@ function CompetitionHero({
             </div>
             <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-                Calendario
+                Maior campeao
               </p>
-              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold text-[#111c2d]">
-                {describeSeasonCalendar(competition)}
-              </p>
+              <div className="mt-3 flex min-w-0 items-center gap-3">
+                {historicalStatsQuery.isLoading ? null : (
+                  <ProfileMedia
+                    alt={`Maior campeao ${allTimeChampionName}`}
+                    assetId={allTimeChampion?.entityId}
+                    category="clubs"
+                    className="h-11 w-11 rounded-full"
+                    fallback={buildFallbackLabel(allTimeChampionName)}
+                    imageClassName="p-1.5"
+                    shape="circle"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="truncate font-[family:var(--font-profile-headline)] text-[1.2rem] font-extrabold leading-tight tracking-[-0.04em] text-[#111c2d]">
+                    {allTimeChampionName}
+                  </p>
+                  <p className="mt-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+                    {allTimeChampionTitles}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -499,7 +757,7 @@ function CompetitionHero({
         <aside className="relative min-h-[320px] overflow-hidden rounded-[1.7rem] border border-[rgba(8,48,35,0.16)] bg-[linear-gradient(135deg,#042f22_0%,#0a4a37_100%)] shadow-[0_34px_84px_-56px_rgba(8,25,20,0.62)]">
           {artwork ? (
             <Image
-              alt={`Imagem da edicao ${competition.name} ${latestSeason?.label ?? ""}`}
+              alt={`Imagem da edição ${competition.name} ${latestSeason?.label ?? ""}`}
               className="object-cover object-center"
               fill
               priority
@@ -533,11 +791,11 @@ function CompetitionHero({
               />
               <div>
                 <p className="text-sm/6 text-[#d7efe4]">
-                  Entre por edicao para manter filtros, rankings e calendario sempre no recorte
+                  Entre por edição para manter filtros, rankings e calendario sempre no recorte
                   correto.
                 </p>
                 <p className="mt-3 font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.04em] text-white">
-                  {seasonsCount > 0 ? `${seasonsCount} temporadas disponiveis` : "Sem temporadas"}
+                  {seasonsCount > 0 ? `${seasonsCount} temporadas disponíveis` : "Sem temporadas"}
                 </p>
               </div>
             </div>
@@ -550,17 +808,22 @@ function CompetitionHero({
 
 function SeasonCardStat({
   label,
+  media,
   value,
 }: {
   label: string;
+  media?: ReactNode;
   value: string;
 }) {
   return (
     <div className="rounded-[1.05rem] border border-[rgba(191,201,195,0.44)] bg-[rgba(246,248,252,0.82)] px-3 py-3">
       <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
-      <p className="mt-1.5 truncate font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
-        {value}
-      </p>
+      <div className="mt-2 flex min-w-0 items-center gap-2">
+        {media ? <div className="shrink-0">{media}</div> : null}
+        <p className="min-w-0 truncate font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -592,10 +855,6 @@ function SeasonCard({
       }),
     [competition.type, structureQuery.data],
   );
-  const analyticsQuery = useCompetitionAnalytics({
-    competitionKey: competition.key,
-    seasonLabel: season.label,
-  });
   const standingsQuery = useSeasonChampionStandings(
     competition,
     season,
@@ -606,9 +865,12 @@ function SeasonCard({
     seasonLabel: season.label,
     stageId: resolution.finalKnockoutStage?.stageId,
   });
+  const topScorerQuery = useSeasonTopScorer(competition, season);
 
   const championRow = resolveChampionFromStandings(standingsQuery.data?.rows ?? []);
+  const runnerUpRow = resolveRunnerUpFromStandings(standingsQuery.data?.rows ?? []);
   const championTie = resolveChampionTie(finalTiesQuery.data?.ties ?? []);
+  const runnerUpTie = resolveRunnerUpFromTie(championTie);
   const shouldUseStandingsChampion =
     competition.type === "domestic_league" || resolution.type === "league";
   const isChampionLoading =
@@ -622,13 +884,19 @@ function SeasonCard({
       : (championTie?.winnerTeamName ?? "Nao identificado");
   const championTeamId =
     shouldUseStandingsChampion ? championRow?.teamId : championTie?.winnerTeamId;
-  const formatLabel =
-    structureQuery.isLoading && structureEnabled
-      ? "..."
-      : resolution.editionLabel ?? describeCompetitionFormatFallback(competition);
-  const matchCount = analyticsQuery.isLoading
+  const runnerUpSummary = shouldUseStandingsChampion
+    ? {
+        teamId: runnerUpRow?.teamId,
+        teamName: runnerUpRow?.teamName ?? null,
+      }
+    : runnerUpTie;
+  const runnerUpName = isChampionLoading
     ? "..."
-    : formatWholeNumber(analyticsQuery.data?.seasonSummary.matchCount);
+    : (runnerUpSummary?.teamName ?? "Nao identificado");
+  const topScorer = topScorerQuery.data?.scorer ?? null;
+  const topScorerName = topScorerQuery.isLoading
+    ? "..."
+    : (topScorer?.entityName ?? "Nao identificado");
   const seasonHref = buildSeasonHubPath({
     competitionKey: competition.key,
     seasonLabel: season.label,
@@ -684,12 +952,44 @@ function SeasonCard({
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <SeasonCardStat label="Formato" value={formatLabel} />
-          <SeasonCardStat label="Partidas" value={matchCount} />
+          <SeasonCardStat
+            label="Artilheiro"
+            media={
+              topScorerQuery.isLoading ? null : (
+                <ProfileMedia
+                  alt={`Artilheiro ${topScorerName}`}
+                  assetId={topScorer?.entityId}
+                  category="players"
+                  className="h-8 w-8 rounded-full"
+                  fallback={buildFallbackLabel(topScorerName)}
+                  imageClassName="p-1"
+                  shape="circle"
+                />
+              )
+            }
+            value={topScorerName}
+          />
+          <SeasonCardStat
+            label="Vice-campeao"
+            media={
+              isChampionLoading ? null : (
+                <ProfileMedia
+                  alt={`Vice-campeao ${runnerUpName}`}
+                  assetId={runnerUpSummary?.teamId}
+                  category="clubs"
+                  className="h-8 w-8 rounded-full"
+                  fallback={buildFallbackLabel(runnerUpName)}
+                  imageClassName="p-1"
+                  shape="circle"
+                />
+              )
+            }
+            value={runnerUpName}
+          />
         </div>
 
         <div className="flex items-center justify-between border-t border-[rgba(191,201,195,0.4)] pt-4 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-          <span>Abrir edicao</span>
+          <span>Abrir edição</span>
           <span className="transition-transform group-hover:translate-x-1">-&gt;</span>
         </div>
       </div>
@@ -729,7 +1029,7 @@ function SeasonsGrid({
             Escolha a temporada
           </h2>
           <p className="mt-2 max-w-3xl text-sm/6 text-[#57657a]">
-            Cada card abre uma edicao especifica, preservando o contexto correto para partidas,
+            Cada card abre uma edição especifica, preservando o contexto correto para partidas,
             tabela, mata-mata, rankings, times e jogadores.
           </p>
         </div>

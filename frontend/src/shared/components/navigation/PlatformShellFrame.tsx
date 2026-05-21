@@ -9,8 +9,10 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 }
 
 export function PlatformShellFrame({
+  compact = false,
   contentWidthClassName = "max-w-7xl",
 }: {
+  compact?: boolean;
   contentWidthClassName?: string;
 }) {
   const shellState = usePlatformShellState();
@@ -20,8 +22,14 @@ export function PlatformShellFrame({
       aria-label="Contexto da página"
       className="border-b border-[rgba(216,227,251,0.72)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(246,249,255,0.84)_100%)] shadow-[0_14px_34px_-34px_rgba(17,28,45,0.18)] backdrop-blur-xl"
     >
-      <div className={joinClasses("mx-auto w-full px-4 py-4 md:px-8", contentWidthClassName)}>
-        <div className="flex flex-col gap-4">
+      <div
+        className={joinClasses(
+          "mx-auto w-full px-4 md:px-8",
+          compact ? "py-2" : "py-4",
+          contentWidthClassName,
+        )}
+      >
+        <div className={joinClasses("flex flex-col", compact ? "gap-2" : "gap-4")}>
           <div className="flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
             {shellState.breadcrumbs.map((breadcrumb, index) => (
               <span className="inline-flex items-center gap-2" key={`${breadcrumb.label}-${index}`}>

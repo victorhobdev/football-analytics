@@ -65,10 +65,12 @@ event_rollup as (
         fixture_id,
         assist_player_id as player_id,
         0::int as goals_from_events,
-        sum(case when assist_player_id is not null then 1 else 0 end)::int as assists_from_events
+        count(*)::int as assists_from_events
     from events
     where fixture_id is not null
       and assist_player_id is not null
+      and event_type = 'Goal'
+      and coalesce(event_detail, '') <> 'Own Goal'
     group by fixture_id, assist_player_id
 ),
 event_player_totals as (

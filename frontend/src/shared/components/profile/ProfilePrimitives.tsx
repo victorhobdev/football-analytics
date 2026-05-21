@@ -40,10 +40,12 @@ const PROFILE_ALERT_CLASSES = {
 export function ProfileShell({
   children,
   className,
+  contentClassName,
   variant = "surface",
 }: {
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
   variant?: "plain" | "surface";
 }) {
   const isPlain = variant === "plain";
@@ -63,7 +65,9 @@ export function ProfileShell({
       {!isPlain ? (
         <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-[radial-gradient(circle_at_top_left,rgba(216,227,251,0.82),transparent_50%),radial-gradient(circle_at_top_right,rgba(139,214,182,0.28),transparent_42%)]" />
       ) : null}
-      <div className={isPlain ? "space-y-6" : "relative z-10 space-y-6"}>{children}</div>
+      <div className={joinClasses(isPlain ? "space-y-6" : "relative z-10 space-y-6", contentClassName)}>
+        {children}
+      </div>
     </Element>
   );
 }
@@ -111,21 +115,27 @@ export function ProfileTabs({
   items,
   aside,
   className,
+  density = "default",
 }: {
   ariaLabel: string;
   items: ProfileTabItem[];
   aside?: ReactNode;
   className?: string;
+  density?: "compact" | "default";
 }) {
+  const isCompact = density === "compact";
+
   return (
     <ProfilePanel
       className={joinClasses(
-        "flex flex-col gap-4 border border-[rgba(191,201,195,0.3)] md:flex-row md:items-center md:justify-between",
+        isCompact
+          ? "flex flex-col gap-2 border border-[rgba(191,201,195,0.3)] md:flex-row md:items-center md:justify-between"
+          : "flex flex-col gap-4 border border-[rgba(191,201,195,0.3)] md:flex-row md:items-center md:justify-between",
         className,
       )}
       tone="soft"
     >
-      <nav aria-label={ariaLabel} className="flex flex-wrap items-center gap-2">
+      <nav aria-label={ariaLabel} className={joinClasses("flex flex-wrap items-center", isCompact ? "gap-1.5" : "gap-2")}>
         {items.map((item) => {
           if (item.customComponent) {
             return <div key={item.key}>{item.customComponent}</div>;
@@ -137,8 +147,18 @@ export function ProfileTabs({
               aria-label={typeof item.label === "string" ? item.label : undefined}
               className={
                 item.isActive
-                  ? "inline-flex items-center gap-2 rounded-full bg-[#003526] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] !text-white shadow-[0_12px_32px_-16px_rgba(0,53,38,0.7)]"
-                  : "inline-flex items-center gap-2 rounded-full border border-[rgba(191,201,195,0.5)] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#404944] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]"
+                  ? joinClasses(
+                      "inline-flex items-center gap-2 rounded-full bg-[#003526] font-bold uppercase !text-white shadow-[0_12px_32px_-16px_rgba(0,53,38,0.7)]",
+                      isCompact
+                        ? "px-3 py-1.5 text-[0.68rem] tracking-[0.14em]"
+                        : "px-4 py-2 text-xs tracking-[0.18em]",
+                    )
+                  : joinClasses(
+                      "inline-flex items-center gap-2 rounded-full border border-[rgba(191,201,195,0.5)] bg-white font-semibold uppercase text-[#404944] transition-colors hover:border-[#8bd6b6] hover:bg-[#f0faf6]",
+                      isCompact
+                        ? "px-3 py-1.5 text-[0.68rem] tracking-[0.14em]"
+                        : "px-4 py-2 text-xs tracking-[0.18em]",
+                    )
               }
               href={item.href}
               key={item.key}

@@ -170,13 +170,16 @@ function buildScopeTags(params: {
   return tags;
 }
 
-function shouldUseCompactHybridSeasonChrome(
+function shouldUseLocalSeasonSurfaceNavigation(
   pathname: string,
   context: CompetitionSeasonContext,
 ): boolean {
+  const competition = getCompetitionByKey(context.competitionKey);
+
   return (
     isCanonicalSeasonHubPath(pathname) &&
-    COMPACT_HYBRID_SEASON_CHROME_COMPETITION_KEYS.has(context.competitionKey)
+    (competition?.type === "domestic_league" ||
+      COMPACT_HYBRID_SEASON_CHROME_COMPETITION_KEYS.has(context.competitionKey))
   );
 }
 
@@ -192,7 +195,7 @@ function buildSeasonSurfaceLinks(
     dateRangeEnd: string | null;
   },
 ): PlatformShellLink[] {
-  if (shouldUseCompactHybridSeasonChrome(pathname, context)) {
+  if (shouldUseLocalSeasonSurfaceNavigation(pathname, context)) {
     return [];
   }
 
@@ -423,16 +426,16 @@ export function usePlatformShellState(): PlatformShellState {
       !pathname.includes("/teams/")
     ) {
       const activeTab = searchParams.get("tab");
-      surfaceLabel = "Edicao";
+      surfaceLabel = "Edição";
       surfaceTitle = `${context.competitionName} ${context.seasonLabel}`;
       description =
         activeTab === "standings"
-          ? "Leitura estrutural da edicao encerrada, com foco na classificacao final, no chaveamento ou na fase classificatoria."
+          ? "Leitura estrutural da edição encerrada, com foco na classificacao final, no chaveamento ou na fase classificatoria."
           : activeTab === "rankings"
-            ? "Destaques individuais e coletivos da edicao no mesmo recorte competitivo."
+            ? "Destaques individuais e coletivos da edição no mesmo recorte competitivo."
             : activeTab === "calendar"
-              ? "Confrontos e partidas concluidas da edicao, sem tratamento de temporada ao vivo."
-              : "Resumo editorial da edicao encerrada, orientado pelo tipo real da competicao.";
+              ? "Confrontos e partidas concluidas da edição, sem tratamento de temporada ao vivo."
+              : "Resumo editorial da edição encerrada, orientado pelo tipo real da competicao.";
       helperText =
         "Os atalhos preservam competicao, temporada e filtros extras enquanto voce muda de leitura.";
     } else if (isShortPlayerResolverPath(pathname)) {

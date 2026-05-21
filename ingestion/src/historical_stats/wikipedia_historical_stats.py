@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 import uuid
 from dataclasses import dataclass, replace
 from io import StringIO
@@ -37,6 +38,31 @@ INVALID_CHAMPION_NAMES = {
     "canceled",
     "league suspended due to spanish civil war",
 }
+
+TEAM_RESOLUTION_STOPWORDS = frozenset(
+    {
+        "ac",
+        "cf",
+        "club",
+        "de",
+        "fc",
+        "losc",
+        "olympique",
+        "rc",
+        "sc",
+        "sv",
+        "the",
+    }
+)
+TEAM_RESOLUTION_ALIAS_GROUPS = (
+    frozenset({"athletico paranaense", "athletico pr"}),
+    frozenset({"atletico goianiense", "atletico go"}),
+    frozenset({"athletic bilbao", "athletic"}),
+    frozenset({"inter", "inter milan", "internazionale"}),
+    frozenset({"lyon", "lyonnais"}),
+    frozenset({"psv", "psv eindhoven"}),
+    frozenset({"rb bragantino", "red bull bragantino", "bragantino"}),
+)
 
 TEAM_MATCH_RECORD_HEURISTICS = {
     "most_points_single_season": "requires team/club, points, and a season embedded in the team cell",
@@ -1626,6 +1652,30 @@ def resolve_team_ids(
     as_of_year: int,
     dry_run: bool,
 ) -> dict[str, Any]:
+    def normalize_resolution_name(value: Any) -> str:
+        normalized = normalize_text(value).lower().replace("&", " and ")
+        normalized = unicodedata.normalize("NFKD", normalized)
+        normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+        normalized = normalized.replace("munchen", "munich").replace("muenchen", "munich")
+        normalized = re.sub(r"[^a-z0-9]+", " ", normalized)
+        tokens = [
+            token
+            for token in normalized.split()
+            if token not in TEAM_RESOLUTION_STOPWORDS and not token.isdigit()
+        ]
+        return " ".join(tokens).strip()
+
+    def build_resolution_keys(value: Any) -> set[str]:
+        normalized = normalize_resolution_name(value)
+        if normalized == "":
+            return set()
+
+        keys = {normalized}
+        for group in TEAM_RESOLUTION_ALIAS_GROUPS:
+            if normalized in group:
+                keys.update(group)
+        return keys
+
     before_null = conn.execute(
         """
         select count(*)
@@ -1637,68 +1687,145 @@ def resolve_team_ids(
         [as_of_year],
     ).fetchone()[0]
 
-    ambiguous_names = conn.execute(
+    unresolved_names = conn.execute(
         """
-        with candidate_names as (
-          select
-            h.entity_name,
-            count(distinct t.team_id) as team_matches
-          from mart.competition_historical_stats h
-          join mart.dim_team t
-            on lower(btrim(t.team_name)) = lower(btrim(h.entity_name))
-          where h.as_of_year = %s
-            and h.entity_type = 'team'
-            and h.entity_id is null
-          group by h.entity_name
-        )
-        select count(*)
-        from candidate_names
-        where team_matches > 1
+        select distinct competition_key, entity_name
+        from mart.competition_historical_stats
+        where as_of_year = %s
+          and entity_type = 'team'
+          and entity_id is null
         """,
         [as_of_year],
-    ).fetchone()[0]
+    ).fetchall()
+
+    teams = conn.execute(
+        """
+        select team_id, team_name
+        from mart.dim_team
+        where team_name is not null
+        """,
+    ).fetchall()
+
+    usage_rows = conn.execute(
+        """
+        select competition_key, team_id, count(*)::int as match_count
+        from (
+          select competition_key, home_team_id as team_id
+          from mart.fact_matches
+          where home_team_id is not null
+          union all
+          select competition_key, away_team_id as team_id
+          from mart.fact_matches
+          where away_team_id is not null
+        ) team_matches
+        group by competition_key, team_id
+        """,
+    ).fetchall()
+
+    usage_by_competition_team = {
+        (str(row[0]), int(row[1])): int(row[2])
+        for row in usage_rows
+    }
+
+    candidates_by_key: dict[str, list[tuple[int, str]]] = {}
+    for row in teams:
+        team_id = int(row[0])
+        team_name = str(row[1])
+        for key in build_resolution_keys(team_name):
+            candidates_by_key.setdefault(key, []).append((team_id, team_name))
+
+    resolutions: list[dict[str, Any]] = []
+    ambiguous_names = 0
+
+    for competition_key, entity_name in unresolved_names:
+        candidate_map: dict[int, str] = {}
+        for key in build_resolution_keys(entity_name):
+            for team_id, team_name in candidates_by_key.get(key, []):
+                candidate_map.setdefault(team_id, team_name)
+
+        if not candidate_map:
+            continue
+
+        ranked_candidates = sorted(
+            (
+                (
+                    usage_by_competition_team.get((str(competition_key), team_id), 0),
+                    team_id,
+                    team_name,
+                )
+                for team_id, team_name in candidate_map.items()
+            ),
+            key=lambda item: (-item[0], item[1]),
+        )
+
+        resolution_method: str | None = None
+        selected_candidate: tuple[int, int, str] | None = None
+
+        if len(ranked_candidates) == 1:
+            selected_candidate = ranked_candidates[0]
+            resolution_method = "normalized_team_name"
+        elif (
+            ranked_candidates[0][0] > 0
+            and ranked_candidates[0][0] > ranked_candidates[1][0]
+        ):
+            selected_candidate = ranked_candidates[0]
+            resolution_method = "competition_team_usage"
+        else:
+            ambiguous_names += 1
+            continue
+
+        resolutions.append(
+            {
+                "competitionKey": str(competition_key),
+                "entityName": str(entity_name),
+                "teamId": selected_candidate[1],
+                "method": resolution_method,
+            }
+        )
 
     updated_rows: list[tuple[Any, ...]] = []
     if not dry_run:
-        updated_rows = conn.execute(
-            """
-            with candidate_names as (
-              select
-                lower(btrim(h.entity_name)) as normalized_name,
-                min(t.team_id) as team_id,
-                count(distinct t.team_id) as team_matches
-              from mart.competition_historical_stats h
-              join mart.dim_team t
-                on lower(btrim(t.team_name)) = lower(btrim(h.entity_name))
-              where h.as_of_year = %s
-                and h.entity_type = 'team'
-                and h.entity_id is null
-              group by lower(btrim(h.entity_name))
-            ),
-            resolvable as (
-              select normalized_name, team_id
-              from candidate_names
-              where team_matches = 1
+        for resolution in resolutions:
+            updated_rows.extend(
+                conn.execute(
+                    """
+                    update mart.competition_historical_stats
+                    set
+                      entity_id = %s,
+                      metadata = jsonb_set(
+                        coalesce(metadata, '{}'::jsonb),
+                        '{entityResolution}',
+                        jsonb_build_object('method', %s::text, 'resolvedEntityId', %s),
+                        true
+                      ),
+                      updated_at = now()
+                    where competition_key = %s
+                      and entity_name = %s
+                      and as_of_year = %s
+                      and entity_type = 'team'
+                      and entity_id is null
+                    returning competition_key, stat_code, entity_name, entity_id
+                    """,
+                    [
+                        resolution["teamId"],
+                        resolution["method"],
+                        resolution["teamId"],
+                        resolution["competitionKey"],
+                        resolution["entityName"],
+                        as_of_year,
+                    ],
+                ).fetchall()
             )
-            update mart.competition_historical_stats h
-            set
-              entity_id = r.team_id,
-              metadata = jsonb_set(
-                h.metadata,
-                '{entityResolution}',
-                jsonb_build_object('method', 'exact_team_name', 'resolvedEntityId', r.team_id),
-                true
-              ),
-              updated_at = now()
-            from resolvable r
-            where lower(btrim(h.entity_name)) = r.normalized_name
-              and h.as_of_year = %s
-              and h.entity_type = 'team'
-              and h.entity_id is null
-            returning h.competition_key, h.stat_code, h.entity_name, h.entity_id
-            """,
-            [as_of_year, as_of_year],
-        ).fetchall()
+    else:
+        updated_rows = [
+            (
+                resolution["competitionKey"],
+                "dry_run",
+                resolution["entityName"],
+                resolution["teamId"],
+            )
+            for resolution in resolutions
+        ]
 
     after_null = conn.execute(
         """

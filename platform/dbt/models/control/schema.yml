@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: competition_season_config
-    description: "Configuracao macro de competicao-temporada com boundary restrito a identidade da edicao."
+    description: "Configuracao macro de competicao-temporada com boundary restrito a identidade da edição."
     tests:
       - unique_combination_of_columns:
           combination_of_columns:

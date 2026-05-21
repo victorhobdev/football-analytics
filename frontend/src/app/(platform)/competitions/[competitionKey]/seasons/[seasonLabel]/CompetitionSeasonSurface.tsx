@@ -39,7 +39,7 @@ import {
 import { resolveSeasonChampionArtwork } from "@/features/competitions/utils/champion-media";
 import { getStageFormatLabel } from "@/features/competitions/utils/competition-structure";
 import { fetchMatchesList } from "@/features/matches/services/matches.service";
-import type { MatchesListData } from "@/features/matches/types";
+import type { MatchListItem, MatchesListData } from "@/features/matches/types";
 import { resolveMatchDisplayContext } from "@/features/matches/utils/match-context";
 import { useRankingTable } from "@/features/rankings/hooks";
 import { fetchRanking } from "@/features/rankings/services";
@@ -56,6 +56,7 @@ import {
   ProfileAlert,
   ProfileCoveragePill,
   ProfilePanel,
+  ProfileTabs,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { useGlobalFilters, useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
@@ -67,6 +68,7 @@ import {
   buildCanonicalPlayerPath,
   buildCanonicalTeamPath,
   buildMatchesPath,
+  buildPlayersPath,
   buildRankingPath,
   buildRetainedFilterQueryString,
   buildSeasonHubPath,
@@ -107,6 +109,12 @@ type KnockoutStageQueryState = {
   ties: StageTie[];
 };
 
+type ChampionLeadRoundsSummary = {
+  count: number | null;
+  isError: boolean;
+  isLoading: boolean;
+};
+
 type BracketSide = "left" | "right";
 
 type BracketSnapshotColumn = {
@@ -118,6 +126,82 @@ type BracketSnapshotColumn = {
 type BracketTeamReference = {
   teamId?: string | null;
   teamName?: string | null;
+};
+
+type HistoricalRankingLeader = {
+  entityId: string;
+  entityName: string;
+  metricValue: number;
+  minutesPlayed: number | null;
+  teamId?: string | null;
+  teamName?: string | null;
+};
+
+type HistoricalRankingLeaderData = {
+  leader: HistoricalRankingLeader | null;
+};
+
+type TeamMetricInsight = {
+  metricValue: number;
+  teamId: string | null;
+  teamName: string;
+};
+
+type MatchMetricInsight = {
+  awayScore: number;
+  awayTeamId: string | null;
+  awayTeamName: string;
+  homeScore: number;
+  homeTeamId: string | null;
+  homeTeamName: string;
+  kickoffAt: string | null;
+  matchId: string;
+  metricValue: number;
+};
+
+type CompletedSeasonMatch = MatchListItem & {
+  awayScore: number;
+  homeScore: number;
+};
+
+type TeamSeasonMatchResult = {
+  isUnbeaten: boolean;
+  isWin: boolean;
+  kickoffTimestamp: number;
+  matchId: string;
+};
+
+type TeamSeasonAggregate = {
+  awayGoalDiff: number;
+  awayGoalsFor: number;
+  awayPoints: number;
+  finalPosition: number | null;
+  goalsAgainst: number;
+  goalsFor: number;
+  homeGoalDiff: number;
+  homeGoalsFor: number;
+  homePoints: number;
+  key: string;
+  longestUnbeatenStreak: number;
+  longestUnbeatenStreakEndedAt: number;
+  longestWinningStreak: number;
+  longestWinningStreakEndedAt: number;
+  matchResults: TeamSeasonMatchResult[];
+  teamId: string | null;
+  teamName: string;
+};
+
+type EditionRailInsights = {
+  bestAttack: TeamMetricInsight | null;
+  bestDefense: TeamMetricInsight | null;
+  bestHomeTeam: TeamMetricInsight | null;
+  bestAwayTeam: TeamMetricInsight | null;
+  highestScoringMatch: MatchMetricInsight | null;
+  longestUnbeatenRun: TeamMetricInsight | null;
+  longestWinningRun: TeamMetricInsight | null;
+  standingsQuery: ReturnType<typeof useSeasonFinalStandings>;
+  matchesQuery: ReturnType<typeof useSeasonAllMatches>;
+  worstAwayTeam: TeamMetricInsight | null;
 };
 
 const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -136,6 +220,8 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
   day: "numeric",
   month: "long",
 });
+
+const MATCHES_LIST_ALL_PAGES_SIZE = 100;
 
 function formatKickoff(value: string | null | undefined): string {
   if (!value) {
@@ -276,6 +362,66 @@ function useSeasonFinalStandings(context: CompetitionSeasonContext, stageId?: st
   });
 }
 
+function useSeasonChampionLeadRounds(
+  context: CompetitionSeasonContext,
+  championTeamId: string | null | undefined,
+  rounds: StandingsRound[],
+): ChampionLeadRoundsSummary {
+  const queries = useQueries({
+    queries: rounds.map((round) => ({
+      queryKey: standingsQueryKeys.table({
+        competitionId: context.competitionId,
+        seasonId: context.seasonId,
+        roundId: round.roundId,
+      }),
+      queryFn: () =>
+        fetchStandings({
+          competitionId: context.competitionId,
+          seasonId: context.seasonId,
+          roundId: round.roundId,
+        }),
+      enabled: Boolean(context.competitionId && context.seasonId && championTeamId && round.roundId),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 20 * 60 * 1000,
+    })),
+  });
+
+  return useMemo(() => {
+    if (!championTeamId || rounds.length === 0) {
+      return {
+        count: null,
+        isError: false,
+        isLoading: false,
+      };
+    }
+
+    if (queries.some((query) => query.isLoading)) {
+      return {
+        count: null,
+        isError: false,
+        isLoading: true,
+      };
+    }
+
+    if (queries.some((query) => query.isError || !query.data?.data)) {
+      return {
+        count: null,
+        isError: true,
+        isLoading: false,
+      };
+    }
+
+    return {
+      count: queries.reduce((sum, query) => {
+        const leader = resolveChampionFromStandings(query.data?.data.rows ?? []);
+        return leader?.teamId === championTeamId ? sum + 1 : sum;
+      }, 0),
+      isError: false,
+      isLoading: false,
+    };
+  }, [championTeamId, queries, rounds.length]);
+}
+
 function useSeasonClosingMatches(context: CompetitionSeasonContext, pageSize = 6) {
   return useQueryWithCoverage<MatchesListData>({
     queryKey: ["matches", "season-closing", context.competitionId, context.seasonId, pageSize],
@@ -288,6 +434,57 @@ function useSeasonClosingMatches(context: CompetitionSeasonContext, pageSize = 6
         sortBy: "kickoffAt",
         sortDirection: "desc",
       }),
+    enabled: Boolean(context.competitionId && context.seasonId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
+    isDataEmpty: (data) => data.items.length === 0,
+  });
+}
+
+async function fetchSeasonAllMatches(context: CompetitionSeasonContext): Promise<ApiResponse<MatchesListData>> {
+  const initialResponse = await fetchMatchesList({
+    competitionId: context.competitionId,
+    seasonId: context.seasonId,
+    page: 1,
+    pageSize: MATCHES_LIST_ALL_PAGES_SIZE,
+    sortBy: "kickoffAt",
+    sortDirection: "desc",
+  });
+  const totalPages = initialResponse.meta?.pagination?.totalPages ?? 1;
+
+  if (totalPages <= 1) {
+    return initialResponse;
+  }
+
+  const remainingResponses = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      fetchMatchesList({
+        competitionId: context.competitionId,
+        seasonId: context.seasonId,
+        page: index + 2,
+        pageSize: MATCHES_LIST_ALL_PAGES_SIZE,
+        sortBy: "kickoffAt",
+        sortDirection: "desc",
+      }),
+    ),
+  );
+
+  return {
+    ...initialResponse,
+    data: {
+      ...initialResponse.data,
+      items: [
+        ...initialResponse.data.items,
+        ...remainingResponses.flatMap((response) => response.data.items),
+      ],
+    },
+  };
+}
+
+function useSeasonAllMatches(context: CompetitionSeasonContext) {
+  return useQueryWithCoverage<MatchesListData>({
+    queryKey: ["matches", "season-all", context.competitionId, context.seasonId],
+    queryFn: () => fetchSeasonAllMatches(context),
     enabled: Boolean(context.competitionId && context.seasonId),
     staleTime: 5 * 60 * 1000,
     gcTime: 20 * 60 * 1000,
@@ -918,6 +1115,169 @@ function useEditionTopScorer(context: CompetitionSeasonContext) {
   });
 }
 
+function resolveRankingMetricValue(row: RankingTableRow, fallback: number): number {
+  return typeof row.metricValue === "number" && Number.isFinite(row.metricValue)
+    ? row.metricValue
+    : fallback;
+}
+
+function resolveRankingMinutes(row: RankingTableRow, fallback: number): number {
+  return typeof row.minutesPlayed === "number" && Number.isFinite(row.minutesPlayed)
+    ? row.minutesPlayed
+    : fallback;
+}
+
+function compareHistoricalRatings(left: RankingTableRow, right: RankingTableRow): number {
+  const leftRating = resolveRankingMetricValue(left, Number.NEGATIVE_INFINITY);
+  const rightRating = resolveRankingMetricValue(right, Number.NEGATIVE_INFINITY);
+
+  if (leftRating !== rightRating) {
+    return rightRating - leftRating;
+  }
+
+  const leftMinutes = resolveRankingMinutes(left, Number.NEGATIVE_INFINITY);
+  const rightMinutes = resolveRankingMinutes(right, Number.NEGATIVE_INFINITY);
+
+  if (leftMinutes !== rightMinutes) {
+    return rightMinutes - leftMinutes;
+  }
+
+  const leftName = (left.entityName ?? left.entityId ?? "").trim();
+  const rightName = (right.entityName ?? right.entityId ?? "").trim();
+  const nameComparison = leftName.localeCompare(rightName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.entityId.localeCompare(right.entityId, "pt-BR", { sensitivity: "base" });
+}
+
+function compareHistoricalAssists(left: RankingTableRow, right: RankingTableRow): number {
+  const leftAssists = resolveRankingMetricValue(left, Number.NEGATIVE_INFINITY);
+  const rightAssists = resolveRankingMetricValue(right, Number.NEGATIVE_INFINITY);
+
+  if (leftAssists !== rightAssists) {
+    return rightAssists - leftAssists;
+  }
+
+  const leftMinutes = resolveRankingMinutes(left, Number.POSITIVE_INFINITY);
+  const rightMinutes = resolveRankingMinutes(right, Number.POSITIVE_INFINITY);
+
+  if (leftMinutes !== rightMinutes) {
+    return leftMinutes - rightMinutes;
+  }
+
+  const leftName = (left.entityName ?? left.entityId ?? "").trim();
+  const rightName = (right.entityName ?? right.entityId ?? "").trim();
+  const nameComparison = leftName.localeCompare(rightName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.entityId.localeCompare(right.entityId, "pt-BR", { sensitivity: "base" });
+}
+
+async function fetchAllHistoricalRankingRows(
+  context: CompetitionSeasonContext,
+  rankingDefinition: RankingDefinition,
+): Promise<{ firstResponse: ApiResponse<{ rows: RankingTableRow[] }> | null; rows: RankingTableRow[] }> {
+  let page = 1;
+  let totalPages = 1;
+  let firstResponse: ApiResponse<{ rows: RankingTableRow[] }> | null = null;
+  const rows: RankingTableRow[] = [];
+
+  do {
+    const response = await fetchRanking({
+      rankingDefinition,
+      filters: {
+        competitionId: context.competitionId,
+        freshnessClass: "season",
+        minSampleValue: rankingDefinition.minSample?.min ?? 0,
+        page,
+        pageSize: 100,
+        seasonId: context.seasonId,
+        sortDirection: rankingDefinition.defaultSort,
+      },
+    });
+
+    firstResponse ??= response;
+    rows.push(...(response.data.rows ?? []));
+    totalPages = response.meta?.pagination?.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  return {
+    firstResponse,
+    rows,
+  };
+}
+
+async function fetchEditionRankingLeader(
+  context: CompetitionSeasonContext,
+  rankingId: string,
+  compareRows: (left: RankingTableRow, right: RankingTableRow) => number,
+): Promise<ApiResponse<HistoricalRankingLeaderData>> {
+  const rankingDefinition = getRankingDefinition(rankingId);
+
+  if (!rankingDefinition) {
+    return {
+      data: { leader: null },
+      meta: {
+        coverage: {
+          label: `Ranking ${rankingId} indisponivel no registry.`,
+          status: "unknown",
+        },
+      },
+    };
+  }
+
+  const { firstResponse, rows } = await fetchAllHistoricalRankingRows(context, rankingDefinition);
+  const leaderRow = [...rows].sort(compareRows)[0] ?? null;
+
+  return {
+    data: {
+      leader: leaderRow
+        ? {
+            entityId: leaderRow.entityId,
+            entityName: leaderRow.entityName?.trim() || leaderRow.entityId,
+            metricValue: resolveRankingMetricValue(leaderRow, 0),
+            minutesPlayed:
+              typeof leaderRow.minutesPlayed === "number" && Number.isFinite(leaderRow.minutesPlayed)
+                ? leaderRow.minutesPlayed
+                : null,
+            teamId: typeof leaderRow.teamId === "string" ? leaderRow.teamId : null,
+            teamName: typeof leaderRow.teamName === "string" ? leaderRow.teamName : null,
+          }
+        : null,
+    },
+    meta: firstResponse?.meta,
+  };
+}
+
+function useEditionTopRatedPlayer(context: CompetitionSeasonContext) {
+  return useQueryWithCoverage<HistoricalRankingLeaderData>({
+    enabled: Boolean(context.competitionId && context.seasonId),
+    gcTime: 30 * 60 * 1000,
+    isDataEmpty: (data) => data.leader === null,
+    queryFn: () => fetchEditionRankingLeader(context, "player-rating", compareHistoricalRatings),
+    queryKey: ["competition-season-top-rated-player", context.competitionId, context.seasonId],
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+function useEditionTopAssistProvider(context: CompetitionSeasonContext) {
+  return useQueryWithCoverage<HistoricalRankingLeaderData>({
+    enabled: Boolean(context.competitionId && context.seasonId),
+    gcTime: 30 * 60 * 1000,
+    isDataEmpty: (data) => data.leader === null,
+    queryFn: () => fetchEditionRankingLeader(context, "player-assists", compareHistoricalAssists),
+    queryKey: ["competition-season-top-assist-provider", context.competitionId, context.seasonId],
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 function HistoricalHeroCard({
   detail,
   label,
@@ -1127,18 +1487,611 @@ function formatHistoricalMatchCount(matchCount: number | null | undefined) {
   return matchCount.toLocaleString("pt-BR");
 }
 
-function resolveLeagueMatchCountFromStandings(rows: StandingsTableRow[]): number | null {
+function formatAverageGoals(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatRoundCount(roundCount: number | null | undefined) {
+  if (typeof roundCount !== "number" || !Number.isFinite(roundCount)) {
+    return "-";
+  }
+
+  const formattedRoundCount = formatHistoricalMatchCount(roundCount);
+
+  return roundCount === 1 ? `${formattedRoundCount} Rodada` : `${formattedRoundCount} Rodadas`;
+}
+
+function resolveLeagueGoalsFromStandings(rows: StandingsTableRow[]): number | null {
   if (rows.length === 0) {
     return null;
   }
 
-  const totalMatchesPlayed = rows.reduce((sum, row) => sum + row.matchesPlayed, 0);
+  const totalGoalsFor = rows.reduce((sum, row) => sum + row.goalsFor, 0);
+  const totalGoalsAgainst = rows.reduce((sum, row) => sum + row.goalsAgainst, 0);
 
-  if (!Number.isFinite(totalMatchesPlayed) || totalMatchesPlayed <= 0 || totalMatchesPlayed % 2 !== 0) {
+  if (
+    !Number.isFinite(totalGoalsFor) ||
+    !Number.isFinite(totalGoalsAgainst) ||
+    totalGoalsFor < 0 ||
+    totalGoalsAgainst < 0 ||
+    totalGoalsFor !== totalGoalsAgainst
+  ) {
     return null;
   }
 
-  return totalMatchesPlayed / 2;
+  return totalGoalsFor;
+}
+
+function normalizeComparableText(value: string | null | undefined): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function formatAssistCount(value: number | null | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  return `${formatHistoricalMatchCount(value)} assist.`;
+}
+
+function formatGameCount(value: number | null | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  const formattedValue = formatHistoricalMatchCount(value);
+  return value === 1 ? `${formattedValue} jogo` : `${formattedValue} jogos`;
+}
+
+function formatPointCount(value: number | null | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  return `${formatHistoricalMatchCount(value)} pts`;
+}
+
+function compareTeamNames(left: { key: string; teamName: string }, right: { key: string; teamName: string }): number {
+  const nameComparison = left.teamName.localeCompare(right.teamName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.key.localeCompare(right.key, "pt-BR", { sensitivity: "base" });
+}
+
+function compareStandingRowNames(left: StandingsTableRow, right: StandingsTableRow): number {
+  const leftName = left.teamName?.trim() || left.teamId;
+  const rightName = right.teamName?.trim() || right.teamId;
+  const nameComparison = leftName.localeCompare(rightName, "pt-BR", { sensitivity: "base" });
+
+  if (nameComparison !== 0) {
+    return nameComparison;
+  }
+
+  return left.teamId.localeCompare(right.teamId, "pt-BR", { sensitivity: "base" });
+}
+
+function compareStandingsByBestAttack(left: StandingsTableRow, right: StandingsTableRow): number {
+  if (left.goalsFor !== right.goalsFor) {
+    return right.goalsFor - left.goalsFor;
+  }
+
+  if (left.position !== right.position) {
+    return left.position - right.position;
+  }
+
+  return compareStandingRowNames(left, right);
+}
+
+function compareStandingsByBestDefense(left: StandingsTableRow, right: StandingsTableRow): number {
+  if (left.goalsAgainst !== right.goalsAgainst) {
+    return left.goalsAgainst - right.goalsAgainst;
+  }
+
+  if (left.position !== right.position) {
+    return left.position - right.position;
+  }
+
+  return compareStandingRowNames(left, right);
+}
+
+function resolveBestPosition(aggregate: TeamSeasonAggregate): number {
+  return typeof aggregate.finalPosition === "number" ? aggregate.finalPosition : Number.POSITIVE_INFINITY;
+}
+
+function resolveWorstPosition(aggregate: TeamSeasonAggregate): number {
+  return typeof aggregate.finalPosition === "number" ? aggregate.finalPosition : Number.NEGATIVE_INFINITY;
+}
+
+function compareBestPositions(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  const leftPosition = resolveBestPosition(left);
+  const rightPosition = resolveBestPosition(right);
+
+  if (leftPosition === rightPosition) {
+    return 0;
+  }
+
+  return leftPosition < rightPosition ? -1 : 1;
+}
+
+function compareWorstPositions(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  const leftPosition = resolveWorstPosition(left);
+  const rightPosition = resolveWorstPosition(right);
+
+  if (leftPosition === rightPosition) {
+    return 0;
+  }
+
+  return leftPosition > rightPosition ? -1 : 1;
+}
+
+function compareAggregatesByBestAttack(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.goalsFor !== right.goalsFor) {
+    return right.goalsFor - left.goalsFor;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByBestDefense(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.goalsAgainst !== right.goalsAgainst) {
+    return left.goalsAgainst - right.goalsAgainst;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByBestHome(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.homePoints !== right.homePoints) {
+    return right.homePoints - left.homePoints;
+  }
+
+  if (left.homeGoalDiff !== right.homeGoalDiff) {
+    return right.homeGoalDiff - left.homeGoalDiff;
+  }
+
+  if (left.homeGoalsFor !== right.homeGoalsFor) {
+    return right.homeGoalsFor - left.homeGoalsFor;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByBestAway(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.awayPoints !== right.awayPoints) {
+    return right.awayPoints - left.awayPoints;
+  }
+
+  if (left.awayGoalDiff !== right.awayGoalDiff) {
+    return right.awayGoalDiff - left.awayGoalDiff;
+  }
+
+  if (left.awayGoalsFor !== right.awayGoalsFor) {
+    return right.awayGoalsFor - left.awayGoalsFor;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByWorstAway(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.awayPoints !== right.awayPoints) {
+    return left.awayPoints - right.awayPoints;
+  }
+
+  if (left.awayGoalDiff !== right.awayGoalDiff) {
+    return left.awayGoalDiff - right.awayGoalDiff;
+  }
+
+  if (left.awayGoalsFor !== right.awayGoalsFor) {
+    return left.awayGoalsFor - right.awayGoalsFor;
+  }
+
+  const positionDelta = compareWorstPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByUnbeatenRun(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.longestUnbeatenStreak !== right.longestUnbeatenStreak) {
+    return right.longestUnbeatenStreak - left.longestUnbeatenStreak;
+  }
+
+  if (left.longestUnbeatenStreakEndedAt !== right.longestUnbeatenStreakEndedAt) {
+    return right.longestUnbeatenStreakEndedAt - left.longestUnbeatenStreakEndedAt;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function compareAggregatesByWinningRun(left: TeamSeasonAggregate, right: TeamSeasonAggregate): number {
+  if (left.longestWinningStreak !== right.longestWinningStreak) {
+    return right.longestWinningStreak - left.longestWinningStreak;
+  }
+
+  if (left.longestWinningStreakEndedAt !== right.longestWinningStreakEndedAt) {
+    return right.longestWinningStreakEndedAt - left.longestWinningStreakEndedAt;
+  }
+
+  const positionDelta = compareBestPositions(left, right);
+
+  if (positionDelta !== 0) {
+    return positionDelta;
+  }
+
+  return compareTeamNames(left, right);
+}
+
+function resolveCompletedSeasonMatch(match: MatchListItem): CompletedSeasonMatch | null {
+  if (
+    typeof match.homeScore !== "number" ||
+    !Number.isFinite(match.homeScore) ||
+    typeof match.awayScore !== "number" ||
+    !Number.isFinite(match.awayScore)
+  ) {
+    return null;
+  }
+
+  return {
+    ...match,
+    awayScore: match.awayScore,
+    homeScore: match.homeScore,
+  };
+}
+
+function resolveKickoffTimestamp(value: string | null | undefined, fallback = Number.NEGATIVE_INFINITY): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsedDate = new Date(value);
+  return Number.isNaN(parsedDate.getTime()) ? fallback : parsedDate.getTime();
+}
+
+function buildStandingsPositionIndex(rows: StandingsTableRow[]): Map<string, number> {
+  const index = new Map<string, number>();
+
+  for (const row of rows) {
+    index.set(`id:${row.teamId}`, row.position);
+
+    const normalizedName = normalizeComparableText(row.teamName);
+
+    if (normalizedName.length > 0) {
+      index.set(`name:${normalizedName}`, row.position);
+    }
+  }
+
+  return index;
+}
+
+function resolveAggregateIdentity(
+  teamId: string | null | undefined,
+  teamName: string | null | undefined,
+  fallbackKey: string,
+) {
+  const normalizedTeamId = typeof teamId === "string" && teamId.trim().length > 0 ? teamId.trim() : null;
+  const resolvedTeamName = typeof teamName === "string" && teamName.trim().length > 0 ? teamName.trim() : normalizedTeamId ?? fallbackKey;
+  const normalizedTeamName = normalizeComparableText(resolvedTeamName);
+  const key = normalizedTeamId ? `id:${normalizedTeamId}` : normalizedTeamName ? `name:${normalizedTeamName}` : fallbackKey;
+
+  return {
+    key,
+    teamId: normalizedTeamId,
+    teamName: resolvedTeamName,
+  };
+}
+
+function createTeamSeasonAggregate(
+  identity: ReturnType<typeof resolveAggregateIdentity>,
+  positionIndex: Map<string, number>,
+): TeamSeasonAggregate {
+  return {
+    awayGoalDiff: 0,
+    awayGoalsFor: 0,
+    awayPoints: 0,
+    finalPosition: positionIndex.get(identity.key) ?? null,
+    goalsAgainst: 0,
+    goalsFor: 0,
+    homeGoalDiff: 0,
+    homeGoalsFor: 0,
+    homePoints: 0,
+    key: identity.key,
+    longestUnbeatenStreak: 0,
+    longestUnbeatenStreakEndedAt: Number.NEGATIVE_INFINITY,
+    longestWinningStreak: 0,
+    longestWinningStreakEndedAt: Number.NEGATIVE_INFINITY,
+    matchResults: [],
+    teamId: identity.teamId,
+    teamName: identity.teamName,
+  };
+}
+
+function buildTeamSeasonAggregates(matches: MatchListItem[], standingsRows: StandingsTableRow[]): TeamSeasonAggregate[] {
+  const aggregates = new Map<string, TeamSeasonAggregate>();
+  const positionIndex = buildStandingsPositionIndex(standingsRows);
+
+  const completedMatches = matches
+    .map(resolveCompletedSeasonMatch)
+    .filter((match): match is CompletedSeasonMatch => match !== null);
+
+  completedMatches.forEach((match, index) => {
+    const kickoffTimestamp = resolveKickoffTimestamp(match.kickoffAt, index);
+    const homeIdentity = resolveAggregateIdentity(match.homeTeamId, match.homeTeamName, `match:${match.matchId}:home`);
+    const awayIdentity = resolveAggregateIdentity(match.awayTeamId, match.awayTeamName, `match:${match.matchId}:away`);
+    const homeAggregate =
+      aggregates.get(homeIdentity.key) ?? createTeamSeasonAggregate(homeIdentity, positionIndex);
+    const awayAggregate =
+      aggregates.get(awayIdentity.key) ?? createTeamSeasonAggregate(awayIdentity, positionIndex);
+
+    aggregates.set(homeIdentity.key, homeAggregate);
+    aggregates.set(awayIdentity.key, awayAggregate);
+
+    const homePoints = match.homeScore > match.awayScore ? 3 : match.homeScore === match.awayScore ? 1 : 0;
+    const awayPoints = match.awayScore > match.homeScore ? 3 : match.homeScore === match.awayScore ? 1 : 0;
+    const goalDiff = match.homeScore - match.awayScore;
+
+    homeAggregate.goalsFor += match.homeScore;
+    homeAggregate.goalsAgainst += match.awayScore;
+    homeAggregate.homeGoalsFor += match.homeScore;
+    homeAggregate.homeGoalDiff += goalDiff;
+    homeAggregate.homePoints += homePoints;
+    homeAggregate.matchResults.push({
+      isUnbeaten: match.homeScore >= match.awayScore,
+      isWin: match.homeScore > match.awayScore,
+      kickoffTimestamp,
+      matchId: match.matchId,
+    });
+
+    awayAggregate.goalsFor += match.awayScore;
+    awayAggregate.goalsAgainst += match.homeScore;
+    awayAggregate.awayGoalsFor += match.awayScore;
+    awayAggregate.awayGoalDiff += -goalDiff;
+    awayAggregate.awayPoints += awayPoints;
+    awayAggregate.matchResults.push({
+      isUnbeaten: match.awayScore >= match.homeScore,
+      isWin: match.awayScore > match.homeScore,
+      kickoffTimestamp,
+      matchId: match.matchId,
+    });
+  });
+
+  return Array.from(aggregates.values()).map((aggregate) => {
+    const orderedResults = [...aggregate.matchResults].sort((left, right) => {
+      if (left.kickoffTimestamp !== right.kickoffTimestamp) {
+        return left.kickoffTimestamp - right.kickoffTimestamp;
+      }
+
+      return left.matchId.localeCompare(right.matchId, "pt-BR", { sensitivity: "base" });
+    });
+
+    let currentUnbeaten = 0;
+    let currentWinning = 0;
+
+    for (const result of orderedResults) {
+      currentUnbeaten = result.isUnbeaten ? currentUnbeaten + 1 : 0;
+      currentWinning = result.isWin ? currentWinning + 1 : 0;
+
+      if (
+        currentUnbeaten > aggregate.longestUnbeatenStreak ||
+        (currentUnbeaten === aggregate.longestUnbeatenStreak &&
+          result.kickoffTimestamp > aggregate.longestUnbeatenStreakEndedAt)
+      ) {
+        aggregate.longestUnbeatenStreak = currentUnbeaten;
+        aggregate.longestUnbeatenStreakEndedAt = result.kickoffTimestamp;
+      }
+
+      if (
+        currentWinning > aggregate.longestWinningStreak ||
+        (currentWinning === aggregate.longestWinningStreak &&
+          result.kickoffTimestamp > aggregate.longestWinningStreakEndedAt)
+      ) {
+        aggregate.longestWinningStreak = currentWinning;
+        aggregate.longestWinningStreakEndedAt = result.kickoffTimestamp;
+      }
+    }
+
+    return aggregate;
+  });
+}
+
+function mapAggregateInsight(aggregate: TeamSeasonAggregate | null, metricValue: number | null | undefined): TeamMetricInsight | null {
+  if (!aggregate || typeof metricValue !== "number" || !Number.isFinite(metricValue)) {
+    return null;
+  }
+
+  return {
+    metricValue,
+    teamId: aggregate.teamId,
+    teamName: aggregate.teamName,
+  };
+}
+
+function resolveBestAttackInsight(
+  standingsRows: StandingsTableRow[],
+  teamAggregates: TeamSeasonAggregate[],
+): TeamMetricInsight | null {
+  const leaderFromStandings = standingsRows.length > 0 ? [...standingsRows].sort(compareStandingsByBestAttack)[0] ?? null : null;
+
+  if (leaderFromStandings) {
+    return {
+      metricValue: leaderFromStandings.goalsFor,
+      teamId: leaderFromStandings.teamId,
+      teamName: leaderFromStandings.teamName?.trim() || leaderFromStandings.teamId,
+    };
+  }
+
+  const leaderFromMatches = [...teamAggregates].sort(compareAggregatesByBestAttack)[0] ?? null;
+  return mapAggregateInsight(leaderFromMatches, leaderFromMatches?.goalsFor);
+}
+
+function resolveBestDefenseInsight(
+  standingsRows: StandingsTableRow[],
+  teamAggregates: TeamSeasonAggregate[],
+): TeamMetricInsight | null {
+  const leaderFromStandings = standingsRows.length > 0 ? [...standingsRows].sort(compareStandingsByBestDefense)[0] ?? null : null;
+
+  if (leaderFromStandings) {
+    return {
+      metricValue: leaderFromStandings.goalsAgainst,
+      teamId: leaderFromStandings.teamId,
+      teamName: leaderFromStandings.teamName?.trim() || leaderFromStandings.teamId,
+    };
+  }
+
+  const leaderFromMatches = [...teamAggregates].sort(compareAggregatesByBestDefense)[0] ?? null;
+  return mapAggregateInsight(leaderFromMatches, leaderFromMatches?.goalsAgainst);
+}
+
+function resolveMatchClassificationPair(
+  match: CompletedSeasonMatch,
+  positionIndex: Map<string, number>,
+): [number, number] {
+  const homePosition =
+    positionIndex.get(`id:${match.homeTeamId}`) ??
+    positionIndex.get(`name:${normalizeComparableText(match.homeTeamName)}`) ??
+    Number.POSITIVE_INFINITY;
+  const awayPosition =
+    positionIndex.get(`id:${match.awayTeamId}`) ??
+    positionIndex.get(`name:${normalizeComparableText(match.awayTeamName)}`) ??
+    Number.POSITIVE_INFINITY;
+
+  return homePosition <= awayPosition ? [homePosition, awayPosition] : [awayPosition, homePosition];
+}
+
+function compareHighestScoringMatches(
+  left: CompletedSeasonMatch,
+  right: CompletedSeasonMatch,
+  positionIndex: Map<string, number>,
+): number {
+  const leftTotalGoals = left.homeScore + left.awayScore;
+  const rightTotalGoals = right.homeScore + right.awayScore;
+
+  if (leftTotalGoals !== rightTotalGoals) {
+    return rightTotalGoals - leftTotalGoals;
+  }
+
+  const leftGoalDiff = Math.abs(left.homeScore - left.awayScore);
+  const rightGoalDiff = Math.abs(right.homeScore - right.awayScore);
+
+  if (leftGoalDiff !== rightGoalDiff) {
+    return rightGoalDiff - leftGoalDiff;
+  }
+
+  const [leftBestPosition, leftSecondPosition] = resolveMatchClassificationPair(left, positionIndex);
+  const [rightBestPosition, rightSecondPosition] = resolveMatchClassificationPair(right, positionIndex);
+
+  if (leftBestPosition !== rightBestPosition) {
+    return leftBestPosition - rightBestPosition;
+  }
+
+  if (leftSecondPosition !== rightSecondPosition) {
+    return leftSecondPosition - rightSecondPosition;
+  }
+
+  const leftKickoffTimestamp = resolveKickoffTimestamp(left.kickoffAt);
+  const rightKickoffTimestamp = resolveKickoffTimestamp(right.kickoffAt);
+
+  if (leftKickoffTimestamp !== rightKickoffTimestamp) {
+    return rightKickoffTimestamp - leftKickoffTimestamp;
+  }
+
+  return left.matchId.localeCompare(right.matchId, "pt-BR", { sensitivity: "base" });
+}
+
+function useEditionRailInsights(context: CompetitionSeasonContext): EditionRailInsights {
+  const standingsQuery = useSeasonFinalStandings(context);
+  const matchesQuery = useSeasonAllMatches(context);
+
+  const insights = useMemo(() => {
+    const standingsRows = standingsQuery.data?.rows ?? [];
+    const matches = matchesQuery.data?.items ?? [];
+    const teamAggregates = buildTeamSeasonAggregates(matches, standingsRows);
+    const positionIndex = buildStandingsPositionIndex(standingsRows);
+    const completedMatches = matches
+      .map(resolveCompletedSeasonMatch)
+      .filter((match): match is CompletedSeasonMatch => match !== null);
+    const highestScoringMatch = [...completedMatches].sort((left, right) => compareHighestScoringMatches(left, right, positionIndex))[0] ?? null;
+    const bestHomeTeam = [...teamAggregates].sort(compareAggregatesByBestHome)[0] ?? null;
+    const bestAwayTeam = [...teamAggregates].sort(compareAggregatesByBestAway)[0] ?? null;
+    const worstAwayTeam = [...teamAggregates].sort(compareAggregatesByWorstAway)[0] ?? null;
+    const longestUnbeatenRun = [...teamAggregates].sort(compareAggregatesByUnbeatenRun)[0] ?? null;
+    const longestWinningRun = [...teamAggregates].sort(compareAggregatesByWinningRun)[0] ?? null;
+
+    return {
+      bestAttack: resolveBestAttackInsight(standingsRows, teamAggregates),
+      bestAwayTeam: mapAggregateInsight(bestAwayTeam, bestAwayTeam?.awayPoints),
+      bestDefense: resolveBestDefenseInsight(standingsRows, teamAggregates),
+      bestHomeTeam: mapAggregateInsight(bestHomeTeam, bestHomeTeam?.homePoints),
+      highestScoringMatch: highestScoringMatch
+        ? {
+            awayScore: highestScoringMatch.awayScore,
+            awayTeamId: highestScoringMatch.awayTeamId ?? null,
+            awayTeamName: highestScoringMatch.awayTeamName?.trim() || "Visitante",
+            homeScore: highestScoringMatch.homeScore,
+            homeTeamId: highestScoringMatch.homeTeamId ?? null,
+            homeTeamName: highestScoringMatch.homeTeamName?.trim() || "Mandante",
+            kickoffAt: highestScoringMatch.kickoffAt ?? null,
+            matchId: highestScoringMatch.matchId,
+            metricValue: highestScoringMatch.homeScore + highestScoringMatch.awayScore,
+          }
+        : null,
+      longestUnbeatenRun: mapAggregateInsight(longestUnbeatenRun, longestUnbeatenRun?.longestUnbeatenStreak),
+      longestWinningRun: mapAggregateInsight(longestWinningRun, longestWinningRun?.longestWinningStreak),
+      worstAwayTeam: mapAggregateInsight(worstAwayTeam, worstAwayTeam?.awayPoints),
+    };
+  }, [matchesQuery.data?.items, standingsQuery.data?.rows]);
+
+  return {
+    ...insights,
+    matchesQuery,
+    standingsQuery,
+  };
 }
 
 // ─── Shared visual atoms ──────────────────────────────────────────────────────────────
@@ -1301,27 +2254,33 @@ function FinalStandingsPanel({
   description,
   query,
   rowsLimit,
+  showHeader = true,
   title,
 }: {
   context: CompetitionSeasonContext;
-  description: string;
+  description?: string;
   query: ReturnType<typeof useSeasonFinalStandings> | ReturnType<typeof useStandingsTable>;
   rowsLimit?: number;
+  showHeader?: boolean;
   title: string;
 }) {
   const rows = rowsLimit ? query.data?.rows.slice(0, rowsLimit) ?? [] : query.data?.rows ?? [];
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-[0.7rem] font-bold uppercase tracking-widest text-[#515f74]">{title}</p>
-          <p className="mt-1 max-w-2xl text-sm text-[#515f74]">{description}</p>
+      {showHeader || query.coverage.status !== "complete" ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {showHeader ? (
+            <div>
+              <p className="text-[0.7rem] font-bold uppercase tracking-widest text-[#515f74]">{title}</p>
+              {description ? <p className="mt-1 max-w-2xl text-sm text-[#515f74]">{description}</p> : null}
+            </div>
+          ) : null}
+          {query.coverage.status !== "complete" ? (
+            <ProfileCoveragePill coverage={query.coverage} />
+          ) : null}
         </div>
-        {query.coverage.status !== "complete" ? (
-          <ProfileCoveragePill coverage={query.coverage} />
-        ) : null}
-      </div>
+      ) : null}
 
       {query.isError && rows.length === 0 ? (
         <ProfileAlert title="Nao foi possivel carregar a classificacao final" tone="critical">
@@ -1764,7 +2723,7 @@ function KnockoutBracketPanel({
                               {championName}
                             </p>
                             <p className="mt-1.5 text-[0.8rem] text-[#d7efe4]">
-                              {formatTieResolutionLabel(tie) ?? "Decisao da edicao"} • {formatTieMatchCountLabel(tie.matchCount)}
+                              {formatTieResolutionLabel(tie) ?? "Decisao da edição"} • {formatTieMatchCountLabel(tie.matchCount)}
                             </p>
                           </div>
                         </div>
@@ -1958,7 +2917,7 @@ function GroupPhaseSummaryPanel({
   if (!stage) {
     return (
       <ProfileAlert title="Fase classificatoria indisponivel" tone="warning">
-        A estrutura atual nao identificou uma fase de tabela para esta edicao.
+        A estrutura atual nao identificou uma fase de tabela para esta edição.
       </ProfileAlert>
     );
   }
@@ -1967,7 +2926,7 @@ function GroupPhaseSummaryPanel({
     return (
       <FinalStandingsPanel
         context={context}
-        description="A fase classificatoria desta edicao foi encerrada e a tabela final segue como referencia central."
+        description="A fase classificatoria desta edição foi encerrada e a tabela final segue como referencia central."
         query={finalStandingsQuery}
         title={stage.stageName ?? "Fase classificatoria"}
       />
@@ -2062,7 +3021,7 @@ function RankingPreviewPanel({
 
       {rankingQuery.isError && topRows.length === 0 ? (
         <ProfileAlert title="Nao foi possivel carregar este ranking" tone="critical">
-          Tente novamente em instantes ou siga para outro destaque da edicao.
+          Tente novamente em instantes ou siga para outro destaque da edição.
         </ProfileAlert>
       ) : null}
 
@@ -2070,7 +3029,7 @@ function RankingPreviewPanel({
         <PartialDataBanner
           className="rounded-[1.2rem] border-[#ffdcc3] bg-[#fff3e8] px-4 py-3 text-[#6e3900]"
           coverage={rankingQuery.coverage}
-          message="Este ranking ainda cobre apenas parte da edicao."
+          message="Este ranking ainda cobre apenas parte da edição."
         />
       ) : null}
 
@@ -2085,7 +3044,7 @@ function RankingPreviewPanel({
       {!rankingQuery.isLoading && topRows.length === 0 ? (
         <EmptyState
           className="rounded-[1.2rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-          description="Ainda nao ha linhas suficientes para esta edicao."
+          description="Ainda nao ha linhas suficientes para esta edição."
           title="Sem destaques"
         />
       ) : null}
@@ -2159,7 +3118,7 @@ function EditionHighlightsSection({
     <div className="space-y-5">
       {!playerGoalsDefinition || !teamPossessionDefinition ? (
         <ProfileAlert title="Rankings indisponiveis" tone="critical">
-          Os destaques principais desta edicao nao puderam ser carregados agora.
+          Os destaques principais desta edição nao puderam ser carregados agora.
         </ProfileAlert>
       ) : (
         <div className="grid gap-5 xl:grid-cols-2">
@@ -2180,7 +3139,7 @@ function EditionHighlightsSection({
         <SeasonCompetitionAnalyticsSection context={context} structure={structure} />
       ) : (
         <ProfileAlert title="Estrutura indisponivel para analytics avancados" tone="warning">
-          Sem a estrutura tipada da edicao, o produto nao consegue abrir comparativos estruturais desta temporada.
+          Sem a estrutura tipada da edição, o produto nao consegue abrir comparativos estruturais desta temporada.
         </ProfileAlert>
       )}
     </div>
@@ -2189,21 +3148,14 @@ function EditionHighlightsSection({
 
 function LeagueOverviewSection({ context }: { context: CompetitionSeasonContext }) {
   const finalStandingsQuery = useSeasonFinalStandings(context);
-  const { roundId } = useGlobalFiltersState();
 
   return (
     <div className="space-y-5">
-      {roundId ? (
-        <ProfileAlert title="Resumo da edicao acima do filtro de rodada" tone="info">
-          O resumo principal desta surface permanece na classificacao final da edicao. O filtro de rodada segue preservado para listas, rankings e saidas externas.
-        </ProfileAlert>
-      ) : null}
-
       <FinalStandingsPanel
         context={context}
-        description="A leitura principal da liga encerrada comeca na tabela final. Sem semantica inventada para zonas que o contrato atual nao sustenta."
         query={finalStandingsQuery}
-        title="Classificacao final"
+        showHeader={false}
+        title="Classificação final"
       />
     </div>
   );
@@ -2219,15 +3171,14 @@ function SeasonFactsCard({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
   });
-  const closingMatchesQuery = useSeasonClosingMatches(context, 1);
   const champion = resolveChampionFromStandings(standingsQuery.data?.rows ?? []);
-  const analyticsMatchCount = analyticsQuery.data?.seasonSummary.matchCount;
-  const standingsMatchCount = resolveLeagueMatchCountFromStandings(standingsQuery.data?.rows ?? []);
-  const resolvedMatchCount = analyticsMatchCount ?? standingsMatchCount;
-  const lastMatchDate = closingMatchesQuery.data?.items[0]?.kickoffAt ?? null;
-  const lastMatchFormatted = lastMatchDate
-    ? DATE_FORMATTER.format(new Date(lastMatchDate))
-    : null;
+  const championLeadRounds = useSeasonChampionLeadRounds(
+    context,
+    champion?.teamId,
+    standingsQuery.data?.rounds ?? [],
+  );
+  const totalGoals = resolveLeagueGoalsFromStandings(standingsQuery.data?.rows ?? []);
+  const averageGoals = analyticsQuery.data?.seasonSummary.averageGoals;
 
   const facts: Array<{ label: string; value: string }> = [
     {
@@ -2237,33 +3188,28 @@ function SeasonFactsCard({
         : (champion?.teamName ?? "Nao identificado"),
     },
     {
-      label: "Partidas",
-      value:
-        analyticsQuery.isLoading && standingsQuery.isLoading
-          ? "..."
-          : formatHistoricalMatchCount(resolvedMatchCount),
+      label: "Gols na edicao",
+      value: standingsQuery.isLoading ? "..." : formatMetricValue("goals", totalGoals),
     },
     {
-      label: "Times",
-      value: standingsQuery.isLoading
-        ? "..."
-        : (standingsQuery.data?.rows.length
-            ? String(standingsQuery.data.rows.length)
-            : "-"),
+      label: "Media de gols/jogo",
+      value: analyticsQuery.isLoading ? "..." : formatAverageGoals(averageGoals),
     },
     {
-      label: "Encerramento",
+      label: "Liderança do campeão",
       value:
-        closingMatchesQuery.isLoading
+        standingsQuery.isLoading || championLeadRounds.isLoading
           ? "..."
-          : (lastMatchFormatted ?? "-"),
+          : (championLeadRounds.isError
+              ? "-"
+              : formatRoundCount(championLeadRounds.count)),
     },
   ];
 
   return (
     <ProfilePanel className="space-y-4">
       <div>
-        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edição</p>
         <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
           {context.competitionName}
         </p>
@@ -2286,101 +3232,281 @@ function SeasonFactsCard({
   );
 }
 
-function ClosingMatchesRailPanel({ context }: { context: CompetitionSeasonContext }) {
-  const matchesQuery = useSeasonClosingMatches(context, 4);
-  const matches = matchesQuery.data?.items ?? [];
+function resolveRailCoverage(coverages: CoverageLike[], label: string): CoverageLike {
+  if (coverages.some((coverage) => coverage.status === "partial")) {
+    return { label, status: "partial" };
+  }
+
+  if (coverages.some((coverage) => coverage.status === "unknown")) {
+    return { label, status: "unknown" };
+  }
+
+  if (coverages.some((coverage) => coverage.status === "empty")) {
+    return { label, status: "empty" };
+  }
+
+  return { label, status: "complete" };
+}
+
+function EditionInsightRow({
+  href,
+  label,
+  media,
+  primary,
+  secondary,
+  value,
+}: {
+  href?: string | null;
+  label: string;
+  media?: ReactNode;
+  primary: string;
+  secondary?: string | null;
+  value: string;
+}) {
+  const content = (
+    <>
+      <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[#57657a]">{label}</p>
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          {media ? <div className="shrink-0">{media}</div> : null}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-[#111c2d]">{primary}</p>
+            {secondary ? <p className="truncate text-[0.7rem] text-[#57657a]">{secondary}</p> : null}
+          </div>
+        </div>
+        <p className="shrink-0 text-sm font-extrabold text-[#003526]">{value}</p>
+      </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        className="block rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
+        href={href}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3">
+      {content}
+    </div>
+  );
+}
+
+function EditionSuperlativesRailCard({ context }: { context: CompetitionSeasonContext }) {
+  const insights = useEditionRailInsights(context);
+  const topRatedQuery = useEditionTopRatedPlayer(context);
+  const assistProviderQuery = useEditionTopAssistProvider(context);
+  const coverage = resolveRailCoverage(
+    [
+      insights.standingsQuery.coverage,
+      insights.matchesQuery.coverage,
+      topRatedQuery.coverage,
+      assistProviderQuery.coverage,
+    ],
+    "Dados parciais dos superlativos",
+  );
+
+  const bestAttack = insights.bestAttack;
+  const bestDefense = insights.bestDefense;
+  const topRatedPlayer = topRatedQuery.data?.leader ?? null;
+  const topAssistProvider = assistProviderQuery.data?.leader ?? null;
+  const highestScoringMatch = insights.highestScoringMatch;
+
+  const items = [
+    {
+      href: bestAttack?.teamId ? buildCanonicalTeamPath(context, bestAttack.teamId) : null,
+      label: "Melhor ataque",
+      media: bestAttack ? <TeamBadge size={38} teamId={bestAttack.teamId} teamName={bestAttack.teamName} /> : null,
+      primary:
+        bestAttack?.teamName ??
+        (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
+      secondary: null,
+      value:
+        bestAttack
+          ? `${formatMetricValue("goals", bestAttack.metricValue)} gols`
+          : (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: bestDefense?.teamId ? buildCanonicalTeamPath(context, bestDefense.teamId) : null,
+      label: "Melhor defesa",
+      media: bestDefense ? <TeamBadge size={38} teamId={bestDefense.teamId} teamName={bestDefense.teamName} /> : null,
+      primary:
+        bestDefense?.teamName ??
+        (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
+      secondary: null,
+      value:
+        bestDefense
+          ? `${formatMetricValue("goals", bestDefense.metricValue)} sofridos`
+          : (insights.standingsQuery.isLoading && insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: topRatedPlayer ? buildCanonicalPlayerPath(context, topRatedPlayer.entityId) : null,
+      label: "Maior nota media",
+      media: topRatedPlayer ? <PlayerPhoto playerId={topRatedPlayer.entityId} playerName={topRatedPlayer.entityName} size={40} /> : null,
+      primary: topRatedPlayer?.entityName ?? (topRatedQuery.isLoading ? "..." : "-"),
+      secondary: topRatedPlayer?.teamName ?? null,
+      value:
+        topRatedPlayer
+          ? formatMetricValue("player_rating", topRatedPlayer.metricValue)
+          : (topRatedQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: topAssistProvider ? buildCanonicalPlayerPath(context, topAssistProvider.entityId) : null,
+      label: "Maior assistente",
+      media: topAssistProvider ? <PlayerPhoto playerId={topAssistProvider.entityId} playerName={topAssistProvider.entityName} size={40} /> : null,
+      primary: topAssistProvider?.entityName ?? (assistProviderQuery.isLoading ? "..." : "-"),
+      secondary: topAssistProvider?.teamName ?? null,
+      value:
+        topAssistProvider
+          ? formatAssistCount(topAssistProvider.metricValue)
+          : (assistProviderQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: highestScoringMatch
+        ? `/matches/${encodeURIComponent(highestScoringMatch.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`
+        : null,
+      label: "Jogo com mais gols",
+      media: highestScoringMatch ? (
+        <div className="flex items-center -space-x-2">
+          <TeamBadge size={30} teamId={highestScoringMatch.homeTeamId} teamName={highestScoringMatch.homeTeamName} />
+          <TeamBadge size={30} teamId={highestScoringMatch.awayTeamId} teamName={highestScoringMatch.awayTeamName} />
+        </div>
+      ) : null,
+      primary:
+        highestScoringMatch
+          ? `${highestScoringMatch.homeTeamName} ${highestScoringMatch.homeScore} - ${highestScoringMatch.awayScore} ${highestScoringMatch.awayTeamName}`
+          : (insights.matchesQuery.isLoading ? "..." : "-"),
+      secondary: highestScoringMatch?.kickoffAt ? formatLongDate(highestScoringMatch.kickoffAt) : null,
+      value:
+        highestScoringMatch
+          ? `${formatMetricValue("goals", highestScoringMatch.metricValue)} gols`
+          : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+  ];
 
   return (
     <ProfilePanel className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Fechamento</p>
+          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Destaques</p>
           <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
-            Ultimas partidas
+            Superlativos da edição
           </p>
         </div>
-        {matchesQuery.coverage.status !== "complete" ? (
-          <ProfileCoveragePill coverage={matchesQuery.coverage} />
-        ) : null}
+        {coverage.status !== "complete" ? <ProfileCoveragePill coverage={coverage} /> : null}
       </div>
-
-      {matchesQuery.isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }, (_, i) => (
-            <LoadingSkeleton height={72} key={`rail-match-loading-${i}`} />
-          ))}
-        </div>
-      ) : null}
-
-      {!matchesQuery.isLoading && matches.length === 0 ? (
-        <EmptyState
-          className="rounded-[1.1rem] border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)]"
-          description="Sem partidas registradas."
-          title="Sem partidas"
-        />
-      ) : null}
-
-      {!matchesQuery.isLoading && matches.length > 0 ? (
-        <div className="space-y-2">
-          {matches.map((match) => (
-            <Link
-              className="block rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-[rgba(240,243,255,0.88)] px-3 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
-              href={`/matches/${encodeURIComponent(match.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`}
-              key={match.matchId}
-            >
-              <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[#57657a]">
-                {resolveMatchDisplayContext(match).summary}
-              </p>
-              <p className="mt-1.5 text-sm font-semibold text-[#111c2d]">
-                {match.homeTeamName ?? "Mandante"}{" "}
-                <span className="font-normal text-[#57657a]">
-                  {typeof match.homeScore === "number" && typeof match.awayScore === "number"
-                    ? `${match.homeScore}–${match.awayScore}`
-                    : "vs"}
-                </span>{" "}
-                {match.awayTeamName ?? "Visitante"}
-              </p>
-            </Link>
-          ))}
-        </div>
-      ) : null}
+      <div className="space-y-2">
+        {items.map((item) => (
+          <EditionInsightRow
+            href={item.href}
+            key={item.label}
+            label={item.label}
+            media={item.media}
+            primary={item.primary}
+            secondary={item.secondary}
+            value={item.value}
+          />
+        ))}
+      </div>
     </ProfilePanel>
   );
 }
 
-function ExploreEditionCard({ context }: { context: CompetitionSeasonContext }) {
-  const filterInput = useSeasonFilterInput(context);
+function EditionTravelRailCard({ context }: { context: CompetitionSeasonContext }) {
+  const insights = useEditionRailInsights(context);
+  const coverage = resolveRailCoverage(
+    [insights.standingsQuery.coverage, insights.matchesQuery.coverage],
+    "Dados parciais de mando e viagem",
+  );
 
-  const links: Array<{ href: string; label: string; hint: string }> = [
-    { href: buildMatchesPath(filterInput), label: "Partidas", hint: "Lista completa da edicao" },
-    { href: buildRankingPath("player-goals", filterInput), label: "Rankings", hint: "Artilharia e estatisticas" },
-    { href: buildTeamsPath(filterInput), label: "Times", hint: "Perfis canonicos da edicao" },
+  const bestHomeTeam = insights.bestHomeTeam;
+  const bestAwayTeam = insights.bestAwayTeam;
+  const worstAwayTeam = insights.worstAwayTeam;
+  const longestUnbeatenRun = insights.longestUnbeatenRun;
+  const longestWinningRun = insights.longestWinningRun;
+
+  const items = [
+    {
+      href: bestHomeTeam?.teamId ? buildCanonicalTeamPath(context, bestHomeTeam.teamId) : null,
+      label: "Melhor mandante",
+      media: bestHomeTeam ? <TeamBadge size={38} teamId={bestHomeTeam.teamId} teamName={bestHomeTeam.teamName} /> : null,
+      primary: bestHomeTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
+      value: bestHomeTeam ? formatPointCount(bestHomeTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: bestAwayTeam?.teamId ? buildCanonicalTeamPath(context, bestAwayTeam.teamId) : null,
+      label: "Melhor visitante",
+      media: bestAwayTeam ? <TeamBadge size={38} teamId={bestAwayTeam.teamId} teamName={bestAwayTeam.teamName} /> : null,
+      primary: bestAwayTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
+      value: bestAwayTeam ? formatPointCount(bestAwayTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: worstAwayTeam?.teamId ? buildCanonicalTeamPath(context, worstAwayTeam.teamId) : null,
+      label: "Pior visitante",
+      media: worstAwayTeam ? <TeamBadge size={38} teamId={worstAwayTeam.teamId} teamName={worstAwayTeam.teamName} /> : null,
+      primary: worstAwayTeam?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
+      value: worstAwayTeam ? formatPointCount(worstAwayTeam.metricValue) : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: longestUnbeatenRun?.teamId ? buildCanonicalTeamPath(context, longestUnbeatenRun.teamId) : null,
+      label: "Maior sequencia invicta",
+      media: longestUnbeatenRun ? <TeamBadge size={38} teamId={longestUnbeatenRun.teamId} teamName={longestUnbeatenRun.teamName} /> : null,
+      primary: longestUnbeatenRun?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
+      value:
+        longestUnbeatenRun
+          ? formatGameCount(longestUnbeatenRun.metricValue)
+          : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
+    {
+      href: longestWinningRun?.teamId ? buildCanonicalTeamPath(context, longestWinningRun.teamId) : null,
+      label: "Maior sequencia de vitorias",
+      media: longestWinningRun ? <TeamBadge size={38} teamId={longestWinningRun.teamId} teamName={longestWinningRun.teamName} /> : null,
+      primary: longestWinningRun?.teamName ?? (insights.matchesQuery.isLoading ? "..." : "-"),
+      value:
+        longestWinningRun
+          ? formatGameCount(longestWinningRun.metricValue)
+          : (insights.matchesQuery.isLoading ? "..." : "-"),
+    },
   ];
 
   return (
     <ProfilePanel className="space-y-4" tone="soft">
-      <div>
-        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Exploracao</p>
-        <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
-          Aprofunde a edicao
-        </p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Mandos</p>
+          <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
+            Forca de mando e viagem
+          </p>
+        </div>
+        {coverage.status !== "complete" ? <ProfileCoveragePill coverage={coverage} /> : null}
       </div>
       <div className="space-y-2">
-        {links.map((link) => (
-          <Link
-            className="flex items-center justify-between gap-3 rounded-[1.1rem] border border-[rgba(191,201,195,0.55)] bg-white/80 px-4 py-3 transition-colors hover:border-[#8bd6b6] hover:bg-white"
-            href={link.href}
-            key={link.label}
-          >
-            <div>
-              <p className="text-sm font-semibold text-[#111c2d]">{link.label}</p>
-              <p className="text-[0.68rem] text-[#57657a]">{link.hint}</p>
-            </div>
-            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">→</span>
-          </Link>
+        {items.map((item) => (
+          <EditionInsightRow
+            href={item.href}
+            key={item.label}
+            label={item.label}
+            media={item.media}
+            primary={item.primary}
+            value={item.value}
+          />
         ))}
       </div>
     </ProfilePanel>
+  );
+}
+
+function EditionRailInsightsCards({ context }: { context: CompetitionSeasonContext }) {
+  return (
+    <>
+      <EditionSuperlativesRailCard context={context} />
+      <EditionTravelRailCard context={context} />
+    </>
   );
 }
 
@@ -2502,7 +3628,7 @@ function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
     <div className="relative overflow-hidden rounded-xl bg-[#003526] p-5 text-white">
       <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-emerald-400/10 blur-3xl" />
       <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-400">
-        Artilheiro da temporada
+        Artilheiro
       </p>
 
       <div className="mt-4">
@@ -2564,51 +3690,12 @@ function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
   );
 }
 
-function LastResultsRailCard({ context }: { context: CompetitionSeasonContext }) {
-  const matchesQuery = useSeasonClosingMatches(context, 3);
-  const matches = matchesQuery.data?.items ?? [];
-
-  return (
-    <div className="rounded-xl bg-[#f0f3ff] p-5">
-      <p className="text-[0.65rem] font-extrabold uppercase tracking-widest text-[#003526]">
-        Ultimos resultados
-      </p>
-      <div className="mt-4 space-y-2">
-        {matchesQuery.isLoading ? (
-          Array.from({ length: 3 }, (_, i) => (
-            <div className="h-10 animate-pulse rounded-lg bg-[#e7eeff]" key={`lr-skel-${i}`} />
-          ))
-        ) : matches.length === 0 ? (
-          <p className="text-xs text-[#515f74]">Sem resultados registrados.</p>
-        ) : (
-          matches.map((match) => (
-            <Link
-              className="flex items-center justify-between rounded-lg bg-white px-3 py-2.5 text-xs font-bold shadow-sm transition-colors hover:bg-[#f9f9ff]"
-              href={`/matches/${encodeURIComponent(match.matchId)}?competitionId=${encodeURIComponent(context.competitionId)}&seasonId=${encodeURIComponent(context.seasonId)}`}
-              key={match.matchId}
-            >
-              <span className="max-w-[90px] truncate text-[#111c2d]">{match.homeTeamName ?? "Mandante"}</span>
-              <span className="mx-2 shrink-0 rounded bg-[#f0f3ff] px-2 py-0.5 text-[0.7rem] font-bold text-[#003526]">
-                {typeof match.homeScore === "number" && typeof match.awayScore === "number"
-                  ? `${match.homeScore} - ${match.awayScore}`
-                  : "vs"}
-              </span>
-              <span className="max-w-[90px] truncate text-right text-[#111c2d]">{match.awayTeamName ?? "Visitante"}</span>
-            </Link>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
 function LeagueEditionRail({ context }: { context: CompetitionSeasonContext }) {
   return (
     <>
       <SeasonFactsCard context={context} />
       <TopScorerRailCard context={context} />
-      <LastResultsRailCard context={context} />
-      <ExploreEditionCard context={context} />
+      <EditionRailInsightsCards context={context} />
     </>
   );
 }
@@ -2623,7 +3710,7 @@ function LeagueStructureSection({ context }: { context: CompetitionSeasonContext
     <div className="space-y-5">
       <FinalStandingsPanel
         context={context}
-        description="A classificacao final da edicao e a ancora principal da leitura da liga."
+        description="A classificacao final da edição e a ancora principal da leitura da liga."
         query={finalStandingsQuery}
         title="Classificacao final"
       />
@@ -2673,7 +3760,7 @@ function CupStructureSection({
   return (
     <KnockoutBracketPanel
       context={context}
-      description="Chaveamento completo da edicao."
+      description="Chaveamento completo da edição."
       resolution={resolution}
       title="Chaveamento finalizado"
     />
@@ -2726,7 +3813,7 @@ function CupFactsCard({
   return (
     <ProfilePanel className="space-y-4">
       <div>
-        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edição</p>
         <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
           {context.competitionName}
         </p>
@@ -2759,8 +3846,7 @@ function CupEditionRail({
   return (
     <>
       <CupFactsCard context={context} resolution={resolution} />
-      <ClosingMatchesRailPanel context={context} />
-      <ExploreEditionCard context={context} />
+      <EditionRailInsightsCards context={context} />
     </>
   );
 }
@@ -2840,7 +3926,7 @@ function HybridHistoricalHero({
       <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.96fr)] xl:items-stretch">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            {["Edicao encerrada", "Hibrida"].map((tag) => (
+            {["Edição encerrada", "Hibrida"].map((tag) => (
               <span
                 className="rounded-full border border-[rgba(0,53,38,0.12)] bg-[rgba(255,255,255,0.72)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#0d4a37]"
                 key={tag}
@@ -2876,7 +3962,7 @@ function HybridHistoricalHero({
 
           <div className="rounded-[1.5rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-5 py-5 shadow-[0_28px_68px_-48px_rgba(17,28,45,0.22)]">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
-              Resumo da edicao
+              Resumo da edição
             </p>
             <div className="mt-4">
               <HybridHeroSummaryItem
@@ -2998,7 +4084,7 @@ function HybridTableOverviewPanel({
   if (!stage) {
     return (
       <ProfileAlert title="Fase de tabela indisponivel" tone="warning">
-        A estrutura atual nao identificou uma fase classificatoria para esta edicao.
+        A estrutura atual nao identificou uma fase classificatoria para esta edição.
       </ProfileAlert>
     );
   }
@@ -3013,7 +4099,7 @@ function HybridTableOverviewPanel({
       return (
         <FinalStandingsPanel
           context={context}
-          description="A classificacao final da fase de grupos segue como referencia principal desta edicao encerrada."
+          description="A classificacao final da fase de grupos segue como referencia principal desta edição encerrada."
           query={finalStandingsQuery}
           title={stage.stageName ?? resolveHybridTableSectionLabel(stage)}
         />
@@ -3029,7 +4115,7 @@ function HybridTableOverviewPanel({
 
         <div className="grid gap-3 md:grid-cols-3">
           <HistoricalHeroCard
-            detail="Grupos consolidados na estrutura da edicao."
+            detail="Grupos consolidados na estrutura da edição."
             label="Grupos"
             tone="soft"
             value={String(stage.groups.length)}
@@ -3287,7 +4373,7 @@ function HybridFactsCard({
   return (
     <ProfilePanel className="space-y-4">
       <div>
-        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edicao</p>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Edição</p>
         <p className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] text-[#111c2d]">
           {context.competitionName}
         </p>
@@ -3334,8 +4420,7 @@ function HybridEditionRail({
   return (
     <>
       <HybridFactsCard context={context} resolution={resolution} />
-      <ClosingMatchesRailPanel context={context} />
-      <ExploreEditionCard context={context} />
+      <EditionRailInsightsCards context={context} />
     </>
   );
 }
@@ -3345,10 +4430,10 @@ function buildSurfaceNavLabels(
 ): SurfaceNavLabels {
   if (resolution.type === "league") {
     return {
-      highlights: "Destaques estatisticos",
-      matches: "Partidas de fechamento",
-      overview: "Classificacao",
-      structure: "Tabela completa",
+      highlights: "Destaques estatísticos",
+      matches: "Partidas",
+      overview: "Classificação",
+      structure: "Classificação",
     };
   }
 
@@ -3371,9 +4456,11 @@ function buildSurfaceNavLabels(
 
 function LeaguePageHeader({
   context,
+  navigation,
   tag,
 }: {
   context: CompetitionSeasonContext;
+  navigation?: ReactNode;
   tag: string;
 }) {
   const compDef = getCompetitionById(context.competitionId);
@@ -3389,34 +4476,33 @@ function LeaguePageHeader({
     .join("");
 
   return (
-    <div className="flex items-end gap-6 px-4 md:px-8 pt-8 pb-4">
-      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(191,201,195,0.55)] bg-white shadow-sm md:h-20 md:w-20">
-        <span className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
-          {initials || "FA"}
-        </span>
-        {logoSrc ? (
-          <img
-            alt={`Logo ${context.competitionName}`}
-            className="absolute inset-0 h-full w-full object-contain bg-white p-2"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-            src={logoSrc}
-          />
-        ) : null}
+    <div className="flex flex-col gap-3 px-1 py-1.5 md:px-2 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(191,201,195,0.55)] bg-white shadow-sm md:h-12 md:w-12">
+          <span className="font-[family:var(--font-profile-headline)] text-base font-extrabold text-[#003526] md:text-lg">
+            {initials || "FA"}
+          </span>
+          {logoSrc ? (
+            <img
+              alt={`Logo ${context.competitionName}`}
+              className="absolute inset-0 h-full w-full object-contain bg-white p-2"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              src={logoSrc}
+            />
+          ) : null}
+        </div>
+
+        <div className="min-w-0">
+          <h1 className="truncate py-0.5 font-[family:var(--font-profile-headline)] text-2xl font-extrabold leading-[1.12] tracking-[-0.04em] text-[#111c2d] md:text-3xl">
+            {context.competitionName}
+          </h1>
+          <p className="mt-0.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[#515f74]">
+            {tag} · {context.seasonLabel}
+          </p>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-block rounded bg-[#e7eeff] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-[#003526]">
-            {tag}
-          </span>
-        </div>
-        <h1 className="font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-none tracking-[-0.03em] text-[#111c2d] md:text-4xl">
-          {context.competitionName}
-        </h1>
-        <p className="text-sm font-semibold text-[#515f74]">
-          Temporada {context.seasonLabel}
-        </p>
-      </div>
+      {navigation ? <div className="min-w-0 lg:flex-1">{navigation}</div> : null}
     </div>
   );
 }
@@ -3565,59 +4651,70 @@ function LeagueSeasonSurface({
 }) {
   const searchParams = useSearchParams();
   const navLabels = buildSurfaceNavLabels(resolution);
+  const filterInput = useSeasonFilterInput(context);
+  const shouldShowClassification =
+    activeSection === "overview" || activeSection === "structure" || activeSection === "matches";
+  const navItems = [
+    {
+      href: buildSeasonSurfaceHref(context, "overview", searchParams),
+      isActive: shouldShowClassification,
+      key: "overview",
+      label: navLabels.overview,
+    },
+    {
+      href: buildSeasonSurfaceHref(context, "rounds", searchParams),
+      isActive: activeSection === "rounds",
+      key: "rounds",
+      label: "Rodada a rodada",
+    },
+    {
+      href: buildSeasonSurfaceHref(context, "highlights", searchParams),
+      isActive: activeSection === "highlights",
+      key: "highlights",
+      label: navLabels.highlights,
+    },
+    {
+      href: buildPlayersPath(filterInput),
+      isActive: false,
+      key: "players",
+      label: "Jogadores",
+    },
+    {
+      href: buildTeamsPath(filterInput),
+      isActive: false,
+      key: "teams",
+      label: "Times",
+    },
+    {
+      href: buildMatchesPath(filterInput),
+      isActive: false,
+      key: "matches",
+      label: navLabels.matches,
+    },
+  ];
+  const navigation = (
+    <ProfileTabs
+      ariaLabel="Navegacao da edição"
+      className="rounded-[1.1rem] !p-2 md:!p-2 lg:justify-end"
+      items={navItems}
+    />
+  );
 
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
-      hero={<LeaguePageHeader context={context} tag="Pontos Corridos" />}
+      density="compact"
+      hero={<LeaguePageHeader context={context} navigation={navigation} tag="Pontos Corridos" />}
       mainCanvas={
         <>
-          {activeSection === "overview" ? <LeagueOverviewSection context={context} /> : null}
-          {activeSection === "structure" ? <LeagueStructureSection context={context} /> : null}
+          {shouldShowClassification ? <LeagueOverviewSection context={context} /> : null}
           {activeSection === "rounds" ? <RoundsSection context={context} /> : null}
-          {activeSection === "matches" ? (
-            <ClosingMatchesPanel
-              context={context}
-              description="Partidas concluidas desta temporada."
-              title="Partidas marcantes da temporada"
-            />
-          ) : null}
           {activeSection === "highlights" ? <EditionHighlightsSection context={context} structure={null} /> : null}
         </>
       }
-      navItems={[
-        {
-          href: buildSeasonSurfaceHref(context, "overview", searchParams),
-          isActive: activeSection === "overview",
-          key: "overview",
-          label: navLabels.overview,
-        },
-        {
-          href: buildSeasonSurfaceHref(context, "structure", searchParams),
-          isActive: activeSection === "structure",
-          key: "structure",
-          label: navLabels.structure,
-        },
-        {
-          href: buildSeasonSurfaceHref(context, "rounds", searchParams),
-          isActive: activeSection === "rounds",
-          key: "rounds",
-          label: "Rodada a Rodada",
-        },
-        {
-          href: buildSeasonSurfaceHref(context, "matches", searchParams),
-          isActive: activeSection === "matches",
-          key: "matches",
-          label: navLabels.matches,
-        },
-        {
-          href: buildSeasonSurfaceHref(context, "highlights", searchParams),
-          isActive: activeSection === "highlights",
-          key: "highlights",
-          label: navLabels.highlights,
-        },
-      ]}
+      navItems={[]}
       secondaryRail={<LeagueEditionRail context={context} />}
+      showLocalBreadcrumbs={false}
     />
   );
 }
@@ -3655,7 +4752,7 @@ function CupSeasonSurface({
           {activeSection === "matches" ? (
             <ClosingMatchesPanel
               context={context}
-              description="Os confrontos mais importantes da edicao."
+              description="Os confrontos mais importantes da edição."
               title="Confrontos decisivos"
             />
           ) : null}
@@ -3716,7 +4813,7 @@ function HybridSeasonSurface({
     <KnockoutBracketPanel
       context={context}
       resolution={resolution}
-      title="Chaveamento da edicao"
+      title="Chaveamento da edição"
       variant="stacked"
     />
   );
@@ -3828,7 +4925,7 @@ export function CompetitionSeasonSurface({
         hero={
           <SeasonHeroBlock
             context={context}
-            description="Estrutura da edicao indisponivel."
+            description="Estrutura da edição indisponivel."
             eyebrow="Estrutura indisponivel"
             highlightDescription="Tente recarregar a pagina."
             highlightLabel="Estado"
@@ -3838,7 +4935,7 @@ export function CompetitionSeasonSurface({
           />
         }
         mainCanvas={
-          <ProfileAlert title="Nao foi possivel carregar a estrutura da edicao" tone="critical">
+          <ProfileAlert title="Nao foi possivel carregar a estrutura da edição" tone="critical">
             Sem esse contrato nao e possivel diferenciar com seguranca o desenho de copa ou hibrido.
           </ProfileAlert>
         }
@@ -3847,7 +4944,7 @@ export function CompetitionSeasonSurface({
             href: buildSeasonHubPath(context),
             isActive: true,
             key: "overview",
-            label: "Resumo da edicao",
+            label: "Resumo da edição",
           },
         ]}
       />

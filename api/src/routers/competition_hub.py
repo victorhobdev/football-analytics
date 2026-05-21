@@ -14,6 +14,14 @@ from ..db.client import db_client
 
 router = APIRouter(tags=["competition-hub"])
 
+COMPETITION_KEY_ALIASES = {
+    "serie_a_italy": "serie_a_it",
+}
+
+PUBLIC_COMPETITION_KEY_ALIASES = {
+    internal_key: public_key for public_key, internal_key in COMPETITION_KEY_ALIASES.items()
+}
+
 
 @dataclass(frozen=True)
 class CompetitionSeasonScope:
@@ -65,6 +73,41 @@ class CompetitionRound:
 
 def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
+
+
+def _normalize_competition_key(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    normalized_value = value.strip()
+    if normalized_value == "":
+        return None
+
+    return COMPETITION_KEY_ALIASES.get(normalized_value, normalized_value)
+
+
+def _public_competition_key(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    normalized_value = value.strip()
+    if normalized_value == "":
+        return None
+
+    return PUBLIC_COMPETITION_KEY_ALIASES.get(normalized_value, normalized_value)
+
+
+def _resolve_canonical_competition(competition_key: str | None):
+    normalized_competition_key = _normalize_competition_key(competition_key)
+
+    if normalized_competition_key is None:
+        return None
+
+    public_competition_key = _public_competition_key(normalized_competition_key)
+
+    return get_canonical_competition_by_key(public_competition_key) or get_canonical_competition_by_key(
+        normalized_competition_key
+    )
 
 
 def _normalize_season_label(value: str | None) -> str | None:
@@ -145,11 +188,11 @@ def _require_competition_scope(
     competition_key: str | None,
     season_label: str | None,
 ) -> tuple[str, str]:
-    normalized_competition_key = (competition_key or "").strip()
+    normalized_competition_key = _normalize_competition_key(competition_key)
     normalized_season_label = _normalize_season_label(season_label)
 
     missing_fields: list[str] = []
-    if normalized_competition_key == "":
+    if normalized_competition_key is None:
         missing_fields.append("competitionKey")
     if normalized_season_label is None:
         missing_fields.append("seasonLabel")
@@ -163,6 +206,31 @@ def _require_competition_scope(
         )
 
     return normalized_competition_key, normalized_season_label
+
+
+def _fetch_stage_scope_row(
+    competition_key: str,
+    season_label: str,
+) -> dict[str, Any] | None:
+    return db_client.fetch_one(
+        """
+        select
+            ds.competition_key,
+            ds.season_label,
+            max(ds.league_id)::int as competition_id,
+            max(ds.season_id)::int as season_id,
+            max(ds.provider_season_id)::bigint as provider_season_id,
+            max(dc.league_name) as competition_name
+        from mart.dim_stage ds
+        left join mart.dim_competition dc
+          on dc.league_id = ds.league_id
+        where ds.competition_key = %s
+          and ds.season_label = %s
+        group by ds.competition_key, ds.season_label
+        limit 1;
+        """,
+        [competition_key, season_label],
+    )
 
 
 def _resolve_competition_scope(
@@ -221,9 +289,26 @@ def _resolve_competition_scope(
     )
 
     if row is None:
-        return None
+        stage_scope_row = _fetch_stage_scope_row(competition_key, season_label)
 
-    canonical_competition = get_canonical_competition_by_key(competition_key)
+        if stage_scope_row is None:
+            return None
+
+        row = {
+            "competition_key": stage_scope_row["competition_key"],
+            "competition_name": stage_scope_row.get("competition_name"),
+            "competition_id": stage_scope_row.get("competition_id"),
+            "season_label": stage_scope_row["season_label"],
+            "season_id": stage_scope_row.get("season_id"),
+            "provider_season_id": stage_scope_row.get("provider_season_id"),
+            "format_family": "unknown",
+            "season_format_code": "unconfigured",
+            "participant_scope": "unknown",
+            "group_ranking_rule_code": None,
+            "tie_rule_code": None,
+        }
+
+    canonical_competition = _resolve_canonical_competition(competition_key)
     fallback_competition_name = canonical_competition.default_name if canonical_competition else competition_key
 
     return CompetitionSeasonScope(
@@ -240,11 +325,10 @@ def _resolve_competition_scope(
         tie_rule_code=row.get("tie_rule_code"),
     )
 
-
 def _serialize_scope(scope: CompetitionSeasonScope) -> dict[str, Any]:
     return {
         "competitionId": str(scope.competition_id) if scope.competition_id is not None else None,
-        "competitionKey": scope.competition_key,
+        "competitionKey": _public_competition_key(scope.competition_key),
         "competitionName": scope.competition_name,
         "seasonId": str(scope.season_id) if scope.season_id is not None else None,
         "seasonLabel": _format_season_label(scope.season_label),
@@ -888,6 +972,26 @@ def _fetch_competition_season_comparisons(competition_key: str) -> list[dict[str
     )
 
 
+def _fetch_competition_season_average_goals(
+    competition_key: str,
+    season_label: str,
+) -> float | None:
+    average_goals = db_client.fetch_val(
+        """
+        select round(avg(fm.total_goals)::numeric, 2) as average_goals
+        from mart.fact_matches fm
+        where fm.competition_key = %s
+          and fm.season_label = %s;
+        """,
+        [competition_key, season_label],
+    )
+
+    if average_goals is None:
+        return None
+
+    return float(average_goals)
+
+
 def _fetch_team_journey_history_rows(
     competition_key: str,
     team_id: int,
@@ -1284,13 +1388,8 @@ HISTORICAL_STATS_GROUP_KEYS = {
     "player_records": "playerRecords",
 }
 
-HISTORICAL_STATS_COMPETITION_ALIASES = {
-    "serie_a_italy": "serie_a_it",
-}
-
-
 def _normalize_historical_stats_competition_key(competition_key: str) -> str:
-    return HISTORICAL_STATS_COMPETITION_ALIASES.get(competition_key, competition_key)
+    return _normalize_competition_key(competition_key) or competition_key
 
 
 def _empty_historical_stats_payload(as_of_year: int) -> dict[str, Any]:
@@ -1426,7 +1525,7 @@ def get_competition_structure(
             code="COMPETITION_SEASON_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "seasonLabel": seasonLabel,
             },
         )
@@ -1490,7 +1589,7 @@ def get_group_standings(
             code="COMPETITION_SEASON_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "seasonLabel": seasonLabel,
             },
         )
@@ -1604,7 +1703,7 @@ def get_stage_ties(
             code="COMPETITION_SEASON_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "seasonLabel": seasonLabel,
             },
         )
@@ -1682,13 +1781,17 @@ def get_competition_analytics(
             code="COMPETITION_SEASON_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "seasonLabel": seasonLabel,
             },
         )
 
     stage_analytics_rows = _fetch_competition_stage_analytics(scope.competition_key, scope.season_label)
     comparison_rows = _fetch_competition_season_comparisons(scope.competition_key)
+    season_average_goals = _fetch_competition_season_average_goals(
+        scope.competition_key,
+        scope.season_label,
+    )
 
     season_summary = {
         "matchCount": sum(int(row.get("match_count") or 0) for row in stage_analytics_rows),
@@ -1705,14 +1808,7 @@ def get_competition_analytics(
         ),
         "groupCount": sum(int(row.get("group_count") or 0) for row in stage_analytics_rows),
         "tieCount": sum(int(row.get("tie_count") or 0) for row in stage_analytics_rows),
-        "averageGoals": next(
-            (
-                float(row["average_goals"])
-                for row in comparison_rows
-                if row.get("season_label") == scope.season_label and row.get("average_goals") is not None
-            ),
-            None,
-        ),
+        "averageGoals": season_average_goals,
     }
 
     data = {
@@ -1771,8 +1867,8 @@ def get_team_journey_history(
     competitionKey: str | None = None,
     teamId: str | None = None,
 ) -> dict[str, Any]:
-    normalized_competition_key = (competitionKey or "").strip()
-    if normalized_competition_key == "":
+    normalized_competition_key = _normalize_competition_key(competitionKey)
+    if normalized_competition_key is None:
         raise AppError(
             message="'competitionKey' is required.",
             code="INVALID_QUERY_PARAM",
@@ -1781,7 +1877,7 @@ def get_team_journey_history(
         )
     normalized_team_id = _parse_required_int(teamId, field_name="teamId")
 
-    canonical_competition = get_canonical_competition_by_key(normalized_competition_key)
+    canonical_competition = _resolve_canonical_competition(normalized_competition_key)
     journey_rows = _fetch_team_journey_history_rows(normalized_competition_key, normalized_team_id)
     if not journey_rows:
         raise AppError(
@@ -1789,7 +1885,7 @@ def get_team_journey_history(
             code="TEAM_JOURNEY_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "teamId": normalized_team_id,
             },
         )
@@ -1801,8 +1897,10 @@ def get_team_journey_history(
 
     data = {
         "competition": {
-            "competitionKey": normalized_competition_key,
-            "competitionName": canonical_competition.default_name if canonical_competition else normalized_competition_key,
+            "competitionKey": _public_competition_key(normalized_competition_key),
+            "competitionName": canonical_competition.default_name
+            if canonical_competition
+            else _public_competition_key(normalized_competition_key),
         },
         "team": {
             "teamId": str(normalized_team_id),
@@ -1839,7 +1937,7 @@ def get_team_progression(
             code="COMPETITION_SEASON_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": normalized_competition_key,
+                "competitionKey": _public_competition_key(normalized_competition_key),
                 "seasonLabel": seasonLabel,
             },
         )
@@ -1855,7 +1953,7 @@ def get_team_progression(
             code="TEAM_PROGRESSION_NOT_FOUND",
             status=404,
             details={
-                "competitionKey": scope.competition_key,
+                "competitionKey": _public_competition_key(scope.competition_key),
                 "seasonLabel": _format_season_label(scope.season_label),
                 "teamId": normalized_team_id,
             },

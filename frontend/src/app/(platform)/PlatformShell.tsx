@@ -542,7 +542,10 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
         <div className="pt-16 lg:pt-24">
           {shouldRenderSurfaceChrome ? (
-            <PlatformShellFrame contentWidthClassName={surfaceContentWidthClassName} />
+            <PlatformShellFrame
+              compact={isCanonicalSeasonRoute}
+              contentWidthClassName={surfaceContentWidthClassName}
+            />
           ) : null}
 
           {shouldRenderSurfaceChrome ? (
@@ -552,7 +555,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
             >
               <div
                 className={joinClasses(
-                  "mx-auto w-full px-6 py-4 md:px-8",
+                  "mx-auto w-full px-6 md:px-8",
+                  isCanonicalSeasonRoute ? "py-2" : "py-4",
                   surfaceContentWidthClassName,
                 )}
               >
@@ -569,7 +573,13 @@ export function PlatformShell({ children }: PlatformShellProps) {
             </section>
           ) : null}
 
-          <div className={isHomeRoute ? "" : "px-6 py-8 md:px-8"}>
+          <div
+            className={
+              isHomeRoute
+                ? ""
+                : joinClasses("px-6 md:px-8", isCanonicalSeasonRoute ? "py-4" : "py-8")
+            }
+          >
             <GlobalErrorBoundary>
               <main
                 className={joinClasses(

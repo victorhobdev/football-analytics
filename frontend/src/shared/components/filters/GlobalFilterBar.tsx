@@ -235,10 +235,23 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function FieldHeader({ label, badge }: { label: string; badge?: ReactNode }) {
+function FieldHeader({
+  badge,
+  compact = false,
+  label,
+}: {
+  badge?: ReactNode;
+  compact?: boolean;
+  label: string;
+}) {
   return (
-    <div className="mb-[0.42rem] flex items-center justify-between gap-2">
-      <span className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#69778d]">
+    <div className={joinClasses("flex items-center justify-between gap-2", compact ? "mb-1" : "mb-[0.42rem]")}>
+      <span
+        className={joinClasses(
+          "font-bold uppercase text-[#69778d]",
+          compact ? "text-[0.62rem] tracking-[0.16em]" : "text-[0.68rem] tracking-[0.2em]",
+        )}
+      >
         {label}
       </span>
       {badge}
@@ -250,20 +263,23 @@ function FilterField({
   label,
   badge,
   children,
+  compact = false,
 }: {
   label: string;
   badge?: ReactNode;
   children: ReactNode;
+  compact?: boolean;
 }) {
   return (
     <label className="flex min-w-0 flex-col text-sm text-[#223146]">
-      <FieldHeader badge={badge} label={label} />
+      <FieldHeader badge={badge} compact={compact} label={label} />
       {children}
     </label>
   );
 }
 
 function StyledSelect({
+  compact = false,
   disabled = false,
   id,
   label,
@@ -272,6 +288,7 @@ function StyledSelect({
   placeholder,
   value,
 }: {
+  compact?: boolean;
   disabled?: boolean;
   id: string;
   label: string;
@@ -320,7 +337,10 @@ function StyledSelect({
         aria-haspopup="listbox"
         aria-label={label}
         className={joinClasses(
-          "flex min-h-[2.9rem] w-full items-center justify-between gap-3 rounded-[0.95rem] bg-white/95 px-[0.85rem] py-[0.7rem] text-left text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99]",
+          "flex w-full items-center justify-between gap-3 bg-white/95 text-left font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99]",
+          compact
+            ? "min-h-[2.35rem] rounded-[0.78rem] px-3 py-2 text-[0.84rem]"
+            : "min-h-[2.9rem] rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-[0.92rem]",
           disabled
             ? "cursor-not-allowed bg-[rgba(222,228,237,0.72)] text-[#93a0b4]"
             : "hover:bg-white",
@@ -383,17 +403,26 @@ function StaticField({
   label,
   value,
   badge,
+  compact = false,
 }: {
   controlId?: string;
   controlValue?: string;
   label: string;
   value: string;
   badge?: ReactNode;
+  compact?: boolean;
 }) {
   return (
     <div className="flex min-w-0 flex-col text-sm text-[#223146]">
-      <FieldHeader badge={badge} label={label} />
-      <div className="flex min-h-[2.9rem] items-center rounded-[0.95rem] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)]">
+      <FieldHeader badge={badge} compact={compact} label={label} />
+      <div
+        className={joinClasses(
+          "flex items-center bg-white/95 font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)]",
+          compact
+            ? "min-h-[2.35rem] rounded-[0.78rem] px-3 py-2 text-[0.84rem]"
+            : "min-h-[2.9rem] rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-[0.92rem]",
+        )}
+      >
         <span className="truncate">{value}</span>
       </div>
       {controlId ? (
@@ -534,10 +563,16 @@ export function GlobalFilterBar() {
   ]
     .filter(Boolean)
     .join(" · ");
-  const controlBarClasses =
-    "rounded-[1.35rem] bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)]";
+  const isCompactSeasonHubFilter = isSeasonHubRootPath;
+  const controlBarClasses = joinClasses(
+    "bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)]",
+    isCompactSeasonHubFilter ? "rounded-[1rem] p-2.5 md:p-3" : "rounded-[1.35rem] p-4",
+  );
   const resetButtonClasses = joinClasses(
-    "inline-flex min-h-[2.15rem] w-full items-center justify-center self-end rounded-full px-5 py-2 text-[0.72rem] font-extrabold uppercase tracking-[0.18em] transition-[transform,background-color,color,box-shadow] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] lg:w-auto lg:whitespace-nowrap",
+    "inline-flex w-full items-center justify-center self-end rounded-full font-extrabold uppercase transition-[transform,background-color,color,box-shadow] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] lg:w-auto lg:whitespace-nowrap",
+    isCompactSeasonHubFilter
+      ? "min-h-[2.05rem] px-4 py-1.5 text-[0.66rem] tracking-[0.16em]"
+      : "min-h-[2.15rem] px-5 py-2 text-[0.72rem] tracking-[0.18em]",
     hasResettableFilters
       ? "bg-[#003526] text-white shadow-[0_14px_28px_-24px_rgba(0,53,38,0.55)] hover:-translate-y-0.5 hover:bg-[#004e39] hover:shadow-[0_18px_34px_-24px_rgba(0,53,38,0.55)] active:scale-[0.97]"
       : "bg-[rgba(222,228,237,0.88)] text-[#93a0b4] shadow-none",
@@ -829,9 +864,10 @@ export function GlobalFilterBar() {
         data-url-hydrated={isUrlHydrated ? "true" : "false"}
         className={controlBarClasses}
       >
-        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end">
-          <FilterField label="Competição">
+        <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_200px] lg:grid-cols-[minmax(0,1fr)_200px_auto] lg:items-end">
+          <FilterField compact label="Competição">
             <StyledSelect
+              compact
               id="global-filter-competition-id"
               label="Competição"
               onChange={(nextValue) => {
@@ -863,8 +899,9 @@ export function GlobalFilterBar() {
             />
           </FilterField>
 
-          <FilterField label="Temporada">
+          <FilterField compact label="Temporada">
             <StyledSelect
+              compact
               disabled={!selectedCompetition}
               id="global-filter-season-id"
               label="Temporada"
@@ -909,7 +946,7 @@ export function GlobalFilterBar() {
           </button>
         </div>
         {compactStatusSummary ? (
-          <p className="mt-3 text-[0.8rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
+          <p className="mt-2 text-[0.74rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
         ) : null}
       </section>
     );
