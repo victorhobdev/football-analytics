@@ -147,6 +147,7 @@ export interface MatchesListLocalFilters {
   status?: string | null;
   teamId?: string | null;
   allPages?: boolean;
+  enabled?: boolean;
   page?: number;
   pageSize?: number;
   sortBy?: MatchesListSortBy;

@@ -18,12 +18,6 @@ export default function RootNotFound() {
           >
             Abrir competições
           </Link>
-          <Link
-            className="button-pill button-pill-secondary"
-            href="/matches"
-          >
-            Abrir partidas
-          </Link>
         </>
       }
       title="Página não encontrada"
