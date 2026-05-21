@@ -1,8 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { resolveSeasonChampionArtwork } from "@/features/competitions/utils/champion-media";
@@ -36,6 +35,7 @@ import {
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 
 const WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens";
+const WORLD_CUP_COMPETITION_ASSET_KEY = "wc_mens";
 
 type WorldCupBracketSnapshotColumn = {
   leftTies: WorldCupKnockoutTie[];
@@ -155,6 +155,17 @@ function buildFallbackLabel(value: string | null | undefined, emptyFallback = "W
     .slice(0, 3)
     .map((token) => token[0]?.toUpperCase() ?? "")
     .join("");
+}
+
+function resolveWorldCupHostCountryAssetId(
+  hostCountryTeam: WorldCupTeamReference | null,
+  hostCountry: string | null,
+): string | null {
+  if (hostCountryTeam?.teamId) {
+    return hostCountryTeam.teamId;
+  }
+
+  return hostCountry === "Coreia do Sul e Japão" ? "world-cup-japan" : null;
 }
 
 function formatGoalLabel(goals: number): string {
@@ -527,7 +538,7 @@ function WorldCupTeamBadge({
       className={joinClasses("border-[rgba(191,201,195,0.4)] bg-[#f0f3ff]", className)}
       fallback={buildFallbackLabel(teamName, "WC")}
       fallbackClassName="text-[0.55rem] text-[#003526]"
-      imageClassName="p-1"
+      imageClassName="p-0"
       shape="circle"
     />
   );
@@ -595,12 +606,12 @@ function HeroSummaryItem({
   valueClassName?: string;
 }) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-[rgba(191,201,195,0.32)] py-3 last:border-b-0 last:pb-0">
-      <div className="flex h-12 w-12 items-center justify-center">{media}</div>
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5 border-b border-[rgba(191,201,195,0.32)] py-2.5 last:border-b-0 last:pb-0">
+      <div className="flex h-10 w-10 items-center justify-center">{media}</div>
       <div className="min-w-0">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
-        <div className={joinClasses("mt-1 text-lg font-semibold text-[#111c2d]", valueClassName)}>{value}</div>
-        {detail ? <p className="mt-1 text-sm/5 text-[#57657a]">{detail}</p> : null}
+        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
+        <div className={joinClasses("mt-0.5 text-base font-semibold text-[#111c2d]", valueClassName)}>{value}</div>
+        {detail ? <p className="mt-0.5 text-[0.82rem] leading-5 text-[#57657a]">{detail}</p> : null}
       </div>
     </div>
   );
@@ -654,70 +665,81 @@ function WorldCupEditionHero({
 }) {
   const artwork = resolveSeasonChampionArtwork(WORLD_CUP_COMPETITION_KEY, seasonLabel);
   const groupsCount = groupStages.reduce((total, stage) => total + stage.groups.length, 0);
-  const topScorerTeamLabel = edition.topScorer?.teamName ?? "Seleção não identificada";
   const championName = describeChampion(edition.champion);
+  const runnerUpName = edition.runnerUp?.teamName ?? "Vice-campeão não identificado";
   const topScorerName = edition.topScorer?.playerName ?? "Artilharia indisponível";
+  const hostCountryName = edition.hostCountry ?? "País-sede não identificado";
+  const hostCountryAssetId = resolveWorldCupHostCountryAssetId(edition.hostCountryTeam, edition.hostCountry);
   const heroImageSrc = artwork?.src ?? null;
+  const [isHeroPhotoUnavailable, setIsHeroPhotoUnavailable] = useState(false);
+  const hasHeroPhoto = Boolean(heroImageSrc) && !isHeroPhotoUnavailable;
+
+  useEffect(() => {
+    setIsHeroPhotoUnavailable(false);
+  }, [heroImageSrc]);
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/65 bg-[linear-gradient(180deg,rgba(255,252,244,0.96)_0%,rgba(248,242,227,0.98)_48%,rgba(241,232,207,0.96)_100%)] p-5 shadow-[0_34px_88px_-58px_rgba(68,43,4,0.28)] md:p-6 xl:p-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-[radial-gradient(circle_at_top_left,rgba(243,223,159,0.45),transparent_48%),radial-gradient(circle_at_top_right,rgba(138,109,24,0.18),transparent_40%)]" />
-      <div className="pointer-events-none absolute bottom-[-18%] right-[12%] h-64 w-64 rounded-full bg-[rgba(95,67,10,0.08)] blur-3xl" />
+    <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/65 bg-[linear-gradient(180deg,rgba(255,252,244,0.96)_0%,rgba(248,242,227,0.98)_48%,rgba(241,232,207,0.96)_100%)] p-4 shadow-[0_34px_88px_-58px_rgba(68,43,4,0.28)] md:p-5 xl:p-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_top_left,rgba(243,223,159,0.45),transparent_48%),radial-gradient(circle_at_top_right,rgba(138,109,24,0.18),transparent_40%)]" />
+      <div className="pointer-events-none absolute bottom-[-20%] right-[12%] h-56 w-56 rounded-full bg-[rgba(95,67,10,0.08)] blur-3xl" />
 
-      <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.78fr)] xl:items-stretch">
-        <div className="space-y-6">
+      <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.8fr)] xl:items-stretch">
+        <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <ProfileTag className="bg-white text-[#6d5c3f]">Copa do Mundo</ProfileTag>
             {groupStages.length > 0 ? <ProfileTag className="bg-white text-[#6d5c3f]">Fase de grupos</ProfileTag> : null}
             {knockoutRounds.length > 0 ? <ProfileTag className="bg-white text-[#6d5c3f]">Mata-mata</ProfileTag> : null}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
-            <div className="relative flex h-20 w-20 shrink-0 flex-col items-center justify-center overflow-hidden rounded-[1.35rem] border border-[rgba(191,201,195,0.55)] bg-white shadow-[0_24px_50px_-34px_rgba(68,43,4,0.32)]">
-              <span className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#8a6d18]">FIFA</span>
-              <span className="mt-1 font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold tracking-[-0.06em] text-[#5f430a]">
-                WC
-              </span>
-            </div>
+          <div className="grid gap-3 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:items-center">
+            <ProfileMedia
+              alt="Logo da Copa do Mundo FIFA"
+              assetId={WORLD_CUP_COMPETITION_ASSET_KEY}
+              category="competitions"
+              className="h-[4.5rem] w-[4.5rem] rounded-[1.35rem] border-[rgba(191,201,195,0.55)] bg-white shadow-[0_24px_50px_-34px_rgba(68,43,4,0.32)]"
+              fallback="WC"
+              fallbackClassName="text-lg text-[#5f430a]"
+              imageClassName="p-3"
+            />
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#8a6d18]">Página da edição</p>
-              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.8rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-[#1d160c] md:text-[3.55rem]">
+              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.65rem] font-extrabold leading-[0.94] tracking-[-0.06em] text-[#1d160c] md:text-[3.35rem]">
                 Copa do Mundo {edition.year}
               </h1>
-              <p className="max-w-3xl text-sm/7 text-[#6d5c3f] md:text-[0.98rem]">
-                Sede em {edition.hostCountry ?? "país não identificado"}, {formatWholeNumber(edition.matchesCount)} partidas
+              <p className="max-w-3xl text-sm/6 text-[#6d5c3f] md:text-[0.95rem]">
+                Sede em {hostCountryName.toLowerCase()}, {formatWholeNumber(edition.matchesCount)} partidas
                 registradas e leitura completa da edição em grupos, chaveamento e artilharia.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Grupos</p>
-              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold text-[#1d160c]">
+          <div className="grid gap-2.5 md:grid-cols-3">
+            <div className="flex min-h-[5.6rem] flex-col items-center justify-center rounded-[1.2rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-3 py-3 text-center">
+              <p className="text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Grupos</p>
+              <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.7rem] font-extrabold leading-none text-[#1d160c]">
                 {formatWholeNumber(groupsCount)}
               </p>
             </div>
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Fases eliminatórias</p>
-              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold text-[#1d160c]">
+            <div className="flex min-h-[5.6rem] flex-col items-center justify-center rounded-[1.2rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-3 py-3 text-center">
+              <p className="text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Fases eliminatórias</p>
+              <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.7rem] font-extrabold leading-none text-[#1d160c]">
                 {formatWholeNumber(knockoutRounds.length)}
               </p>
             </div>
-            <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Participantes</p>
-              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold text-[#1d160c]">
+            <div className="flex min-h-[5.6rem] flex-col items-center justify-center rounded-[1.2rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-3 py-3 text-center">
+              <p className="text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">Participantes</p>
+              <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.7rem] font-extrabold leading-none text-[#1d160c]">
                 {formatWholeNumber(edition.teamsCount)}
               </p>
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-5 py-5 shadow-[0_28px_68px_-48px_rgba(68,43,4,0.22)]">
+          <div className="rounded-[1.35rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-4 py-4 shadow-[0_28px_68px_-48px_rgba(68,43,4,0.22)]">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#6d5c3f]">
               Resumo da edição
             </p>
-            <div className="mt-4">
+            <div className="mt-3">
               <HeroSummaryItem
                 label="Campeão"
                 media={
@@ -725,25 +747,40 @@ function WorldCupEditionHero({
                     alt={championName}
                     assetId={edition.champion?.teamId}
                     category="clubs"
-                    className="h-12 w-12 border-0 bg-[rgba(240,243,255,0.82)]"
+                    className="h-10 w-10 border-0 bg-[rgba(240,243,255,0.82)]"
                     fallback={buildFallbackLabel(championName, "WC")}
-                    imageClassName="p-1.5"
+                    imageClassName="p-1.25"
                     shape="circle"
                   />
                 }
                 value={
                   <TeamPageLink
-                    className="truncate font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold leading-none tracking-[-0.05em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
+                    className="truncate font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-none tracking-[-0.05em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
                     team={edition.champion}
                   />
                 }
                 valueClassName="min-w-0"
               />
               <HeroSummaryItem
-                detail={edition.runnerUp?.teamName ? `Vice: ${edition.runnerUp.teamName}` : "Vice não identificado"}
-                label="Decisão"
-                value={edition.finalVenue ?? "Palco final indisponível"}
-                valueClassName="font-[family:var(--font-profile-headline)] text-[1.4rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#1d160c]"
+                label="Vice-campeão"
+                media={
+                  <ProfileMedia
+                    alt={runnerUpName}
+                    assetId={edition.runnerUp?.teamId}
+                    category="clubs"
+                    className="h-10 w-10 border-0 bg-[rgba(240,243,255,0.82)]"
+                    fallback={buildFallbackLabel(runnerUpName, "WC")}
+                    imageClassName="p-1.25"
+                    shape="circle"
+                  />
+                }
+                value={
+                  <TeamPageLink
+                    className="truncate font-[family:var(--font-profile-headline)] text-[1.2rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
+                    team={edition.runnerUp}
+                  />
+                }
+                valueClassName="min-w-0"
               />
               <HeroSummaryItem
                 detail={`${formatWholeNumber(edition.topScorer?.goals ?? null)} ${formatGoalLabel(edition.topScorer?.goals ?? 0)}${edition.topScorer?.teamName ? ` · ${edition.topScorer.teamName}` : ""}`}
@@ -753,38 +790,47 @@ function WorldCupEditionHero({
                     alt={topScorerName}
                     assetId={edition.topScorer?.playerId}
                     category="players"
-                    className="h-12 w-12 border-[#d8e3fb] bg-[rgba(240,243,255,0.82)]"
+                    className="h-10 w-10 border-[#d8e3fb] bg-[rgba(240,243,255,0.82)]"
                     fallback={buildFallbackLabel(topScorerName, "WC")}
                     imageClassName="p-0"
                     shape="circle"
                   />
                 }
                 value={topScorerName}
-                valueClassName="font-[family:var(--font-profile-headline)] text-[1.4rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#1d160c]"
+                valueClassName="font-[family:var(--font-profile-headline)] text-[1.16rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1d160c]"
               />
               <HeroSummaryItem
-                detail={`Cobertura ${(edition.coverage.label ?? "disponível").toLowerCase()} · ${topScorerTeamLabel}`}
-                label="Recorte"
-                value={edition.editionName}
-                valueClassName="font-[family:var(--font-profile-headline)] text-[1.25rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-[#1d160c]"
+                detail={hostCountryName}
+                label="Estádio da final"
+                media={
+                  <ProfileMedia
+                    alt={`País-sede ${hostCountryName}`}
+                    assetId={hostCountryAssetId}
+                    category="clubs"
+                    className="h-10 w-10 border-0 bg-[rgba(240,243,255,0.82)]"
+                    fallback={buildFallbackLabel(hostCountryName, "WC")}
+                    imageClassName="p-1.25"
+                    shape="circle"
+                  />
+                }
+                value={edition.finalVenue ?? "Estádio não informado"}
+                valueClassName="font-[family:var(--font-profile-headline)] text-[1.16rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1d160c]"
               />
             </div>
           </div>
         </div>
 
         <aside className="relative min-h-[320px] overflow-hidden rounded-[1.7rem] border border-[rgba(95,67,10,0.18)] bg-[linear-gradient(135deg,#2b1d0b_0%,#5a3f0f_56%,#8a6d18_100%)] shadow-[0_34px_84px_-56px_rgba(68,43,4,0.55)]">
-          {heroImageSrc ? (
-            <Image
-              alt={`Imagem temática da edição ${edition.year}`}
-              className="object-cover object-center"
-              fill
-              priority
-              sizes="(min-width: 1280px) 360px, 100vw"
-              src={heroImageSrc}
+          {hasHeroPhoto ? (
+            <img
+              alt={`Celebração do campeão da Copa do Mundo ${edition.year}`}
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              onError={() => setIsHeroPhotoUnavailable(true)}
+              src={heroImageSrc ?? undefined}
             />
           ) : null}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,226,163,0.22),transparent_26%),linear-gradient(180deg,rgba(21,13,4,0.12)_0%,rgba(21,13,4,0.52)_46%,rgba(21,13,4,0.92)_100%)]" />
-          {!heroImageSrc ? (
+          {!hasHeroPhoto ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex h-40 w-40 flex-col items-center justify-center rounded-full border border-white/14 bg-white/8 text-center shadow-[0_28px_64px_-36px_rgba(0,0,0,0.4)]">
                 <span className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/72">Copa do Mundo</span>
@@ -797,17 +843,19 @@ function WorldCupEditionHero({
           <div className="relative flex h-full min-h-[320px] flex-col justify-between p-5 md:p-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/88">
-                Hero da edição
+                Campeão da edição
               </span>
               <span className="rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/72">
-                {edition.hostCountry ?? "Sem sede"}
+                {championName}
               </span>
             </div>
 
             <div className="space-y-4">
               <div className="max-w-[16rem]">
                 <p className="text-sm/6 text-[#f8efd8]">
-                  Estrutura pronta para receber arte temática da edição assim que o catálogo incorporar a Copa.
+                  {hasHeroPhoto
+                    ? `Registro visual da conquista de ${championName} na Copa do Mundo ${edition.year}.`
+                    : "Estrutura pronta para receber arte temática da edição assim que o catálogo incorporar a Copa."}
                 </p>
               </div>
               <div className="rounded-[1.3rem] border border-white/12 bg-[rgba(24,15,5,0.52)] px-4 py-4 backdrop-blur-sm">
@@ -862,7 +910,7 @@ function WorldCupGroupStandingCard({ row }: { row: WorldCupEditionStandingRow })
           {row.position}
         </span>
         <WorldCupTeamBadge
-          className="h-[26px] w-[26px]"
+          className="h-10 w-10"
           team={{ teamId: row.teamId, teamName }}
         />
         {row.teamId ? (
@@ -914,7 +962,6 @@ function WorldCupGroupPhaseSection({
   return (
     <ProfilePanel className="space-y-5" tone="base">
       <SectionHeader
-        description="Classificação final de cada grupo da edição, no mesmo padrão visual da Libertadores."
         eyebrow="Fase de grupos"
         title="Grupos da edição"
       />
@@ -990,7 +1037,7 @@ function WorldCupSnapshotTieCard({
           return (
             <div className="grid grid-cols-[minmax(0,1fr)_1.75rem] items-center gap-2" key={`${side}-${tie.tieKey}-${team.teamId ?? teamName}`}>
               <div className="flex min-w-0 items-center gap-2">
-                <WorldCupTeamBadge className="h-6 w-6 border-0 bg-white" team={team} />
+                <WorldCupTeamBadge className="h-9 w-9 border-0 bg-white" team={team} />
                 <span
                   className={
                     isWinner
@@ -1092,7 +1139,7 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
                   >
                     <div className="flex items-center justify-between gap-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <WorldCupTeamBadge className="h-8 w-8 border-white/12 bg-white/12 text-white" team={team} />
+                        <WorldCupTeamBadge className="h-11 w-11 border-white/12 bg-white/12 text-white" team={team} />
                         <span className={isWinner ? "truncate text-[1rem] font-extrabold text-white" : "truncate text-[1rem] font-semibold text-white/88"}>
                           {teamName}
                         </span>
@@ -1289,7 +1336,7 @@ function WorldCupEditionRankingSection({
             </h2>
           </div>
           <Link
-            className="inline-flex items-center rounded-full border border-[rgba(191,201,195,0.52)] bg-[rgba(240,243,255,0.88)] px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526] transition-colors hover:border-[#8bd6b6] hover:bg-white"
+            className="button-pill button-pill-secondary"
             href={buildWorldCupRankingsPath()}
           >
             Ver ranking histórico

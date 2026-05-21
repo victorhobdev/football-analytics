@@ -182,7 +182,7 @@ export function MatchCenterHeader({ match, contextInput = {} }: MatchCenterHeade
           {headToHeadHref ? (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={headToHeadHref}
               >
                 Comparar confronto

@@ -1,4 +1,9 @@
 import { getCompetitionById, getCompetitionByKey } from "@/config/competitions.registry";
+import {
+  buildWorldCupEditionPath,
+  buildWorldCupHubPath,
+  buildWorldCupTeamPath,
+} from "@/features/world-cup/routes";
 import { resolveSeasonForCompetition } from "@/config/seasons.registry";
 import type {
   CompetitionSeasonContext,
@@ -22,6 +27,8 @@ type SharedFilterQueryInput = CompetitionSeasonContextInput & {
 
 const CONTEXT_QUERY_KEYS = ["competitionId", "competitionKey", "seasonId", "seasonLabel"] as const;
 export const SEASON_HUB_TABS = ["calendar", "standings", "rankings"] as const;
+const WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens";
+const WORLD_CUP_STATIC_PATH_SEGMENTS = new Set(["finais", "rankings", "selecoes"]);
 
 type CompetitionSeasonPathInput =
   | CompetitionSeasonContext
@@ -97,6 +104,16 @@ function normalizePathname(pathname: string): string {
   return withoutTrailingSlash.length > 0 ? withoutTrailingSlash : "/";
 }
 
+function isWorldCupEditionPath(pathname: string): boolean {
+  const match = pathname.match(/^\/copa-do-mundo\/([^/]+)(?:\/|$)/);
+
+  if (!match) {
+    return false;
+  }
+
+  return !WORLD_CUP_STATIC_PATH_SEGMENTS.has(match[1]);
+}
+
 export function resolveCompetitionSeasonContext(
   input: CompetitionSeasonContextInput,
 ): CompetitionSeasonContext | null {
@@ -151,6 +168,20 @@ export function resolveCompetitionSeasonContextFromPathname(
   pathname: string,
 ): CompetitionSeasonContext | null {
   const normalizedPathname = normalizePathname(pathname);
+
+  if (isWorldCupEditionPath(normalizedPathname)) {
+    const worldCupMatch = normalizedPathname.match(/^\/copa-do-mundo\/([^/]+)(?:\/|$)/);
+
+    if (!worldCupMatch) {
+      return null;
+    }
+
+    return resolveCompetitionSeasonContext({
+      competitionKey: WORLD_CUP_COMPETITION_KEY,
+      seasonLabel: worldCupMatch[1],
+    });
+  }
+
   const match = normalizedPathname.match(/^\/competitions\/([^/]+)\/seasons\/([^/]+)(?:\/|$)/);
 
   if (!match) {
@@ -168,6 +199,10 @@ export function buildCompetitionSeasonBasePath(context: CompetitionSeasonContext
 }
 
 export function buildCompetitionHubPath(competitionKey: string): string {
+  if (competitionKey.trim() === WORLD_CUP_COMPETITION_KEY) {
+    return buildWorldCupHubPath();
+  }
+
   return `/competitions/${encodePathSegment(competitionKey)}`;
 }
 
@@ -177,6 +212,10 @@ export function buildSeasonHubPath(input: CompetitionSeasonPathInput): string {
 
   if (!competitionKey || !seasonLabel) {
     throw new Error("competitionKey and seasonLabel are required to build the season hub path.");
+  }
+
+  if (competitionKey === WORLD_CUP_COMPETITION_KEY) {
+    return buildWorldCupEditionPath(seasonLabel);
   }
 
   return `/competitions/${encodePathSegment(competitionKey)}/seasons/${encodePathSegment(seasonLabel)}`;
@@ -213,6 +252,10 @@ export function buildCanonicalPlayerPath(
 }
 
 export function buildCanonicalTeamPath(context: CompetitionSeasonContext, teamId: string): string {
+  if (context.competitionKey === WORLD_CUP_COMPETITION_KEY) {
+    return buildWorldCupTeamPath(teamId);
+  }
+
   return `${buildCompetitionSeasonBasePath(context)}/teams/${encodePathSegment(teamId)}`;
 }
 
@@ -310,6 +353,10 @@ export function buildTeamResolverPath(
   teamId: string,
   contextInput: SharedFilterQueryInput = {},
 ): string {
+  if (normalizeText(contextInput.competitionKey) === WORLD_CUP_COMPETITION_KEY) {
+    return buildWorldCupTeamPath(teamId);
+  }
+
   return `/teams/${encodePathSegment(teamId)}${buildFilterQueryString(contextInput)}`;
 }
 
@@ -330,6 +377,10 @@ export function buildTeamsPath(contextInput: SharedFilterQueryInput = {}): strin
 
 export function buildMatchesPath(contextInput: SharedFilterQueryInput = {}): string {
   return `/matches${buildFilterQueryString(contextInput)}`;
+}
+
+export function buildRankingsHubPath(contextInput: SharedFilterQueryInput = {}): string {
+  return `/rankings${buildFilterQueryString(contextInput)}`;
 }
 
 export function buildRankingPath(
@@ -416,6 +467,14 @@ export function buildPassthroughSearchParamsQueryString(
 export function getContextQueryKeysToOmitForPath(pathname: string): ContextQueryKey[] {
   const normalizedPathname = normalizePathname(pathname);
 
+  if (isWorldCupEditionPath(normalizedPathname)) {
+    return ["competitionId", "seasonId"];
+  }
+
+  if (/^\/copa-do-mundo(?:\/|$)/.test(normalizedPathname)) {
+    return ["competitionId"];
+  }
+
   if (/^\/competitions\/[^/]+\/seasons\/[^/]+(?:\/|$)/.test(normalizedPathname)) {
     return ["competitionId", "seasonId"];
   }
@@ -432,6 +491,10 @@ export function getContextQueryKeysToLockForPath(pathname: string): ContextQuery
 
   if (/^\/matches\/[^/]+(?:\/|$)/.test(normalizedPathname)) {
     return ["competitionId", "seasonId"];
+  }
+
+  if (isWorldCupEditionPath(normalizedPathname)) {
+    return ["seasonId"];
   }
 
   if (/^\/competitions\/[^/]+\/seasons\/[^/]+(?:\/|$)/.test(normalizedPathname)) {

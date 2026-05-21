@@ -39,14 +39,30 @@ def _format_competition_coverage(
     events_count: int,
     player_statistics_count: int,
 ) -> dict[str, Any]:
-    minimum_available = min(
+    component_counts = (
         match_statistics_count,
         lineups_count,
         events_count,
         player_statistics_count,
     )
+
+    if matches_count <= 0:
+        return build_coverage_from_counts(0, 0, "Competition depth coverage")
+
+    if max(component_counts) <= 0:
+        return build_coverage_from_counts(0, matches_count, "Competition depth coverage")
+
+    aggregated_available = max(
+        1,
+        round(
+            sum(min(count, matches_count) / matches_count for count in component_counts)
+            / len(component_counts)
+            * matches_count
+        ),
+    )
+
     return build_coverage_from_counts(
-        minimum_available,
+        aggregated_available,
         matches_count,
         "Competition depth coverage",
     )

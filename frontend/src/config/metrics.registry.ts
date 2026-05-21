@@ -101,6 +101,17 @@ const METRICS_LIST: MetricDefinition[] = [
     sourceHints: ["mart.player_match_summary", "raw.match_statistics"],
   },
   {
+    key: "cards_total",
+    label: "Cartões",
+    description: "Total de cartões (amarelos + vermelhos).",
+    format: "number",
+    precision: 0,
+    entity: "player",
+    normalizable: true,
+    coverageWarning: "A cobertura pode variar conforme a fonte em partidas antigas.",
+    sourceHints: ["mart.player_match_summary", "raw.match_statistics"],
+  },
+  {
     key: "red_cards",
     label: "Cartões vermelhos",
     description: "Total de cartões vermelhos.",

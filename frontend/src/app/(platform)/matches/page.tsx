@@ -38,7 +38,7 @@ import { useTimeRange } from "@/shared/hooks/useTimeRange";
 import {
   buildMatchCenterPath,
   buildPlayersPath,
-  buildRankingPath,
+  buildRankingsHubPath,
   buildSeasonHubTabPath,
   buildTeamsPath,
 } from "@/shared/utils/context-routing";
@@ -363,9 +363,7 @@ function MatchDiscoveryCard({
         <div className="flex shrink-0 flex-col gap-3 lg:items-end">
           <Link
             aria-label={`Abrir central da partida de ${homeTeamName} x ${awayTeamName}`}
-            className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
-              isScheduled ? "bg-[rgba(216,227,251,0.92)] text-[#1f2d40]" : "bg-[#003526] text-white"
-            }`}
+            className={`button-pill ${isScheduled ? "button-pill-soft" : "button-pill-primary"}`}
             href={href}
             onFocus={() => {
               onPrefetch(match.matchId);
@@ -664,7 +662,7 @@ export default function MatchesPage() {
     dateRangeStart,
     dateRangeEnd,
   });
-  const rankingsHref = buildRankingPath("player-goals", {
+  const rankingsHref = buildRankingsHubPath({
     competitionId,
     seasonId,
     roundId,
@@ -806,7 +804,7 @@ export default function MatchesPage() {
                     {featuredMatch.venueName ? ` • ${featuredMatch.venueName}` : ""}
                   </p>
                   <Link
-                    className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                    className="button-pill button-pill-primary"
                     href={buildMatchHref(featuredMatch)}
                     onFocus={() => {
                       prefetchMatchDetail(featuredMatch.matchId);

@@ -22,6 +22,8 @@ export function usePlayersList(localFilters: PlayersListLocalFilters = {}) {
       competitionId,
       seasonId,
       roundId: timeRangeParams.roundId,
+      stageId: localFilters.stageId ?? undefined,
+      stageFormat: localFilters.stageFormat ?? undefined,
       venue,
       lastN: timeRangeParams.lastN,
       dateRangeStart: timeRangeParams.dateRangeStart,
@@ -32,6 +34,8 @@ export function usePlayersList(localFilters: PlayersListLocalFilters = {}) {
       position: localFilters.position ?? undefined,
       page: localFilters.page,
       pageSize: localFilters.pageSize,
+      sortBy: localFilters.sortBy ?? undefined,
+      sortDirection: localFilters.sortDirection ?? undefined,
     };
   }, [
     competitionId,
@@ -39,6 +43,10 @@ export function usePlayersList(localFilters: PlayersListLocalFilters = {}) {
     localFilters.pageSize,
     localFilters.position,
     localFilters.search,
+    localFilters.sortBy,
+    localFilters.sortDirection,
+    localFilters.stageFormat,
+    localFilters.stageId,
     localFilters.teamId,
     localFilters.minMinutes,
     seasonId,

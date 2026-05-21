@@ -258,25 +258,25 @@ export function TeamProfileContent({ teamId, contextOverride }: TeamProfileConte
 
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-on-dark"
               href={headToHeadHref}
             >
               Confronto direto
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-on-dark"
               href={playersHref}
             >
               Jogadores
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-on-dark"
               href={rankingsHref}
             >
               Rankings
             </Link>
             <Link
-              className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#003526]"
+              className="button-pill button-pill-inverse"
               href={matchesHref}
             >
               Abrir partidas

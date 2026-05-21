@@ -43,6 +43,7 @@ const FILTER_QUERY_KEYS = [
   "dateRangeStart",
   "dateRangeEnd",
 ] as const;
+const WORLD_CUP_STATIC_PATH_SEGMENTS = new Set(["finais", "rankings", "selecoes"]);
 
 type SearchParamsLike = Pick<URLSearchParams, "get">;
 type SeasonSelectOption = {
@@ -50,8 +51,21 @@ type SeasonSelectOption = {
   label: string;
 };
 
+function isWorldCupEditionPathname(pathname: string): boolean {
+  const match = pathname.match(/^\/copa-do-mundo\/([^/]+)(?:\/|$)/);
+
+  if (!match) {
+    return false;
+  }
+
+  return !WORLD_CUP_STATIC_PATH_SEGMENTS.has(match[1]);
+}
+
 function isSeasonHubRootPathname(pathname: string): boolean {
-  return /^\/competitions\/[^/]+\/seasons\/[^/]+\/?$/.test(pathname);
+  return (
+    /^\/competitions\/[^/]+\/seasons\/[^/]+\/?$/.test(pathname) ||
+    isWorldCupEditionPathname(pathname)
+  );
 }
 
 function parseVenue(value: string | null): VenueFilter {
@@ -479,11 +493,11 @@ export function GlobalFilterBar() {
   const isSeasonContextLocked = lockedContextKeys.has("seasonId");
   const hasLockedRouteContext = isCompetitionContextLocked || isSeasonContextLocked;
   const isCompetitionScopedPath = useMemo(
-    () => /^\/competitions\/[^/]+(?:\/|$)/.test(pathname),
+    () => /^\/competitions\/[^/]+(?:\/|$)/.test(pathname) || pathname === "/copa-do-mundo" || pathname.startsWith("/copa-do-mundo/"),
     [pathname],
   );
   const isCompetitionSeasonScopedPath = useMemo(
-    () => /^\/competitions\/[^/]+\/seasons\/[^/]+(?:\/|$)/.test(pathname),
+    () => /^\/competitions\/[^/]+\/seasons\/[^/]+(?:\/|$)/.test(pathname) || isWorldCupEditionPathname(pathname),
     [pathname],
   );
   const isSeasonHubRootPath = useMemo(() => isSeasonHubRootPathname(pathname), [pathname]);
@@ -555,27 +569,26 @@ export function GlobalFilterBar() {
           dateRangeStart ||
           dateRangeEnd,
   );
+  const isWorldCupPath = pathname === "/copa-do-mundo" || pathname.startsWith("/copa-do-mundo/");
+  const shouldUseCompactFilterBar = isWorldCupPath;
+  const shouldShowActiveWindowSummary =
+    activeWindowSummary !== "Temporada inteira" &&
+    (activeMode !== "lastN" || lastN !== null || dateRangeStart !== null || dateRangeEnd !== null);
   const compactStatusSummary = [
     roundId ? `Rodada ${roundId}` : null,
-    activeMode !== "lastN" || lastN !== null || dateRangeStart !== null || dateRangeEnd !== null
-      ? activeWindowSummary
-      : null,
+    shouldShowActiveWindowSummary ? activeWindowSummary : null,
   ]
     .filter(Boolean)
     .join(" · ");
-  const isCompactSeasonHubFilter = isSeasonHubRootPath;
   const controlBarClasses = joinClasses(
-    "bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)]",
-    isCompactSeasonHubFilter ? "rounded-[1rem] p-2.5 md:p-3" : "rounded-[1.35rem] p-4",
+    isWorldCupPath
+      ? "border border-[rgba(138,109,24,0.14)] bg-[linear-gradient(180deg,rgba(255,251,241,0.92),rgba(255,255,255,0.96))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_16px_34px_-32px_rgba(95,67,10,0.16)]"
+      : "bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)]",
+    isWorldCupPath ? "rounded-[1rem] p-2.5 md:p-3" : "rounded-[1.35rem] p-4",
   );
   const resetButtonClasses = joinClasses(
-    "inline-flex w-full items-center justify-center self-end rounded-full font-extrabold uppercase transition-[transform,background-color,color,box-shadow] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] lg:w-auto lg:whitespace-nowrap",
-    isCompactSeasonHubFilter
-      ? "min-h-[2.05rem] px-4 py-1.5 text-[0.66rem] tracking-[0.16em]"
-      : "min-h-[2.15rem] px-5 py-2 text-[0.72rem] tracking-[0.18em]",
-    hasResettableFilters
-      ? "bg-[#003526] text-white shadow-[0_14px_28px_-24px_rgba(0,53,38,0.55)] hover:-translate-y-0.5 hover:bg-[#004e39] hover:shadow-[0_18px_34px_-24px_rgba(0,53,38,0.55)] active:scale-[0.97]"
-      : "bg-[rgba(222,228,237,0.88)] text-[#93a0b4] shadow-none",
+    "button-pill w-full self-end lg:w-auto lg:self-end lg:whitespace-nowrap",
+    hasResettableFilters ? "button-pill-primary" : "button-pill-secondary border-[rgba(191,201,195,0.36)] bg-white/65 text-[#93a0b4]",
   );
 
   const currentFilters = useMemo(
@@ -864,10 +877,9 @@ export function GlobalFilterBar() {
         data-url-hydrated={isUrlHydrated ? "true" : "false"}
         className={controlBarClasses}
       >
-        <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_200px] lg:grid-cols-[minmax(0,1fr)_200px_auto] lg:items-end">
-          <FilterField compact label="Competição">
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end">
+          <FilterField label="Competição">
             <StyledSelect
-              compact
               id="global-filter-competition-id"
               label="Competição"
               onChange={(nextValue) => {
@@ -899,9 +911,8 @@ export function GlobalFilterBar() {
             />
           </FilterField>
 
-          <FilterField compact label="Temporada">
+          <FilterField label="Temporada">
             <StyledSelect
-              compact
               disabled={!selectedCompetition}
               id="global-filter-season-id"
               label="Temporada"
@@ -946,7 +957,7 @@ export function GlobalFilterBar() {
           </button>
         </div>
         {compactStatusSummary ? (
-          <p className="mt-2 text-[0.74rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
+          <p className="mt-3 text-[0.8rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
         ) : null}
       </section>
     );
@@ -958,17 +969,26 @@ export function GlobalFilterBar() {
       data-url-hydrated={isUrlHydrated ? "true" : "false"}
       className={controlBarClasses}
     >
-      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end">
+      <div
+        className={joinClasses(
+          "grid",
+          shouldUseCompactFilterBar
+            ? "gap-2 md:grid-cols-[minmax(0,1fr)_200px] lg:grid-cols-[minmax(0,1fr)_200px_auto] lg:items-center"
+            : "gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end",
+        )}
+      >
         {isCompetitionContextLocked ? (
           <StaticField
+            compact={shouldUseCompactFilterBar}
             controlId="global-filter-competition-id"
             controlValue={competitionId ?? ""}
             label="Competição"
             value={selectedCompetitionLabel}
           />
         ) : (
-          <FilterField label="Competição">
+          <FilterField compact={shouldUseCompactFilterBar} label="Competição">
             <StyledSelect
+              compact={shouldUseCompactFilterBar}
               disabled={isCompetitionContextLocked}
               id="global-filter-competition-id"
               label="Competição"
@@ -1020,14 +1040,16 @@ export function GlobalFilterBar() {
 
         {isSeasonContextLocked ? (
           <StaticField
+            compact={shouldUseCompactFilterBar}
             controlId="global-filter-season-id"
             controlValue={seasonId ?? ""}
             label="Temporada"
             value={selectedSeasonLabel}
           />
         ) : (
-          <FilterField label="Temporada">
+          <FilterField compact={shouldUseCompactFilterBar} label="Temporada">
             <StyledSelect
+              compact={shouldUseCompactFilterBar}
               disabled={isSeasonContextLocked}
               id="global-filter-season-id"
               label="Temporada"
@@ -1065,7 +1087,9 @@ export function GlobalFilterBar() {
         </button>
       </div>
       {compactStatusSummary ? (
-        <p className="mt-3 text-[0.8rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
+        <p className={joinClasses(shouldUseCompactFilterBar ? "mt-2 text-[0.74rem]" : "mt-3 text-[0.8rem]", "font-semibold text-[#687790]")}>
+          {compactStatusSummary}
+        </p>
       ) : null}
     </section>
   );

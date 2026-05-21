@@ -11,7 +11,7 @@ export interface SeasonDef {
 const ANNUAL_SEASON_PATTERN = /^\d{4}$/;
 const SPLIT_YEAR_LABEL_PATTERN = /^(\d{4})\/(\d{4})$/;
 const SPLIT_YEAR_CATALOG_PATTERN = /^(\d{4})_(\d{2}|\d{4})$/;
-const MIN_SUPPORTED_SEASON_YEAR = 2000;
+const MIN_SUPPORTED_SEASON_YEAR = 1900;
 const MAX_SUPPORTED_SEASON_YEAR = 2100;
 
 export const SUPPORTED_SEASONS: SeasonDef[] = [
@@ -253,6 +253,24 @@ export function listSeasonsForCompetition(
 ): SeasonDef[] {
   if (!competition) {
     return [];
+  }
+
+  if (competition.supportedSeasonQueryIds && competition.supportedSeasonQueryIds.length > 0) {
+    const seasons: SeasonDef[] = [];
+    const seenSeasonIds = new Set<string>();
+
+    for (const queryId of competition.supportedSeasonQueryIds) {
+      const season = getSeasonByQueryId(queryId, competition.seasonCalendar);
+
+      if (!season || seenSeasonIds.has(season.id)) {
+        continue;
+      }
+
+      seenSeasonIds.add(season.id);
+      seasons.push(season);
+    }
+
+    return seasons;
   }
 
   return SUPPORTED_SEASONS.filter(

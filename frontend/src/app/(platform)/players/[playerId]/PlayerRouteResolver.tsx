@@ -5,8 +5,11 @@ import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import { PlayerProfileContent } from "./PlayerProfileContent";
+
 import { usePlayerContexts } from "@/features/players/hooks";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
+import { ProfileAlert } from "@/shared/components/profile/ProfilePrimitives";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
 import {
   buildCanonicalPlayerPath,
@@ -128,6 +131,24 @@ export function PlayerRouteResolver({ playerId }: PlayerRouteResolverProps) {
     );
   }
 
+  // Nem todo perfil elegível tem contexto competitivo navegável. Nesses casos,
+  // abrimos o perfil direto em vez de tratar a ausência de histórico como erro.
+  if (!localContext && !contextsQuery.isError && !canonicalHref) {
+    return (
+      <PlayerProfileContent
+        notice={
+          <ProfileAlert title="Perfil aberto em modo direto" tone="info">
+            <p>
+              Este jogador não possui contexto competitivo canônico para navegação. O perfil segue
+              disponível com o estado de dados atual.
+            </p>
+          </ProfileAlert>
+        }
+        playerId={playerId}
+      />
+    );
+  }
+
   const failureCopy = buildPlayerResolverFailureCopy(
     contextsQuery.isError,
     contextsQuery.error?.status,
@@ -142,7 +163,7 @@ export function PlayerRouteResolver({ playerId }: PlayerRouteResolverProps) {
       kicker="Navegação"
       secondaryAction={
         <Link
-          className="inline-flex items-center rounded-full border border-[rgba(112,121,116,0.28)] bg-white/92 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1f2d40]"
+          className="button-pill button-pill-secondary"
           href={`/competitions${currentQueryString}`}
         >
           Abrir competições

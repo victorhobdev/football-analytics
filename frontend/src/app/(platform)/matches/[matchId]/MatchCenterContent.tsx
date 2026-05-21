@@ -349,14 +349,14 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+              className="button-pill button-pill-on-dark"
               href={matchesHref}
             >
               Voltar para partidas
             </Link>
             {seasonHubHref ? (
               <Link
-                className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-on-dark"
                 href={seasonHubHref}
               >
                 Voltar para temporada
@@ -364,7 +364,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
             ) : null}
             {rankingsHref ? (
               <Link
-                className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#003526]"
+                className="button-pill button-pill-inverse"
                 href={rankingsHref}
               >
                 Rankings
@@ -585,7 +585,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 Lance a lance da partida, em ordem cronológica.
               </p>
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={buildMatchCenterTabHref(pathname, searchParams, "timeline")}
               >
                 Ver linha do tempo
@@ -608,7 +608,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 Escalações por time, com titulares e banco quando esses dados estiverem disponíveis.
               </p>
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={buildMatchCenterTabHref(pathname, searchParams, "lineups")}
               >
                 Ver escalações
@@ -631,7 +631,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 Posse, volume ofensivo, passe e disciplina lado a lado.
               </p>
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={buildMatchCenterTabHref(pathname, searchParams, "team-stats")}
               >
                 Ver comparativo
@@ -654,7 +654,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 Nomes, minutos, participações e nota dos jogadores no jogo.
               </p>
               <Link
-                className="inline-flex items-center rounded-full bg-[#003526] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="button-pill button-pill-primary"
                 href={buildMatchCenterTabHref(pathname, searchParams, "player-stats")}
               >
                 Ver jogadores

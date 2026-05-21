@@ -6,20 +6,75 @@ export interface RankingTableRow extends Record<string, string | number | boolea
   entityName?: string | null;
   rank?: number | null;
   metricValue?: number | null;
+  metricPer90?: number | null;
+  matchesPlayed?: number | null;
+  minutesPlayed?: number | null;
+  teamId?: string | null;
+  teamName?: string | null;
+  teamCount?: number | null;
+  teamContextLabel?: string | null;
 }
 
 export interface RankingStageContext {
   stageId: string;
   stageName?: string | null;
   stageFormat?: string | null;
+  stageFormatLabel?: string | null;
+}
+
+export interface RankingScopeVenue {
+  value: VenueFilter;
+  label: string;
+}
+
+export interface RankingScopeWindow {
+  kind: "all" | "round" | "lastN" | "dateRange";
+  label: string;
+  appliesPerEntity: boolean;
+  roundId?: string | null;
+  lastN?: number | null;
+  dateStart?: string | null;
+  dateEnd?: string | null;
+}
+
+export interface RankingScopeSample {
+  field?: string | null;
+  label: string;
+  unit?: string | null;
+  unitLabel?: string | null;
+  defaultValue?: number | null;
+  appliedValue?: number | null;
+  isDefault: boolean;
+}
+
+export interface RankingScopeContext {
+  kind: "catalog" | "competition" | "season" | "competitionSeason";
+  label: string;
+  competitionId?: string | null;
+  competitionName?: string | null;
+  seasonId?: string | null;
+  seasonLabel?: string | null;
+  venue: RankingScopeVenue;
+  window: RankingScopeWindow;
+  sample?: RankingScopeSample | null;
+  stage?: RankingStageContext | null;
+}
+
+export interface RankingSortMeta {
+  direction: RankingSortDirection;
+  label: string;
+  serverSide: boolean;
 }
 
 export interface RankingTableData {
   rankingId: string;
   metricKey: string;
-  stage?: RankingStageContext | null;
+  entity?: string | null;
+  scope: RankingScopeContext;
   rows: RankingTableRow[];
   updatedAt?: string | null;
+  sort?: RankingSortMeta | null;
+  freshnessClass?: RankingFreshnessClass;
 }
 
 export interface RankingsGlobalFilters {

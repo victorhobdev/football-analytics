@@ -259,6 +259,36 @@ def _filter_scorer_list_by_minimum_goals(rows: list[dict[str, Any]]) -> list[dic
     ]
 
 
+def _fetch_wc_profile_urls(wc_player_ids: list[int | None]) -> dict[int, str]:
+    normalized_player_ids = sorted({player_id for player_id in wc_player_ids if player_id is not None})
+    if not normalized_player_ids:
+        return {}
+
+    rows = db_client.fetch_all(
+        """
+        select
+            wc_player_id,
+            sportmonks_player_id
+        from raw.wc_player_identity_map
+        where wc_player_id = any(%s)
+          and match_confidence = 'confirmed'
+          and sportmonks_player_id is not null;
+        """,
+        [normalized_player_ids],
+    )
+
+    profile_urls: dict[int, str] = {}
+    for row in rows:
+        wc_player_id = _safe_int(row.get("wc_player_id"))
+        sportmonks_player_id = _safe_int(row.get("sportmonks_player_id"))
+        if wc_player_id is None or sportmonks_player_id is None:
+            continue
+
+        profile_urls[wc_player_id] = f"/players/{sportmonks_player_id}"
+
+    return profile_urls
+
+
 def _build_champion_identity_key(team: dict[str, Any] | None) -> str | None:
     if team is None:
         return None
@@ -629,10 +659,13 @@ def _fetch_historical_top_scorer() -> dict[str, Any] | None:
     if row is None:
         return None
 
+    player_id = _safe_int(row.get("player_id"))
+    profile_urls = _fetch_wc_profile_urls([player_id])
     team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
     return {
         "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
         "playerName": _sanitize_display_name(row.get("player_name")),
+        "profileUrl": profile_urls.get(player_id) if player_id is not None else None,
         "teamId": team.get("teamId") if team else None,
         "teamName": team.get("teamName") if team else None,
         "goals": int(row.get("goals") or 0),
@@ -676,14 +709,17 @@ def _fetch_edition_top_scorers(season_label: str) -> list[dict[str, Any]]:
         [WORLD_CUP_COMPETITION_KEY, season_label],
     )
 
+    profile_urls = _fetch_wc_profile_urls([_safe_int(row.get("player_id")) for row in rows])
     scorers_payload: list[dict[str, Any]] = []
     for row in rows:
+        player_id = _safe_int(row.get("player_id"))
         team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
         scorers_payload.append(
             {
                 "rank": int(row.get("scorer_rank") or 0),
                 "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
                 "playerName": _sanitize_display_name(row.get("player_name")),
+                "profileUrl": profile_urls.get(player_id) if player_id is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
                 "goals": int(row.get("goals") or 0),
@@ -961,11 +997,13 @@ def _fetch_team_historical_scorers(team_ids: list[int]) -> list[dict[str, Any]]:
         [WORLD_CUP_COMPETITION_KEY, team_ids],
     )
 
+    profile_urls = _fetch_wc_profile_urls([_safe_int(row.get("player_id")) for row in rows])
     return [
         {
             "rank": int(row.get("scorer_rank") or 0),
             "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
             "playerName": _sanitize_display_name(row.get("player_name")),
+            "profileUrl": profile_urls.get(player_id) if (player_id := _safe_int(row.get("player_id"))) is not None else None,
             "goals": int(row.get("goals") or 0),
         }
         for row in rows
@@ -1054,6 +1092,7 @@ def _fetch_ranking_fixture_rows() -> list[dict[str, Any]]:
             f.stage_name,
             f.round_name,
             f.date_utc,
+            f.venue_name,
             f.home_team_id,
             f.home_team_name,
             f.away_team_id,
@@ -1066,6 +1105,77 @@ def _fetch_ranking_fixture_rows() -> list[dict[str, Any]]:
         """,
         [WORLD_CUP_COMPETITION_KEY],
     )
+
+
+def _ranking_fixture_sort_key(row: dict[str, Any]) -> tuple[int, Any, int]:
+    fixture_date = row.get("date_utc")
+    fixture_id = _safe_int(row.get("fixture_id")) or 0
+    return (1 if fixture_date is not None else 0, fixture_date or "", fixture_id)
+
+
+def _find_final_round_decider_fixture_row(
+    edition: dict[str, Any],
+    ranking_fixture_rows: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if edition.get("resolutionType") != "final_round":
+        return None
+
+    season_label = edition.get("seasonLabel")
+    champion_key = _team_reference_key_from_payload(edition.get("champion"))
+    runner_up_key = _team_reference_key_from_payload(edition.get("runnerUp"))
+    if season_label is None or champion_key is None or runner_up_key is None:
+        return None
+
+    candidate_rows: list[dict[str, Any]] = []
+    for row in ranking_fixture_rows:
+        if row.get("season_label") != season_label:
+            continue
+
+        stage_name = _normalize_compare_key(row.get("stage_name"))
+        round_name = _normalize_compare_key(row.get("round_name"))
+        if stage_name != "final round" and round_name != "final round":
+            continue
+
+        home_key = _team_reference_key(row.get("home_team_id"), row.get("home_team_name"))
+        away_key = _team_reference_key(row.get("away_team_id"), row.get("away_team_name"))
+        if {home_key, away_key} != {champion_key, runner_up_key}:
+            continue
+
+        candidate_rows.append(row)
+
+    if not candidate_rows:
+        return None
+
+    return sorted(candidate_rows, key=_ranking_fixture_sort_key, reverse=True)[0]
+
+
+def _orient_final_fixture_row_for_display(
+    edition: dict[str, Any],
+    fixture_row: dict[str, Any],
+) -> dict[str, Any]:
+    if edition.get("resolutionType") != "final_round":
+        return fixture_row
+
+    champion_key = _team_reference_key_from_payload(edition.get("champion"))
+    runner_up_key = _team_reference_key_from_payload(edition.get("runnerUp"))
+    home_key = _team_reference_key(fixture_row.get("home_team_id"), fixture_row.get("home_team_name"))
+    away_key = _team_reference_key(fixture_row.get("away_team_id"), fixture_row.get("away_team_name"))
+
+    if champion_key is None or runner_up_key is None:
+        return fixture_row
+
+    if home_key == champion_key and away_key == runner_up_key:
+        return {
+            **fixture_row,
+            "home_team_id": fixture_row.get("away_team_id"),
+            "home_team_name": fixture_row.get("away_team_name"),
+            "away_team_id": fixture_row.get("home_team_id"),
+            "away_team_name": fixture_row.get("home_team_name"),
+            "home_goals": fixture_row.get("away_goals"),
+            "away_goals": fixture_row.get("home_goals"),
+        }
+
+    return fixture_row
 
 
 def _fetch_player_squad_appearance_rows() -> list[dict[str, Any]]:
@@ -1337,7 +1447,7 @@ def _build_world_cup_team_stat_rankings(
             ),
         },
         "topFourAppearances": {
-            "label": "Seleções com mais presenças no top 4",
+            "label": "Seleções com mais semi-finais",
             "metricLabel": "Top 4",
             "items": _assign_dense_ranks(
                 [
@@ -1501,7 +1611,7 @@ def _build_world_cup_squad_appearance_rankings(
 
     return {
         "squadAppearances": {
-            "label": "Jogadores com mais Copas no elenco",
+            "label": "Jogadores com mais copas disputadas",
             "metricLabel": "Copas",
             "minimumAppearancesCount": MINIMUM_SQUAD_EDITIONS_FOR_PLAYER_RANKINGS,
             "items": _assign_dense_ranks(
@@ -1789,6 +1899,7 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
     for season_row in edition_rows:
         season_label = season_row["season_label"]
         host_country = translate_world_cup_display_name(_normalize_text(season_row.get("host_country")))
+        host_country_team = serialize_world_cup_display_team(None, host_country)
         matches_count = match_counts_by_season.get(season_label, 0)
         count_teams = _safe_int(season_row.get("count_teams"))
         format_flags = season_row.get("format_flags") or {}
@@ -1846,6 +1957,7 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
                 "year": int(season_label),
                 "editionName": build_world_cup_edition_name(season_label),
                 "hostCountry": host_country,
+                "hostCountryTeam": host_country_team,
                 "teamsCount": count_teams,
                 "matchesCount": matches_count,
                 "champion": champion_team,
@@ -2234,6 +2346,9 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
     team_stage_rows = _fetch_team_stage_presence_rows()
     team_knockout_rows = _fetch_team_knockout_presence_rows()
     team_top_scorer_rows = _fetch_team_top_scorers_by_season()
+    top_scorer_profile_urls = _fetch_wc_profile_urls(
+        [_safe_int(row.get("player_id")) for row in team_top_scorer_rows]
+    )
 
     stage_index = {
         (row["season_label"], int(row["team_id"])): row
@@ -2249,6 +2364,7 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
         (row["season_label"], int(row["team_id"])): {
             "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
             "playerName": _sanitize_display_name(row.get("player_name")),
+            "profileUrl": top_scorer_profile_urls.get(player_id) if (player_id := _safe_int(row.get("player_id"))) is not None else None,
             "goals": int(row.get("goals") or 0),
         }
         for row in team_top_scorer_rows
@@ -2425,6 +2541,9 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
     squad_appearance_rows = _fetch_player_squad_appearance_rows()
     final_fixture_rows = _fetch_final_fixture_rows()
     penalty_scores_by_fixture = _fetch_penalty_shootout_scores_by_fixture()
+    scorer_profile_urls = _fetch_wc_profile_urls(
+        [_safe_int(row.get("player_id")) for row in historical_scorer_rows]
+    )
 
     scorer_editions_index: dict[str, list[dict[str, Any]]] = {}
     for row in historical_scorer_edition_rows:
@@ -2454,12 +2573,14 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
             previous_scorer_goals = goals
 
         scorer_key = scorer_row.get("scorer_key")
+        player_id = _safe_int(scorer_row.get("player_id"))
         team = _serialize_team(_safe_int(scorer_row.get("team_id")), scorer_row.get("team_name"))
         scorers_payload.append(
             {
                 "rank": current_scorer_rank,
                 "playerId": str(scorer_row["player_id"]) if scorer_row.get("player_id") is not None else None,
                 "playerName": _sanitize_display_name(scorer_row.get("player_name")),
+                "profileUrl": scorer_profile_urls.get(player_id) if player_id is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
                 "goals": goals,
@@ -2487,34 +2608,46 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
     finals_payload: list[dict[str, Any]] = []
     omitted_editions: list[dict[str, Any]] = []
     for edition in sorted(editions, key=lambda item: int(item["year"]), reverse=True):
-        if edition.get("resolutionType") == "final_round":
-            omitted_editions.append(
-                {
-                    "seasonLabel": edition["seasonLabel"],
-                    "year": edition["year"],
-                    "reason": "A edição foi decidida por fase final em grupos, sem final única.",
-                }
-            )
-            continue
-
         final_fixture_row = final_fixture_rows.get(edition["seasonLabel"])
         if final_fixture_row is None:
+            final_fixture_row = _find_final_round_decider_fixture_row(edition, ranking_fixture_rows)
+
+        if final_fixture_row is None:
+            if edition.get("resolutionType") == "final_round":
+                omitted_editions.append(
+                    {
+                        "seasonLabel": edition["seasonLabel"],
+                        "year": edition["year"],
+                        "reason": "A edição foi decidida por fase final em grupos e não teve jogo decisivo localizável na base.",
+                    }
+                )
             continue
+
+        displayed_final_fixture_row = _orient_final_fixture_row_for_display(edition, final_fixture_row)
+        resolution_note = edition.get("coverageNote")
+        if edition.get("resolutionType") == "final_round" and not resolution_note:
+            resolution_note = "Jogo decisivo da fase final em grupos."
 
         finals_payload.append(
             {
                 "seasonLabel": edition["seasonLabel"],
                 "year": edition["year"],
-                "homeTeam": _serialize_team(final_fixture_row.get("home_team_id"), final_fixture_row.get("home_team_name")),
-                "awayTeam": _serialize_team(final_fixture_row.get("away_team_id"), final_fixture_row.get("away_team_name")),
-                "homeScore": _safe_int(final_fixture_row.get("home_goals")),
-                "awayScore": _safe_int(final_fixture_row.get("away_goals")),
-                "shootout": _serialize_shootout(final_fixture_row, penalty_scores_by_fixture),
-                "venueName": translate_world_cup_venue_name(_normalize_text(final_fixture_row.get("venue_name"))),
+                "homeTeam": _serialize_team(
+                    displayed_final_fixture_row.get("home_team_id"),
+                    displayed_final_fixture_row.get("home_team_name"),
+                ),
+                "awayTeam": _serialize_team(
+                    displayed_final_fixture_row.get("away_team_id"),
+                    displayed_final_fixture_row.get("away_team_name"),
+                ),
+                "homeScore": _safe_int(displayed_final_fixture_row.get("home_goals")),
+                "awayScore": _safe_int(displayed_final_fixture_row.get("away_goals")),
+                "shootout": _serialize_shootout(displayed_final_fixture_row, penalty_scores_by_fixture),
+                "venueName": translate_world_cup_venue_name(_normalize_text(displayed_final_fixture_row.get("venue_name"))),
                 "champion": edition.get("champion"),
                 "runnerUp": edition.get("runnerUp"),
                 "resolutionType": edition.get("resolutionType"),
-                "resolutionNote": edition.get("coverageNote"),
+                "resolutionNote": resolution_note,
             }
         )
 

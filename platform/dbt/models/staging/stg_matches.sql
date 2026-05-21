@@ -5,7 +5,7 @@ select
     fixture_id,
     coalesce(provider, source_provider) as provider,
     source_provider,
-    date_utc,
+    coalesce(date_utc, date::timestamp at time zone 'UTC') as date_utc,
     "timestamp" as fixture_timestamp,
     timezone,
     referee,
