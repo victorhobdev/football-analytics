@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 
-import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,13 +19,11 @@ import type {
   WorldCupEditionNavigationItem,
   WorldCupEditionScorer,
   WorldCupEditionStandingRow,
-  WorldCupKnockoutMatch,
   WorldCupKnockoutRound,
   WorldCupKnockoutTie,
   WorldCupTeamReference,
 } from "@/features/world-cup/types/world-cup.types";
 import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
-import { DataTable } from "@/shared/components/data-display/DataTable";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import {
   ProfileAlert,
@@ -51,6 +48,12 @@ type WorldCupBracketSide = "left" | "right";
 type WorldCupBracketTeamReference = {
   teamId?: string | null;
   teamName?: string | null;
+};
+
+type WorldCupTieScoreboardEntry = {
+  goals: number | null;
+  isWinner: boolean;
+  team: WorldCupTeamReference;
 };
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
@@ -80,6 +83,14 @@ function formatSignedNumber(value: number | null | undefined): string {
   }
 
   return formattedValue;
+}
+
+function formatScoreValue(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return formatWholeNumber(value);
 }
 
 function formatKickoff(value: string | null | undefined): string | null {
@@ -196,6 +207,30 @@ function describeResolutionType(resolutionType: string | null | undefined): stri
     default:
       return null;
   }
+}
+
+function localizeWorldCupStageLabel(label: string): string {
+  return label
+    .replace(/\bgroup stage\b/i, "Fase de grupos")
+    .replace(/\bknockout stage\b/i, "Mata-mata");
+}
+
+function localizeWorldCupGroupLabel(label: string): string {
+  const trimmedLabel = label.trim();
+
+  if (/^group\s+/i.test(trimmedLabel)) {
+    return trimmedLabel.replace(/^group\s+/i, "Grupo ");
+  }
+
+  if (/^grupo\s+/i.test(trimmedLabel)) {
+    return `Grupo ${trimmedLabel.replace(/^grupo\s+/i, "").trim()}`;
+  }
+
+  if (/^[A-Z0-9]+$/i.test(trimmedLabel)) {
+    return `Grupo ${trimmedLabel}`;
+  }
+
+  return trimmedLabel;
 }
 
 function isTieWinner(team: WorldCupTeamReference | null, winner: WorldCupTeamReference | null): boolean {
@@ -402,6 +437,102 @@ function resolveWorldCupSnapshotColumns(rounds: WorldCupKnockoutRound[]): WorldC
   });
 }
 
+function resolveOrderedWorldCupTieParticipants(tie: WorldCupKnockoutTie): WorldCupTeamReference[] {
+  const orderedParticipants: WorldCupTeamReference[] = [];
+  const pushParticipant = (team: WorldCupTeamReference | null | undefined) => {
+    if (!team?.teamId && !team?.teamName) {
+      return;
+    }
+
+    if (orderedParticipants.some((participant) => matchesTeamIdentity(participant, team))) {
+      return;
+    }
+
+    orderedParticipants.push({
+      teamId: team.teamId ?? null,
+      teamName: team.teamName ?? null,
+    });
+  };
+
+  tie.matches.forEach((match) => {
+    pushParticipant(match.homeTeam);
+    pushParticipant(match.awayTeam);
+  });
+
+  pushParticipant(tie.winner);
+  pushParticipant(tie.runnerUp);
+
+  return orderedParticipants.slice(0, 2);
+}
+
+function resolveWorldCupTieGoals(tie: WorldCupKnockoutTie, participant: WorldCupTeamReference): number | null {
+  let totalGoals = 0;
+  let hasTrackedScore = false;
+
+  tie.matches.forEach((match) => {
+    if (match.homeTeam && matchesTeamIdentity(match.homeTeam, participant) && typeof match.homeScore === "number") {
+      totalGoals += match.homeScore;
+      hasTrackedScore = true;
+    }
+
+    if (match.awayTeam && matchesTeamIdentity(match.awayTeam, participant) && typeof match.awayScore === "number") {
+      totalGoals += match.awayScore;
+      hasTrackedScore = true;
+    }
+  });
+
+  return hasTrackedScore ? totalGoals : null;
+}
+
+function resolveWorldCupTieScoreboard(tie: WorldCupKnockoutTie): WorldCupTieScoreboardEntry[] {
+  return resolveOrderedWorldCupTieParticipants(tie).map((team) => ({
+    goals: resolveWorldCupTieGoals(tie, team),
+    isWinner: isTieWinner(team, tie.winner),
+    team,
+  }));
+}
+
+function resolveWorldCupTieShootout(tie: WorldCupKnockoutTie) {
+  return tie.matches.find((match) => match.shootout)?.shootout ?? null;
+}
+
+function resolveWorldCupTieStatusLabel(tie: WorldCupKnockoutTie): string | null {
+  const resolutionLabel = resolveResolutionBadge(tie);
+
+  if (resolutionLabel) {
+    return resolutionLabel;
+  }
+
+  return tie.matches.length > 1 ? "Agregado" : null;
+}
+
+function formatMatchCountLabel(value: number): string {
+  return value === 1 ? "1 jogo" : `${formatWholeNumber(value)} jogos`;
+}
+
+function WorldCupTeamBadge({
+  team,
+  className,
+}: {
+  team: WorldCupTeamReference | null;
+  className?: string;
+}) {
+  const teamName = team?.teamName ?? "Não identificado";
+
+  return (
+    <ProfileMedia
+      alt={teamName}
+      assetId={team?.teamId}
+      category="clubs"
+      className={joinClasses("border-[rgba(191,201,195,0.4)] bg-[#f0f3ff]", className)}
+      fallback={buildFallbackLabel(teamName, "WC")}
+      fallbackClassName="text-[0.55rem] text-[#003526]"
+      imageClassName="p-1"
+      shape="circle"
+    />
+  );
+}
+
 function TeamPageLink({
   team,
   className,
@@ -537,7 +668,6 @@ function WorldCupEditionHero({
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-2">
             <ProfileTag className="bg-white text-[#6d5c3f]">Copa do Mundo</ProfileTag>
-            <ProfileTag className="bg-white text-[#6d5c3f]">Edição encerrada</ProfileTag>
             {groupStages.length > 0 ? <ProfileTag className="bg-white text-[#6d5c3f]">Fase de grupos</ProfileTag> : null}
             {knockoutRounds.length > 0 ? <ProfileTag className="bg-white text-[#6d5c3f]">Mata-mata</ProfileTag> : null}
           </div>
@@ -710,56 +840,69 @@ function WorldCupEditionHero({
   );
 }
 
-const WORLD_CUP_GROUP_COLUMNS: ColumnDef<WorldCupEditionStandingRow>[] = [
-  {
-    accessorKey: "position",
-    header: "#",
-    cell: ({ row }) => (
-      <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003526]">
-        {row.original.position}
-      </span>
-    ),
-  },
-  {
-    accessorFn: (row) => row.teamName ?? row.teamId,
-    id: "teamName",
-    header: "Seleção",
-    cell: ({ row }) => {
-      const teamName = row.original.teamName ?? "Seleção não identificada";
-      const content = row.original.teamId ? (
-        <Link className="font-semibold text-[#003526] transition-colors hover:text-[#00513b]" href={buildWorldCupTeamPath(row.original.teamId)}>
-          {teamName}
-        </Link>
-      ) : (
-        <span className="font-semibold text-[#111c2d]">{teamName}</span>
-      );
+function WorldCupGroupStandingCard({ row }: { row: WorldCupEditionStandingRow }) {
+  const isAdvanced = row.advanced;
+  const teamName = row.teamName ?? row.teamId ?? "Seleção não identificada";
 
-      return (
-        <div className="space-y-1">
-          <div>{content}</div>
-          {row.original.advanced ? (
-            <span className="inline-flex items-center rounded-full bg-[rgba(139,214,182,0.24)] px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#00513b]">
-              Classificado
-            </span>
-          ) : null}
+  return (
+    <div
+      className={
+        isAdvanced
+          ? "flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(3,53,38,0.2)] bg-[rgba(139,214,182,0.1)] px-3 py-2.5"
+          : "flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(191,201,195,0.42)] bg-white px-3 py-2.5"
+      }
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          className={joinClasses(
+            "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+            isAdvanced ? "bg-[rgba(3,53,38,0.12)] text-[#003526]" : "bg-[rgba(3,53,38,0.06)] text-[#57657a]",
+          )}
+        >
+          {row.position}
+        </span>
+        <WorldCupTeamBadge
+          className="h-[26px] w-[26px]"
+          team={{ teamId: row.teamId, teamName }}
+        />
+        {row.teamId ? (
+          <Link
+            className="truncate text-sm font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+            href={buildWorldCupTeamPath(row.teamId)}
+          >
+            {teamName}
+          </Link>
+        ) : (
+          <span className="truncate text-sm font-semibold text-[#111c2d]">{teamName}</span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 text-right">
+        <div className="hidden sm:block">
+          <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8fa097]">V</p>
+          <p className="text-xs font-bold text-[#57657a]">{row.wins}</p>
         </div>
-      );
-    },
-  },
-  { accessorKey: "matchesPlayed", header: "J" },
-  { accessorKey: "wins", header: "V" },
-  { accessorKey: "draws", header: "E" },
-  { accessorKey: "losses", header: "D" },
-  { accessorKey: "goalsFor", header: "GP" },
-  { accessorKey: "goalsAgainst", header: "GC" },
-  {
-    accessorFn: (row) => row.goalDiff,
-    id: "goalDiff",
-    header: "SG",
-    cell: ({ row }) => formatSignedNumber(row.original.goalDiff),
-  },
-  { accessorKey: "points", header: "Pts" },
-];
+        <div className="hidden sm:block">
+          <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8fa097]">SG</p>
+          <p
+            className={joinClasses(
+              "text-xs font-bold",
+              row.goalDiff > 0 ? "text-[#1b6b51]" : row.goalDiff < 0 ? "text-[#ba1a1a]" : "text-[#57657a]",
+            )}
+          >
+            {formatSignedNumber(row.goalDiff)}
+          </p>
+        </div>
+        <div>
+          <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8fa097]">Pts</p>
+          <p className={joinClasses("text-sm font-extrabold", isAdvanced ? "text-[#003526]" : "text-[#111c2d]")}>
+            {row.points}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function WorldCupGroupPhaseSection({
   groupStages,
@@ -771,9 +914,9 @@ function WorldCupGroupPhaseSection({
   return (
     <ProfilePanel className="space-y-5" tone="base">
       <SectionHeader
-        description="Mesmo dado da Copa, agora apresentado no padrão de grupos já consolidado na superfície híbrida."
+        description="Classificação final de cada grupo da edição, no mesmo padrão visual da Libertadores."
         eyebrow="Fase de grupos"
-        title="Tabelas por grupo"
+        title="Grupos da edição"
       />
 
       {groupStages.length === 0 ? (
@@ -783,7 +926,7 @@ function WorldCupGroupPhaseSection({
           {groupStages.map((stage) => (
             <section className="space-y-4" key={stage.stageKey}>
               <div className="flex flex-wrap items-center gap-2">
-                <ProfileTag>{stage.stageLabel}</ProfileTag>
+                <ProfileTag>{localizeWorldCupStageLabel(stage.stageLabel)}</ProfileTag>
                 <span className="text-sm text-[#57657a]">
                   {formatWholeNumber(stage.groups.length)} {stage.groups.length === 1 ? "grupo" : "grupos"}
                 </span>
@@ -792,22 +935,22 @@ function WorldCupGroupPhaseSection({
               <div className="grid gap-4 xl:grid-cols-2">
                 {stage.groups.map((group) => (
                   <ProfilePanel className="space-y-4" key={`${stage.stageKey}-${group.groupKey ?? "group"}`} tone="soft">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Grupo</p>
-                        <h3 className="mt-2 font-[family:var(--font-profile-headline)] text-[1.6rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
-                          {group.groupLabel.replace(/^Grupo\s+/i, "")}
-                        </h3>
-                      </div>
-                    </div>
+                    <SectionHeader eyebrow="GRUPO" title={localizeWorldCupGroupLabel(group.groupLabel)} />
 
-                    <DataTable
-                      columns={WORLD_CUP_GROUP_COLUMNS}
-                      data={group.rows}
-                      emptyDescription="Sem linhas para exibir."
-                      emptyTitle="Sem classificação"
-                      variant="profile"
-                    />
+                    {group.rows.length === 0 ? (
+                      <ProfileAlert title="Sem classificação" tone="info">
+                        Ainda não há linhas suficientes para este grupo.
+                      </ProfileAlert>
+                    ) : (
+                      <div className="space-y-2">
+                        {group.rows.map((row) => (
+                          <WorldCupGroupStandingCard
+                            key={`${stage.stageKey}-${group.groupKey ?? "group"}-${row.teamId ?? row.teamName ?? row.position}`}
+                            row={row}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </ProfilePanel>
                 ))}
               </div>
@@ -819,66 +962,6 @@ function WorldCupGroupPhaseSection({
   );
 }
 
-function WorldCupBracketMatchSummary({
-  match,
-  winner,
-}: {
-  match: WorldCupKnockoutMatch;
-  winner: WorldCupTeamReference | null;
-}) {
-  return (
-    <div className="rounded-[0.92rem] border border-[rgba(191,201,195,0.34)] bg-[rgba(240,243,255,0.72)] px-2.5 py-2.5">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[#6a7890]">
-        <span>{formatKickoff(match.kickoffAt) ?? "Data não informada"}</span>
-        {match.isReplay ? <span>Replay</span> : null}
-      </div>
-
-      <div className="mt-2.5 space-y-2">
-        {[match.homeTeam, match.awayTeam].map((team, teamIndex) => {
-          const score = teamIndex === 0 ? match.homeScore : match.awayScore;
-          const isWinner = isTieWinner(team, winner);
-          const teamName = team?.teamName ?? "Não identificado";
-
-          return (
-            <div className="grid grid-cols-[minmax(0,1fr)_1.75rem] items-center gap-2" key={`${match.fixtureId}-${teamIndex}`}>
-              <div className="flex min-w-0 items-center gap-2">
-                <ProfileMedia
-                  alt={teamName}
-                  assetId={team?.teamId}
-                  category="clubs"
-                  className="h-6 w-6 border-0 bg-white"
-                  fallback={buildFallbackLabel(teamName, "WC")}
-                  fallbackClassName="text-[0.58rem]"
-                  imageClassName="p-1"
-                  shape="circle"
-                />
-                <span
-                  className={
-                    isWinner
-                      ? "block min-w-0 text-[0.94rem] font-extrabold leading-[1.08rem] text-[#003526]"
-                      : "block min-w-0 text-[0.94rem] font-semibold leading-[1.08rem] text-[#111c2d]"
-                  }
-                >
-                  {teamName}
-                </span>
-              </div>
-              <span className="w-7 text-right font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-none text-[#111c2d]">
-                {formatWholeNumber(score)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {match.shootout ? (
-        <p className="mt-2 text-[0.68rem] text-[#57657a]">
-          Pênaltis: {match.shootout.home} x {match.shootout.away}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
 function WorldCupSnapshotTieCard({
   side,
   tie,
@@ -886,7 +969,9 @@ function WorldCupSnapshotTieCard({
   side: WorldCupBracketSide;
   tie: WorldCupKnockoutTie;
 }) {
-  const resolutionLabel = resolveResolutionBadge(tie);
+  const resolutionLabel = resolveWorldCupTieStatusLabel(tie);
+  const scoreboard = resolveWorldCupTieScoreboard(tie);
+  const shootout = resolveWorldCupTieShootout(tie);
 
   return (
     <div
@@ -898,11 +983,36 @@ function WorldCupSnapshotTieCard({
       <div className="flex min-h-[0.85rem] items-center justify-center text-center text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[#6a7890]">
         {resolutionLabel ? <span>{resolutionLabel}</span> : null}
       </div>
-      <div className="mt-2.5 space-y-2.5">
-        {tie.matches.map((match) => (
-          <WorldCupBracketMatchSummary key={match.fixtureId} match={match} winner={tie.winner} />
-        ))}
+      <div className="mt-2.5 space-y-2">
+        {scoreboard.map(({ goals, isWinner, team }) => {
+          const teamName = team.teamName ?? "Não identificado";
+
+          return (
+            <div className="grid grid-cols-[minmax(0,1fr)_1.75rem] items-center gap-2" key={`${side}-${tie.tieKey}-${team.teamId ?? teamName}`}>
+              <div className="flex min-w-0 items-center gap-2">
+                <WorldCupTeamBadge className="h-6 w-6 border-0 bg-white" team={team} />
+                <span
+                  className={
+                    isWinner
+                      ? "block min-w-0 text-[0.97rem] font-extrabold leading-[1.08rem] text-[#003526]"
+                      : "block min-w-0 text-[0.97rem] font-semibold leading-[1.08rem] text-[#111c2d]"
+                  }
+                >
+                  {teamName}
+                </span>
+              </div>
+              <span className="w-7 text-right font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-none text-[#111c2d]">
+                {formatScoreValue(goals)}
+              </span>
+            </div>
+          );
+        })}
       </div>
+      {shootout ? (
+        <p className="mt-2.5 text-[0.68rem] text-[#57657a]">
+          Pênaltis: {shootout.home} x {shootout.away}
+        </p>
+      ) : null}
       {tie.resolutionNote ? <p className="mt-2.5 text-[0.68rem] text-[#57657a]">{tie.resolutionNote}</p> : null}
     </div>
   );
@@ -944,9 +1054,12 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
   const tie = finalRound?.ties[0] ?? null;
   const championName = tie?.winner?.teamName ?? "Campeão";
   const dateLabel = tie ? formatTieWindow(tie) : null;
+  const scoreboard = tie ? resolveWorldCupTieScoreboard(tie) : [];
+  const shootout = tie ? resolveWorldCupTieShootout(tie) : null;
+  const decisionLabel = tie ? resolveWorldCupTieStatusLabel(tie) : null;
 
   return (
-    <div className="mx-auto w-full max-w-[280px] rounded-[1.45rem] border border-[rgba(95,67,10,0.28)] bg-[radial-gradient(circle_at_top,rgba(243,223,159,0.18),transparent_48%),linear-gradient(180deg,#3c2809_0%,#6e4c11_54%,#8a6d18_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(68,43,4,0.58)]">
+    <div className="mx-auto w-full max-w-[264px] rounded-[1.45rem] border border-[rgba(95,67,10,0.28)] bg-[radial-gradient(circle_at_top,rgba(243,223,159,0.18),transparent_48%),linear-gradient(180deg,#3c2809_0%,#6e4c11_54%,#8a6d18_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(68,43,4,0.58)]">
       <p className="text-center text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-[#f3df9f]">
         {finalRound?.roundLabel ?? "Final"}
       </p>
@@ -964,11 +1077,9 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
           ) : null}
 
           <div className="grid gap-2.5">
-            {tie.matches[0] ? (
-              [tie.matches[0].homeTeam, tie.matches[0].awayTeam].map((team, teamIndex) => {
-                const isWinner = isTieWinner(team, tie.winner);
-                const score = teamIndex === 0 ? tie.matches[0].homeScore : tie.matches[0].awayScore;
-                const teamName = team?.teamName ?? "Não identificado";
+            {scoreboard.length > 0 ? (
+              scoreboard.map(({ goals, isWinner, team }) => {
+                const teamName = team.teamName ?? "Não identificado";
 
                 return (
                   <div
@@ -977,27 +1088,17 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
                         ? "rounded-[1rem] border border-[rgba(243,223,159,0.28)] bg-[rgba(255,255,255,0.08)] px-3 py-3"
                         : "rounded-[1rem] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-3"
                     }
-                    key={`final-${team?.teamId ?? teamName}`}
+                    key={`final-${team.teamId ?? teamName}`}
                   >
                     <div className="flex items-center justify-between gap-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <ProfileMedia
-                          alt={teamName}
-                          assetId={team?.teamId}
-                          category="clubs"
-                          className="h-8 w-8 border-white/12 bg-white/12 text-white"
-                          fallback={buildFallbackLabel(teamName, "WC")}
-                          fallbackClassName="text-[0.62rem] text-white"
-                          imageClassName="p-1"
-                          shape="circle"
-                          tone="contrast"
-                        />
+                        <WorldCupTeamBadge className="h-8 w-8 border-white/12 bg-white/12 text-white" team={team} />
                         <span className={isWinner ? "truncate text-[1rem] font-extrabold text-white" : "truncate text-[1rem] font-semibold text-white/88"}>
                           {teamName}
                         </span>
                       </div>
                       <span className="font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold leading-none text-white">
-                        {formatWholeNumber(score)}
+                        {formatScoreValue(goals)}
                       </span>
                     </div>
                   </div>
@@ -1016,15 +1117,11 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
               {championName}
             </p>
             <p className="mt-1.5 text-[0.8rem] text-[#f8efd8]">
-              {resolveResolutionBadge(tie) ?? "Decisão da edição"} •{" "}
-              {tie.matches.length === 1 ? "1 jogo" : `${formatWholeNumber(tie.matches.length)} jogos`}
+              {decisionLabel ?? "Decisão da edição"} • {formatMatchCountLabel(tie.matches.length)}
             </p>
-            {tie.matches.some((match) => match.shootout) ? (
+            {shootout ? (
               <p className="mt-2 text-[0.72rem] text-[#f8efd8]">
-                {tie.matches
-                  .filter((match) => match.shootout)
-                  .map((match) => `Pênaltis ${match.shootout?.home} x ${match.shootout?.away}`)
-                  .join(" · ")}
+                Pênaltis: {shootout.home} x {shootout.away}
               </p>
             ) : null}
           </div>
@@ -1048,9 +1145,9 @@ function WorldCupKnockoutSection({
     <ProfilePanel className="space-y-5" tone="base">
       <SectionHeader
         align="center"
-        description="A Copa passa a usar o snapshot de chaveamento já aprovado no produto, preservando confrontos, replays e decisões por pênaltis."
-        eyebrow="Mata-mata"
-        title="Chave eliminatória"
+        description="Mesmo modelo visual da Libertadores, preservando confrontos, replays e decisões por pênaltis."
+        eyebrow="Chaveamento"
+        title="Chaveamento até a final"
       />
 
       {knockoutRounds.length === 0 ? (
@@ -1060,7 +1157,7 @@ function WorldCupKnockoutSection({
           <div
             className="grid items-center gap-2.5 xl:gap-3"
             style={{
-              gridTemplateColumns: `repeat(${Math.max(snapshotColumns.length, 1)}, minmax(168px, 1.12fr)) minmax(244px, 1.02fr) repeat(${Math.max(snapshotColumns.length, 1)}, minmax(168px, 1.12fr))`,
+              gridTemplateColumns: `repeat(${Math.max(snapshotColumns.length, 1)}, minmax(148px, 1.08fr)) minmax(228px, 1fr) repeat(${Math.max(snapshotColumns.length, 1)}, minmax(148px, 1.08fr))`,
             }}
           >
             {snapshotColumns.length > 0 ? (

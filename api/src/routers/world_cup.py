@@ -11,7 +11,6 @@ from fastapi import APIRouter, HTTPException, Request
 from ..core.contracts import build_api_response, build_coverage_from_counts
 from ..db.client import db_client
 from .world_cup_labels import (
-    build_world_cup_country_key,
     build_world_cup_edition_name,
     serialize_world_cup_display_team,
     translate_world_cup_display_name,
@@ -1790,7 +1789,6 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
     for season_row in edition_rows:
         season_label = season_row["season_label"]
         host_country = translate_world_cup_display_name(_normalize_text(season_row.get("host_country")))
-        host_country_key = build_world_cup_country_key(host_country)
         matches_count = match_counts_by_season.get(season_label, 0)
         count_teams = _safe_int(season_row.get("count_teams"))
         format_flags = season_row.get("format_flags") or {}
@@ -1848,7 +1846,6 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
                 "year": int(season_label),
                 "editionName": build_world_cup_edition_name(season_label),
                 "hostCountry": host_country,
-                "hostCountryKey": host_country_key,
                 "teamsCount": count_teams,
                 "matchesCount": matches_count,
                 "champion": champion_team,

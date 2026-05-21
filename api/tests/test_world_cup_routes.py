@@ -15,13 +15,15 @@ from api.src.routers.world_cup_labels import serialize_world_cup_display_team
 
 class WorldCupRouteHelpersTests(unittest.TestCase):
     def test_serialize_world_cup_display_team_merges_germany_lineage(self) -> None:
+        brazil = serialize_world_cup_display_team(7030456752538593319, "Brazil")
         germany = serialize_world_cup_display_team(7030167035104799597, "Germany")
         west_germany = serialize_world_cup_display_team(7030069810056421591, "West Germany")
         east_germany = serialize_world_cup_display_team(7030661052346191578, "East Germany")
 
+        self.assertEqual(brazil, {"teamId": "world-cup-brazil", "teamName": "Brasil"})
         self.assertEqual(germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
         self.assertEqual(west_germany, {"teamId": "world-cup-germany", "teamName": "Alemanha"})
-        self.assertEqual(east_germany, {"teamId": "7030661052346191578", "teamName": "Alemanha Oriental"})
+        self.assertEqual(east_germany, {"teamId": "world-cup-east-germany", "teamName": "Alemanha Oriental"})
 
     @patch("api.src.routers.world_cup._fetch_team_top_scorers_by_season")
     @patch("api.src.routers.world_cup._fetch_team_knockout_presence_rows")
