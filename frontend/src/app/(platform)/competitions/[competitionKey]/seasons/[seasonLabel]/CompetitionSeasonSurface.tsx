@@ -36,6 +36,7 @@ import {
   type CompetitionSeasonSurfaceResolution,
   type CompetitionSeasonSurfaceSection,
 } from "@/features/competitions/utils/competition-season-surface";
+import { resolveSeasonChampionArtwork } from "@/features/competitions/utils/champion-media";
 import { getStageFormatLabel } from "@/features/competitions/utils/competition-structure";
 import { fetchMatchesList } from "@/features/matches/services/matches.service";
 import type { MatchesListData } from "@/features/matches/types";
@@ -131,6 +132,13 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "short",
 });
+
+const LONG_DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+  day: "numeric",
+  month: "long",
+});
+
+const HISTORICAL_HERO_TEST_IMAGE_SRC = "/images/competition-season/champion-celebration-test.jpg";
 
 function formatKickoff(value: string | null | undefined): string {
   if (!value) {
@@ -525,6 +533,35 @@ function resolveSnapshotColumns(
   });
 }
 
+function normalizeStageIdentityValue(value: string | null | undefined): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function isRoundOf16Stage(stage: CompetitionStructureStage): boolean {
+  const stageIdentities = [stage.stageCode, stage.stageId, stage.stageName]
+    .map((value) => normalizeStageIdentityValue(value))
+    .filter(Boolean);
+
+  return stageIdentities.some(
+    (value) =>
+      value.includes("round_of_16") ||
+      value.includes("last_16") ||
+      value.includes("oitavas") ||
+      value.includes("eighth_final") ||
+      value.includes("eighth_finals"),
+  );
+}
+
+function resolvePrimaryKnockoutStages(stages: KnockoutStageQueryState[]): KnockoutStageQueryState[] {
+  const roundOf16Index = stages.findIndex((stage) => isRoundOf16Stage(stage.stage));
+  return roundOf16Index >= 0 ? stages.slice(roundOf16Index) : stages;
+}
+
 function resolveTransitionSlotCount(stage: CompetitionStructureStage | null | undefined): number | null {
   if (!stage || stage.transitions.length === 0) {
     return null;
@@ -660,10 +697,6 @@ function SeasonSectionHeader({
       {coverage && coverage.status !== "complete" ? <ProfileCoveragePill coverage={coverage} /> : null}
     </div>
   );
-}
-
-function EditionSummaryGrid({ children }: { children: ReactNode }) {
-  return <div className="grid gap-3 md:grid-cols-3">{children}</div>;
 }
 
 function SeasonHeroBlock({
@@ -905,6 +938,133 @@ function HistoricalHeroCard({
       <p className="mt-2 text-xs/5 text-[#57657a]">{detail}</p>
     </article>
   );
+}
+
+function HybridHeroSummaryItem({
+  detail,
+  label,
+  media,
+  value,
+  valueClassName,
+}: {
+  detail?: ReactNode;
+  label: string;
+  media?: ReactNode;
+  value: ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="border-b border-[rgba(191,201,195,0.42)] py-4 first:pt-0 last:border-b-0 last:pb-0">
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
+      <div className="mt-2 flex items-center gap-3">
+        {media ? <div className="shrink-0">{media}</div> : null}
+        <div className="min-w-0">
+          <div
+            className={
+              valueClassName ??
+              "font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-[#111c2d]"
+            }
+          >
+            {value}
+          </div>
+          {detail ? <div className="mt-1.5 text-sm/5 text-[#57657a]">{detail}</div> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatLongDate(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return LONG_DATE_FORMATTER.format(parsedDate);
+}
+
+function formatHybridStageTargetLabel(value: string | null | undefined): string {
+  const normalizedValue = normalizeStageIdentityValue(value);
+
+  if (!normalizedValue) {
+    return "o mata-mata";
+  }
+
+  if (
+    normalizedValue.includes("round_of_16") ||
+    normalizedValue.includes("last_16") ||
+    normalizedValue.includes("oitavas")
+  ) {
+    return "as oitavas";
+  }
+
+  if (normalizedValue.includes("quarter") || normalizedValue.includes("quartas")) {
+    return "as quartas";
+  }
+
+  if (normalizedValue.includes("semi")) {
+    return "a semifinal";
+  }
+
+  if (normalizedValue.includes("final")) {
+    return "a final";
+  }
+
+  return value ?? "o mata-mata";
+}
+
+function resolveHybridStructureHeadline(
+  resolution: CompetitionSeasonSurfaceResolution,
+): string {
+  if (resolution.primaryTableStage?.stageFormat === "group_table") {
+    return "Fase de grupos -> mata-mata";
+  }
+
+  if (resolution.primaryTableStage?.stageFormat === "league_table") {
+    return "Fase classificatoria -> mata-mata";
+  }
+
+  return "Fase de tabela -> mata-mata";
+}
+
+function resolveHybridStructureDetail(stage: CompetitionStructureStage | null): string {
+  if (!stage || stage.transitions.length === 0) {
+    return "Transicao consolidada para o mata-mata.";
+  }
+
+  const slotCount = resolveTransitionSlotCount(stage);
+  const transitionTarget = formatHybridStageTargetLabel(
+    stage.transitions[0]?.toStageName ?? stage.transitions[0]?.toStageId,
+  );
+
+  if (stage.stageFormat === "group_table" && slotCount) {
+    return `${slotCount} avancam por grupo ate ${transitionTarget}`;
+  }
+
+  if (slotCount) {
+    return `${slotCount} equipes avancam ate ${transitionTarget}`;
+  }
+
+  return `Transicao consolidada ate ${transitionTarget}`;
+}
+
+function resolveHybridNavigationStructureLabel(
+  stage: CompetitionStructureStage | null,
+): string {
+  if (stage?.stageFormat === "group_table") {
+    return "Grupos";
+  }
+
+  if (stage?.stageFormat === "league_table") {
+    return "Classificatoria";
+  }
+
+  return "Fase de tabela";
 }
 
 function formatHistoricalMatchCount(matchCount: number | null | undefined) {
@@ -1248,7 +1408,8 @@ function KnockoutBracketPanel({
   title: string;
   variant?: "snapshot" | "stacked";
 }) {
-  const stages = useKnockoutStageQueries(context, resolution);
+  const allStages = useKnockoutStageQueries(context, resolution);
+  const stages = useMemo(() => resolvePrimaryKnockoutStages(allStages), [allStages]);
 
   const hasPartialCoverage = stages.some((stage) => stage.coverage.status === "partial");
   const snapshotState = useMemo(() => {
@@ -1456,7 +1617,7 @@ function KnockoutBracketPanel({
             <div
               className="grid items-center gap-2.5 xl:gap-3"
               style={{
-                gridTemplateColumns: `repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(144px, 1.08fr)) minmax(198px, 0.96fr) repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(144px, 1.08fr))`,
+                gridTemplateColumns: `repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(168px, 1.12fr)) minmax(244px, 1.02fr) repeat(${Math.max(snapshotState.snapshotColumns.length, 1)}, minmax(168px, 1.12fr))`,
               }}
             >
               {snapshotState.snapshotColumns.length > 0
@@ -1470,7 +1631,7 @@ function KnockoutBracketPanel({
                 )}
 
               <div className="flex h-full flex-col justify-center">
-                <div className="mx-auto w-full max-w-[230px] rounded-[1.45rem] border border-[rgba(8,48,35,0.32)] bg-[radial-gradient(circle_at_top,rgba(32,108,79,0.24),transparent_48%),linear-gradient(180deg,#042d21_0%,#06533c_54%,#073d2d_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(0,53,38,0.62)]">
+                <div className="mx-auto w-full max-w-[280px] rounded-[1.45rem] border border-[rgba(8,48,35,0.32)] bg-[radial-gradient(circle_at_top,rgba(32,108,79,0.24),transparent_48%),linear-gradient(180deg,#042d21_0%,#06533c_54%,#073d2d_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(0,53,38,0.62)]">
                   <p className="text-center text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-[#bfe6d6]">
                     {snapshotState.finalStage?.stage.stageName ?? "Final"}
                   </p>
@@ -2578,8 +2739,8 @@ function HybridSecondaryActions({ context }: { context: CompetitionSeasonContext
 
   return (
     <>
-      <HybridActionLink href={buildRankingPath("player-goals", filterInput)} label="Rankings" />
       <HybridActionLink href={buildMatchesPath(filterInput)} label="Partidas" />
+      <HybridActionLink href={buildRankingPath("player-goals", filterInput)} label="Rankings" />
       <HybridActionLink href={buildTeamsPath(filterInput)} label="Times" />
       <HybridActionLink href={buildPlayersPath(filterInput)} label="Jogadores" />
     </>
@@ -2593,6 +2754,7 @@ function HybridHistoricalHero({
   context: CompetitionSeasonContext;
   resolution: CompetitionSeasonSurfaceResolution;
 }) {
+  const [isHeroPhotoUnavailable, setIsHeroPhotoUnavailable] = useState(false);
   const analyticsQuery = useCompetitionAnalytics({
     competitionKey: context.competitionKey,
     seasonLabel: context.seasonLabel,
@@ -2602,54 +2764,262 @@ function HybridHistoricalHero({
     seasonLabel: context.seasonLabel,
     stageId: resolution.finalKnockoutStage?.stageId,
   });
+  const topScorerQuery = useEditionTopScorer(context);
+  const competitionDefinition = getCompetitionById(context.competitionId);
+  const visualAssetId = getCompetitionVisualAssetId(competitionDefinition);
+  const competitionLogoSrc = visualAssetId
+    ? `/api/visual-assets/competitions/${encodeURIComponent(visualAssetId)}`
+    : null;
+  const competitionInitials = context.competitionName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((token) => token[0]?.toUpperCase() ?? "")
+    .join("");
+  const championArtwork = resolveSeasonChampionArtwork(context.competitionKey, context.seasonLabel);
 
   const championTie = resolveChampionTie(championTieQuery.data?.ties ?? []);
   const championName = championTieQuery.isLoading
     ? "..."
     : championTie?.winnerTeamName ?? "Campeao nao identificado";
-  const finalWindow = championTie ? formatDateWindow(championTie.firstLegAt, championTie.lastLegAt) : null;
-  const structureLabel = resolution.editionLabel ?? "Formato hibrido";
+  const finalDecisionDate =
+    championTie ? formatLongDate(championTie.lastLegAt ?? championTie.firstLegAt) : null;
+  const structureHeadline = resolveHybridStructureHeadline(resolution);
+  const structureDetail = resolveHybridStructureDetail(resolution.primaryTableStage);
   const matchCount = analyticsQuery.isLoading
     ? "..."
     : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount);
-  const progressionSummary =
-    resolveTransitionSummary(resolution.primaryTableStage) ??
-    "Leitura historica da fase de tabela e do chaveamento final.";
+  const topScorer = topScorerQuery.data?.scorer ?? null;
+  const topScorerName = topScorerQuery.isLoading ? "..." : (topScorer?.entityName ?? "Artilharia indisponivel");
+  const topScorerDetail = topScorer ? (
+    <>
+      <span className="font-semibold text-[#003526]">{topScorer.goals} gols</span>
+      {topScorer.teamName ? ` • ${topScorer.teamName}` : ""}
+    </>
+  ) : (
+    "Ranking historico do torneio nao consolidado."
+  );
+  const heroImageSrc = championArtwork?.src ?? HISTORICAL_HERO_TEST_IMAGE_SRC;
+  const summaryValue = (
+    <>
+      <span className="font-extrabold text-[#003526]">{matchCount}</span>
+      <span className="mx-2 text-[#8fa097]">•</span>
+      <span className="font-extrabold text-[#003526]">{resolution.stageCount} fases</span>
+    </>
+  );
 
   return (
-    <SeasonHeroBlock
-      context={context}
-      description="Arquivo historico da edicao, conectando a fase de tabela ao mata-mata ate a decisao final."
-      eyebrow="Edicao hibrida encerrada"
-      highlightDescription={
-        finalWindow
-          ? `Decisao registrada em ${finalWindow}.`
-          : "Confronto final consolidado no arquivo historico."
-      }
-      highlightLabel="Campeao"
-      highlightValue={championName}
-      summary={
-        <EditionSummaryGrid>
-          <HistoricalHeroCard
-            detail={progressionSummary}
-            label="Estrutura"
-            value={structureLabel}
-          />
-          <HistoricalHeroCard
-            detail={resolution.finalKnockoutStage?.stageName ?? "Sem fase final consolidada."}
-            label="Decisao"
-            value={finalWindow ?? "Data nao informada"}
-          />
-          <HistoricalHeroCard
-            detail={`${resolution.stageCount} fases mapeadas nesta edicao.`}
-            label="Partidas"
-            value={matchCount}
-          />
-        </EditionSummaryGrid>
-      }
-      tags={["Edicao encerrada", structureLabel, context.seasonLabel]}
-      title={`${context.competitionName} ${context.seasonLabel}`}
-    />
+    <div className="relative overflow-hidden rounded-[1.7rem] border border-[rgba(191,201,195,0.5)] bg-[radial-gradient(circle_at_top_right,rgba(194,241,214,0.42),transparent_26%),linear-gradient(180deg,#f7fbf8_0%,#edf6f1_100%)] px-5 py-5 shadow-[0_34px_80px_-52px_rgba(17,28,45,0.32)] md:px-6 md:py-6">
+      <div className="absolute right-[-8%] top-[-18%] h-56 w-56 rounded-full bg-[rgba(5,77,57,0.08)] blur-3xl" />
+      <div className="absolute bottom-[-24%] left-[14%] h-48 w-48 rounded-full bg-[rgba(166,242,209,0.22)] blur-3xl" />
+
+      <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.96fr)] xl:items-stretch">
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            {["Edicao encerrada", "Hibrida"].map((tag) => (
+              <span
+                className="rounded-full border border-[rgba(0,53,38,0.12)] bg-[rgba(255,255,255,0.72)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#0d4a37]"
+                key={tag}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start">
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] border border-[rgba(191,201,195,0.55)] bg-white shadow-[0_24px_50px_-34px_rgba(17,28,45,0.42)]">
+              <span className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#003526]">
+                {competitionInitials || "FA"}
+              </span>
+              {competitionLogoSrc ? (
+                <img
+                  alt={`Logo ${context.competitionName}`}
+                  className="absolute inset-0 h-full w-full object-contain bg-white p-3"
+                  onError={(event) => {
+                    (event.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                  src={competitionLogoSrc}
+                />
+              ) : null}
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.65rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-[#111c2d] md:text-[3.25rem]">
+                {context.competitionName} {context.seasonLabel}
+              </h1>
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-[rgba(191,201,195,0.52)] bg-white/92 px-5 py-5 shadow-[0_28px_68px_-48px_rgba(17,28,45,0.22)]">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+              Resumo da edicao
+            </p>
+            <div className="mt-4">
+              <HybridHeroSummaryItem
+                label="Campeao"
+                media={championTie ? <TeamBadge size={44} teamId={championTie.winnerTeamId} teamName={championName} /> : null}
+                value={championName}
+                valueClassName="font-[family:var(--font-profile-headline)] text-[2.05rem] font-extrabold leading-none tracking-[-0.05em] text-[#111c2d]"
+              />
+              <HybridHeroSummaryItem
+                label="Final"
+                value={finalDecisionDate ?? "Data nao informada"}
+                valueClassName="font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#111c2d]"
+              />
+              <HybridHeroSummaryItem
+                detail={topScorerDetail}
+                label="Artilheiro"
+                media={<PlayerPhoto playerId={topScorer?.entityId} playerName={topScorer?.entityName ?? topScorerName} size={52} />}
+                value={topScorerName}
+                valueClassName="font-[family:var(--font-profile-headline)] text-[1.55rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#111c2d]"
+              />
+              <HybridHeroSummaryItem
+                label="Resumo"
+                value={summaryValue}
+                valueClassName="font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-[#111c2d]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)]">
+          {!isHeroPhotoUnavailable ? (
+            <img
+              alt={`Celebracao do campeao da ${context.competitionName}`}
+              className="absolute inset-0 h-full w-full object-cover"
+              onError={() => setIsHeroPhotoUnavailable(true)}
+              src={heroImageSrc}
+            />
+          ) : null}
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,24,18,0.12)_0%,rgba(3,24,18,0.44)_48%,rgba(3,24,18,0.78)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,224,130,0.2),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(166,242,209,0.18),transparent_26%)]" />
+
+          {isHeroPhotoUnavailable ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-white/16 bg-white/10 blur-[1px]" />
+            </div>
+          ) : null}
+
+          <div className="absolute inset-x-4 bottom-4">
+            <div className="rounded-[1.3rem] border border-white/12 bg-[rgba(7,24,18,0.52)] px-4 py-4 backdrop-blur-sm">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">
+                Campeao
+              </p>
+              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold leading-none tracking-[-0.04em] text-white">
+                {championName}
+              </p>
+              <p className="mt-2 text-sm text-[#d7efe4]">
+                {finalDecisionDate ?? "Data da final nao informada"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HybridStructureStrip({
+  context,
+  resolution,
+}: {
+  context: CompetitionSeasonContext;
+  resolution: CompetitionSeasonSurfaceResolution;
+}) {
+  const analyticsQuery = useCompetitionAnalytics({
+    competitionKey: context.competitionKey,
+    seasonLabel: context.seasonLabel,
+  });
+  const matchCount = analyticsQuery.isLoading
+    ? "..."
+    : formatHistoricalMatchCount(analyticsQuery.data?.seasonSummary.matchCount);
+  const structureHeadline = resolveHybridStructureHeadline(resolution);
+  const structureDetail = resolveHybridStructureDetail(resolution.primaryTableStage);
+
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="space-y-2">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
+          Leitura da edicao
+        </p>
+        <h2 className="font-[family:var(--font-profile-headline)] text-[1.7rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
+          {structureHeadline}
+        </h2>
+        <p className="text-sm/6 text-[#57657a]">{structureDetail}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <span className="rounded-full border border-[rgba(191,201,195,0.52)] bg-[rgba(240,243,255,0.88)] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
+          {resolution.stageCount} fases
+        </span>
+        <span className="rounded-full border border-[rgba(191,201,195,0.52)] bg-[rgba(240,243,255,0.88)] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
+          {matchCount} partidas
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function HybridHighlightLink({
+  description,
+  href,
+  label,
+}: {
+  description: string;
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      className="rounded-[1.3rem] border border-[rgba(191,201,195,0.52)] bg-white px-4 py-4 transition-[transform,border-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:border-[#8bd6b6] hover:shadow-[0_22px_58px_-42px_rgba(17,28,45,0.22)] active:scale-[0.985]"
+      href={href}
+    >
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">Destaque</p>
+      <h3 className="mt-2 font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
+        {label}
+      </h3>
+      <p className="mt-2 text-sm/6 text-[#57657a]">{description}</p>
+      <p className="mt-4 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
+        Abrir
+      </p>
+    </Link>
+  );
+}
+
+function HybridHighlightsPanel({
+  context,
+}: {
+  context: CompetitionSeasonContext;
+}) {
+  const filterInput = useSeasonFilterInput(context);
+  const searchParams = useSearchParams();
+
+  return (
+    <ProfilePanel className="space-y-4">
+      <div>
+        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">Destaques da edicao</p>
+        <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[1.9rem] font-extrabold tracking-[-0.04em] text-[#111c2d]">
+          Exploracoes prioritarias
+        </h2>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <HybridHighlightLink
+          description="Artilharia completa e recorte ofensivo da temporada."
+          href={buildRankingPath("player-goals", filterInput)}
+          label="Artilharia completa"
+        />
+        <HybridHighlightLink
+          description="Progressao do campeao no mata-mata ate a decisao."
+          href={buildSeasonSurfaceHref(context, "matches", searchParams)}
+          label="Caminho do campeao"
+        />
+        <HybridHighlightLink
+          description="Perfis e contexto das equipes registradas na edicao."
+          href={buildTeamsPath(filterInput)}
+          label="Times participantes"
+        />
+      </div>
+    </ProfilePanel>
   );
 }
 
@@ -2895,6 +3265,7 @@ function HybridOverviewSection({
 }) {
   return (
     <div className="space-y-5">
+      <HybridHighlightsPanel context={context} />
       <HybridTableOverviewPanel context={context} stage={resolution.primaryTableStage} />
     </div>
   );
@@ -3016,9 +3387,9 @@ function buildSurfaceNavLabels(
   if (resolution.type === "hybrid") {
     return {
       highlights: "Destaques estatisticos",
-      matches: "Chaveamento",
+      matches: "Mata-mata",
       overview: "Visao geral",
-      structure: resolveHybridTableSectionLabel(resolution.primaryTableStage),
+      structure: resolveHybridNavigationStructureLabel(resolution.primaryTableStage),
     };
   }
 
@@ -3383,12 +3754,12 @@ function HybridSeasonSurface({
       variant="snapshot"
     />
   );
-  const shouldShowHybridRail = activeSection !== "matches";
 
   return (
     <CompetitionSeasonSurfaceShell
       context={context}
       hero={<HybridHistoricalHero context={context} resolution={resolution} />}
+      summaryStrip={activeSection === "overview" ? <HybridStructureStrip context={context} resolution={resolution} /> : null}
       mainCanvas={
         <>
           {activeSection === "overview" ? <HybridOverviewSection context={context} resolution={resolution} /> : null}
@@ -3417,7 +3788,7 @@ function HybridSeasonSurface({
           label: navLabels.matches,
         },
       ]}
-      secondaryRail={shouldShowHybridRail ? <HybridEditionRail context={context} resolution={resolution} /> : null}
+      secondaryRail={null}
       showLocalBreadcrumbs={false}
       supportingModules={activeSection === "overview" ? overviewBracket : null}
     />

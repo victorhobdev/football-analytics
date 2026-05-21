@@ -8,6 +8,10 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  --hero-image-opacity: 0.98;
+  --hero-image-saturation: 1.22;
+  --hero-image-contrast: 1.08;
+  --hero-image-brightness: 0.96;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 2rem;
   background: linear-gradient(180deg, rgba(247, 250, 248, 0.18), rgba(243, 248, 245, 0.14));
@@ -21,12 +25,29 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(5, 30, 23, 0.18), rgba(236, 244, 240, 0.84));
-  background-position: center 18%;
-  background-repeat: no-repeat;
-  background-size: cover;
-  filter: saturate(1.06) contrast(1.02) brightness(1.06);
-  opacity: 0.9;
+  background-image:
+    linear-gradient(
+      104deg,
+      rgba(244, 248, 245, 0.4) 0%,
+      rgba(244, 248, 245, 0.2) 26%,
+      rgba(18, 38, 31, 0.12) 56%,
+      rgba(7, 27, 21, 0.22) 100%
+    ),
+    url("./background.png");
+  background-position:
+    center center,
+    center 18%;
+  background-repeat:
+    no-repeat,
+    no-repeat;
+  background-size:
+    cover,
+    cover;
+  filter:
+    saturate(var(--hero-image-saturation))
+    contrast(var(--hero-image-contrast))
+    brightness(var(--hero-image-brightness));
+  opacity: var(--hero-image-opacity);
   pointer-events: none;
   transform: scale(1.02);
 }
@@ -36,14 +57,14 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 84% 12%, rgba(196, 220, 255, 0.14), transparent 24%),
-    radial-gradient(circle at 8% 88%, rgba(216, 227, 251, 0.14), transparent 28%),
+    radial-gradient(circle at 84% 12%, rgba(196, 220, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 8% 88%, rgba(216, 227, 251, 0.08), transparent 28%),
     linear-gradient(
       112deg,
-      rgba(248, 251, 249, 0.18) 0%,
-      rgba(248, 251, 249, 0.1) 26%,
+      rgba(248, 251, 249, 0.08) 0%,
+      rgba(248, 251, 249, 0.04) 26%,
       rgba(244, 249, 246, 0.01) 56%,
-      rgba(240, 246, 243, 0.14) 100%
+      rgba(240, 246, 243, 0.08) 100%
     );
   pointer-events: none;
 }

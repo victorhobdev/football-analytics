@@ -8,7 +8,11 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function PlatformShellFrame() {
+export function PlatformShellFrame({
+  contentWidthClassName = "max-w-7xl",
+}: {
+  contentWidthClassName?: string;
+}) {
   const shellState = usePlatformShellState();
 
   return (
@@ -16,7 +20,7 @@ export function PlatformShellFrame() {
       aria-label="Contexto da página"
       className="border-b border-[rgba(216,227,251,0.72)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(246,249,255,0.84)_100%)] shadow-[0_14px_34px_-34px_rgba(17,28,45,0.18)] backdrop-blur-xl"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 md:px-8">
+      <div className={joinClasses("mx-auto w-full px-4 py-4 md:px-8", contentWidthClassName)}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
             {shellState.breadcrumbs.map((breadcrumb, index) => (

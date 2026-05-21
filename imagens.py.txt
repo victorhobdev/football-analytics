@@ -1,0 +1,74 @@
+from icrawler.builtin import GoogleImageCrawler
+import os
+import unicodedata
+
+# ---------- UTIL ----------
+def slugify(text):
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    return text.lower().replace(" ", "_")
+
+# ---------- CATALOGO ----------
+CATALOG = [
+    {"competition": "Campeonato Brasileiro Serie A", "season": 2025, "champion": "Botafogo"},
+    {"competition": "Campeonato Brasileiro Serie A", "season": 2024, "champion": "Botafogo"},
+    {"competition": "Campeonato Brasileiro Serie A", "season": 2023, "champion": "Atletico Mineiro"},
+    {"competition": "Campeonato Brasileiro Serie A", "season": 2022, "champion": "Palmeiras"},
+    {"competition": "Campeonato Brasileiro Serie A", "season": 2021, "champion": "Atletico Mineiro"},
+
+    {"competition": "Campeonato Brasileiro Serie B", "season": 2025, "champion": "???"},
+    {"competition": "Campeonato Brasileiro Serie B", "season": 2024, "champion": "Mirassol"},
+    {"competition": "Campeonato Brasileiro Serie B", "season": 2023, "champion": "Vitoria"},
+    {"competition": "Campeonato Brasileiro Serie B", "season": 2022, "champion": "Cruzeiro"},
+    {"competition": "Campeonato Brasileiro Serie B", "season": 2021, "champion": "Coritiba"},
+
+    {"competition": "Copa Libertadores", "season": 2025, "champion": "Flamengo"},
+    {"competition": "Copa Libertadores", "season": 2024, "champion": "Botafogo"},
+    {"competition": "Copa Libertadores", "season": 2023, "champion": "Fluminense"},
+    {"competition": "Copa Libertadores", "season": 2022, "champion": "Flamengo"},
+    {"competition": "Copa Libertadores", "season": 2021, "champion": "Palmeiras"},
+
+    {"competition": "Copa Sudamericana", "season": 2025, "champion": "???"},
+    {"competition": "Copa Sudamericana", "season": 2024, "champion": "Racing Club"},
+
+    {"competition": "Copa do Brasil", "season": 2025, "champion": "???"},
+    {"competition": "Copa do Brasil", "season": 2024, "champion": "Flamengo"},
+    {"competition": "Copa do Brasil", "season": 2023, "champion": "Sao Paulo"},
+    {"competition": "Copa do Brasil", "season": 2022, "champion": "Flamengo"},
+    {"competition": "Copa do Brasil", "season": 2021, "champion": "Athletico Paranaense"},
+]
+
+OUTPUT_DIR = "./images"
+
+# ---------- EXECUÇÃO ----------
+for entry in CATALOG:
+    if entry["champion"] == "???":
+        print(f"⏭️ Pulando {entry['competition']} {entry['season']}")
+        continue
+
+    # query mais forte (melhora MUITO o resultado)
+    query = f"{entry['champion']} {entry['season']} champion trophy celebration football team"
+
+    folder_name = f"{slugify(entry['competition'])}_{entry['season']}"
+    folder_path = os.path.join(OUTPUT_DIR, folder_name)
+
+    os.makedirs(folder_path, exist_ok=True)
+
+    print(f"🔍 Buscando: {query}")
+
+    try:
+        crawler = GoogleImageCrawler(
+            storage={"root_dir": folder_path}
+        )
+
+        crawler.crawl(
+            keyword=query,
+            max_num=5,              # pega mais e você escolhe depois
+            min_size=(1200, 600),  # força qualidade melhor
+        )
+
+        print(f"✅ Salvo em: {folder_path}\n")
+
+    except Exception as e:
+        print(f"❌ Erro em {entry['competition']} {entry['season']}: {e}\n")
+
+print("🏁 Concluído!")

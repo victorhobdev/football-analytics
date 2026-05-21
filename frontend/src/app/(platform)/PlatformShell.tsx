@@ -43,6 +43,10 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+function isCanonicalCompetitionSeasonRoute(pathname: string): boolean {
+  return /^\/competitions\/[^/]+\/seasons\/[^/]+$/.test(pathname);
+}
+
 function isActiveNavLink(pathname: string, href: string): boolean {
   const hrefPathname = href.split("?")[0] ?? href;
 
@@ -239,6 +243,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const canonicalSeasonCoverageCount = SUPPORTED_SEASON_COVERAGE_COUNT;
   const isHomeRoute = pathname === "/";
   const isCompetitionsIndexRoute = pathname === "/competitions";
+  const isCanonicalSeasonRoute = isCanonicalCompetitionSeasonRoute(pathname);
+  const surfaceContentWidthClassName = isCanonicalSeasonRoute ? "max-w-[95rem]" : "max-w-7xl";
   const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute;
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -535,14 +541,21 @@ export function PlatformShell({ children }: PlatformShellProps) {
         </header>
 
         <div className="pt-16 lg:pt-24">
-          {shouldRenderSurfaceChrome ? <PlatformShellFrame /> : null}
+          {shouldRenderSurfaceChrome ? (
+            <PlatformShellFrame contentWidthClassName={surfaceContentWidthClassName} />
+          ) : null}
 
           {shouldRenderSurfaceChrome ? (
             <section
               aria-label="Filtros globais"
               className="border-b border-[rgba(191,201,195,0.3)] bg-white/76 shadow-[0_16px_40px_-36px_rgba(17,28,45,0.28)]"
             >
-              <div className="mx-auto w-full max-w-7xl px-6 py-4 md:px-8">
+              <div
+                className={joinClasses(
+                  "mx-auto w-full px-6 py-4 md:px-8",
+                  surfaceContentWidthClassName,
+                )}
+              >
                 <Suspense
                   fallback={
                     <p className="animate-pulse text-sm text-[#57657a]">
@@ -560,7 +573,9 @@ export function PlatformShell({ children }: PlatformShellProps) {
             <GlobalErrorBoundary>
               <main
                 className={joinClasses(
-                  isHomeRoute ? "min-h-[calc(100vh-4rem)]" : "mx-auto w-full max-w-7xl",
+                  isHomeRoute
+                    ? "min-h-[calc(100vh-4rem)]"
+                    : joinClasses("mx-auto w-full", surfaceContentWidthClassName),
                 )}
               >
                 {children}
