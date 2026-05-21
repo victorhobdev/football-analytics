@@ -18,25 +18,25 @@ O projeto não tenta ser um placar ao vivo. O foco é arquivo histórico e naveg
 
 ## O que este projeto é
 
-`football-analytics` é uma aplicação de exploração futebolística orientada por temporadas fechadas e acervo histórico. A proposta de produto é transformar dados operacionais de futebol em uma experiência navegável e consistente, com contexto de competição, recorte de temporada, central da partida, rankings e perfis contextuais.
+`football-analytics` é uma aplicação de exploração futebolística orientada por temporadas fechadas e acervo histórico. O objetivo é expor dados operacionais de futebol em uma navegação consistente, com contexto de competição, recorte de temporada, central da partida, rankings e perfis contextuais.
 
 Na prática, o projeto combina:
 
 - pipeline de dados com orquestração e camadas explícitas;
 - modelagem analítica para consumo de produto;
 - BFF em FastAPI para estabilizar contrato entre dado e interface;
-- frontend em Next.js com superfícies reais de navegação;
-- assets e BI acoplados ao mesmo fluxo de produto.
+- frontend em Next.js com superfícies de navegação;
+- assets e BI integrados ao mesmo fluxo.
 
-## Por que ele é forte para portfólio
+## Escopo técnico
 
-Este projeto demonstra ownership técnico de ponta a ponta:
+Este repositório concentra, no mesmo fluxo, as camadas centrais da aplicação:
 
-- produto de dados com separação clara entre ingestão, warehouse, BFF e UI;
+- ingestão, warehouse, BFF e UI com fronteiras explícitas;
 - modelagem canônica de competições e temporadas;
 - frontend analítico com múltiplas superfícies navegáveis;
-- preocupação real com qualidade, contratos e readiness de release;
-- escopo com volume e cobertura suficientes para discussão séria de arquitetura.
+- contratos e gates locais para validação operacional;
+- volume histórico suficiente para exercitar navegação, agregações e exposição de dados.
 
 ## Atributos principais
 
@@ -47,7 +47,7 @@ Este projeto demonstra ownership técnico de ponta a ponta:
 | Escala histórica | `50` escopos competição-temporada, `15.265` fixtures, `267.590` eventos de partida |
 | Profundidade de produto | competições, season hub, rankings, partidas, times, jogadores, head-to-head, mercado e técnicos |
 | Arquitetura | Airflow + MinIO + Postgres + dbt + FastAPI + Next.js + Metabase |
-| Qualidade operacional | gates locais de backend/dados e frontend para readiness |
+| Qualidade operacional | gates locais de backend/dados e frontend para validação operacional |
 
 ## Cobertura atual do acervo
 
@@ -83,11 +83,11 @@ Catálogo canônico exposto hoje pelo app e BFF:
 
 Leitura correta do estado atual:
 
-- o produto já nasce multi-competição;
+- o catálogo atual já é multi-competição;
 - o núcleo mais forte está consolidado em `10` competições auditadas;
 - parte do catálogo adicional já existe no código e no contrato, mas depende de validação runtime para cobertura total.
 
-## Superfícies de produto já implementadas
+## Superfícies já implementadas
 
 Rotas públicas existentes no frontend:
 
@@ -177,7 +177,7 @@ football-analytics/
 ├── infra/airflow/      # DAGs e configuração de orquestração
 ├── platform/dbt/       # modelagem analítica
 ├── platform/quality/   # validações e qualidade
-├── docs/               # contratos, readiness e documentação funcional
+├── docs/               # contratos, validação e documentação funcional
 ├── tools/              # gates e scripts utilitários
 ├── data/               # dados e artefatos locais
 └── docker-compose.yml  # stack local base
@@ -223,7 +223,7 @@ Observação importante:
 
 - o comando acima sobe o frontend em `3001` para evitar conflito com o Metabase em `3000`.
 
-## Validação e readiness
+## Validação operacional
 
 Gate mínimo de frontend:
 
@@ -237,7 +237,7 @@ Gate mínimo de backend/dados:
 python tools/backend_data_readiness_gate.py
 ```
 
-Esses gates existem para verificar readiness operacional antes de demo, entrega técnica ou revisão final.
+Esses gates existem para verificar o estado operacional mínimo antes de revisão manual ou mudança relevante.
 
 ## Documentação complementar
 
@@ -247,11 +247,3 @@ Esses gates existem para verificar readiness operacional antes de demo, entrega 
 - [Contrato mart -> frontend -> BFF](docs/MART_FRONTEND_BFF_CONTRACTS.md)
 - [Readiness de frontend](docs/FRONTEND_RELEASE_READINESS.md)
 - [Readiness de backend/dados](docs/BACKEND_DATA_RELEASE_READINESS.md)
-
-## O que um recrutador encontra aqui
-
-- visão de produto, não só scripts isolados;
-- integração real entre data engineering, backend e frontend;
-- modelagem orientada a domínio;
-- preocupação com contratos, cobertura e rastreabilidade;
-- um projeto que conversa bem com vagas de data platform, analytics engineering, backend e full-stack orientado a produto de dados.
