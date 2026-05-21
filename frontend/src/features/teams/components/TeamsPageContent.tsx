@@ -501,7 +501,7 @@ export function TeamsPageContent() {
                 Times
               </p>
               <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
-                Raio-x rápido dos clubes
+                Resumo rápido dos clubes
               </h1>
             </div>
 

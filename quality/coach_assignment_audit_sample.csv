@@ -1,0 +1,2424 @@
+competition_key,league_id,season,team_id,team_name,matches_total,matches_with_assignment,matches_without_assignment,matches_with_conflict,invalid_name_tenures,future_tenures_hidden,assistant_as_head_risk,public_surface_impacted
+serie_a_it,384,2022,1123,Hellas Verona,39,0,39,0,0,0,0,True
+serie_a_it,384,2022,345,Spezia,39,0,39,0,0,0,0,True
+brasileirao_b,651,2023,6544,ABC,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,113,AC Milan,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,113,AC Milan,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,113,AC Milan,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,113,AC Milan,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,113,AC Milan,38,0,38,0,0,0,0,True
+premier_league,8,2024,52,AFC Bournemouth,38,0,38,0,0,0,0,True
+premier_league,8,2022,52,AFC Bournemouth,38,0,38,0,0,0,0,True
+premier_league,8,2023,52,AFC Bournemouth,38,0,38,0,0,0,0,True
+ligue_1,301,2022,524,Ajaccio,38,0,38,0,0,0,0,True
+la_liga,564,2022,618,Almería,38,0,38,0,0,0,0,True
+la_liga,564,2023,618,Almería,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,238918,Amazonas,38,0,38,0,0,0,0,True
+brasileirao_a,648,2023,6325,América Mineiro,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,6325,América Mineiro,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,6325,América Mineiro,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,6325,América Mineiro,38,0,38,0,0,0,0,True
+ligue_1,301,2022,776,Angers SCO,38,0,38,0,0,0,0,True
+ligue_1,301,2020,776,Angers SCO,38,0,38,0,0,0,0,True
+ligue_1,301,2021,776,Angers SCO,38,0,38,0,0,0,0,True
+premier_league,8,2020,19,Arsenal,38,0,38,0,0,0,0,True
+premier_league,8,2024,19,Arsenal,38,0,38,0,0,0,0,True
+premier_league,8,2021,19,Arsenal,38,0,38,0,0,0,0,True
+premier_league,8,2022,19,Arsenal,38,0,38,0,0,0,0,True
+premier_league,8,2023,19,Arsenal,38,0,38,0,0,0,0,True
+premier_league,8,2024,15,Aston Villa,38,0,38,0,0,0,0,True
+premier_league,8,2022,15,Aston Villa,38,0,38,0,0,0,0,True
+premier_league,8,2023,15,Aston Villa,38,0,38,0,0,0,0,True
+premier_league,8,2021,15,Aston Villa,38,0,38,0,0,0,0,True
+premier_league,8,2020,15,Aston Villa,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,708,Atalanta,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,708,Atalanta,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,708,Atalanta,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,708,Atalanta,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,708,Atalanta,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,234948,Athletic Club,38,0,38,0,0,0,0,True
+la_liga,564,2021,13258,Athletic Club,38,0,38,0,0,0,0,True
+la_liga,564,2022,13258,Athletic Club,38,0,38,0,0,0,0,True
+la_liga,564,2023,13258,Athletic Club,38,0,38,0,0,0,0,True
+la_liga,564,2024,13258,Athletic Club,38,0,38,0,0,0,0,True
+la_liga,564,2020,13258,Athletic Club,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,8331,Atlético GO,38,0,38,0,0,0,0,True
+la_liga,564,2020,7980,Atlético Madrid,38,0,38,0,0,0,0,True
+la_liga,564,2021,7980,Atlético Madrid,38,0,38,0,0,0,0,True
+la_liga,564,2024,7980,Atlético Madrid,38,0,38,0,0,0,0,True
+la_liga,564,2023,7980,Atlético Madrid,38,0,38,0,0,0,0,True
+la_liga,564,2022,7980,Atlético Madrid,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,3427,Atlético Mineiro,38,0,38,0,0,0,0,True
+ligue_1,301,2022,3682,Auxerre,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,6468,Avaí,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,6468,Avaí,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,6468,Avaí,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,6468,Avaí,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,563,Benevento,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,8513,Bologna,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,8513,Bologna,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,8513,Bologna,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,8513,Bologna,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,8513,Bologna,38,0,38,0,0,0,0,True
+ligue_1,301,2020,3562,Bordeaux,38,0,38,0,0,0,0,True
+ligue_1,301,2021,3562,Bordeaux,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,2864,Botafogo,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,2864,Botafogo,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,104,Botafogo SP,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,104,Botafogo SP,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,10017,Brasil de Pelotas,38,0,38,0,0,0,0,True
+premier_league,8,2021,236,Brentford,38,0,38,0,0,0,0,True
+premier_league,8,2022,236,Brentford,38,0,38,0,0,0,0,True
+premier_league,8,2023,236,Brentford,38,0,38,0,0,0,0,True
+premier_league,8,2024,236,Brentford,38,0,38,0,0,0,0,True
+ligue_1,301,2021,266,Brest,38,0,38,0,0,0,0,True
+ligue_1,301,2022,266,Brest,38,0,38,0,0,0,0,True
+ligue_1,301,2020,266,Brest,38,0,38,0,0,0,0,True
+premier_league,8,2022,78,Brighton & Hove Albion,38,0,38,0,0,0,0,True
+premier_league,8,2023,78,Brighton & Hove Albion,38,0,38,0,0,0,0,True
+premier_league,8,2024,78,Brighton & Hove Albion,38,0,38,0,0,0,0,True
+premier_league,8,2021,78,Brighton & Hove Albion,38,0,38,0,0,0,0,True
+premier_league,8,2020,78,Brighton & Hove Albion,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,6304,Brusque,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,6304,Brusque,38,0,38,0,0,0,0,True
+premier_league,8,2021,27,Burnley,38,0,38,0,0,0,0,True
+premier_league,8,2023,27,Burnley,38,0,38,0,0,0,0,True
+premier_league,8,2020,27,Burnley,38,0,38,0,0,0,0,True
+la_liga,564,2023,6827,Cádiz,38,0,38,0,0,0,0,True
+la_liga,564,2021,6827,Cádiz,38,0,38,0,0,0,0,True
+la_liga,564,2022,6827,Cádiz,38,0,38,0,0,0,0,True
+la_liga,564,2020,6827,Cádiz,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,585,Cagliari,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,585,Cagliari,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,585,Cagliari,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,585,Cagliari,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,12220,Ceará,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,12220,Ceará,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,12220,Ceará,38,0,38,0,0,0,0,True
+brasileirao_a,648,2025,12220,Ceará,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,12220,Ceará,38,0,38,0,0,0,0,True
+la_liga,564,2023,36,Celta de Vigo,38,0,38,0,0,0,0,True
+la_liga,564,2024,36,Celta de Vigo,38,0,38,0,0,0,0,True
+la_liga,564,2021,36,Celta de Vigo,38,0,38,0,0,0,0,True
+la_liga,564,2020,36,Celta de Vigo,38,0,38,0,0,0,0,True
+la_liga,564,2022,36,Celta de Vigo,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,710,Chapecoense,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,710,Chapecoense,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,710,Chapecoense,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,710,Chapecoense,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,710,Chapecoense,38,0,38,0,0,0,0,True
+premier_league,8,2022,18,Chelsea,38,0,38,0,0,0,0,True
+premier_league,8,2023,18,Chelsea,38,0,38,0,0,0,0,True
+premier_league,8,2021,18,Chelsea,38,0,38,0,0,0,0,True
+premier_league,8,2024,18,Chelsea,38,0,38,0,0,0,0,True
+premier_league,8,2020,18,Chelsea,38,0,38,0,0,0,0,True
+ligue_1,301,2021,6898,Clermont,38,0,38,0,0,0,0,True
+ligue_1,301,2022,6898,Clermont,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,268,Como,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,12180,Confiança,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,303,Corinthians,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,303,Corinthians,38,0,38,0,0,0,0,True
+brasileirao_a,648,2023,6285,Coritiba,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,6285,Coritiba,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,6285,Coritiba,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,6285,Coritiba,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,6285,Coritiba,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,6188,CRB,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,6188,CRB,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,6188,CRB,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,6188,CRB,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,10722,Cremonese,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,89,Crotone,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,3371,Cruzeiro,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,3371,Cruzeiro,38,0,38,0,0,0,0,True
+premier_league,8,2023,51,Crystal Palace,38,0,38,0,0,0,0,True
+premier_league,8,2024,51,Crystal Palace,38,0,38,0,0,0,0,True
+premier_league,8,2020,51,Crystal Palace,38,0,38,0,0,0,0,True
+premier_league,8,2022,51,Crystal Palace,38,0,38,0,0,0,0,True
+premier_league,8,2021,51,Crystal Palace,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,3847,CSA,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,3847,CSA,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,5463,Cuiabá,38,0,38,0,0,0,0,True
+la_liga,564,2024,2975,Deportivo Alavés,38,0,38,0,0,0,0,True
+la_liga,564,2020,2975,Deportivo Alavés,38,0,38,0,0,0,0,True
+la_liga,564,2021,2975,Deportivo Alavés,38,0,38,0,0,0,0,True
+la_liga,564,2023,2975,Deportivo Alavés,38,0,38,0,0,0,0,True
+ligue_1,301,2020,6842,Dijon,38,0,38,0,0,0,0,True
+la_liga,564,2020,1099,Elche,38,0,38,0,0,0,0,True
+la_liga,564,2021,1099,Elche,38,0,38,0,0,0,0,True
+la_liga,564,2022,1099,Elche,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,397,Empoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,397,Empoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,397,Empoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,397,Empoli,38,0,38,0,0,0,0,True
+la_liga,564,2024,528,Espanyol,38,0,38,0,0,0,0,True
+la_liga,564,2022,528,Espanyol,38,0,38,0,0,0,0,True
+la_liga,564,2021,528,Espanyol,38,0,38,0,0,0,0,True
+premier_league,8,2023,13,Everton,38,0,38,0,0,0,0,True
+premier_league,8,2022,13,Everton,38,0,38,0,0,0,0,True
+premier_league,8,2024,13,Everton,38,0,38,0,0,0,0,True
+premier_league,8,2021,13,Everton,38,0,38,0,0,0,0,True
+premier_league,8,2020,13,Everton,38,0,38,0,0,0,0,True
+la_liga,564,2023,83,FC Barcelona,38,0,38,0,0,0,0,True
+la_liga,564,2021,83,FC Barcelona,38,0,38,0,0,0,0,True
+la_liga,564,2024,83,FC Barcelona,38,0,38,0,0,0,0,True
+la_liga,564,2020,83,FC Barcelona,38,0,38,0,0,0,0,True
+la_liga,564,2022,83,FC Barcelona,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,2505,Ferroviária,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,109,Fiorentina,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,109,Fiorentina,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,109,Fiorentina,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,109,Fiorentina,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,109,Fiorentina,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,1024,Flamengo,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,1095,Fluminense,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,1095,Fluminense,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,4070,Frosinone,38,0,38,0,0,0,0,True
+premier_league,8,2022,11,Fulham,38,0,38,0,0,0,0,True
+premier_league,8,2023,11,Fulham,38,0,38,0,0,0,0,True
+premier_league,8,2024,11,Fulham,38,0,38,0,0,0,0,True
+premier_league,8,2020,11,Fulham,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,102,Genoa,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,102,Genoa,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,102,Genoa,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,102,Genoa,38,0,38,0,0,0,0,True
+la_liga,564,2020,106,Getafe,38,0,38,0,0,0,0,True
+la_liga,564,2023,106,Getafe,38,0,38,0,0,0,0,True
+la_liga,564,2022,106,Getafe,38,0,38,0,0,0,0,True
+la_liga,564,2021,106,Getafe,38,0,38,0,0,0,0,True
+la_liga,564,2024,106,Getafe,38,0,38,0,0,0,0,True
+la_liga,564,2022,231,Girona,38,0,38,0,0,0,0,True
+la_liga,564,2024,231,Girona,38,0,38,0,0,0,0,True
+la_liga,564,2023,231,Girona,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,9323,Goiás,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,9323,Goiás,38,0,38,0,0,0,0,True
+brasileirao_a,648,2023,9323,Goiás,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,9323,Goiás,38,0,38,0,0,0,0,True
+la_liga,564,2023,103,Granada,38,0,38,0,0,0,0,True
+la_liga,564,2021,103,Granada,38,0,38,0,0,0,0,True
+la_liga,564,2020,103,Granada,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,2925,Grêmio,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,2925,Grêmio,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,3672,Guarani,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,3672,Guarani,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,1123,Hellas Verona,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,1123,Hellas Verona,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,1123,Hellas Verona,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,1123,Hellas Verona,38,0,38,0,0,0,0,True
+la_liga,564,2020,274,Huesca,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,2930,Inter,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,2930,Inter,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,2930,Inter,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,2930,Inter,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,2930,Inter,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,2696,Internacional,38,0,38,0,0,0,0,True
+premier_league,8,2024,116,Ipswich Town,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,13292,Ituano,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,13292,Ituano,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,13292,Ituano,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,48,Juventude,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,625,Juventus,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,625,Juventus,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,625,Juventus,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,625,Juventus,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,625,Juventus,38,0,38,0,0,0,0,True
+la_liga,564,2023,2921,Las Palmas,38,0,38,0,0,0,0,True
+la_liga,564,2024,2921,Las Palmas,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,43,Lazio,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,43,Lazio,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,43,Lazio,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,43,Lazio,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,43,Lazio,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,7790,Lecce,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,7790,Lecce,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,7790,Lecce,38,0,38,0,0,0,0,True
+premier_league,8,2020,71,Leeds United,38,0,38,0,0,0,0,True
+premier_league,8,2021,71,Leeds United,38,0,38,0,0,0,0,True
+premier_league,8,2022,71,Leeds United,38,0,38,0,0,0,0,True
+la_liga,564,2024,844,Leganés,38,0,38,0,0,0,0,True
+premier_league,8,2020,42,Leicester City,38,0,38,0,0,0,0,True
+premier_league,8,2022,42,Leicester City,38,0,38,0,0,0,0,True
+premier_league,8,2024,42,Leicester City,38,0,38,0,0,0,0,True
+premier_league,8,2021,42,Leicester City,38,0,38,0,0,0,0,True
+ligue_1,301,2020,271,Lens,38,0,38,0,0,0,0,True
+ligue_1,301,2022,271,Lens,38,0,38,0,0,0,0,True
+ligue_1,301,2021,271,Lens,38,0,38,0,0,0,0,True
+la_liga,564,2021,3457,Levante,38,0,38,0,0,0,0,True
+la_liga,564,2020,3457,Levante,38,0,38,0,0,0,0,True
+premier_league,8,2023,8,Liverpool,38,0,38,0,0,0,0,True
+premier_league,8,2024,8,Liverpool,38,0,38,0,0,0,0,True
+premier_league,8,2020,8,Liverpool,38,0,38,0,0,0,0,True
+premier_league,8,2022,8,Liverpool,38,0,38,0,0,0,0,True
+premier_league,8,2021,8,Liverpool,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,9181,Londrina,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,9181,Londrina,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,9181,Londrina,38,0,38,0,0,0,0,True
+ligue_1,301,2022,9257,Lorient,38,0,38,0,0,0,0,True
+ligue_1,301,2021,9257,Lorient,38,0,38,0,0,0,0,True
+ligue_1,301,2020,9257,Lorient,38,0,38,0,0,0,0,True
+ligue_1,301,2021,690,LOSC Lille,38,0,38,0,0,0,0,True
+ligue_1,301,2020,690,LOSC Lille,38,0,38,0,0,0,0,True
+ligue_1,301,2022,690,LOSC Lille,38,0,38,0,0,0,0,True
+premier_league,8,2023,115,Luton Town,38,0,38,0,0,0,0,True
+la_liga,564,2022,645,Mallorca,38,0,38,0,0,0,0,True
+la_liga,564,2021,645,Mallorca,38,0,38,0,0,0,0,True
+la_liga,564,2024,645,Mallorca,38,0,38,0,0,0,0,True
+la_liga,564,2023,645,Mallorca,38,0,38,0,0,0,0,True
+premier_league,8,2024,9,Manchester City,38,0,38,0,0,0,0,True
+premier_league,8,2021,9,Manchester City,38,0,38,0,0,0,0,True
+premier_league,8,2022,9,Manchester City,38,0,38,0,0,0,0,True
+premier_league,8,2020,9,Manchester City,38,0,38,0,0,0,0,True
+premier_league,8,2023,9,Manchester City,38,0,38,0,0,0,0,True
+premier_league,8,2021,14,Manchester United,38,0,38,0,0,0,0,True
+premier_league,8,2024,14,Manchester United,38,0,38,0,0,0,0,True
+premier_league,8,2023,14,Manchester United,38,0,38,0,0,0,0,True
+premier_league,8,2022,14,Manchester United,38,0,38,0,0,0,0,True
+premier_league,8,2020,14,Manchester United,38,0,38,0,0,0,0,True
+ligue_1,301,2021,3513,Metz,38,0,38,0,0,0,0,True
+ligue_1,301,2020,3513,Metz,38,0,38,0,0,0,0,True
+brasileirao_a,648,2025,11126,Mirassol,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,11126,Mirassol,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,11126,Mirassol,38,0,38,0,0,0,0,True
+ligue_1,301,2021,6789,Monaco,38,0,38,0,0,0,0,True
+ligue_1,301,2020,6789,Monaco,38,0,38,0,0,0,0,True
+ligue_1,301,2022,6789,Monaco,38,0,38,0,0,0,0,True
+ligue_1,301,2022,581,Montpellier,38,0,38,0,0,0,0,True
+ligue_1,301,2020,581,Montpellier,38,0,38,0,0,0,0,True
+ligue_1,301,2021,581,Montpellier,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,1628,Monza,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,1628,Monza,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,1628,Monza,38,0,38,0,0,0,0,True
+ligue_1,301,2022,59,Nantes,38,0,38,0,0,0,0,True
+ligue_1,301,2020,59,Nantes,38,0,38,0,0,0,0,True
+ligue_1,301,2021,59,Nantes,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,597,Napoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,597,Napoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,597,Napoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,597,Napoli,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,597,Napoli,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,12157,Náutico,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,12157,Náutico,38,0,38,0,0,0,0,True
+premier_league,8,2021,20,Newcastle United,38,0,38,0,0,0,0,True
+premier_league,8,2023,20,Newcastle United,38,0,38,0,0,0,0,True
+premier_league,8,2022,20,Newcastle United,38,0,38,0,0,0,0,True
+premier_league,8,2020,20,Newcastle United,38,0,38,0,0,0,0,True
+premier_league,8,2024,20,Newcastle United,38,0,38,0,0,0,0,True
+ligue_1,301,2020,450,Nice,38,0,38,0,0,0,0,True
+ligue_1,301,2021,450,Nice,38,0,38,0,0,0,0,True
+ligue_1,301,2022,450,Nice,38,0,38,0,0,0,0,True
+ligue_1,301,2020,6967,Nîmes,38,0,38,0,0,0,0,True
+premier_league,8,2021,33,Norwich City,38,0,38,0,0,0,0,True
+premier_league,8,2023,63,Nottingham Forest,38,0,38,0,0,0,0,True
+premier_league,8,2022,63,Nottingham Forest,38,0,38,0,0,0,0,True
+premier_league,8,2024,63,Nottingham Forest,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,6370,Novorizontino,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,6370,Novorizontino,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,6370,Novorizontino,38,0,38,0,0,0,0,True
+ligue_1,301,2021,79,Olympique Lyonnais,38,0,38,0,0,0,0,True
+ligue_1,301,2022,79,Olympique Lyonnais,38,0,38,0,0,0,0,True
+ligue_1,301,2020,79,Olympique Lyonnais,38,0,38,0,0,0,0,True
+ligue_1,301,2021,44,Olympique Marseille,38,0,38,0,0,0,0,True
+ligue_1,301,2022,44,Olympique Marseille,38,0,38,0,0,0,0,True
+ligue_1,301,2020,44,Olympique Marseille,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,14710,Operário PR,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,14710,Operário PR,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,14710,Operário PR,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,14710,Operário PR,38,0,38,0,0,0,0,True
+la_liga,564,2020,459,Osasuna,38,0,38,0,0,0,0,True
+la_liga,564,2023,459,Osasuna,38,0,38,0,0,0,0,True
+la_liga,564,2022,459,Osasuna,38,0,38,0,0,0,0,True
+la_liga,564,2024,459,Osasuna,38,0,38,0,0,0,0,True
+la_liga,564,2021,459,Osasuna,38,0,38,0,0,0,0,True
+ligue_1,301,2020,591,Paris Saint Germain,38,0,38,0,0,0,0,True
+ligue_1,301,2022,591,Paris Saint Germain,38,0,38,0,0,0,0,True
+ligue_1,301,2021,591,Paris Saint Germain,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,398,Parma,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,398,Parma,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,3478,Paysandu,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,3478,Paysandu,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,3931,Ponte Preta,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,3931,Ponte Preta,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,3931,Ponte Preta,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,3931,Ponte Preta,38,0,38,0,0,0,0,True
+la_liga,564,2021,377,Rayo Vallecano,38,0,38,0,0,0,0,True
+la_liga,564,2023,377,Rayo Vallecano,38,0,38,0,0,0,0,True
+la_liga,564,2024,377,Rayo Vallecano,38,0,38,0,0,0,0,True
+la_liga,564,2022,377,Rayo Vallecano,38,0,38,0,0,0,0,True
+la_liga,564,2021,485,Real Betis,38,0,38,0,0,0,0,True
+la_liga,564,2022,485,Real Betis,38,0,38,0,0,0,0,True
+la_liga,564,2023,485,Real Betis,38,0,38,0,0,0,0,True
+la_liga,564,2024,485,Real Betis,38,0,38,0,0,0,0,True
+la_liga,564,2020,485,Real Betis,38,0,38,0,0,0,0,True
+la_liga,564,2023,594,Real Sociedad,38,0,38,0,0,0,0,True
+la_liga,564,2021,594,Real Sociedad,38,0,38,0,0,0,0,True
+la_liga,564,2020,594,Real Sociedad,38,0,38,0,0,0,0,True
+la_liga,564,2022,594,Real Sociedad,38,0,38,0,0,0,0,True
+la_liga,564,2024,594,Real Sociedad,38,0,38,0,0,0,0,True
+la_liga,564,2020,361,Real Valladolid,38,0,38,0,0,0,0,True
+la_liga,564,2022,361,Real Valladolid,38,0,38,0,0,0,0,True
+la_liga,564,2024,361,Real Valladolid,38,0,38,0,0,0,0,True
+ligue_1,301,2022,1028,Reims,38,0,38,0,0,0,0,True
+ligue_1,301,2020,1028,Reims,38,0,38,0,0,0,0,True
+ligue_1,301,2021,1028,Reims,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,11550,Remo,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,11550,Remo,38,0,38,0,0,0,0,True
+ligue_1,301,2022,598,Rennes,38,0,38,0,0,0,0,True
+ligue_1,301,2020,598,Rennes,38,0,38,0,0,0,0,True
+ligue_1,301,2021,598,Rennes,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,37,Roma,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,37,Roma,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,37,Roma,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,37,Roma,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,37,Roma,38,0,38,0,0,0,0,True
+ligue_1,301,2021,108,Saint-Étienne,38,0,38,0,0,0,0,True
+ligue_1,301,2020,108,Saint-Étienne,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,7743,Salernitana,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,7743,Salernitana,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,7743,Salernitana,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,6764,Sampaio Corrêa,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,6764,Sampaio Corrêa,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,6764,Sampaio Corrêa,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,522,Sampdoria,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,522,Sampdoria,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,522,Sampdoria,38,0,38,0,0,0,0,True
+brasileirao_a,648,2025,3684,Santos,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,3684,Santos,38,0,38,0,0,0,0,True
+brasileirao_a,648,2022,3684,Santos,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,3684,Santos,38,0,38,0,0,0,0,True
+brasileirao_a,648,2023,3684,Santos,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,3496,São Paulo,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,2714,Sassuolo,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,2714,Sassuolo,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,2714,Sassuolo,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,2714,Sassuolo,38,0,38,0,0,0,0,True
+la_liga,564,2020,60,SD Eibar,38,0,38,0,0,0,0,True
+la_liga,564,2024,676,Sevilla,38,0,38,0,0,0,0,True
+la_liga,564,2021,676,Sevilla,38,0,38,0,0,0,0,True
+la_liga,564,2020,676,Sevilla,38,0,38,0,0,0,0,True
+la_liga,564,2022,676,Sevilla,38,0,38,0,0,0,0,True
+la_liga,564,2023,676,Sevilla,38,0,38,0,0,0,0,True
+premier_league,8,2020,21,Sheffield United,38,0,38,0,0,0,0,True
+premier_league,8,2023,21,Sheffield United,38,0,38,0,0,0,0,True
+premier_league,8,2024,65,Southampton,38,0,38,0,0,0,0,True
+premier_league,8,2020,65,Southampton,38,0,38,0,0,0,0,True
+premier_league,8,2021,65,Southampton,38,0,38,0,0,0,0,True
+premier_league,8,2022,65,Southampton,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,345,Spezia,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,345,Spezia,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,2352,Sport Recife,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,2352,Sport Recife,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,2352,Sport Recife,38,0,38,0,0,0,0,True
+brasileirao_a,648,2021,2352,Sport Recife,38,0,38,0,0,0,0,True
+brasileirao_a,648,2025,2352,Sport Recife,38,0,38,0,0,0,0,True
+ligue_1,301,2021,686,Strasbourg,38,0,38,0,0,0,0,True
+ligue_1,301,2020,686,Strasbourg,38,0,38,0,0,0,0,True
+ligue_1,301,2022,686,Strasbourg,38,0,38,0,0,0,0,True
+brasileirao_b,651,2022,2592,Tombense,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,2592,Tombense,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,613,Torino,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,613,Torino,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,613,Torino,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,613,Torino,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,613,Torino,38,0,38,0,0,0,0,True
+premier_league,8,2020,6,Tottenham Hotspur,38,0,38,0,0,0,0,True
+premier_league,8,2021,6,Tottenham Hotspur,38,0,38,0,0,0,0,True
+premier_league,8,2024,6,Tottenham Hotspur,38,0,38,0,0,0,0,True
+premier_league,8,2023,6,Tottenham Hotspur,38,0,38,0,0,0,0,True
+premier_league,8,2022,6,Tottenham Hotspur,38,0,38,0,0,0,0,True
+ligue_1,301,2022,289,Toulouse,38,0,38,0,0,0,0,True
+ligue_1,301,2021,7047,Troyes,38,0,38,0,0,0,0,True
+ligue_1,301,2022,7047,Troyes,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,346,Udinese,38,0,38,0,0,0,0,True
+serie_a_it,384,2022,346,Udinese,38,0,38,0,0,0,0,True
+serie_a_it,384,2023,346,Udinese,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,346,Udinese,38,0,38,0,0,0,0,True
+serie_a_it,384,2020,346,Udinese,38,0,38,0,0,0,0,True
+la_liga,564,2024,214,Valencia,38,0,38,0,0,0,0,True
+la_liga,564,2020,214,Valencia,38,0,38,0,0,0,0,True
+la_liga,564,2022,214,Valencia,38,0,38,0,0,0,0,True
+la_liga,564,2023,214,Valencia,38,0,38,0,0,0,0,True
+la_liga,564,2021,214,Valencia,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,696,Vasco da Gama,38,0,38,0,0,0,0,True
+serie_a_it,384,2021,267,Venezia,38,0,38,0,0,0,0,True
+serie_a_it,384,2024,267,Venezia,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,11941,Vila Nova,38,0,38,0,0,0,0,True
+brasileirao_b,651,2024,11941,Vila Nova,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,11941,Vila Nova,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,11941,Vila Nova,38,0,38,0,0,0,0,True
+la_liga,564,2023,3477,Villarreal,38,0,38,0,0,0,0,True
+la_liga,564,2021,3477,Villarreal,38,0,38,0,0,0,0,True
+la_liga,564,2024,3477,Villarreal,38,0,38,0,0,0,0,True
+la_liga,564,2020,3477,Villarreal,38,0,38,0,0,0,0,True
+la_liga,564,2022,3477,Villarreal,38,0,38,0,0,0,0,True
+brasileirao_b,651,2021,3440,Vitória,38,0,38,0,0,0,0,True
+brasileirao_a,648,2024,3440,Vitória,38,0,38,0,0,0,0,True
+brasileirao_b,651,2023,3440,Vitória,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,11642,Volta Redonda,38,0,38,0,0,0,0,True
+premier_league,8,2021,25,Watford,38,0,38,0,0,0,0,True
+premier_league,8,2020,10,West Bromwich Albion,38,0,38,0,0,0,0,True
+premier_league,8,2020,1,West Ham United,38,0,38,0,0,0,0,True
+premier_league,8,2024,1,West Ham United,38,0,38,0,0,0,0,True
+premier_league,8,2022,1,West Ham United,38,0,38,0,0,0,0,True
+premier_league,8,2023,1,West Ham United,38,0,38,0,0,0,0,True
+premier_league,8,2021,1,West Ham United,38,0,38,0,0,0,0,True
+premier_league,8,2020,29,Wolverhampton Wanderers,38,0,38,0,0,0,0,True
+premier_league,8,2023,29,Wolverhampton Wanderers,38,0,38,0,0,0,0,True
+premier_league,8,2022,29,Wolverhampton Wanderers,38,0,38,0,0,0,0,True
+premier_league,8,2021,29,Wolverhampton Wanderers,38,0,38,0,0,0,0,True
+premier_league,8,2024,29,Wolverhampton Wanderers,38,0,38,0,0,0,0,True
+brasileirao_b,651,2025,238918,Amazonas,37,0,37,0,0,0,0,True
+brasileirao_b,651,2024,6325,América Mineiro,37,0,37,0,0,0,0,True
+brasileirao_b,651,2023,6468,Avaí,37,0,37,0,0,0,0,True
+brasileirao_b,651,2024,104,Botafogo SP,37,0,37,0,0,0,0,True
+brasileirao_b,651,2022,6304,Brusque,37,0,37,0,0,0,0,True
+brasileirao_b,651,2025,9323,Goiás,37,0,37,0,0,0,0,True
+brasileirao_b,651,2022,3672,Guarani,37,0,37,0,0,0,0,True
+brasileirao_b,651,2023,3672,Guarani,37,0,37,0,0,0,0,True
+brasileirao_b,651,2024,6370,Novorizontino,37,0,37,0,0,0,0,True
+brasileirao_b,651,2022,11941,Vila Nova,37,0,37,0,0,0,0,True
+ligue_1,301,2024,776,Angers SCO,34,0,34,0,0,0,0,True
+ligue_1,301,2024,3682,Auxerre,34,0,34,0,0,0,0,True
+bundesliga,82,2023,3321,Bayer 04 Leverkusen,34,0,34,0,0,0,0,True
+bundesliga,82,2020,3321,Bayer 04 Leverkusen,34,0,34,0,0,0,0,True
+bundesliga,82,2022,3321,Bayer 04 Leverkusen,34,0,34,0,0,0,0,True
+bundesliga,82,2024,3321,Bayer 04 Leverkusen,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3321,Bayer 04 Leverkusen,34,0,34,0,0,0,0,True
+bundesliga,82,2022,68,Borussia Dortmund,34,0,34,0,0,0,0,True
+bundesliga,82,2023,68,Borussia Dortmund,34,0,34,0,0,0,0,True
+bundesliga,82,2021,68,Borussia Dortmund,34,0,34,0,0,0,0,True
+bundesliga,82,2024,68,Borussia Dortmund,34,0,34,0,0,0,0,True
+bundesliga,82,2020,68,Borussia Dortmund,34,0,34,0,0,0,0,True
+bundesliga,82,2023,683,Borussia Mönchengladbach,34,0,34,0,0,0,0,True
+bundesliga,82,2024,683,Borussia Mönchengladbach,34,0,34,0,0,0,0,True
+bundesliga,82,2021,683,Borussia Mönchengladbach,34,0,34,0,0,0,0,True
+bundesliga,82,2022,683,Borussia Mönchengladbach,34,0,34,0,0,0,0,True
+bundesliga,82,2020,683,Borussia Mönchengladbach,34,0,34,0,0,0,0,True
+ligue_1,301,2024,266,Brest,34,0,34,0,0,0,0,True
+ligue_1,301,2023,266,Brest,34,0,34,0,0,0,0,True
+ligue_1,301,2023,6898,Clermont,34,0,34,0,0,0,0,True
+bundesliga,82,2023,482,Darmstadt 98,34,0,34,0,0,0,0,True
+bundesliga,82,2021,2927,DSC Arminia Bielefeld,34,0,34,0,0,0,0,True
+bundesliga,82,2020,2927,DSC Arminia Bielefeld,34,0,34,0,0,0,0,True
+bundesliga,82,2024,366,Eintracht Frankfurt,34,0,34,0,0,0,0,True
+bundesliga,82,2022,366,Eintracht Frankfurt,34,0,34,0,0,0,0,True
+bundesliga,82,2021,366,Eintracht Frankfurt,34,0,34,0,0,0,0,True
+bundesliga,82,2020,366,Eintracht Frankfurt,34,0,34,0,0,0,0,True
+bundesliga,82,2023,366,Eintracht Frankfurt,34,0,34,0,0,0,0,True
+primeira_liga,462,2023,3161,Famalicão,34,0,34,0,0,0,0,True
+bundesliga,82,2023,90,FC Augsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2024,90,FC Augsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2021,90,FC Augsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2020,90,FC Augsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2022,90,FC Augsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2023,503,FC Bayern München,34,0,34,0,0,0,0,True
+bundesliga,82,2022,503,FC Bayern München,34,0,34,0,0,0,0,True
+bundesliga,82,2020,503,FC Bayern München,34,0,34,0,0,0,0,True
+bundesliga,82,2021,503,FC Bayern München,34,0,34,0,0,0,0,True
+bundesliga,82,2024,503,FC Bayern München,34,0,34,0,0,0,0,True
+bundesliga,82,2020,3320,FC Köln,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3320,FC Köln,34,0,34,0,0,0,0,True
+bundesliga,82,2022,3320,FC Köln,34,0,34,0,0,0,0,True
+bundesliga,82,2023,3320,FC Köln,34,0,34,0,0,0,0,True
+bundesliga,82,2023,1079,FC Union Berlin,34,0,34,0,0,0,0,True
+bundesliga,82,2022,1079,FC Union Berlin,34,0,34,0,0,0,0,True
+bundesliga,82,2020,1079,FC Union Berlin,34,0,34,0,0,0,0,True
+bundesliga,82,2021,1079,FC Union Berlin,34,0,34,0,0,0,0,True
+bundesliga,82,2024,1079,FC Union Berlin,34,0,34,0,0,0,0,True
+bundesliga,82,2023,794,FSV Mainz 05,34,0,34,0,0,0,0,True
+bundesliga,82,2021,794,FSV Mainz 05,34,0,34,0,0,0,0,True
+bundesliga,82,2022,794,FSV Mainz 05,34,0,34,0,0,0,0,True
+bundesliga,82,2020,794,FSV Mainz 05,34,0,34,0,0,0,0,True
+bundesliga,82,2024,794,FSV Mainz 05,34,0,34,0,0,0,0,True
+bundesliga,82,2023,2831,Heidenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2024,2831,Heidenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2020,3317,Hertha BSC,34,0,34,0,0,0,0,True
+bundesliga,82,2022,3317,Hertha BSC,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3317,Hertha BSC,34,0,34,0,0,0,0,True
+bundesliga,82,2024,3611,Holstein Kiel,34,0,34,0,0,0,0,True
+ligue_1,301,2023,1055,Le Havre,34,0,34,0,0,0,0,True
+ligue_1,301,2024,1055,Le Havre,34,0,34,0,0,0,0,True
+ligue_1,301,2023,271,Lens,34,0,34,0,0,0,0,True
+ligue_1,301,2024,271,Lens,34,0,34,0,0,0,0,True
+ligue_1,301,2023,9257,Lorient,34,0,34,0,0,0,0,True
+ligue_1,301,2023,690,LOSC Lille,34,0,34,0,0,0,0,True
+ligue_1,301,2024,690,LOSC Lille,34,0,34,0,0,0,0,True
+ligue_1,301,2023,3513,Metz,34,0,34,0,0,0,0,True
+ligue_1,301,2023,6789,Monaco,34,0,34,0,0,0,0,True
+ligue_1,301,2024,6789,Monaco,34,0,34,0,0,0,0,True
+ligue_1,301,2023,581,Montpellier,34,0,34,0,0,0,0,True
+ligue_1,301,2024,581,Montpellier,34,0,34,0,0,0,0,True
+primeira_liga,462,2023,1085,Moreirense,34,0,34,0,0,0,0,True
+ligue_1,301,2024,59,Nantes,34,0,34,0,0,0,0,True
+ligue_1,301,2023,59,Nantes,34,0,34,0,0,0,0,True
+ligue_1,301,2023,450,Nice,34,0,34,0,0,0,0,True
+ligue_1,301,2024,450,Nice,34,0,34,0,0,0,0,True
+ligue_1,301,2023,79,Olympique Lyonnais,34,0,34,0,0,0,0,True
+ligue_1,301,2024,79,Olympique Lyonnais,34,0,34,0,0,0,0,True
+ligue_1,301,2023,44,Olympique Marseille,34,0,34,0,0,0,0,True
+ligue_1,301,2024,44,Olympique Marseille,34,0,34,0,0,0,0,True
+ligue_1,301,2023,591,Paris Saint Germain,34,0,34,0,0,0,0,True
+ligue_1,301,2024,591,Paris Saint Germain,34,0,34,0,0,0,0,True
+bundesliga,82,2020,277,RB Leipzig,34,0,34,0,0,0,0,True
+bundesliga,82,2021,277,RB Leipzig,34,0,34,0,0,0,0,True
+bundesliga,82,2024,277,RB Leipzig,34,0,34,0,0,0,0,True
+bundesliga,82,2022,277,RB Leipzig,34,0,34,0,0,0,0,True
+bundesliga,82,2023,277,RB Leipzig,34,0,34,0,0,0,0,True
+ligue_1,301,2024,1028,Reims,34,0,34,0,0,0,0,True
+ligue_1,301,2023,1028,Reims,34,0,34,0,0,0,0,True
+ligue_1,301,2024,598,Rennes,34,0,34,0,0,0,0,True
+ligue_1,301,2023,598,Rennes,34,0,34,0,0,0,0,True
+ligue_1,301,2024,108,Saint-Étienne,34,0,34,0,0,0,0,True
+bundesliga,82,2022,3543,SC Freiburg,34,0,34,0,0,0,0,True
+bundesliga,82,2020,3543,SC Freiburg,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3543,SC Freiburg,34,0,34,0,0,0,0,True
+bundesliga,82,2023,3543,SC Freiburg,34,0,34,0,0,0,0,True
+bundesliga,82,2024,3543,SC Freiburg,34,0,34,0,0,0,0,True
+bundesliga,82,2020,67,Schalke 04,34,0,34,0,0,0,0,True
+bundesliga,82,2022,67,Schalke 04,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3431,SpVgg Greuther Fürth,34,0,34,0,0,0,0,True
+bundesliga,82,2024,353,St. Pauli,34,0,34,0,0,0,0,True
+ligue_1,301,2024,686,Strasbourg,34,0,34,0,0,0,0,True
+ligue_1,301,2023,686,Strasbourg,34,0,34,0,0,0,0,True
+ligue_1,301,2024,289,Toulouse,34,0,34,0,0,0,0,True
+ligue_1,301,2023,289,Toulouse,34,0,34,0,0,0,0,True
+bundesliga,82,2023,2726,TSG Hoffenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2020,2726,TSG Hoffenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2024,2726,TSG Hoffenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2022,2726,TSG Hoffenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2021,2726,TSG Hoffenheim,34,0,34,0,0,0,0,True
+bundesliga,82,2022,3319,VfB Stuttgart,34,0,34,0,0,0,0,True
+bundesliga,82,2020,3319,VfB Stuttgart,34,0,34,0,0,0,0,True
+bundesliga,82,2021,3319,VfB Stuttgart,34,0,34,0,0,0,0,True
+bundesliga,82,2024,3319,VfB Stuttgart,34,0,34,0,0,0,0,True
+bundesliga,82,2023,3319,VfB Stuttgart,34,0,34,0,0,0,0,True
+bundesliga,82,2021,999,VfL Bochum 1848,34,0,34,0,0,0,0,True
+bundesliga,82,2024,999,VfL Bochum 1848,34,0,34,0,0,0,0,True
+bundesliga,82,2022,999,VfL Bochum 1848,34,0,34,0,0,0,0,True
+bundesliga,82,2023,999,VfL Bochum 1848,34,0,34,0,0,0,0,True
+bundesliga,82,2024,510,VfL Wolfsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2020,510,VfL Wolfsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2023,510,VfL Wolfsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2022,510,VfL Wolfsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2021,510,VfL Wolfsburg,34,0,34,0,0,0,0,True
+bundesliga,82,2020,82,Werder Bremen,34,0,34,0,0,0,0,True
+bundesliga,82,2024,82,Werder Bremen,34,0,34,0,0,0,0,True
+bundesliga,82,2023,82,Werder Bremen,34,0,34,0,0,0,0,True
+bundesliga,82,2022,82,Werder Bremen,34,0,34,0,0,0,0,True
+primeira_liga,462,2024,830,Vitória Guimarães,34,3,31,0,0,0,0,True
+brasileirao_a,648,2021,3496,São Paulo,38,13,25,0,0,0,0,True
+brasileirao_a,648,2021,692,Bahia,38,15,23,0,0,0,0,True
+brasileirao_a,648,2021,3432,Athletico PR,38,16,22,0,0,0,0,True
+primeira_liga,462,2024,269225,AVS,34,13,21,0,0,0,0,True
+primeira_liga,462,2024,58,Sporting CP,34,15,19,0,0,0,0,True
+brasileirao_b,651,2024,275822,CRB B,19,0,19,0,0,0,0,True
+brasileirao_b,651,2024,6188,CRB,18,0,18,0,0,0,0,True
+brasileirao_a,648,2025,2696,Internacional,38,21,17,0,0,0,0,True
+libertadores,1122,2024,2864,Botafogo,17,0,17,0,0,0,0,True
+champions_league,2,2024,591,Paris Saint Germain,17,0,17,0,0,0,0,True
+brasileirao_a,648,2023,2864,Botafogo,38,22,16,0,0,0,0,True
+brasileirao_a,648,2023,3496,São Paulo,38,22,16,0,0,0,0,True
+brasileirao_a,648,2025,3440,Vitória,38,22,16,0,0,0,0,True
+champions_league,2,2024,2417,Slovan Bratislava,16,0,16,0,0,0,0,True
+brasileirao_a,648,2023,303,Corinthians,38,23,15,0,0,0,0,True
+brasileirao_a,648,2023,3371,Cruzeiro,38,23,15,0,0,0,0,True
+brasileirao_a,648,2023,1095,Fluminense,38,23,15,0,0,0,0,True
+brasileirao_a,648,2023,2925,Grêmio,38,23,15,0,0,0,0,True
+champions_league,2,2024,2930,Inter,15,0,15,0,0,0,0,True
+brasileirao_a,648,2024,1024,Flamengo,38,24,14,0,0,0,1,True
+champions_league,2,2024,19,Arsenal,14,0,14,0,0,0,0,True
+champions_league,2,2024,68,Borussia Dortmund,14,0,14,0,0,0,0,True
+libertadores,1122,2024,7930,Colo-Colo,14,0,14,0,0,0,0,True
+libertadores,1122,2022,9335,Estudiantes,14,0,14,0,0,0,0,True
+champions_league,2,2024,83,FC Barcelona,14,0,14,0,0,0,0,True
+champions_league,2,2024,503,FC Bayern München,14,0,14,0,0,0,0,True
+champions_league,2,2023,85,FC København,14,0,14,0,0,0,0,True
+champions_league,2,2024,690,LOSC Lille,14,0,14,0,0,0,0,True
+champions_league,2,2021,354,Malmö FF,14,0,14,0,0,0,0,True
+champions_league,2,2021,627,Sheriff,14,0,14,0,0,0,0,True
+champions_league,2,2024,2727,Sparta Praha,14,0,14,0,0,0,0,True
+primeira_liga,462,2024,3161,Famalicão,34,21,13,0,0,0,0,True
+champions_league,2,2023,68,Borussia Dortmund,13,0,13,0,0,0,0,True
+champions_league,2,2020,18,Chelsea,13,0,13,0,0,0,0,True
+sudamericana,1116,2024,3371,Cruzeiro,13,0,13,0,0,0,0,True
+libertadores,1122,2021,1024,Flamengo,13,0,13,0,0,0,0,True
+champions_league,2,2022,2930,Inter,13,0,13,0,0,0,0,True
+champions_league,2,2021,8,Liverpool,13,0,13,0,0,0,0,True
+champions_league,2,2022,9,Manchester City,13,0,13,0,0,0,0,True
+champions_league,2,2020,9,Manchester City,13,0,13,0,0,0,0,True
+brasileirao_a,648,2025,3496,São Paulo,38,26,12,0,0,0,0,True
+champions_league,2,2022,113,AC Milan,12,0,12,0,0,0,0,True
+champions_league,2,2024,15,Aston Villa,12,0,12,0,0,0,0,True
+libertadores,1122,2021,3427,Atlético Mineiro,12,0,12,0,0,0,0,True
+libertadores,1122,2021,472,Barcelona Guayaquil,12,0,12,0,0,0,0,True
+libertadores,1122,2025,3408,Cerro Porteño,12,0,12,0,0,0,0,True
+champions_league,2,2024,340,Club Brugge,12,0,12,0,0,0,0,True
+sudamericana,1116,2024,303,Corinthians,12,0,12,0,0,0,0,True
+champions_league,2,2022,674,Dinamo Zagreb,12,0,12,0,0,0,0,True
+champions_league,2,2023,503,FC Bayern München,12,0,12,0,0,0,0,True
+champions_league,2,2024,73,Feyenoord,12,0,12,0,0,0,0,True
+champions_league,2,2023,34,Galatasaray,12,0,12,0,0,0,0,True
+champions_league,2,2022,571,Maccabi Haifa,12,0,12,0,0,0,0,True
+champions_league,2,2021,9,Manchester City,12,0,12,0,0,0,0,True
+libertadores,1122,2024,828,Nacional,12,0,12,0,0,0,0,True
+libertadores,1122,2022,15606,Olimpia,12,0,12,0,0,0,0,True
+champions_league,2,2023,591,Paris Saint Germain,12,0,12,0,0,0,0,True
+champions_league,2,2020,591,Paris Saint Germain,12,0,12,0,0,0,0,True
+libertadores,1122,2024,3338,Peñarol,12,0,12,0,0,0,0,True
+champions_league,2,2023,682,PSV,12,0,12,0,0,0,0,True
+champions_league,2,2024,682,PSV,12,0,12,0,0,0,0,True
+libertadores,1122,2024,10002,River Plate,12,0,12,0,0,0,0,True
+champions_league,2,2024,49,Salzburg,12,0,12,0,0,0,0,True
+libertadores,1122,2022,9904,Vélez Sarsfield,12,0,12,0,0,0,0,True
+champions_league,2,2022,3545,Viktoria Plzeň,12,0,12,0,0,0,0,True
+champions_league,2,2021,3477,Villarreal,12,0,12,0,0,0,0,True
+champions_league,2,2021,647,Young Boys,12,0,12,0,0,0,0,True
+champions_league,2,2020,112,Ferencvárosi,11,0,11,0,0,0,0,True
+brasileirao_a,648,2025,7808,Bragantino,38,28,10,0,0,0,0,True
+champions_league,2,2024,113,AC Milan,10,0,10,0,0,0,0,True
+libertadores,1122,2022,6325,América Mineiro,10,0,10,0,0,0,0,True
+champions_league,2,2023,19,Arsenal,10,0,10,0,0,0,0,True
+champions_league,2,2024,708,Atalanta,10,0,10,0,0,0,0,True
+champions_league,2,2023,7980,Atlético Madrid,10,0,10,0,0,0,0,True
+champions_league,2,2024,7980,Atlético Madrid,10,0,10,0,0,0,0,True
+champions_league,2,2021,7980,Atlético Madrid,10,0,10,0,0,0,0,True
+copa_do_brasil,654,2021,3427,Atlético Mineiro,10,0,10,0,0,0,0,True
+libertadores,1122,2021,6597,Atlético Nacional,10,0,10,0,0,0,0,True
+champions_league,2,2024,3321,Bayer 04 Leverkusen,10,0,10,0,0,0,0,True
+champions_league,2,2020,68,Borussia Dortmund,10,0,10,0,0,0,0,True
+champions_league,2,2024,266,Brest,10,0,10,0,0,0,0,True
+champions_league,2,2024,53,Celtic,10,0,10,0,0,0,0,True
+libertadores,1122,2023,3408,Cerro Porteño,10,0,10,0,0,0,0,True
+champions_league,2,2021,18,Chelsea,10,0,10,0,0,0,0,True
+champions_league,2,2022,18,Chelsea,10,0,10,0,0,0,0,True
+libertadores,1122,2023,6308,Club Bolívar,10,0,10,0,0,0,0,True
+copa_do_brasil,654,2024,303,Corinthians,10,0,10,0,0,0,0,True
+champions_league,2,2024,2673,Crvena Zvezda,10,0,10,0,0,0,0,True
+libertadores,1122,2023,8260,Deportivo Pereira,10,0,10,0,0,0,0,True
+champions_league,2,2024,674,Dinamo Zagreb,10,0,10,0,0,0,0,True
+libertadores,1122,2025,9335,Estudiantes,10,0,10,0,0,0,0,True
+champions_league,2,2023,83,FC Barcelona,10,0,10,0,0,0,0,True
+champions_league,2,2022,503,FC Bayern München,10,0,10,0,0,0,0,True
+champions_league,2,2020,503,FC Bayern München,10,0,10,0,0,0,0,True
+champions_league,2,2021,503,FC Bayern München,10,0,10,0,0,0,0,True
+champions_league,2,2020,939,FC Midtjylland,10,0,10,0,0,0,0,True
+libertadores,1122,2024,1095,Fluminense,10,0,10,0,0,0,0,True
+libertadores,1122,2021,1095,Fluminense,10,0,10,0,0,0,0,True
+libertadores,1122,2021,14635,Independiente del Valle,10,0,10,0,0,0,0,True
+libertadores,1122,2021,7792,Junior FC,10,0,10,0,0,0,0,True
+champions_league,2,2024,625,Juventus,10,0,10,0,0,0,0,True
+champions_league,2,2024,8,Liverpool,10,0,10,0,0,0,0,True
+champions_league,2,2020,8,Liverpool,10,0,10,0,0,0,0,True
+champions_league,2,2023,9,Manchester City,10,0,10,0,0,0,0,True
+champions_league,2,2024,9,Manchester City,10,0,10,0,0,0,0,True
+champions_league,2,2024,6789,Monaco,10,0,10,0,0,0,0,True
+champions_league,2,2022,597,Napoli,10,0,10,0,0,0,0,True
+libertadores,1122,2021,15606,Olimpia,10,0,10,0,0,0,0,True
+libertadores,1122,2023,15606,Olimpia,10,0,10,0,0,0,0,True
+champions_league,2,2022,62,Rangers,10,0,10,0,0,0,0,True
+libertadores,1122,2021,10002,River Plate,10,0,10,0,0,0,0,True
+libertadores,1122,2025,10002,River Plate,10,0,10,0,0,0,0,True
+champions_league,2,2021,49,Salzburg,10,0,10,0,0,0,0,True
+libertadores,1122,2021,3684,Santos,10,0,10,0,0,0,0,True
+libertadores,1122,2024,3496,São Paulo,10,0,10,0,0,0,0,True
+libertadores,1122,2021,3496,São Paulo,10,0,10,0,0,0,0,True
+champions_league,2,2021,621,Shakhtar Donetsk,10,0,10,0,0,0,0,True
+libertadores,1122,2023,10661,Sporting Cristal,10,0,10,0,0,0,0,True
+libertadores,1122,2022,9999,Talleres Córdoba,10,0,10,0,0,0,0,True
+libertadores,1122,2022,10024,The Strongest,10,0,10,0,0,0,0,True
+libertadores,1122,2025,9904,Vélez Sarsfield,10,0,10,0,0,0,0,True
+champions_league,2,2024,647,Young Boys,10,0,10,0,0,0,0,True
+primeira_liga,462,2024,652,Porto,34,25,9,0,0,0,0,True
+champions_league,2,2020,556,Dynamo Kyiv,9,0,9,0,0,0,0,True
+sudamericana,1116,2025,15605,Guaraní,9,0,9,0,0,0,0,True
+champions_league,2,2021,629,Ajax,8,0,8,0,0,0,0,True
+copa_do_brasil,654,2023,6325,América Mineiro,8,0,8,0,0,0,0,True
+champions_league,2,2023,328,Antwerp,8,0,8,0,0,0,0,True
+champions_league,2,2020,708,Atalanta,8,0,8,0,0,0,0,True
+champions_league,2,2020,7980,Atlético Madrid,8,0,8,0,0,0,0,True
+libertadores,1122,2023,6597,Atlético Nacional,8,0,8,0,0,0,0,True
+libertadores,1122,2025,6597,Atlético Nacional,8,0,8,0,0,0,0,True
+champions_league,2,2022,1668,Bodø / Glimt,8,0,8,0,0,0,0,True
+champions_league,2,2024,8513,Bologna,8,0,8,0,0,0,0,True
+champions_league,2,2022,68,Borussia Dortmund,8,0,8,0,0,0,0,True
+champions_league,2,2020,683,Borussia Mönchengladbach,8,0,8,0,0,0,0,True
+libertadores,1122,2022,3408,Cerro Porteño,8,0,8,0,0,0,0,True
+libertadores,1122,2021,3408,Cerro Porteño,8,0,8,0,0,0,0,True
+libertadores,1122,2022,3930,Club Atletico Colón,8,0,8,0,0,0,0,True
+champions_league,2,2022,340,Club Brugge,8,0,8,0,0,0,0,True
+champions_league,2,2021,674,Dinamo Zagreb,8,0,8,0,0,0,0,True
+champions_league,2,2022,366,Eintracht Frankfurt,8,0,8,0,0,0,0,True
+libertadores,1122,2022,10683,Emelec,8,0,8,0,0,0,0,True
+champions_league,2,2020,83,FC Barcelona,8,0,8,0,0,0,0,True
+champions_league,2,2022,85,FC København,8,0,8,0,0,0,0,True
+champions_league,2,2021,112,Ferencvárosi,8,0,8,0,0,0,0,True
+copa_do_brasil,654,2021,1024,Flamengo,8,0,8,0,0,0,0,True
+champions_league,2,2024,231,Girona,8,0,8,0,0,0,0,True
+sudamericana,1116,2025,10987,Godoy Cruz,8,0,8,0,0,0,0,True
+libertadores,1122,2024,2925,Grêmio,8,0,8,0,0,0,0,True
+champions_league,2,2023,2930,Inter,8,0,8,0,0,0,0,True
+champions_league,2,2021,2930,Inter,8,0,8,0,0,0,0,True
+libertadores,1122,2021,2696,Internacional,8,0,8,0,0,0,0,True
+champions_league,2,2021,625,Juventus,8,0,8,0,0,0,0,True
+champions_league,2,2020,625,Juventus,8,0,8,0,0,0,0,True
+champions_league,2,2020,2645,Krasnodar,8,0,8,0,0,0,0,True
+champions_league,2,2020,43,Lazio,8,0,8,0,0,0,0,True
+champions_league,2,2023,43,Lazio,8,0,8,0,0,0,0,True
+libertadores,1122,2022,10982,Libertad,8,0,8,0,0,0,0,True
+libertadores,1122,2025,10982,Libertad,8,0,8,0,0,0,0,True
+champions_league,2,2022,8,Liverpool,8,0,8,0,0,0,0,True
+champions_league,2,2021,690,LOSC Lille,8,0,8,0,0,0,0,True
+champions_league,2,2021,2742,Ludogorets,8,0,8,0,0,0,0,True
+champions_league,2,2023,571,Maccabi Haifa,8,0,8,0,0,0,0,True
+champions_league,2,2021,14,Manchester United,8,0,8,0,0,0,0,True
+libertadores,1122,2023,828,Nacional,8,0,8,0,0,0,0,True
+champions_league,2,2023,597,Napoli,8,0,8,0,0,0,0,True
+champions_league,2,2020,602,Olympiacos F.C.,8,0,8,0,0,0,0,True
+champions_league,2,2021,591,Paris Saint Germain,8,0,8,0,0,0,0,True
+champions_league,2,2022,591,Paris Saint Germain,8,0,8,0,0,0,0,True
+libertadores,1122,2025,3338,Peñarol,8,0,8,0,0,0,0,True
+champions_league,2,2022,5317,Qarabağ,8,0,8,0,0,0,0,True
+libertadores,1122,2021,3608,Racing Club,8,0,8,0,0,0,0,True
+champions_league,2,2023,3270,Raków Częstochowa,8,0,8,0,0,0,0,True
+champions_league,2,2020,277,RB Leipzig,8,0,8,0,0,0,0,True
+champions_league,2,2022,277,RB Leipzig,8,0,8,0,0,0,0,True
+champions_league,2,2024,277,RB Leipzig,8,0,8,0,0,0,0,True
+champions_league,2,2023,277,RB Leipzig,8,0,8,0,0,0,0,True
+champions_league,2,2023,594,Real Sociedad,8,0,8,0,0,0,0,True
+libertadores,1122,2022,10002,River Plate,8,0,8,0,0,0,0,True
+libertadores,1122,2023,10002,River Plate,8,0,8,0,0,0,0,True
+champions_league,2,2020,49,Salzburg,8,0,8,0,0,0,0,True
+libertadores,1122,2024,520,San Lorenzo,8,0,8,0,0,0,0,True
+champions_league,2,2020,676,Sevilla,8,0,8,0,0,0,0,True
+champions_league,2,2024,621,Shakhtar Donetsk,8,0,8,0,0,0,0,True
+champions_league,2,2024,3357,Sturm Graz,8,0,8,0,0,0,0,True
+libertadores,1122,2024,9999,Talleres Córdoba,8,0,8,0,0,0,0,True
+libertadores,1122,2024,10024,The Strongest,8,0,8,0,0,0,0,True
+champions_league,2,2022,6,Tottenham Hotspur,8,0,8,0,0,0,0,True
+libertadores,1122,2021,2710,Universidad Católica,8,0,8,0,0,0,0,True
+libertadores,1122,2025,8175,Universitario,8,0,8,0,0,0,0,True
+libertadores,1122,2021,9904,Vélez Sarsfield,8,0,8,0,0,0,0,True
+champions_league,2,2024,3319,VfB Stuttgart,8,0,8,0,0,0,0,True
+champions_league,2,2023,647,Young Boys,8,0,8,0,0,0,0,True
+brasileirao_a,648,2025,696,Vasco da Gama,38,31,7,0,0,0,0,True
+sudamericana,1116,2025,12294,Caracas,7,0,7,0,0,0,0,True
+sudamericana,1116,2024,2532,Coquimbo Unido,7,0,7,0,0,0,0,True
+sudamericana,1116,2024,15743,Deportivo Garcilaso,7,0,7,0,0,0,0,True
+sudamericana,1116,2024,251693,Real Tomayapo,7,0,7,0,0,0,0,True
+sudamericana,1116,2025,5582,Sportivo Luqueño,7,0,7,0,0,0,0,True
+sudamericana,1116,2024,5582,Sportivo Luqueño,7,0,7,0,0,0,0,True
+sudamericana,1116,2025,10258,Unión Española,7,0,7,0,0,0,0,True
+brasileirao_a,648,2025,303,Corinthians,38,32,6,0,0,0,0,True
+copa_do_brasil,654,2021,3432,Athletico PR,10,4,6,0,0,0,0,True
+libertadores,1122,2025,3496,São Paulo,10,4,6,0,0,0,0,True
+copa_do_brasil,654,2021,6544,ABC,6,0,6,0,0,0,0,True
+champions_league,2,2021,113,AC Milan,6,0,6,0,0,0,0,True
+champions_league,2,2023,113,AC Milan,6,0,6,0,0,0,0,True
+champions_league,2,2020,629,Ajax,6,0,6,0,0,0,0,True
+champions_league,2,2022,629,Ajax,6,0,6,0,0,0,0,True
+libertadores,1122,2022,10671,Alianza Lima,6,0,6,0,0,0,0,True
+libertadores,1122,2024,10671,Alianza Lima,6,0,6,0,0,0,0,True
+libertadores,1122,2023,10671,Alianza Lima,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2022,6325,América Mineiro,6,0,6,0,0,0,0,True
+champions_league,2,2021,708,Atalanta,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,8331,Atlético GO,6,0,6,0,0,0,0,True
+champions_league,2,2022,7980,Atlético Madrid,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,692,Bahia,6,0,6,0,0,0,0,True
+champions_league,2,2022,3321,Bayer 04 Leverkusen,6,0,6,0,0,0,0,True
+champions_league,2,2021,554,Beşiktaş,6,0,6,0,0,0,0,True
+champions_league,2,2024,1668,Bodø / Glimt,6,0,6,0,0,0,0,True
+champions_league,2,2021,68,Borussia Dortmund,6,0,6,0,0,0,0,True
+sudamericana,1116,2025,5476,Boston River,6,0,6,0,0,0,0,True
+champions_league,2,2023,6913,Breidablik,6,0,6,0,0,0,0,True
+libertadores,1122,2025,7738,Carabobo,6,0,6,0,0,0,0,True
+libertadores,1122,2022,12294,Caracas,6,0,6,0,0,0,0,True
+libertadores,1122,2024,12294,Caracas,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2022,12220,Ceará,6,0,6,0,0,0,0,True
+champions_league,2,2022,53,Celtic,6,0,6,0,0,0,0,True
+champions_league,2,2023,53,Celtic,6,0,6,0,0,0,0,True
+libertadores,1122,2024,3408,Cerro Porteño,6,0,6,0,0,0,0,True
+champions_league,2,2021,3599,CFR Cluj,6,0,6,0,0,0,0,True
+champions_league,2,2021,340,Club Brugge,6,0,6,0,0,0,0,True
+champions_league,2,2020,340,Club Brugge,6,0,6,0,0,0,0,True
+libertadores,1122,2024,6292,Cobresal,6,0,6,0,0,0,0,True
+libertadores,1122,2022,7930,Colo-Colo,6,0,6,0,0,0,0,True
+libertadores,1122,2023,7930,Colo-Colo,6,0,6,0,0,0,0,True
+libertadores,1122,2025,7930,Colo-Colo,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2024,6188,CRB,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,6188,CRB,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,6036,Criciúma,6,0,6,0,0,0,0,True
+champions_league,2,2023,2673,Crvena Zvezda,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2025,3847,CSA,6,0,6,0,0,0,0,True
+libertadores,1122,2022,3479,Deportivo Cali,6,0,6,0,0,0,0,True
+libertadores,1122,2021,8339,Deportivo La Guaira,6,0,6,0,0,0,0,True
+libertadores,1122,2022,8390,Deportivo Táchira,6,0,6,0,0,0,0,True
+libertadores,1122,2021,8390,Deportivo Táchira,6,0,6,0,0,0,0,True
+libertadores,1122,2025,8390,Deportivo Táchira,6,0,6,0,0,0,0,True
+libertadores,1122,2024,8390,Deportivo Táchira,6,0,6,0,0,0,0,True
+champions_league,2,2024,556,Dynamo Kyiv,6,0,6,0,0,0,0,True
+champions_league,2,2022,556,Dynamo Kyiv,6,0,6,0,0,0,0,True
+champions_league,2,2021,556,Dynamo Kyiv,6,0,6,0,0,0,0,True
+libertadores,1122,2024,9335,Estudiantes,6,0,6,0,0,0,0,True
+champions_league,2,2022,83,FC Barcelona,6,0,6,0,0,0,0,True
+champions_league,2,2021,83,FC Barcelona,6,0,6,0,0,0,0,True
+champions_league,2,2024,939,FC Midtjylland,6,0,6,0,0,0,0,True
+champions_league,2,2024,3444,FCSB,6,0,6,0,0,0,0,True
+champions_league,2,2023,1079,FC Union Berlin,6,0,6,0,0,0,0,True
+champions_league,2,2022,112,Ferencvárosi,6,0,6,0,0,0,0,True
+champions_league,2,2023,73,Feyenoord,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,1095,Fluminense,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2022,9323,Goiás,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,2925,Grêmio,6,0,6,0,0,0,0,True
+libertadores,1122,2022,14635,Independiente del Valle,6,0,6,0,0,0,0,True
+libertadores,1122,2022,251684,Independiente Petrolero,6,0,6,0,0,0,0,True
+champions_league,2,2020,2930,Inter,6,0,6,0,0,0,0,True
+champions_league,2,2020,3702,İstanbul Başakşehir,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,8441,Juazeirense,6,0,6,0,0,0,0,True
+champions_league,2,2022,625,Juventus,6,0,6,0,0,0,0,True
+champions_league,2,2023,5284,KÍ,6,0,6,0,0,0,0,True
+libertadores,1122,2021,10779,LDU Quito,6,0,6,0,0,0,0,True
+champions_league,2,2021,349,Legia Warszawa,6,0,6,0,0,0,0,True
+champions_league,2,2023,271,Lens,6,0,6,0,0,0,0,True
+libertadores,1122,2024,10982,Libertad,6,0,6,0,0,0,0,True
+libertadores,1122,2023,10982,Libertad,6,0,6,0,0,0,0,True
+sudamericana,1116,2024,10982,Libertad,6,0,6,0,0,0,0,True
+libertadores,1122,2023,976,Liverpool,6,0,6,0,0,0,0,True
+libertadores,1122,2024,976,Liverpool,6,0,6,0,0,0,0,True
+champions_league,2,2020,490,Lokomotiv Moskva,6,0,6,0,0,0,0,True
+champions_league,2,2022,2742,Ludogorets,6,0,6,0,0,0,0,True
+champions_league,2,2024,2742,Ludogorets,6,0,6,0,0,0,0,True
+champions_league,2,2024,354,Malmö FF,6,0,6,0,0,0,0,True
+champions_league,2,2020,14,Manchester United,6,0,6,0,0,0,0,True
+champions_league,2,2023,14,Manchester United,6,0,6,0,0,0,0,True
+libertadores,1122,2023,208,Melgar,6,0,6,0,0,0,0,True
+champions_league,2,2023,290,Molde,6,0,6,0,0,0,0,True
+libertadores,1122,2023,10046,Monagas,6,0,6,0,0,0,0,True
+libertadores,1122,2025,828,Nacional,6,0,6,0,0,0,0,True
+libertadores,1122,2021,828,Nacional,6,0,6,0,0,0,0,True
+libertadores,1122,2022,828,Nacional,6,0,6,0,0,0,0,True
+champions_league,2,2023,20,Newcastle United,6,0,6,0,0,0,0,True
+libertadores,1122,2023,12408,Ñublense,6,0,6,0,0,0,0,True
+libertadores,1122,2025,15606,Olimpia,6,0,6,0,0,0,0,True
+champions_league,2,2023,1453,Olimpija,6,0,6,0,0,0,0,True
+champions_league,2,2022,44,Olympique Marseille,6,0,6,0,0,0,0,True
+champions_league,2,2020,44,Olympique Marseille,6,0,6,0,0,0,0,True
+champions_league,2,2023,57,Panathinaikos,6,0,6,0,0,0,0,True
+libertadores,1122,2023,6969,Patronato,6,0,6,0,0,0,0,True
+libertadores,1122,2022,3338,Peñarol,6,0,6,0,0,0,0,True
+champions_league,2,2021,682,PSV,6,0,6,0,0,0,0,True
+champions_league,2,2022,5504,Pyunik,6,0,6,0,0,0,0,True
+champions_league,2,2024,5317,Qarabağ,6,0,6,0,0,0,0,True
+champions_league,2,2021,277,RB Leipzig,6,0,6,0,0,0,0,True
+champions_league,2,2020,598,Rennes,6,0,6,0,0,0,0,True
+libertadores,1122,2021,11646,Rentistas,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2025,238915,Retrô,6,0,6,0,0,0,0,True
+champions_league,2,2022,49,Salzburg,6,0,6,0,0,0,0,True
+champions_league,2,2023,49,Salzburg,6,0,6,0,0,0,0,True
+libertadores,1122,2025,259042,San Antonio Bulo Bulo,6,0,6,0,0,0,0,True
+libertadores,1122,2021,12506,Santa Fe,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,3684,Santos,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2022,3684,Santos,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2023,3684,Santos,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,3496,São Paulo,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2024,3496,São Paulo,6,0,6,0,0,0,0,True
+champions_league,2,2022,676,Sevilla,6,0,6,0,0,0,0,True
+champions_league,2,2023,676,Sevilla,6,0,6,0,0,0,0,True
+champions_league,2,2021,676,Sevilla,6,0,6,0,0,0,0,True
+champions_league,2,2020,621,Shakhtar Donetsk,6,0,6,0,0,0,0,True
+champions_league,2,2023,621,Shakhtar Donetsk,6,0,6,0,0,0,0,True
+champions_league,2,2022,621,Shakhtar Donetsk,6,0,6,0,0,0,0,True
+champions_league,2,2022,627,Sheriff,6,0,6,0,0,0,0,True
+champions_league,2,2023,2417,Slovan Bratislava,6,0,6,0,0,0,0,True
+libertadores,1122,2022,10661,Sporting Cristal,6,0,6,0,0,0,0,True
+libertadores,1122,2021,10661,Sporting Cristal,6,0,6,0,0,0,0,True
+libertadores,1122,2025,10661,Sporting Cristal,6,0,6,0,0,0,0,True
+libertadores,1122,2025,9999,Talleres Córdoba,6,0,6,0,0,0,0,True
+libertadores,1122,2023,10024,The Strongest,6,0,6,0,0,0,0,True
+libertadores,1122,2021,10024,The Strongest,6,0,6,0,0,0,0,True
+libertadores,1122,2021,13330,Unión La Calera,6,0,6,0,0,0,0,True
+libertadores,1122,2021,8175,Universitario,6,0,6,0,0,0,0,True
+libertadores,1122,2024,8175,Universitario,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,696,Vasco da Gama,6,0,6,0,0,0,0,True
+champions_league,2,2021,510,VfL Wolfsburg,6,0,6,0,0,0,0,True
+copa_do_brasil,654,2021,3440,Vitória,6,0,6,0,0,0,0,True
+sudamericana,1116,2025,3440,Vitória,6,0,6,0,0,0,0,True
+champions_league,2,2022,1001,Žalgiris,6,0,6,0,0,0,0,True
+champions_league,2,2021,2963,Zenit,6,0,6,0,0,0,0,True
+champions_league,2,2020,2963,Zenit,6,0,6,0,0,0,0,True
+brasileirao_a,648,2025,1095,Fluminense,38,33,5,0,0,0,0,True
+brasileirao_a,648,2025,2925,Grêmio,38,33,5,0,0,0,0,True
+champions_league,2,2020,2997,Maccabi Tel Aviv,5,0,5,0,0,0,0,True
+champions_league,2,2020,290,Molde,5,0,5,0,0,0,0,True
+champions_league,2,2020,368,Omonia Nicosia,5,0,5,0,0,0,0,True
+brasileirao_a,648,2024,5463,Cuiabá,38,34,4,2,0,0,0,True
+copa_do_brasil,654,2024,1024,Flamengo,10,6,4,0,0,0,0,True
+libertadores,1122,2024,1024,Flamengo,10,6,4,0,0,0,0,True
+copa_do_brasil,654,2025,1095,Fluminense,10,6,4,0,0,0,0,True
+sudamericana,1116,2025,1095,Fluminense,10,6,4,0,0,0,0,True
+champions_league,2,2024,58,Sporting CP,10,6,4,0,0,0,0,True
+sudamericana,1116,2025,696,Vasco da Gama,8,4,4,0,0,0,0,True
+copa_do_brasil,654,2021,14810,4 de Julho,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,6544,ABC,4,0,4,0,0,0,0,True
+champions_league,2,2023,781,AEK Athens,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,12249,Águia de Marabá,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,12249,Águia de Marabá,4,0,4,0,0,0,0,True
+champions_league,2,2021,5495,Alashkert,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,5457,Altos,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,238918,Amazonas,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,6325,América Mineiro,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,7679,América RN,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,6425,Aparecidense,4,0,4,0,0,0,0,True
+champions_league,2,2024,2604,APOEL,4,0,4,0,0,0,0,True
+champions_league,2,2023,526,Aris Limassol,4,0,4,0,0,0,0,True
+champions_league,2,2023,5909,Astana,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,6468,Avaí,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,239711,Azuriz,4,0,4,0,0,0,0,True
+champions_league,2,2023,3859,BATE,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,5511,Boavista,4,0,4,0,0,0,0,True
+champions_league,2,2024,3877,Borac Banja Luka,4,0,4,0,0,0,0,True
+libertadores,1122,2025,5476,Boston River,4,0,4,0,0,0,0,True
+libertadores,1122,2023,5476,Boston River,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,2864,Botafogo,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,7740,Botafogo PB,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,104,Botafogo SP,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,104,Botafogo SP,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,10017,Brasil de Pelotas,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,14684,Brasiliense,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,6304,Brusque,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,6304,Brusque,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,30144,Capital Brasilia,4,0,4,0,0,0,0,True
+libertadores,1122,2021,12294,Caracas,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,12220,Ceará,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,7573,Ceilândia,4,0,4,0,0,0,0,True
+champions_league,2,2024,1114,Celje,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,5638,Cianorte,4,0,4,0,0,0,0,True
+libertadores,1122,2021,6308,Club Bolívar,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,303,Corinthians,4,0,4,0,0,0,0,True
+libertadores,1122,2025,303,Corinthians,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,6285,Coritiba,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,6285,Coritiba,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,6285,Coritiba,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,6188,CRB,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,6188,CRB,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,3371,Cruzeiro,4,0,4,0,0,0,0,True
+champions_league,2,2021,2673,Crvena Zvezda,4,0,4,0,0,0,0,True
+champions_league,2,2022,2673,Crvena Zvezda,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,3847,CSA,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,3847,CSA,4,0,4,0,0,0,0,True
+champions_league,2,2024,3791,Dinamo Minsk,4,0,4,0,0,0,0,True
+champions_league,2,2023,674,Dinamo Zagreb,4,0,4,0,0,0,0,True
+libertadores,1122,2023,2433,El Nacional,4,0,4,0,0,0,0,True
+libertadores,1122,2025,2433,El Nacional,4,0,4,0,0,0,0,True
+champions_league,2,2022,1401,F91 Dudelange,4,0,4,0,0,0,0,True
+champions_league,2,2021,939,FC Midtjylland,4,0,4,0,0,0,0,True
+champions_league,2,2022,939,FC Midtjylland,4,0,4,0,0,0,0,True
+champions_league,2,2024,88,Fenerbahçe,4,0,4,0,0,0,0,True
+champions_league,2,2024,112,Ferencvárosi,4,0,4,0,0,0,0,True
+champions_league,2,2021,8697,Flora,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,1095,Fluminense,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,9323,Goiás,4,0,4,0,0,0,0,True
+libertadores,1122,2021,2925,Grêmio,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,2925,Grêmio,4,0,4,0,0,0,0,True
+libertadores,1122,2021,15605,Guaraní,4,0,4,0,0,0,0,True
+champions_league,2,2023,2535,Häcken,4,0,4,0,0,0,0,True
+champions_league,2,2021,724,HJK,4,0,4,0,0,0,0,True
+champions_league,2,2022,724,HJK,4,0,4,0,0,0,0,True
+champions_league,2,2023,724,HJK,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,13292,Ituano,4,0,4,0,0,0,0,True
+champions_league,2,2024,890,Jagiellonia Białystok,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,8441,Juazeirense,4,0,4,0,0,0,0,True
+champions_league,2,2021,3108,Kairat,4,0,4,0,0,0,0,True
+champions_league,2,2024,5284,KÍ,4,0,4,0,0,0,0,True
+libertadores,1122,2021,10982,Libertad,4,0,4,0,0,0,0,True
+champions_league,2,2024,10068,Lincoln Red Imps,4,0,4,0,0,0,0,True
+champions_league,2,2021,10068,Lincoln Red Imps,4,0,4,0,0,0,0,True
+champions_league,2,2022,260,Linfield,4,0,4,0,0,0,0,True
+champions_league,2,2023,2742,Ludogorets,4,0,4,0,0,0,0,True
+libertadores,1122,2023,2674,Magallanes,4,0,4,0,0,0,0,True
+champions_league,2,2022,354,Malmö FF,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,14812,Maracanã,4,0,4,0,0,0,0,True
+champions_league,2,2022,2973,Maribor,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,12230,Maringá,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,12230,Maringá,4,0,4,0,0,0,0,True
+champions_league,2,2021,6789,Monaco,4,0,4,0,0,0,0,True
+libertadores,1122,2025,10046,Monagas,4,0,4,0,0,0,0,True
+champions_league,2,2021,10695,Mura,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,12157,Náutico,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,12157,Náutico,4,0,4,0,0,0,0,True
+champions_league,2,2021,2599,Neftçi,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,9175,Nova Iguaçu,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,6370,Novorizontino,4,0,4,0,0,0,0,True
+champions_league,2,2021,602,Olympiacos F.C.,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,14710,Operário PR,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,14710,Operário PR,4,0,4,0,0,0,0,True
+champions_league,2,2024,8111,Panevėžys,4,0,4,0,0,0,0,True
+champions_league,2,2024,649,PAOK,4,0,4,0,0,0,0,True
+champions_league,2,2020,649,PAOK,4,0,4,0,0,0,0,True
+champions_league,2,2024,6131,Petrocub,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,7469,Portuguesa RJ,4,0,4,0,0,0,0,True
+champions_league,2,2021,4113,Prishtina,4,0,4,0,0,0,0,True
+champions_league,2,2022,682,PSV,4,0,4,0,0,0,0,True
+champions_league,2,2023,5317,Qarabağ,4,0,4,0,0,0,0,True
+champions_league,2,2023,62,Rangers,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,11550,Remo,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,11550,Remo,4,0,4,0,0,0,0,True
+champions_league,2,2024,6556,Rīgas FS,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,6764,Sampaio Corrêa,4,0,4,0,0,0,0,True
+libertadores,1122,2021,520,San Lorenzo,4,0,4,0,0,0,0,True
+champions_league,2,2023,1970,Servette,4,0,4,0,0,0,0,True
+champions_league,2,2022,207,Shamrock Rovers,4,0,4,0,0,0,0,True
+champions_league,2,2024,207,Shamrock Rovers,4,0,4,0,0,0,0,True
+champions_league,2,2023,627,Sheriff,4,0,4,0,0,0,0,True
+champions_league,2,2022,4493,Shkupi,4,0,4,0,0,0,0,True
+champions_league,2,2024,216,Slavia Praha,4,0,4,0,0,0,0,True
+champions_league,2,2022,2417,Slovan Bratislava,4,0,4,0,0,0,0,True
+champions_league,2,2021,2417,Slovan Bratislava,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,12280,Sousa,4,0,4,0,0,0,0,True
+champions_league,2,2021,2727,Sparta Praha,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,2352,Sport Recife,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,2352,Sport Recife,4,0,4,0,0,0,0,True
+champions_league,2,2024,579,The New Saints,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,14800,Tocantinópolis,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,2592,Tombense,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,2592,Tombense,4,0,4,0,0,0,0,True
+champions_league,2,2024,17318,UE Santa Coloma,4,0,4,0,0,0,0,True
+libertadores,1122,2021,15327,Universidad Católica,4,0,4,0,0,0,0,True
+champions_league,2,2022,2688,Víkingur Reykjavík,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2025,11941,Vila Nova,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,11941,Vila Nova,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2021,11941,Vila Nova,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2022,3440,Vitória,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,11642,Volta Redonda,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2024,6013,Ypiranga Erechim,4,0,4,0,0,0,0,True
+copa_do_brasil,654,2023,6013,Ypiranga Erechim,4,0,4,0,0,0,0,True
+champions_league,2,2021,1001,Žalgiris,4,0,4,0,0,0,0,True
+champions_league,2,2023,1001,Žalgiris,4,0,4,0,0,0,0,True
+champions_league,2,2023,6213,Zrinjski,4,0,4,0,0,0,0,True
+libertadores,1122,2023,1095,Fluminense,13,10,3,0,0,0,0,True
+copa_do_brasil,654,2025,696,Vasco da Gama,12,9,3,0,0,0,0,True
+sudamericana,1116,2025,13264,Cienciano,9,6,3,0,0,0,0,True
+sudamericana,1116,2024,5463,Cuiabá,8,5,3,0,0,0,0,True
+libertadores,1122,2022,472,Barcelona Guayaquil,6,3,3,0,0,0,0,True
+sudamericana,1116,2025,303,Corinthians,6,3,3,0,0,0,0,True
+sudamericana,1116,2025,7228,Unión Santa Fe,6,3,3,0,0,0,0,True
+champions_league,2,2020,2673,Crvena Zvezda,3,0,3,0,0,0,0,True
+champions_league,2,2020,6007,Dinamo Brest,3,0,3,0,0,0,0,True
+champions_league,2,2020,2402,Gent,3,0,3,0,0,0,0,True
+champions_league,2,2020,260,Linfield,3,0,3,0,0,0,0,True
+champions_league,2,2020,5317,Qarabağ,3,0,3,0,0,0,0,True
+copa_do_brasil,654,2024,5463,Cuiabá,4,2,2,1,0,0,2,True
+brasileirao_a,648,2025,3427,Atlético Mineiro,38,36,2,0,0,0,0,True
+brasileirao_a,648,2025,3621,Fortaleza,38,36,2,0,0,0,0,True
+copa_do_brasil,654,2021,3621,Fortaleza,10,8,2,0,0,0,0,True
+sudamericana,1116,2025,2925,Grêmio,8,6,2,0,0,0,0,True
+copa_do_brasil,654,2025,2925,Grêmio,4,2,2,0,0,0,0,True
+copa_do_brasil,654,2025,3496,São Paulo,4,2,2,0,0,0,0,True
+copa_do_brasil,654,2024,6544,ABC,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,6544,ABC,2,0,2,0,0,0,0,True
+champions_league,2,2022,726,AEK Larnaca,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,8392,Água Santa,2,0,2,0,0,0,0,True
+fifa_intercontinental_cup,1452,2024,7780,Al Ain,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,7679,América RN,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,3579,Anápolis,2,0,2,0,0,0,0,True
+champions_league,2,2022,6315,Apollon,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,234948,Athletic Club,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,234948,Athletic Club,2,0,2,0,0,0,0,True
+libertadores,1122,2022,6597,Atlético Nacional,2,0,2,0,0,0,0,True
+libertadores,1122,2024,6597,Atlético Nacional,2,0,2,0,0,0,0,True
+libertadores,1122,2022,8046,Audax Italiano,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,6468,Avaí,2,0,2,0,0,0,0,True
+libertadores,1122,2021,13843,Ayacucho,2,0,2,0,0,0,0,True
+champions_league,2,2020,61,AZ,2,0,2,0,0,0,0,True
+champions_league,2,2023,28028,Bačka Topola,2,0,2,0,0,0,0,True
+libertadores,1122,2025,7019,Blooming,2,0,2,0,0,0,0,True
+champions_league,2,2021,1668,Bodø / Glimt,2,0,2,0,0,0,0,True
+champions_league,2,2021,3877,Borac Banja Luka,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,2864,Botafogo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,14684,Brasiliense,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,14684,Brasiliense,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,14684,Brasiliense,2,0,2,0,0,0,0,True
+champions_league,2,2021,293,Brøndby IF,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,6304,Brusque,2,0,2,0,0,0,0,True
+champions_league,2,2021,5447,Budućnost,2,0,2,0,0,0,0,True
+champions_league,2,2023,5447,Budućnost,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,11733,Camboriú,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,239166,Capital FC,2,0,2,0,0,0,0,True
+libertadores,1122,2023,7738,Carabobo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,5526,Cascavel,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,5526,Cascavel,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,5526,Cascavel,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,10080,Caxias,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,10080,Caxias,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,12220,Ceará,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,12220,Ceará,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,12220,Ceará,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,7573,Ceilândia,2,0,2,0,0,0,0,True
+champions_league,2,2020,1114,Celje,2,0,2,0,0,0,0,True
+champions_league,2,2021,53,Celtic,2,0,2,0,0,0,0,True
+champions_league,2,2020,53,Celtic,2,0,2,0,0,0,0,True
+sudamericana,1116,2024,3408,Cerro Porteño,2,0,2,0,0,0,0,True
+champions_league,2,2022,3599,CFR Cluj,2,0,2,0,0,0,0,True
+champions_league,2,2020,3599,CFR Cluj,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,710,Chapecoense,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,237097,Concórdia Atlético Clube,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,12180,Confiança,2,0,2,0,0,0,0,True
+champions_league,2,2021,1294,Connah's Quay,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,3847,CSA,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,5463,Cuiabá,2,0,2,0,0,0,0,True
+libertadores,1122,2023,13671,Curicó Unido,2,0,2,0,0,0,0,True
+champions_league,2,2024,3750,Dečić,2,0,2,0,0,0,0,True
+libertadores,1122,2025,8137,Defensor Sporting,2,0,2,0,0,0,0,True
+libertadores,1122,2024,8137,Defensor Sporting,2,0,2,0,0,0,0,True
+libertadores,1122,2025,10204,Deportes Tolima,2,0,2,0,0,0,0,True
+libertadores,1122,2021,9398,Deportivo Lara,2,0,2,0,0,0,0,True
+libertadores,1122,2022,9398,Deportivo Lara,2,0,2,0,0,0,0,True
+libertadores,1122,2023,7672,Deportivo Maldonado,2,0,2,0,0,0,0,True
+champions_league,2,2024,3998,Differdange 03,2,0,2,0,0,0,0,True
+champions_league,2,2022,5686,Dinamo Batumi,2,0,2,0,0,0,0,True
+champions_league,2,2024,5686,Dinamo Batumi,2,0,2,0,0,0,0,True
+champions_league,2,2021,3451,Dinamo Tbilisi,2,0,2,0,0,0,0,True
+champions_league,2,2023,3451,Dinamo Tbilisi,2,0,2,0,0,0,0,True
+champions_league,2,2020,674,Dinamo Zagreb,2,0,2,0,0,0,0,True
+champions_league,2,2023,109275,Dnipro-1,2,0,2,0,0,0,0,True
+champions_league,2,2020,148038,Drita,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,6350,EC São José,2,0,2,0,0,0,0,True
+champions_league,2,2024,63383,Egnatia Rrogozhinë,2,0,2,0,0,0,0,True
+libertadores,1122,2024,2433,El Nacional,2,0,2,0,0,0,0,True
+champions_league,2,2023,134619,Farul Constanța,2,0,2,0,0,0,0,True
+champions_league,2,2024,593,FC Twente,2,0,2,0,0,0,0,True
+champions_league,2,2022,88,Fenerbahçe,2,0,2,0,0,0,0,True
+champions_league,2,2023,112,Ferencvárosi,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,8131,Ferroviário,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,8131,Ferroviário,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,8131,Ferroviário,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,9804,Figueirense,2,0,2,0,0,0,0,True
+champions_league,2,2024,8697,Flora,2,0,2,0,0,0,0,True
+champions_league,2,2023,8697,Flora,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,252839,Fluminense PI,2,0,2,0,0,0,0,True
+champions_league,2,2021,3833,Fola Esch,2,0,2,0,0,0,0,True
+champions_league,2,2024,34,Galatasaray,2,0,2,0,0,0,0,True
+champions_league,2,2021,34,Galatasaray,2,0,2,0,0,0,0,True
+champions_league,2,2023,2709,Genk,2,0,2,0,0,0,0,True
+champions_league,2,2021,2709,Genk,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,12418,Globo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,14861,Glória,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,9323,Goiás,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,3672,Guarani,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,30285,Guarany de Bagé,2,0,2,0,0,0,0,True
+champions_league,2,2023,295,Hamrun Spartans,2,0,2,0,0,0,0,True
+champions_league,2,2024,295,Hamrun Spartans,2,0,2,0,0,0,0,True
+champions_league,2,2021,360,Hibernians,2,0,2,0,0,0,0,True
+champions_league,2,2022,360,Hibernians,2,0,2,0,0,0,0,True
+champions_league,2,2024,724,HJK,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,30278,Iguatu,2,0,2,0,0,0,0,True
+champions_league,2,2021,17303,Inter Club d'Escaldes,2,0,2,0,0,0,0,True
+champions_league,2,2022,17303,Inter Club d'Escaldes,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,2696,Internacional,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,8704,Joinville,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,48,Juventude,2,0,2,0,0,0,0,True
+champions_league,2,2023,228494,KF Ballkani,2,0,2,0,0,0,0,True
+champions_league,2,2024,228494,KF Ballkani,2,0,2,0,0,0,0,True
+champions_league,2,2022,228494,KF Ballkani,2,0,2,0,0,0,0,True
+champions_league,2,2020,5284,KÍ,2,0,2,0,0,0,0,True
+champions_league,2,2022,5284,KÍ,2,0,2,0,0,0,0,True
+champions_league,2,2023,11833,Larne,2,0,2,0,0,0,0,True
+champions_league,2,2024,11833,Larne,2,0,2,0,0,0,0,True
+champions_league,2,2022,302,Lech Poznań,2,0,2,0,0,0,0,True
+champions_league,2,2020,349,Legia Warszawa,2,0,2,0,0,0,0,True
+champions_league,2,2022,10068,Lincoln Red Imps,2,0,2,0,0,0,0,True
+champions_league,2,2023,10068,Lincoln Red Imps,2,0,2,0,0,0,0,True
+champions_league,2,2021,260,Linfield,2,0,2,0,0,0,0,True
+libertadores,1122,2021,976,Liverpool,2,0,2,0,0,0,0,True
+champions_league,2,2020,2742,Ludogorets,2,0,2,0,0,0,0,True
+champions_league,2,2024,13775,Lugano,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,8728,Luverdense,2,0,2,0,0,0,0,True
+champions_league,2,2021,571,Maccabi Haifa,2,0,2,0,0,0,0,True
+champions_league,2,2024,2997,Maccabi Tel Aviv,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,30117,Manaus,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,30117,Manaus,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,30117,Manaus,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,12162,Marcílio Dias,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,12230,Maringá,2,0,2,0,0,0,0,True
+libertadores,1122,2024,208,Melgar,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,11126,Mirassol,2,0,2,0,0,0,0,True
+champions_league,2,2022,6789,Monaco,2,0,2,0,0,0,0,True
+libertadores,1122,2022,10046,Monagas,2,0,2,0,0,0,0,True
+libertadores,1122,2022,5479,Montevideo City Torque,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,9966,Moto Club MA,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,12406,Murici,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,9175,Nova Iguaçu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,9175,Nova Iguaçu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,238914,Nova Mutum EC,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,260210,Nova Venécia,2,0,2,0,0,0,0,True
+libertadores,1122,2025,12408,Ñublense,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,10064,Olaria,2,0,2,0,0,0,0,True
+champions_league,2,2022,602,Olympiacos F.C.,2,0,2,0,0,0,0,True
+champions_league,2,2023,44,Olympique Marseille,2,0,2,0,0,0,0,True
+champions_league,2,2021,368,Omonia Nicosia,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,30399,Operário Ltda,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,9938,Operário MS,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,14710,Operário PR,2,0,2,0,0,0,0,True
+champions_league,2,2024,7345,Ordabasy,2,0,2,0,0,0,0,True
+champions_league,2,2024,2736,Partizan,2,0,2,0,0,0,0,True
+champions_league,2,2023,5197,Partizani Tirana,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,3478,Paysandu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,3478,Paysandu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,3478,Paysandu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,3478,Paysandu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,3478,Paysandu,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,14923,Petrolina,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,12277,Picos,2,0,2,0,0,0,0,True
+libertadores,1122,2022,9917,Plaza Colonia,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,3931,Ponte Preta,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,3931,Ponte Preta,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,234503,Porto Velho,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,234503,Porto Velho,2,0,2,0,0,0,0,True
+libertadores,1122,2024,15935,Portuguesa,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,7469,Portuguesa RJ,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,238997,Pouso Alegre,2,0,2,0,0,0,0,True
+champions_league,2,2024,5504,Pyunik,2,0,2,0,0,0,0,True
+champions_league,2,2021,62,Rangers,2,0,2,0,0,0,0,True
+champions_league,2,2024,62,Rangers,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,14798,Real Brasília FC,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,14825,Real Noroeste,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,11550,Remo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,11550,Remo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,238915,Retrô,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,238915,Retrô,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,238915,Retrô,2,0,2,0,0,0,0,True
+champions_league,2,2021,3546,Riga,2,0,2,0,0,0,0,True
+champions_league,2,2022,6556,Rīgas FS,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,12622,Rio Branco ES,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,142941,Rio Branco-VN,2,0,2,0,0,0,0,True
+libertadores,1122,2024,172,Rionegro Águilas,2,0,2,0,0,0,0,True
+libertadores,1122,2021,147867,Royal Pari,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,6764,Sampaio Corrêa,2,0,2,0,0,0,0,True
+sudamericana,1116,2025,259042,San Antonio Bulo Bulo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,31215,Santa Cruz,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,31215,Santa Cruz,2,0,2,0,0,0,0,True
+libertadores,1122,2025,12506,Santa Fe,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,3684,Santos,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,6276,São Bernardo,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,12307,São Luiz,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,12307,São Luiz,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,14870,São Raimundo RR,2,0,2,0,0,0,0,True
+champions_league,2,2020,3529,Sarajevo,2,0,2,0,0,0,0,True
+champions_league,2,2021,6452,Shakhtyor,2,0,2,0,0,0,0,True
+champions_league,2,2022,6452,Shakhtyor,2,0,2,0,0,0,0,True
+champions_league,2,2021,207,Shamrock Rovers,2,0,2,0,0,0,0,True
+champions_league,2,2023,207,Shamrock Rovers,2,0,2,0,0,0,0,True
+champions_league,2,2020,627,Sheriff,2,0,2,0,0,0,0,True
+champions_league,2,2021,876,Skendija 79,2,0,2,0,0,0,0,True
+champions_league,2,2021,3678,SK Rapid,2,0,2,0,0,0,0,True
+champions_league,2,2020,3678,SK Rapid,2,0,2,0,0,0,0,True
+champions_league,2,2020,216,Slavia Praha,2,0,2,0,0,0,0,True
+champions_league,2,2021,216,Slavia Praha,2,0,2,0,0,0,0,True
+champions_league,2,2021,2712,Spartak Moskva,2,0,2,0,0,0,0,True
+champions_league,2,2023,2727,Sparta Praha,2,0,2,0,0,0,0,True
+libertadores,1122,2024,10661,Sporting Cristal,2,0,2,0,0,0,0,True
+champions_league,2,2023,132687,Struga,2,0,2,0,0,0,0,True
+champions_league,2,2024,132687,Struga,2,0,2,0,0,0,0,True
+champions_league,2,2022,3357,Sturm Graz,2,0,2,0,0,0,0,True
+champions_league,2,2023,3357,Sturm Graz,2,0,2,0,0,0,0,True
+champions_league,2,2020,5878,Sūduva,2,0,2,0,0,0,0,True
+champions_league,2,2022,3712,Sutjeska,2,0,2,0,0,0,0,True
+champions_league,2,2023,11452,Swift Hesperange,2,0,2,0,0,0,0,True
+champions_league,2,2021,5203,Teuta Durrës,2,0,2,0,0,0,0,True
+champions_league,2,2023,579,The New Saints,2,0,2,0,0,0,0,True
+champions_league,2,2022,579,The New Saints,2,0,2,0,0,0,0,True
+libertadores,1122,2025,10024,The Strongest,2,0,2,0,0,0,0,True
+champions_league,2,2022,5202,Tirana,2,0,2,0,0,0,0,True
+champions_league,2,2020,5202,Tirana,2,0,2,0,0,0,0,True
+champions_league,2,2022,5834,Tobol,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,2592,Tombense,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,2592,Tombense,2,0,2,0,0,0,0,True
+champions_league,2,2022,688,Trabzonspor,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,14895,Tuna Luso,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,14895,Tuna Luso,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2022,260305,Tuntum,2,0,2,0,0,0,0,True
+libertadores,1122,2025,15115,UCV,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,260347,União Carmolandense,2,0,2,0,0,0,0,True
+champions_league,2,2022,3958,Union Saint-Gilloise,2,0,2,0,0,0,0,True
+champions_league,2,2024,3958,Union Saint-Gilloise,2,0,2,0,0,0,0,True
+libertadores,1122,2022,8175,Universitario,2,0,2,0,0,0,0,True
+champions_league,2,2023,5487,Urartu,2,0,2,0,0,0,0,True
+champions_league,2,2023,11235,Valmiera,2,0,2,0,0,0,0,True
+champions_league,2,2021,2929,Valur,2,0,2,0,0,0,0,True
+champions_league,2,2024,2688,Víkingur Reykjavík,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2023,11941,Vila Nova,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,3341,Villa Nova,2,0,2,0,0,0,0,True
+champions_league,2,2024,19353,Virtus,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2025,3440,Vitória,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2024,3440,Vitória,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,11642,Volta Redonda,2,0,2,0,0,0,0,True
+champions_league,2,2020,647,Young Boys,2,0,2,0,0,0,0,True
+copa_do_brasil,654,2021,6013,Ypiranga Erechim,2,0,2,0,0,0,0,True
+libertadores,1122,2023,9404,Zamora Fútbol Club,2,0,2,0,0,0,0,True
+champions_league,2,2022,6213,Zrinjski,2,0,2,0,0,0,0,True
+champions_league,2,2022,389,Zürich,2,0,2,0,0,0,0,True
+sudamericana,1116,2025,3427,Atlético Mineiro,15,14,1,0,0,0,0,True
+copa_do_brasil,654,2023,3496,São Paulo,10,9,1,0,0,0,0,True
+copa_do_brasil,654,2025,3427,Atlético Mineiro,8,7,1,0,0,0,0,True
+libertadores,1122,2025,2696,Internacional,8,7,1,0,0,0,0,True
+copa_do_brasil,654,2022,48,Juventude,4,3,1,0,0,0,0,True
+copa_do_brasil,654,2025,6544,ABC,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,239392,ADT,1,0,1,0,0,0,0,True
+sudamericana,1116,2025,239392,ADT,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,12249,Águia de Marabá,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14905,Águia Negra,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,5457,Altos,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,238918,Amazonas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,6325,América Mineiro,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,6325,América Mineiro,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,7679,América RN,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,7679,América RN,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,6425,Aparecidense,1,0,1,0,0,0,0,True
+champions_league,2,2020,132649,Ararat-Armenia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,12217,ASA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,12217,ASA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,12217,ASA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,12217,ASA,1,0,1,0,0,0,0,True
+champions_league,2,2020,5909,Astana,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,234948,Athletic Club,1,0,1,0,0,0,0,True
+champions_league,2,2023,17301,Atlètic Club d'Escaldes,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14966,Atlético Acreano,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14917,Atlético Alagoinhas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14917,Atlético Alagoinhas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,14917,Atlético Alagoinhas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14700,Audax Rio,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,6468,Avaí,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,5514,Bahia de Feira,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,5514,Bahia de Feira,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,249710,Barcelona BA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,35528,Barcelona RO,1,0,1,0,0,0,0,True
+champions_league,2,2020,554,Beşiktaş,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,5511,Boavista,1,0,1,0,0,0,0,True
+fifa_intercontinental_cup,1452,2024,2864,Botafogo,1,0,1,0,0,0,0,True
+supercopa_do_brasil,1798,2025,2864,Botafogo,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,7740,Botafogo PB,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,104,Botafogo SP,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,10017,Brasil de Pelotas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,6304,Brusque,1,0,1,0,0,0,0,True
+champions_league,2,2020,5447,Budućnost,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,5956,Caldense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,5956,Caldense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,11986,Campinense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,11986,Campinense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,11986,Campinense,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,7738,Carabobo,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,5526,Cascavel,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,30426,Castanhal,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,30426,Castanhal,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,30271,Caucaia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,10080,Caxias,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,7573,Ceilândia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,237281,CFRJ / Marica,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,710,Chapecoense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,710,Chapecoense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,5638,Cianorte,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,12180,Confiança,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,12180,Confiança,1,0,1,0,0,0,0,True
+champions_league,2,2020,1294,Connah's Quay,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14788,Cordino,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,6285,Coritiba,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,6285,Coritiba,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,234223,Costa Rica - MS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,234223,Costa Rica - MS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,6188,CRB,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,3371,Cruzeiro,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,7689,CSE,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,7638,Democrata GV,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,10204,Deportes Tolima,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,8339,Deportivo La Guaira,1,0,1,0,0,0,0,True
+champions_league,2,2020,3451,Dinamo Tbilisi,1,0,1,0,0,0,0,True
+champions_league,2,2020,443,Djurgården,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,254061,Dourados Atlético,1,0,1,0,0,0,0,True
+champions_league,2,2020,1311,Dundalk,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,11620,Esportivo,1,0,1,0,0,0,0,True
+champions_league,2,2020,234886,Europa FC,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,259321,Falcon,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,2505,Ferroviária,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,8131,Ferroviário,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,8131,Ferroviário,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,9804,Figueirense,1,0,1,0,0,0,0,True
+champions_league,2,2020,8697,Flora,1,0,1,0,0,0,0,True
+champions_league,2,2020,762,Floriana,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,252839,Fluminense PI,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,252839,Fluminense PI,1,0,1,0,0,0,0,True
+champions_league,2,2020,3833,Fola Esch,1,0,1,0,0,0,0,True
+champions_league,2,2021,18967,Folgore,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,7718,Galvez,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,13144,Gama,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,30532,GAS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,30532,GAS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,10809,Goianésia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,9323,Goiás,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,12156,Grêmio Anápolis,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,15605,Guaraní,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,10020,Guarany de Sobral,1,0,1,0,0,0,0,True
+champions_league,2,2021,8678,HB,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,58081,Humaitá,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,58081,Humaitá,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,58081,Humaitá,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,58081,Humaitá,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,6162,Icasa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,30278,Iguatu,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14859,Independencia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,30595,Independente AP,1,0,1,0,0,0,0,True
+champions_league,2,2020,17303,Inter Club d'Escaldes,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,5663,Inter de Limeira,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,7583,Itabaiana,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14922,Itabuna,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,13292,Ituano,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,8649,Jacuipense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,8649,Jacuipense,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,239049,Jaraguá EC,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,30140,Jequié,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14871,Ji-Paraná,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,239050,Juventude MA,1,0,1,0,0,0,0,True
+champions_league,2,2020,8673,KR Reykjavík,1,0,1,0,0,0,0,True
+champions_league,2,2020,4323,KuPS,1,0,1,0,0,0,0,True
+champions_league,2,2022,847,La Fiorita,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,12197,Lagarto,1,0,1,0,0,0,0,True
+champions_league,2,2022,4400,Levadia,1,0,1,0,0,0,0,True
+champions_league,2,2020,5428,Lokomotiva Zagreb,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,9181,Londrina,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,9181,Londrina,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,5533,Madureira,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,260211,Manauara,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,30117,Manaus,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,10386,Maranhão,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,10386,Maranhão,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,12162,Marcílio Dias,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,3022,Marília,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,3022,Marília,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,11126,Mirassol,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,9966,Moto Club MA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,9966,Moto Club MA,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,12406,Murici,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,12157,Náutico,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,9175,Nova Iguaçu,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,238914,Nova Mutum EC,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,260210,Nova Venécia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,6370,Novorizontino,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,3523,Oeste,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,10064,Olaria,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,15606,Olimpia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,30399,Operário Ltda,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,30399,Operário Ltda,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,9938,Operário MS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,9938,Operário MS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,14710,Operário PR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14710,Operário PR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,239234,Oratório,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14824,Palmas,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,3246,Paraná,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,3246,Paraná,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14762,Parnahyba,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14762,Parnahyba,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14977,Peñarol,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,3931,Ponte Preta,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,3931,Ponte Preta,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,234503,Porto Velho,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,234503,Porto Velho,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,9266,Portuguesa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,7469,Portuguesa RJ,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14694,Portuguesa Santista,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,238997,Pouso Alegre,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,9221,Princesa Solimões,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,30526,Real Ariquemes,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14798,Real Brasília FC,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14825,Real Noroeste,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14825,Real Noroeste,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,11550,Remo,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,8180,Resende,1,0,1,0,0,0,0,True
+champions_league,2,2020,3546,Riga,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,5999,Rio Branco,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,5999,Rio Branco,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,12622,Rio Branco ES,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,142941,Rio Branco-VN,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,7748,Ríver,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,10830,Salgueiro,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,10830,Salgueiro,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,6764,Sampaio Corrêa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,6764,Sampaio Corrêa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,6764,Sampaio Corrêa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14750,Santa Cruz de Natal RN,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,8237,Santa Cruz RS,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,6276,São Bernardo,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,30094,Sao Francisco,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,14768,São Raimundo AM,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14870,São Raimundo RR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14870,São Raimundo RR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,14870,São Raimundo RR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14870,São Raimundo RR,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,9457,Sergipe,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,9457,Sergipe,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,9457,Sergipe,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,9457,Sergipe,1,0,1,0,0,0,0,True
+champions_league,2,2020,5426,Sileks,1,0,1,0,0,0,0,True
+champions_league,2,2020,2417,Slovan Bratislava,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,12280,Sousa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,12280,Sousa,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,2352,Sport Recife,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,2352,Sport Recife,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,2352,Sport Recife,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14800,Tocantinópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14800,Tocantinópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14800,Tocantinópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,2592,Tombense,1,0,1,0,0,0,0,True
+champions_league,2,2020,5444,Tre Fiori,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,7663,Trem,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,7663,Trem,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,7663,Trem,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,7663,Trem,1,0,1,0,0,0,0,True
+champions_league,2,2023,18968,Tre Penne,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,3403,Treze,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,3403,Treze,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14895,Tuna Luso,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,260305,Tuntum,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,5773,Uberlândia,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,14968,União Rondonópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,14968,União Rondonópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,14968,União Rondonópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,14968,União Rondonópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14968,União Rondonópolis,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,9902,URT,1,0,1,0,0,0,0,True
+champions_league,2,2020,3545,Viktoria Plzeň,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,3440,Vitória,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2023,12317,Vitória ES,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2022,11642,Volta Redonda,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2024,11642,Volta Redonda,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2025,6419,Votuporanguense,1,0,1,0,0,0,0,True
+sudamericana,1116,2024,3517,Wilstermann,1,0,1,0,0,0,0,True
+copa_do_brasil,654,2021,14992,Ypiranga AP,1,0,1,0,0,0,0,True
+brasileirao_a,648,2024,8331,Atlético GO,38,38,0,38,0,0,0,True
+brasileirao_b,651,2025,8331,Atlético GO,38,38,0,38,0,0,0,True
+brasileirao_a,648,2023,5463,Cuiabá,38,38,0,38,0,0,23,True
+la_liga,564,2021,3468,Real Madrid,38,38,0,38,0,0,0,True
+la_liga,564,2023,3468,Real Madrid,38,38,0,38,0,0,0,True
+la_liga,564,2022,3468,Real Madrid,38,38,0,38,0,0,0,True
+brasileirao_a,648,2023,696,Vasco da Gama,38,38,0,38,0,0,38,True
+primeira_liga,462,2023,11741,Casa Pia,34,34,0,34,0,0,0,True
+primeira_liga,462,2024,11741,Casa Pia,34,34,0,34,0,0,0,True
+brasileirao_a,648,2022,5463,Cuiabá,38,38,0,33,0,0,33,True
+brasileirao_b,651,2023,48,Juventude,38,38,0,33,2,0,33,True
+brasileirao_a,648,2023,7808,Bragantino,38,38,0,24,0,0,24,True
+primeira_liga,462,2024,2628,Santa Clara,34,34,0,24,0,0,0,True
+brasileirao_a,648,2022,1024,Flamengo,38,38,0,22,0,0,22,True
+primeira_liga,462,2024,960,Boavista,34,34,0,21,0,0,0,True
+brasileirao_b,651,2023,8331,Atlético GO,38,38,0,19,0,0,0,True
+la_liga,564,2024,3468,Real Madrid,38,38,0,17,0,0,0,True
+primeira_liga,462,2024,12152,Estrela Amadora,34,34,0,13,0,0,0,True
+champions_league,2,2023,3468,Real Madrid,13,13,0,13,0,0,0,True
+champions_league,2,2021,3468,Real Madrid,13,13,0,13,0,0,0,True
+libertadores,1122,2023,587,Boca Juniors,13,13,0,12,0,0,0,True
+champions_league,2,2022,3468,Real Madrid,12,12,0,12,0,0,0,True
+sudamericana,1116,2025,9269,América de Cali,11,11,0,11,0,0,11,True
+sudamericana,1116,2024,332,Independiente Medellín,11,11,0,11,0,0,7,True
+brasileirao_b,651,2022,696,Vasco da Gama,37,37,0,10,0,0,10,True
+sudamericana,1116,2024,587,Boca Juniors,10,10,0,10,0,0,0,True
+primeira_liga,462,2024,4092,Arouca,34,34,0,9,0,0,0,True
+sudamericana,1116,2024,5632,Racing,9,9,0,9,0,0,0,True
+copa_do_brasil,654,2022,1024,Flamengo,10,10,0,8,0,0,8,True
+sudamericana,1116,2024,234259,Always Ready,8,8,0,8,0,0,0,True
+libertadores,1122,2021,3393,Argentinos Juniors,8,8,0,8,0,0,8,True
+libertadores,1122,2023,3393,Argentinos Juniors,8,8,0,8,0,0,8,True
+sudamericana,1116,2025,3139,Huracán,8,8,0,8,0,0,8,True
+brasileirao_a,648,2023,3432,Athletico PR,38,38,0,7,0,0,0,True
+sudamericana,1116,2025,10840,Independiente,8,8,0,7,0,0,0,True
+sudamericana,1116,2024,3439,Danubio,7,7,0,7,0,0,0,True
+sudamericana,1116,2024,9891,Delfin,7,7,0,7,1,0,0,True
+brasileirao_a,648,2024,696,Vasco da Gama,38,38,0,6,0,0,5,True
+champions_league,2,2024,3468,Real Madrid,14,14,0,6,0,0,0,True
+libertadores,1122,2022,1024,Flamengo,13,13,0,6,0,0,6,True
+libertadores,1122,2021,9269,América de Cali,6,6,0,6,0,0,6,True
+sudamericana,1116,2024,3393,Argentinos Juniors,6,6,0,6,0,0,6,True
+copa_do_brasil,654,2024,8331,Atlético GO,6,6,0,6,0,0,0,True
+libertadores,1122,2025,175,Universidad Chile,6,6,0,6,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1962,7030758651880281227,Yugoslavia,6,6,0,6,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1930,7030804317853736961,Argentina,5,5,0,5,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1982,7030452031964107577,Austria,5,5,0,5,0,0,0,True
+libertadores,1122,2024,234259,Always Ready,4,4,0,4,0,0,4,True
+fifa_world_cup_mens,7000547241627854950,1938,7030612896348323355,Hungary,4,4,0,4,0,0,0,True
+libertadores,1122,2023,3139,Huracán,4,4,0,4,0,0,4,True
+fifa_world_cup_mens,7000547241627854950,2002,7030026708875084432,Sweden,4,4,0,4,0,0,0,True
+copa_do_brasil,654,2024,696,Vasco da Gama,10,10,0,3,0,0,3,True
+sudamericana,1116,2025,175,Universidad Chile,8,8,0,3,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1982,7030755748894348214,Algeria,3,3,0,3,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1962,7030545134325799351,Italy,3,3,0,3,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1998,7030709518438899287,Saudi Arabia,3,3,0,3,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1958,7030360905738386063,Scotland,3,3,0,3,0,0,0,True
+fifa_world_cup_mens,7000547241627854950,1998,7030890593521025659,Tunisia,3,3,0,3,0,0,0,True
+brasileirao_a,648,2023,692,Bahia,38,38,0,2,0,0,2,True
+brasileirao_a,648,2023,2696,Internacional,38,38,0,2,0,0,0,True
+brasileirao_a,648,2025,48,Juventude,38,38,0,2,0,0,0,True
+sudamericana,1116,2025,9868,Mushuc Runa,9,9,0,2,0,0,2,True
+libertadores,1122,2023,3432,Athletico PR,8,8,0,2,0,0,0,True
+copa_do_brasil,654,2023,3432,Athletico PR,6,6,0,2,0,0,0,True
+libertadores,1122,2022,2710,Universidad Católica,6,6,0,2,0,0,0,True
+fifa_intercontinental_cup,1452,2024,460,Al Ahly,2,2,0,2,0,0,2,True
+copa_do_brasil,654,2025,8331,Atlético GO,2,2,0,2,0,0,0,True
+libertadores,1122,2025,587,Boca Juniors,2,2,0,2,0,0,0,True
+copa_do_brasil,654,2023,7808,Bragantino,2,2,0,2,0,0,2,True
+fifa_world_cup_mens,7000547241627854950,1938,7030313464302394564,Romania,2,2,0,2,0,0,0,True
+copa_do_brasil,654,2023,696,Vasco da Gama,2,2,0,2,0,0,2,True
+brasileirao_a,648,2024,3432,Athletico PR,38,38,0,1,0,0,0,True
+brasileirao_b,651,2025,5463,Cuiabá,38,38,0,1,0,0,1,True
+sudamericana,1116,2024,3432,Athletico PR,12,12,0,1,0,0,0,True
+libertadores,1122,2023,2696,Internacional,12,12,0,1,0,0,0,True
+copa_do_brasil,654,2022,5463,Cuiabá,4,4,0,1,0,0,1,True
+sudamericana,1116,2024,9269,América de Cali,1,1,0,1,0,0,1,True
+copa_do_brasil,654,2023,5463,Cuiabá,1,1,0,1,0,0,1,True
+fifa_world_cup_mens,7000547241627854950,1934,7030313464302394564,Romania,1,1,0,1,0,0,0,True
+sudamericana,1116,2025,2710,Universidad Católica,1,1,0,1,0,0,0,True
+sudamericana,1116,2024,2710,Universidad Católica,1,1,0,1,0,0,0,True
+sudamericana,1116,2025,259048,Universitario de Vinto,1,1,0,1,0,0,0,True
+sudamericana,1116,2024,259048,Universitario de Vinto,1,1,0,1,0,0,0,True
+brasileirao_a,648,2022,3432,Athletico PR,38,38,0,0,0,0,0,False
+brasileirao_b,651,2025,3432,Athletico PR,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,8331,Atlético GO,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,3427,Atlético Mineiro,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,3427,Atlético Mineiro,38,38,0,0,0,0,0,False
+brasileirao_a,648,2023,3427,Atlético Mineiro,38,38,0,0,0,0,0,False
+brasileirao_a,648,2025,692,Bahia,38,38,0,0,0,0,1,True
+brasileirao_b,651,2022,692,Bahia,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,692,Bahia,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,2864,Botafogo,38,38,0,0,0,0,0,False
+brasileirao_a,648,2025,2864,Botafogo,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,7808,Bragantino,38,38,0,0,0,0,1,True
+brasileirao_a,648,2022,7808,Bragantino,38,38,0,0,0,0,0,False
+brasileirao_a,648,2021,7808,Bragantino,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,303,Corinthians,38,38,0,0,0,0,0,False
+brasileirao_b,651,2025,6036,Criciúma,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,6036,Criciúma,38,38,0,0,0,0,0,False
+brasileirao_b,651,2022,6036,Criciúma,38,38,0,0,0,0,0,False
+brasileirao_b,651,2023,6036,Criciúma,38,38,0,0,0,0,0,False
+brasileirao_a,648,2025,3371,Cruzeiro,38,38,0,0,0,0,0,False
+brasileirao_b,651,2022,3371,Cruzeiro,38,38,0,0,0,0,0,False
+brasileirao_a,648,2023,1024,Flamengo,38,38,0,0,0,0,0,False
+brasileirao_a,648,2025,1024,Flamengo,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,1095,Fluminense,38,38,0,0,0,0,0,False
+brasileirao_a,648,2023,3621,Fortaleza,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,3621,Fortaleza,38,38,0,0,0,0,0,False
+brasileirao_a,648,2021,3621,Fortaleza,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,3621,Fortaleza,38,38,0,0,0,0,0,False
+brasileirao_b,651,2022,2925,Grêmio,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,2696,Internacional,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,2696,Internacional,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,48,Juventude,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,48,Juventude,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,3422,Palmeiras,38,38,0,0,0,0,0,False
+brasileirao_a,648,2024,3422,Palmeiras,38,38,0,0,0,0,0,False
+brasileirao_a,648,2025,3422,Palmeiras,38,38,0,0,0,0,0,False
+brasileirao_a,648,2023,3422,Palmeiras,38,38,0,0,0,0,0,False
+brasileirao_a,648,2021,3422,Palmeiras,38,38,0,0,0,0,0,False
+la_liga,564,2020,3468,Real Madrid,38,38,0,0,0,0,0,False
+brasileirao_a,648,2022,3496,São Paulo,38,38,0,0,0,0,0,False
+primeira_liga,462,2023,4092,Arouca,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,605,Benfica,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,605,Benfica,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,960,Boavista,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,988,Chaves,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,1198,Estoril,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,1198,Estoril,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,12152,Estrela Amadora,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,7214,Farense,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,7214,Farense,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,364,Gil Vicente,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,364,Gil Vicente,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,1085,Moreirense,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,7035,Nacional,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,1658,Portimonense SAD,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,652,Porto,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,6377,Rio Ave,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,6377,Rio Ave,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,884,Sporting Braga,34,34,0,0,0,0,0,False
+primeira_liga,462,2024,884,Sporting Braga,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,58,Sporting CP,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,830,Vitória Guimarães,34,34,0,0,0,0,0,False
+primeira_liga,462,2023,8164,Vizela,34,34,0,0,0,0,0,False
+champions_league,2,2021,605,Benfica,14,14,0,0,0,0,0,False
+champions_league,2,2022,605,Benfica,14,14,0,0,0,0,0,False
+libertadores,1122,2022,3432,Athletico PR,13,13,0,0,0,0,0,False
+libertadores,1122,2024,3427,Atlético Mineiro,13,13,0,0,0,0,0,False
+libertadores,1122,2025,1024,Flamengo,13,13,0,0,0,0,0,False
+sudamericana,1116,2025,9878,Lanús,13,13,0,0,0,0,1,True
+sudamericana,1116,2025,3547,Once Caldas,13,13,0,0,0,0,1,True
+libertadores,1122,2021,3422,Palmeiras,13,13,0,0,0,0,0,False
+libertadores,1122,2025,3422,Palmeiras,13,13,0,0,0,0,0,False
+sudamericana,1116,2024,3608,Racing Club,13,13,0,0,0,0,0,False
+libertadores,1122,2025,10671,Alianza Lima,12,12,0,0,0,0,0,False
+libertadores,1122,2023,3427,Atlético Mineiro,12,12,0,0,0,0,0,False
+champions_league,2,2024,605,Benfica,12,12,0,0,0,0,0,False
+sudamericana,1116,2024,9878,Lanús,12,12,0,0,0,0,0,False
+libertadores,1122,2025,10779,LDU Quito,12,12,0,0,0,0,0,False
+libertadores,1122,2022,3422,Palmeiras,12,12,0,0,0,0,0,False
+libertadores,1122,2023,3422,Palmeiras,12,12,0,0,0,0,0,False
+libertadores,1122,2025,3608,Racing Club,12,12,0,0,0,0,0,False
+champions_league,2,2020,3468,Real Madrid,12,12,0,0,0,0,0,False
+copa_do_brasil,654,2024,3427,Atlético Mineiro,10,10,0,0,0,0,0,False
+libertadores,1122,2022,3427,Atlético Mineiro,10,10,0,0,0,0,0,False
+libertadores,1122,2025,692,Bahia,10,10,0,0,0,0,0,False
+libertadores,1122,2025,472,Barcelona Guayaquil,10,10,0,0,0,0,0,False
+sudamericana,1116,2024,7808,Bragantino,10,10,0,0,0,0,0,False
+copa_do_brasil,654,2022,303,Corinthians,10,10,0,0,0,0,0,False
+copa_do_brasil,654,2025,303,Corinthians,10,10,0,0,0,0,0,False
+libertadores,1122,2022,303,Corinthians,10,10,0,0,0,0,0,False
+copa_do_brasil,654,2023,1024,Flamengo,10,10,0,0,0,0,0,False
+sudamericana,1116,2024,3621,Fortaleza,10,10,0,0,0,0,0,False
+copa_do_brasil,654,2023,2925,Grêmio,10,10,0,0,0,0,0,False
+libertadores,1122,2023,332,Independiente Medellín,10,10,0,0,0,0,0,False
+libertadores,1122,2024,9890,Palestino,10,10,0,0,0,0,0,False
+champions_league,2,2020,652,Porto,10,10,0,0,0,0,0,False
+libertadores,1122,2023,3608,Racing Club,10,10,0,0,0,0,0,False
+copa_do_brasil,654,2022,3496,São Paulo,10,10,0,0,0,0,0,False
+champions_league,2,2023,884,Sporting Braga,10,10,0,0,0,0,0,False
+sudamericana,1116,2025,2528,Cerro Largo,9,9,0,0,0,0,0,False
+sudamericana,1116,2025,9890,Palestino,9,9,0,0,0,0,0,False
+sudamericana,1116,2024,237829,Sportivo Ameliano,9,9,0,0,0,0,0,False
+sudamericana,1116,2024,15327,Universidad Católica,9,9,0,0,0,0,0,False
+sudamericana,1116,2025,15327,Universidad Católica,9,9,0,0,0,0,0,False
+copa_do_brasil,654,2025,3432,Athletico PR,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2022,8331,Atlético GO,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2024,692,Bahia,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2023,692,Bahia,8,8,0,0,0,0,0,False
+sudamericana,1116,2024,6829,Belgrano,8,8,0,0,0,0,0,False
+libertadores,1122,2022,587,Boca Juniors,8,8,0,0,0,0,0,False
+libertadores,1122,2021,587,Boca Juniors,8,8,0,0,0,0,0,False
+libertadores,1122,2025,2864,Botafogo,8,8,0,0,0,0,0,False
+libertadores,1122,2024,6308,Club Bolívar,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2023,303,Corinthians,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2025,3371,Cruzeiro,8,8,0,0,0,0,0,False
+libertadores,1122,2021,9561,Defensa y Justicia,8,8,0,0,0,0,0,False
+libertadores,1122,2022,10204,Deportes Tolima,8,8,0,0,0,0,0,False
+libertadores,1122,2023,1024,Flamengo,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2022,1095,Fluminense,8,8,0,0,0,0,0,False
+libertadores,1122,2022,3621,Fortaleza,8,8,0,0,0,0,0,False
+libertadores,1122,2025,3621,Fortaleza,8,8,0,0,0,0,0,False
+sudamericana,1116,2025,14635,Independiente del Valle,8,8,0,0,0,0,0,False
+libertadores,1122,2023,14635,Independiente del Valle,8,8,0,0,0,0,0,False
+sudamericana,1116,2024,2696,Internacional,8,8,0,0,0,0,0,False
+libertadores,1122,2024,7792,Junior FC,8,8,0,0,0,0,0,False
+copa_do_brasil,654,2024,48,Juventude,8,8,0,0,0,0,0,False
+libertadores,1122,2024,3422,Palmeiras,8,8,0,0,0,0,0,False
+champions_league,2,2023,652,Porto,8,8,0,0,0,0,0,False
+champions_league,2,2022,652,Porto,8,8,0,0,0,0,0,False
+champions_league,2,2021,58,Sporting CP,8,8,0,0,0,0,0,False
+sudamericana,1116,2025,15995,Academia Puerto Cabello,7,7,0,0,1,0,0,True
+sudamericana,1116,2024,12833,Alianza Petrolera,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030804317853736961,Argentina,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030804317853736961,Argentina,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030804317853736961,Argentina,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030804317853736961,Argentina,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030804317853736961,Argentina,7,7,0,0,0,0,0,False
+sudamericana,1116,2025,150808,Atlético Grau,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030014715658981209,Belgium,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030014715658981209,Belgium,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030456752538593319,Brazil,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030991384093091376,Bulgaria,7,7,0,0,0,0,0,False
+sudamericana,1116,2024,3807,César Vallejo,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030167412132839666,Croatia,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030167412132839666,Croatia,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030167412132839666,Croatia,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030881390726831176,England,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030881390726831176,England,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030055698161060114,France,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030167035104799597,Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030167035104799597,Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030167035104799597,Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030167035104799597,Germany,7,7,0,0,0,0,0,False
+sudamericana,1116,2025,270457,Gualberto Villarroel SJ,7,7,0,0,1,0,0,True
+fifa_world_cup_mens,7000547241627854950,1978,7030545134325799351,Italy,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030545134325799351,Italy,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030545134325799351,Italy,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030545134325799351,Italy,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030545134325799351,Italy,7,7,0,0,0,0,0,False
+sudamericana,1116,2024,11370,Metropolitanos,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030890775095811152,Morocco,7,7,0,0,0,0,0,False
+sudamericana,1116,2025,8384,Nacional Potosí,7,7,0,0,0,0,0,False
+sudamericana,1116,2024,8384,Nacional Potosí,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030845151900853084,Netherlands,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030845151900853084,Netherlands,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030845151900853084,Netherlands,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030845151900853084,Netherlands,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030845151900853084,Netherlands,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030000318847925231,Poland,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030000318847925231,Poland,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030276759082996865,Portugal,7,7,0,0,0,0,0,False
+sudamericana,1116,2025,5632,Racing,7,7,0,0,0,0,0,False
+sudamericana,1116,2024,256588,Rayo Zuliano,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030819938108773058,South Korea,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030750042375044082,Spain,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030026708875084432,Sweden,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030338460173589097,Turkey,7,7,0,0,0,0,0,False
+sudamericana,1116,2024,13330,Unión La Calera,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030883704211735427,Uruguay,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030069810056421591,West Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030069810056421591,West Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030069810056421591,West Germany,7,7,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030069810056421591,West Germany,7,7,0,0,0,0,0,False
+sudamericana,1116,2025,10671,Alianza Lima,6,6,0,0,0,0,0,False
+libertadores,1122,2021,234259,Always Ready,6,6,0,0,0,0,0,False
+libertadores,1122,2022,234259,Always Ready,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030804317853736961,Argentina,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2022,3432,Athletico PR,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2024,3432,Athletico PR,6,6,0,0,0,0,0,False
+libertadores,1122,2025,8238,Atlético Bucaramanga,6,6,0,0,0,0,0,False
+libertadores,1122,2023,8239,Aucas,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030452031964107577,Austria,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2025,692,Bahia,6,6,0,0,0,0,0,False
+libertadores,1122,2023,472,Barcelona Guayaquil,6,6,0,0,0,0,0,False
+libertadores,1122,2024,472,Barcelona Guayaquil,6,6,0,0,0,0,0,False
+champions_league,2,2023,605,Benfica,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2025,2864,Botafogo,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2023,2864,Botafogo,6,6,0,0,0,0,0,False
+libertadores,1122,2022,7808,Bragantino,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2025,7808,Bragantino,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030456752538593319,Brazil,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030456752538593319,Brazil,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030456752538593319,Brazil,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030456752538593319,Brazil,6,6,0,0,0,0,0,False
+libertadores,1122,2025,14212,Central Cordoba SdE,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030019513468641247,Chile,6,6,0,0,0,0,0,False
+sudamericana,1116,2025,6308,Club Bolívar,6,6,0,0,0,0,0,False
+libertadores,1122,2025,6308,Club Bolívar,6,6,0,0,0,0,0,False
+libertadores,1122,2023,303,Corinthians,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2022,3371,Cruzeiro,6,6,0,0,0,0,0,False
+sudamericana,1116,2025,3371,Cruzeiro,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030546947886156533,Czechoslovakia,6,6,0,0,0,0,0,False
+sudamericana,1116,2024,9561,Defensa y Justicia,6,6,0,0,0,0,0,False
+sudamericana,1116,2025,9561,Defensa y Justicia,6,6,0,0,0,0,0,False
+sudamericana,1116,2025,9628,Deportes Iquique,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030661052346191578,East Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030881390726831176,England,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2022,3621,Fortaleza,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030055698161060114,France,6,6,0,0,0,0,0,False
+libertadores,1122,2024,15061,Huachipato,6,6,0,0,0,0,0,False
+libertadores,1122,2025,14635,Independiente del Valle,6,6,0,0,0,0,0,False
+libertadores,1122,2024,14635,Independiente del Valle,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030545134325799351,Italy,6,6,0,0,0,0,0,False
+libertadores,1122,2024,10779,LDU Quito,6,6,0,0,0,0,0,False
+sudamericana,1116,2025,208,Melgar,6,6,0,0,0,0,0,False
+libertadores,1122,2023,11370,Metropolitanos,6,6,0,0,0,0,0,False
+libertadores,1122,2024,7810,Millonarios,6,6,0,0,0,0,0,False
+sudamericana,1116,2024,3480,Nacional Asunción,6,6,0,0,0,0,0,False
+libertadores,1122,2024,3480,Nacional Asunción,6,6,0,0,0,0,0,False
+copa_do_brasil,654,2023,3422,Palmeiras,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030791860762290774,Peru,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030000318847925231,Poland,6,6,0,0,0,0,0,False
+champions_league,2,2021,652,Porto,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030276759082996865,Portugal,6,6,0,0,0,0,0,False
+libertadores,1122,2024,3365,Rosario Central,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030758982634478019,Soviet Union,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030750042375044082,Spain,6,6,0,0,0,0,0,False
+champions_league,2,2022,58,Sporting CP,6,6,0,0,0,0,0,False
+sudamericana,1116,2024,11013,Sportivo Trinidense,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030026708875084432,Sweden,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030026708875084432,Sweden,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030883704211735427,Uruguay,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030069810056421591,West Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030069810056421591,West Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030069810056421591,West Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030069810056421591,West Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030069810056421591,West Germany,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030758651880281227,Yugoslavia,6,6,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030804317853736961,Argentina,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030804317853736961,Argentina,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030804317853736961,Argentina,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030804317853736961,Argentina,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030452031964107577,Austria,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030014715658981209,Belgium,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030014715658981209,Belgium,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030456752538593319,Brazil,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030061328724306729,Cameroon,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030658653462203331,Colombia,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030338561931919045,Costa Rica,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030546947886156533,Czechoslovakia,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030458810819449459,Denmark,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030881390726831176,England,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030881390726831176,England,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030881390726831176,England,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030881390726831176,England,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030881390726831176,England,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030055698161060114,France,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030167035104799597,Germany,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030167035104799597,Germany,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030387421992520955,Ghana,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030612896348323355,Hungary,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030545134325799351,Italy,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030545134325799351,Italy,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030436684419156506,Mexico,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030845151900853084,Netherlands,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030845151900853084,Netherlands,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030439768098932333,Northern Ireland,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030439768098932333,Northern Ireland,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030677663790432694,Paraguay,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030276759082996865,Portugal,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030526014718063801,Republic of Ireland,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030313464302394564,Romania,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030655906623246781,Russia,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030741134188876754,Senegal,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030758982634478019,Soviet Union,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030758982634478019,Soviet Union,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030750042375044082,Spain,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030750042375044082,Spain,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030750042375044082,Spain,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030750042375044082,Spain,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030026708875084432,Sweden,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030026708875084432,Sweden,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030651194192465147,Ukraine,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030981485851247663,United States,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030883704211735427,Uruguay,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030883704211735427,Uruguay,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030298943635220265,Wales,5,5,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030758651880281227,Yugoslavia,5,5,0,0,0,0,0,False
+libertadores,1122,2024,15995,Academia Puerto Cabello,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030755748894348214,Algeria,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030804317853736961,Argentina,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030804317853736961,Argentina,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030804317853736961,Argentina,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2022,3427,Atlético Mineiro,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2023,3427,Atlético Mineiro,4,4,0,0,0,0,0,False
+libertadores,1122,2024,14594,Aurora,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030798328777613372,Australia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030798328777613372,Australia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030452031964107577,Austria,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2022,692,Bahia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030014715658981209,Belgium,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030014715658981209,Belgium,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030014715658981209,Belgium,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2022,2864,Botafogo,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2024,7808,Bragantino,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2021,7808,Bragantino,4,4,0,0,0,0,0,False
+libertadores,1122,2024,7808,Bragantino,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030456752538593319,Brazil,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030991384093091376,Bulgaria,4,4,0,0,0,0,0,False
+sudamericana,1116,2025,14212,Central Cordoba SdE,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030019513468641247,Chile,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030019513468641247,Chile,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030019513468641247,Chile,4,4,0,0,0,0,0,False
+libertadores,1122,2022,6308,Club Bolívar,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030658653462203331,Colombia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030658653462203331,Colombia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030338561931919045,Costa Rica,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2025,6036,Criciúma,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2024,6036,Criciúma,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2023,3371,Cruzeiro,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030546947886156533,Czechoslovakia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030546947886156533,Czechoslovakia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030458810819449459,Denmark,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030458810819449459,Denmark,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030458810819449459,Denmark,4,4,0,0,0,0,0,False
+libertadores,1122,2025,9628,Deportes Iquique,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030427993541383370,Ecuador,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030881390726831176,England,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030881390726831176,England,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030881390726831176,England,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030881390726831176,England,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030881390726831176,England,4,4,0,0,0,0,0,False
+libertadores,1122,2022,15064,Everton,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2025,1024,Flamengo,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2023,1095,Fluminense,4,4,0,0,0,0,0,False
+libertadores,1122,2022,1095,Fluminense,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2023,3621,Fortaleza,4,4,0,0,0,0,0,False
+libertadores,1122,2023,3621,Fortaleza,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2024,3621,Fortaleza,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030167035104799597,Germany,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030387421992520955,Ghana,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030137610965637118,Greece,4,4,0,0,0,0,0,False
+sudamericana,1116,2024,15061,Huachipato,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030612896348323355,Hungary,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030612896348323355,Hungary,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030612896348323355,Hungary,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2024,2696,Internacional,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2023,2696,Internacional,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2025,2696,Internacional,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030545134325799351,Italy,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030545134325799351,Italy,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030545134325799351,Italy,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030376373289330911,Japan,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030376373289330911,Japan,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030376373289330911,Japan,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030376373289330911,Japan,4,4,0,0,0,0,0,False
+sudamericana,1116,2024,10779,LDU Quito,4,4,0,0,0,0,0,False
+libertadores,1122,2025,208,Melgar,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030436684419156506,Mexico,4,4,0,0,0,0,0,False
+libertadores,1122,2023,7810,Millonarios,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030890775095811152,Morocco,4,4,0,0,0,0,0,False
+libertadores,1122,2023,3480,Nacional Asunción,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030845151900853084,Netherlands,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030845151900853084,Netherlands,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030902071214775495,Nigeria,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030902071214775495,Nigeria,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030902071214775495,Nigeria,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030598140585355612,North Korea,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030844293587873215,Norway,4,4,0,0,0,0,0,False
+sudamericana,1116,2024,9890,Palestino,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2022,3422,Palmeiras,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2024,3422,Palmeiras,4,4,0,0,0,0,0,False
+copa_do_brasil,654,2025,3422,Palmeiras,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030677663790432694,Paraguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030677663790432694,Paraguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030677663790432694,Paraguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030791860762290774,Peru,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030000318847925231,Poland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030000318847925231,Poland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030276759082996865,Portugal,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030276759082996865,Portugal,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030526014718063801,Republic of Ireland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030526014718063801,Republic of Ireland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030313464302394564,Romania,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030313464302394564,Romania,4,4,0,0,0,0,0,False
+sudamericana,1116,2024,3365,Rosario Central,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030709518438899287,Saudi Arabia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030741134188876754,Senegal,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030689120036992715,Slovakia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030819938108773058,South Korea,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030819938108773058,South Korea,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030758982634478019,Soviet Union,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030758982634478019,Soviet Union,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030758982634478019,Soviet Union,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030750042375044082,Spain,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030750042375044082,Spain,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030750042375044082,Spain,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030750042375044082,Spain,4,4,0,0,0,0,0,False
+libertadores,1122,2024,11013,Sportivo Trinidense,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030026708875084432,Sweden,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030797588282590825,Switzerland,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030981485851247663,United States,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030981485851247663,United States,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030981485851247663,United States,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030981485851247663,United States,4,4,0,0,0,0,0,False
+libertadores,1122,2022,15327,Universidad Católica,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030883704211735427,Uruguay,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030069810056421591,West Germany,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030758651880281227,Yugoslavia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030758651880281227,Yugoslavia,4,4,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030755748894348214,Algeria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030755748894348214,Algeria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030504881278878271,Angola,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030804317853736961,Argentina,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030804317853736961,Argentina,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030804317853736961,Argentina,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030798328777613372,Australia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030798328777613372,Australia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030798328777613372,Australia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030798328777613372,Australia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030452031964107577,Austria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030452031964107577,Austria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030452031964107577,Austria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030014715658981209,Belgium,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030014715658981209,Belgium,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030014715658981209,Belgium,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030573674695217666,Bolivia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030445074848559029,Bosnia and Herzegovina,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030456752538593319,Brazil,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030456752538593319,Brazil,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030991384093091376,Bulgaria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030991384093091376,Bulgaria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030991384093091376,Bulgaria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030991384093091376,Bulgaria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030991384093091376,Bulgaria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030061328724306729,Cameroon,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030424292320181439,Canada,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030424292320181439,Canada,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030019513468641247,Chile,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030019513468641247,Chile,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030019513468641247,Chile,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030019513468641247,Chile,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030019513468641247,Chile,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030527995726116350,China,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030658653462203331,Colombia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030658653462203331,Colombia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030658653462203331,Colombia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030338561931919045,Costa Rica,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030338561931919045,Costa Rica,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030338561931919045,Costa Rica,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030338561931919045,Costa Rica,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030167412132839666,Croatia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030167412132839666,Croatia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030167412132839666,Croatia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030355224030280720,Cuba,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030546947886156533,Czechoslovakia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030546947886156533,Czechoslovakia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030546947886156533,Czechoslovakia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030284267405402592,Czech Republic,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030458810819449459,Denmark,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030458810819449459,Denmark,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030427993541383370,Ecuador,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030427993541383370,Ecuador,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030427993541383370,Ecuador,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030403529540577695,Egypt,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030403529540577695,Egypt,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030027036657195930,El Salvador,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030027036657195930,El Salvador,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030881390726831176,England,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030881390726831176,England,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030881390726831176,England,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030055698161060114,France,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030055698161060114,France,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030055698161060114,France,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030055698161060114,France,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030055698161060114,France,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030167035104799597,Germany,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030167035104799597,Germany,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030387421992520955,Ghana,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030387421992520955,Ghana,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030137610965637118,Greece,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030137610965637118,Greece,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030425513105639500,Haiti,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030887274080475239,Honduras,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030887274080475239,Honduras,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030887274080475239,Honduras,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030612896348323355,Hungary,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030612896348323355,Hungary,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030612896348323355,Hungary,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030598525093323001,Iceland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030770209115560073,Iran,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030539295843619133,Iraq,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030390721369224216,Israel,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030545134325799351,Italy,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030545134325799351,Italy,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030545134325799351,Italy,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030545134325799351,Italy,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030545134325799351,Italy,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030855009887557334,Ivory Coast,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030855009887557334,Ivory Coast,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030855009887557334,Ivory Coast,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030182915213182598,Jamaica,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030376373289330911,Japan,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030376373289330911,Japan,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030376373289330911,Japan,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030216110813708023,Kuwait,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030436684419156506,Mexico,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030890775095811152,Morocco,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030890775095811152,Morocco,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030890775095811152,Morocco,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030890775095811152,Morocco,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030413817647232236,New Zealand,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030413817647232236,New Zealand,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030902071214775495,Nigeria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030902071214775495,Nigeria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030902071214775495,Nigeria,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030439768098932333,Northern Ireland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030598140585355612,North Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030844293587873215,Norway,3,3,0,0,0,0,0,False
+fifa_intercontinental_cup,1452,2024,10036,Pachuca,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030602999051572793,Panama,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1958,7030677663790432694,Paraguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030677663790432694,Paraguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030791860762290774,Peru,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030791860762290774,Peru,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030000318847925231,Poland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030000318847925231,Poland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030000318847925231,Poland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030276759082996865,Portugal,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030276759082996865,Portugal,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030276759082996865,Portugal,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030882825595867654,Qatar,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030313464302394564,Romania,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030655906623246781,Russia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030655906623246781,Russia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030655906623246781,Russia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030709518438899287,Saudi Arabia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030709518438899287,Saudi Arabia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030709518438899287,Saudi Arabia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030709518438899287,Saudi Arabia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030360905738386063,Scotland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030741134188876754,Senegal,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030684048803333445,Serbia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030684048803333445,Serbia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030684048803333445,Serbia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030742116623305582,Serbia and Montenegro,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030749987074521227,Slovenia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030749987074521227,Slovenia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030432957294226557,South Africa,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030432957294226557,South Africa,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030432957294226557,South Africa,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1994,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1986,7030819938108773058,South Korea,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030758982634478019,Soviet Union,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2014,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030750042375044082,Spain,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1970,7030026708875084432,Sweden,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030026708875084432,Sweden,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030026708875084432,Sweden,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030026708875084432,Sweden,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030797588282590825,Switzerland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030797588282590825,Switzerland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1966,7030797588282590825,Switzerland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030797588282590825,Switzerland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2010,7030797588282590825,Switzerland,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030852409629203931,Togo,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030076200507552669,Trinidad and Tobago,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2018,7030890593521025659,Tunisia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030890593521025659,Tunisia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030890593521025659,Tunisia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030890593521025659,Tunisia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1978,7030890593521025659,Tunisia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030338460173589097,Turkey,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030595352384080004,United Arab Emirates,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030981485851247663,United States,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1990,7030981485851247663,United States,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030981485851247663,United States,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2006,7030981485851247663,United States,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1998,7030981485851247663,United States,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030883704211735427,Uruguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1962,7030883704211735427,Uruguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030883704211735427,Uruguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2002,7030883704211735427,Uruguay,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,2022,7030298943635220265,Wales,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030758651880281227,Yugoslavia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1982,7030758651880281227,Yugoslavia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030758651880281227,Yugoslavia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030758651880281227,Yugoslavia,3,3,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1974,7030528676610151617,Zaire,3,3,0,0,0,0,0,False
+libertadores,1122,2023,234259,Always Ready,2,2,0,0,0,0,0,False
+sudamericana,1116,2025,8238,Atlético Bucaramanga,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2023,8331,Atlético GO,2,2,0,0,0,0,0,False
+libertadores,1122,2024,8239,Aucas,2,2,0,0,0,0,0,False
+sudamericana,1116,2025,692,Bahia,2,2,0,0,0,0,0,False
+sudamericana,1116,2024,472,Barcelona Guayaquil,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030014715658981209,Belgium,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030014715658981209,Belgium,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030573674695217666,Bolivia,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2022,7808,Bragantino,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030456752538593319,Brazil,2,2,0,0,0,0,0,False
+libertadores,1122,2022,3807,César Vallejo,2,2,0,0,0,0,0,False
+libertadores,1122,2021,3807,César Vallejo,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2022,6036,Criciúma,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2023,6036,Criciúma,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030546947886156533,Czechoslovakia,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2025,3621,Fortaleza,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030055698161060114,France,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030055698161060114,France,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030167035104799597,Germany,2,2,0,0,0,0,0,False
+libertadores,1122,2024,10987,Godoy Cruz,2,2,0,0,0,0,0,False
+libertadores,1122,2022,15605,Guaraní,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030612896348323355,Hungary,2,2,0,0,0,0,0,False
+sudamericana,1116,2024,14635,Independiente del Valle,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030545134325799351,Italy,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030436684419156506,Mexico,2,2,0,0,0,0,0,False
+libertadores,1122,2022,7810,Millonarios,2,2,0,0,0,0,0,False
+libertadores,1122,2025,3480,Nacional Asunción,2,2,0,0,0,0,0,False
+libertadores,1122,2023,8384,Nacional Potosí,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2021,3422,Palmeiras,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030677663790432694,Paraguay,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030677663790432694,Paraguay,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030791860762290774,Peru,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1930,7030313464302394564,Romania,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030360905738386063,Scotland,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1954,7030819938108773058,South Korea,2,2,0,0,0,0,0,False
+libertadores,1122,2023,12562,Sport Huancayo,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030026708875084432,Sweden,2,2,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030797588282590825,Switzerland,2,2,0,0,0,0,0,False
+libertadores,1122,2021,10258,Unión Española,2,2,0,0,0,0,0,False
+libertadores,1122,2023,15327,Universidad Católica,2,2,0,0,0,0,0,False
+libertadores,1122,2021,175,Universidad Chile,2,2,0,0,0,0,0,False
+copa_do_brasil,654,2022,696,Vasco da Gama,2,2,0,0,0,0,0,False
+libertadores,1122,2021,456,Wanderers,2,2,0,0,0,0,0,False
+sudamericana,1116,2025,15077,2 de Mayo,1,1,0,0,1,0,0,True
+fifa_world_cup_mens,7000547241627854950,1934,7030804317853736961,Argentina,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,8239,Aucas,1,1,0,0,0,0,0,False
+fifa_intercontinental_cup,1452,2024,1022,Auckland City,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,14594,Aurora,1,1,0,0,1,0,0,True
+fifa_world_cup_mens,7000547241627854950,1934,7030014715658981209,Belgium,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030014715658981209,Belgium,1,1,0,0,0,0,0,False
+champions_league,2,2020,605,Benfica,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1950,7030573674695217666,Bolivia,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030456752538593319,Brazil,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,2528,Cerro Largo,1,1,0,0,0,0,0,False
+copa_do_brasil,654,2025,5463,Cuiabá,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,10976,Cusco FC,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,3439,Danubio,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,9996,Deportivo Cuenca,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,8339,Deportivo La Guaira,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030253628244204588,Dutch East Indies,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030403529540577695,Egypt,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,15064,Everton,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,15064,Everton,1,1,0,0,0,0,0,False
+supercopa_do_brasil,1798,2025,1024,Flamengo,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030055698161060114,France,1,1,0,0,0,0,0,False
+copa_do_brasil,654,2022,2925,Grêmio,1,1,0,0,0,0,0,False
+copa_do_brasil,654,2022,2696,Internacional,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,7792,Junior FC,1,1,0,0,0,0,0,False
+copa_do_brasil,654,2025,48,Juventude,1,1,0,0,0,0,0,False
+copa_do_brasil,654,2023,48,Juventude,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,11370,Metropolitanos,1,1,0,0,1,0,0,True
+sudamericana,1116,2025,7810,Millonarios,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030845151900853084,Netherlands,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030845151900853084,Netherlands,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030844293587873215,Norway,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,149671,Orense,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1938,7030000318847925231,Poland,1,1,0,0,0,0,0,False
+fifa_intercontinental_cup,1452,2024,3468,Real Madrid,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,12562,Sport Huancayo,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,237829,Sportivo Ameliano,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,15328,Técnico Universitario,1,1,0,0,0,0,0,False
+fifa_world_cup_mens,7000547241627854950,1934,7030981485851247663,United States,1,1,0,0,0,0,0,False
+sudamericana,1116,2024,456,Wanderers,1,1,0,0,0,0,0,False
+sudamericana,1116,2025,456,Wanderers,1,1,0,0,0,0,0,False

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import date
 from functools import lru_cache
 
 
@@ -23,6 +24,7 @@ class Settings:
     pg_pool_min_size: int
     pg_pool_max_size: int
     pg_pool_timeout_s: float
+    product_data_cutoff: date
 
 
 @lru_cache(maxsize=1)
@@ -37,4 +39,5 @@ def get_settings() -> Settings:
         pg_pool_min_size=int(os.getenv("FOOTBALL_PG_POOL_MIN_SIZE", "1")),
         pg_pool_max_size=int(os.getenv("FOOTBALL_PG_POOL_MAX_SIZE", "10")),
         pg_pool_timeout_s=float(os.getenv("FOOTBALL_PG_POOL_TIMEOUT_S", "10")),
+        product_data_cutoff=date.fromisoformat(os.getenv("PRODUCT_DATA_CUTOFF", "2025-12-31")),
     )

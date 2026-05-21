@@ -105,7 +105,7 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload["data"]["items"][0]["amountValue"], 25000000)
-        self.assertEqual(payload["data"]["items"][0]["currency"], "EUR")
+        self.assertIsNone(payload["data"]["items"][0]["currency"])
 
         query, params = fetch_all_mock.call_args.args
         self.assertIn("order by amount_value desc", query)
@@ -124,8 +124,41 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         query, params = fetch_all_mock.call_args.args
         self.assertIn("%s::text in ('all', 'arrivals')", query)
-        self.assertIn("%Barcelona%", params)
+        self.assertIn("spt.payload -> 'fromTeam' ->> 'name'", query)
+        self.assertIn("spt.payload -> 'toTeam' ->> 'name'", query)
+        self.assertIn(["%barcelona%"], params)
         self.assertIn("arrivals", params)
+
+    @patch("api.src.routers.market.db_client.fetch_all")
+    def test_market_transfers_search_is_accent_insensitive_and_tokenized(self, fetch_all_mock) -> None:
+        fetch_all_mock.return_value = [
+            {
+                "transfer_id": 4,
+                "player_id": 40,
+                "player_name": "Éverton Augusto de Barros Ribeiro",
+                "from_team_id": 500,
+                "from_team_name": "Flamengo",
+                "to_team_id": 600,
+                "to_team_name": "Bahia",
+                "transfer_date": date(2024, 1, 6),
+                "completed": True,
+                "career_ended": False,
+                "type_id": 220,
+                "amount": None,
+                "amount_value": None,
+                "_total_count": 1,
+            }
+        ]
+
+        response = self.client.get("/api/v1/market/transfers?search=everton%20r")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["data"]["items"][0]["playerName"], "Éverton Augusto de Barros Ribeiro")
+
+        query, params = fetch_all_mock.call_args.args
+        self.assertIn("translate(lower(coalesce", query)
+        self.assertIn(["%everton%", "%r%"], params)
 
     @patch("api.src.routers.market.db_client.fetch_all")
     def test_market_transfers_short_circuits_when_scope_has_no_teams(self, fetch_all_mock) -> None:

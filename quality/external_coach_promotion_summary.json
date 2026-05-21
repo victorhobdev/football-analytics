@@ -1,0 +1,52 @@
+{
+  "run_id": "external_coach_promotion_20260425T145630Z",
+  "executed": true,
+  "blocked": false,
+  "preflight": {
+    "gates": {
+      "promotable_rows": 8201,
+      "promotable_match_teams": 8201,
+      "promotable_coach_keys": 280,
+      "outside_window": 0,
+      "would_overwrite_protected_assignment": 0,
+      "unresolved_match_team_conflicts": 0,
+      "bad_roles": 0,
+      "non_p286_candidates": 0,
+      "invalid_external_person_id": 0,
+      "invalid_dates": 0,
+      "invalid_names": 0,
+      "identity_conflicts": 0
+    },
+    "blockers": {}
+  },
+  "before": {
+    "coach_identity": 1959,
+    "coach_identity_source_ref": 0,
+    "coach_tenure": 0,
+    "fact_assignment": 10903,
+    "fact_public": 10903,
+    "external_fact_assignment": 0,
+    "external_fact_coaches": 0
+  },
+  "after": {
+    "coach_identity": 2103,
+    "coach_identity_source_ref": 560,
+    "coach_tenure": 340,
+    "fact_assignment": 19104,
+    "fact_public": 19104,
+    "external_fact_assignment": 8201,
+    "external_fact_coaches": 280
+  },
+  "writes": {
+    "identities": 144,
+    "identity_refs": 560,
+    "tenures": 340,
+    "assignments": 8201
+  },
+  "quality": {
+    "external_outside_window": 0,
+    "duplicate_match_team_rows": 0,
+    "external_bad_roles": 0,
+    "external_invalid_names": 0
+  }
+}

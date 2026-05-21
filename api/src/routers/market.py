@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import unicodedata
 from datetime import date
 from typing import Any, Literal
 
@@ -15,6 +16,9 @@ MarketSortBy = Literal["transferDate", "playerName", "amount"]
 SortDirection = Literal["asc", "desc"]
 TeamDirection = Literal["all", "arrivals", "departures"]
 
+ACCENT_SOURCE = "áàâãäéèêëíìîïóòôõöúùûüçñ"
+ACCENT_TARGET = "aaaaaeeeeiiiiooooouuuucn"
+
 
 def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
@@ -26,11 +30,37 @@ def _to_int(value: Any) -> int:
     return int(value)
 
 
+def _normalize_search_query(value: str) -> str:
+    collapsed = " ".join(value.strip().split())
+    normalized = unicodedata.normalize("NFKD", collapsed.lower())
+    without_marks = "".join(char for char in normalized if not unicodedata.combining(char))
+    return without_marks.strip()
+
+
+def _escape_like(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _search_patterns(value: str | None) -> list[str] | None:
+    if not value or not value.strip():
+        return None
+
+    tokens = [_escape_like(token) for token in _normalize_search_query(value).split() if token]
+    return [f"%{token}%" for token in tokens] if tokens else None
+
+
+def _normalized_sql(column_sql: str) -> str:
+    return (
+        f"translate(lower(coalesce({column_sql}, '')), "
+        f"'{ACCENT_SOURCE}', '{ACCENT_TARGET}')"
+    )
+
+
 _TRANSFER_TYPE_NAMES = {
     219: "Transferência definitiva",
     218: "Empréstimo",
-    9688: "Livre / fim de contrato",
-    220: "Retorno de empréstimo",
+    220: "Transferência livre",
+    9688: "Retorno de empréstimo",
 }
 
 
@@ -140,8 +170,8 @@ def get_market_transfers(
         date_range_start=dateRangeStart,
         date_range_end=dateRangeEnd,
     )
-    search_pattern = f"%{search.strip()}%" if search and search.strip() else None
-    club_search_pattern = f"%{clubSearch.strip()}%" if clubSearch and clubSearch.strip() else None
+    search_patterns = _search_patterns(search)
+    club_search_patterns = _search_patterns(clubSearch)
     offset = (page - 1) * pageSize
     sort_column = {
         "amount": "amount_value",
@@ -160,21 +190,54 @@ def get_market_transfers(
             coverage=build_coverage_from_counts(0, 0, "Market transfers coverage"),
         )
 
+    player_name_sql = "coalesce(nullif(trim(spt.player_name), ''), concat('Unknown Player #', spt.player_id::text))"
+    from_team_name_sql = (
+        "coalesce(dim_from.team_name, nullif(trim(spt.payload -> 'fromTeam' ->> 'name'), ''), "
+        "nullif(trim(spt.payload -> 'from_team' ->> 'name'), ''), '')"
+    )
+    to_team_name_sql = (
+        "coalesce(dim_to.team_name, nullif(trim(spt.payload -> 'toTeam' ->> 'name'), ''), "
+        "nullif(trim(spt.payload -> 'to_team' ->> 'name'), ''), '')"
+    )
+    amount_sql = "nullif(trim(coalesce(spt.amount, '')), '')"
+    normalized_market_search_sql = (
+        f"{_normalized_sql(player_name_sql)} || ' ' || "
+        f"{_normalized_sql(from_team_name_sql)} || ' ' || "
+        f"{_normalized_sql(to_team_name_sql)} || ' ' || "
+        f"{_normalized_sql(amount_sql)}"
+    )
+    normalized_from_team_search_sql = (
+        f"{_normalized_sql(from_team_name_sql)} || ' ' || coalesce(spt.from_team_id::text, '')"
+    )
+    normalized_to_team_search_sql = (
+        f"{_normalized_sql(to_team_name_sql)} || ' ' || coalesce(spt.to_team_id::text, '')"
+    )
+
     query = f"""
         with enriched_transfers as (
             select
                 spt.transfer_id,
                 spt.player_id,
-                coalesce(nullif(trim(spt.player_name), ''), concat('Unknown Player #', spt.player_id::text)) as player_name,
+                {player_name_sql} as player_name,
                 spt.from_team_id,
                 case
                     when spt.from_team_id is null then null
-                    else coalesce(dim_from.team_name, concat('Team #', spt.from_team_id::text))
+                    else coalesce(
+                        dim_from.team_name,
+                        nullif(trim(spt.payload -> 'fromTeam' ->> 'name'), ''),
+                        nullif(trim(spt.payload -> 'from_team' ->> 'name'), ''),
+                        concat('Team #', spt.from_team_id::text)
+                    )
                 end as from_team_name,
                 spt.to_team_id,
                 case
                     when spt.to_team_id is null then null
-                    else coalesce(dim_to.team_name, concat('Team #', spt.to_team_id::text))
+                    else coalesce(
+                        dim_to.team_name,
+                        nullif(trim(spt.payload -> 'toTeam' ->> 'name'), ''),
+                        nullif(trim(spt.payload -> 'to_team' ->> 'name'), ''),
+                        concat('Team #', spt.to_team_id::text)
+                    )
                 end as to_team_name,
                 spt.transfer_date,
                 coalesce(spt.completed, false) as completed,
@@ -192,26 +255,29 @@ def get_market_transfers(
             left join mart.dim_team dim_to
               on dim_to.team_id = spt.to_team_id
             where (
-                %s::text is null
-                or coalesce(nullif(trim(spt.player_name), ''), concat('Unknown Player #', spt.player_id::text)) ilike %s
-                or coalesce(dim_from.team_name, '') ilike %s
-                or coalesce(dim_to.team_name, '') ilike %s
-                or nullif(trim(coalesce(spt.amount, '')), '') ilike %s
+                %s::text[] is null
+                or not exists (
+                    select 1
+                    from unnest(%s::text[]) as search_token(pattern)
+                    where {normalized_market_search_sql} not like search_token.pattern
+                )
             )
               and (
-                %s::text is null
+                %s::text[] is null
                 or (
                     %s::text in ('all', 'departures')
-                    and (
-                        coalesce(dim_from.team_name, '') ilike %s
-                        or spt.from_team_id::text ilike %s
+                    and not exists (
+                        select 1
+                        from unnest(%s::text[]) as club_token(pattern)
+                        where {normalized_from_team_search_sql} not like club_token.pattern
                     )
                 )
                 or (
                     %s::text in ('all', 'arrivals')
-                    and (
-                        coalesce(dim_to.team_name, '') ilike %s
-                        or spt.to_team_id::text ilike %s
+                    and not exists (
+                        select 1
+                        from unnest(%s::text[]) as club_token(pattern)
+                        where {normalized_to_team_search_sql} not like club_token.pattern
                     )
                 )
               )
@@ -262,18 +328,13 @@ def get_market_transfers(
     rows = db_client.fetch_all(
         query,
         [
-            search_pattern,
-            search_pattern,
-            search_pattern,
-            search_pattern,
-            search_pattern,
-            club_search_pattern,
+            search_patterns,
+            search_patterns,
+            club_search_patterns,
             teamDirection,
-            club_search_pattern,
-            club_search_pattern,
+            club_search_patterns,
             teamDirection,
-            club_search_pattern,
-            club_search_pattern,
+            club_search_patterns,
             typeId,
             typeId,
             filters.date_start,
@@ -311,7 +372,7 @@ def get_market_transfers(
             "typeName": _transfer_type_name(row.get("type_id")),
             "amount": row.get("amount"),
             "amountValue": row.get("amount_value"),
-            "currency": "EUR" if row.get("amount_value") is not None else None,
+            "currency": None,
         }
         for row in rows
     ]
