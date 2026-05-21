@@ -10,7 +10,7 @@
 
 Plataforma full-stack de exploração de futebol histórico, construída como produto de dados ponta a ponta: ingestão, modelagem, BFF, frontend analítico e camada de BI.
 
-O projeto não tenta ser um placar ao vivo. O foco é arquivo histórico e navegação canônica por competição, temporada, partida, time, jogador e rankings.
+O projeto não tenta ser um placar ao vivo. Ele organiza um arquivo histórico com navegação canônica por competição, temporada, partida, time, jogador e rankings.
 
 **Repositório:** [github.com/victorhob1981/football-analytics](https://github.com/victorhob1981/football-analytics)
 
@@ -28,9 +28,9 @@ Na prática, o projeto combina:
 - frontend em Next.js com superfícies reais de navegação;
 - assets e BI acoplados ao mesmo fluxo de produto.
 
-## Por que ele é forte para portfólio
+## Características do projeto
 
-Este projeto demonstra ownership técnico de ponta a ponta:
+Este projeto reúne capacidades técnicas de ponta a ponta:
 
 - produto de dados com separação clara entre ingestão, warehouse, BFF e UI;
 - modelagem canônica de competições e temporadas;
@@ -248,10 +248,9 @@ Esses gates existem para verificar readiness operacional antes de demo, entrega 
 - [Readiness de frontend](docs/FRONTEND_RELEASE_READINESS.md)
 - [Readiness de backend/dados](docs/BACKEND_DATA_RELEASE_READINESS.md)
 
-## O que um recrutador encontra aqui
+## Resumo do que está implementado aqui
 
 - visão de produto, não só scripts isolados;
 - integração real entre data engineering, backend e frontend;
 - modelagem orientada a domínio;
 - preocupação com contratos, cobertura e rastreabilidade;
-- um projeto que conversa bem com vagas de data platform, analytics engineering, backend e full-stack orientado a produto de dados.
