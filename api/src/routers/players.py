@@ -10,6 +10,7 @@ from ..core.contracts import build_api_response, build_coverage_from_counts, bui
 from ..core.errors import AppError
 from ..core.filters import GlobalFilters, VenueFilter, append_fact_match_filters, validate_and_build_global_filters
 from ..db.client import db_client
+from .world_cup_labels import translate_world_cup_display_name
 
 router = APIRouter(prefix="/api/v1/players", tags=["players"])
 
@@ -229,22 +230,44 @@ def _fetch_player_profile_meta(player_id: int) -> dict[str, Any]:
                 from wc_positions_ranked
                 where rn = 1
             ) as world_cup_primary_position,
+            (
+                select wc_player_id::text
+                from linked_wc
+                order by
+                    case
+                        when match_method = 'manual_real_profile' then 0
+                        when match_method = 'manual_local_profile_no_sportmonks_record' then 1
+                        else 2
+                    end,
+                    wc_player_id
+                limit 1
+            ) as world_cup_image_asset_id,
             coalesce((select goal_count from wc_goals), 0) as world_cup_goal_count
         """,
         [player_id, player_id],
     ) or {}
 
-    team_names = _normalize_text_list(row.get("world_cup_team_names"))
+    team_names = [
+        translated_name
+        for team_name in _normalize_text_list(row.get("world_cup_team_names"))
+        if (translated_name := translate_world_cup_display_name(team_name)) is not None
+    ]
+    team_names = list(dict.fromkeys(team_names))
     edition_labels = _normalize_text_list(row.get("world_cup_edition_labels"))
     primary_position_raw = row.get("world_cup_primary_position")
     primary_position = str(primary_position_raw).strip() if primary_position_raw is not None else None
     if primary_position == "":
         primary_position = None
+    image_asset_id_raw = row.get("world_cup_image_asset_id")
+    image_asset_id = str(image_asset_id_raw).strip() if image_asset_id_raw is not None else None
+    if image_asset_id == "":
+        image_asset_id = None
 
     is_world_cup_linked = bool(row.get("is_world_cup_linked"))
     world_cup_summary: dict[str, Any] | None = None
     if is_world_cup_linked:
         world_cup_summary = {
+            "imageAssetId": image_asset_id,
             "teamNames": team_names,
             "teamCount": len(team_names),
             "editionLabels": edition_labels,
@@ -1177,7 +1200,7 @@ def get_player_profile(
         "teamId": str(summary_row["team_id"]) if summary_row.get("team_id") is not None else None,
         "teamName": summary_row.get("team_name") or fallback_team_name,
         "position": summary_row.get("position_name") or fallback_position,
-        "nationality": player_ref.get("nationality"),
+        "nationality": translate_world_cup_display_name(player_ref.get("nationality")),
         "lastMatchAt": summary_row.get("last_match_date"),
     }
     summary_payload = {

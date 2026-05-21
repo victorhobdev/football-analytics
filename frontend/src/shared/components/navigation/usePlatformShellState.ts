@@ -603,11 +603,11 @@ export function usePlatformShellState(): PlatformShellState {
         "Os atalhos mantêm o mesmo recorte ao mudar de área.";
     } else if (pathname === "/market") {
       surfaceLabel = "Mercado";
-      surfaceTitle = "Mercado em preparação pública";
+      surfaceTitle = "Transferências de jogadores";
       description =
-        "A trilha de transferências ainda não tem contrato público estável, mas o domínio já está enquadrado na arquitetura do produto.";
+        "Explore movimentações reais de jogadores com busca, tipo de transferência e paginação no recorte atual.";
       helperText =
-        "Use jogadores, times e rankings para explorar o contexto disponível hoje enquanto a lista pública de mercado é fechada.";
+        "A cobertura preserva os filtros globais, mas valores financeiros e nomes de alguns clubes dependem da fonte disponível.";
       breadcrumbs.push({ label: "Mercado" });
       surfaceLinks.splice(
         0,

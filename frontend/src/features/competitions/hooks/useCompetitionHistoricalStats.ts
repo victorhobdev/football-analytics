@@ -13,13 +13,7 @@ const HISTORICAL_STATS_STALE_TIME_MS = 30 * 60 * 1000;
 const HISTORICAL_STATS_GC_TIME_MS = 60 * 60 * 1000;
 
 function isHistoricalStatsEmpty(data: CompetitionHistoricalStatsData): boolean {
-  return (
-    data.champions.items.length === 0 &&
-    data.scorers.items.length === 0 &&
-    data.teamRecords.items.length === 0 &&
-    data.matchRecords.items.length === 0 &&
-    data.playerRecords.items.length === 0
-  );
+  return data.champions.items.length === 0 && data.scorers.items.length === 0;
 }
 
 export function useCompetitionHistoricalStats(filters: CompetitionHistoricalStatsFilters) {

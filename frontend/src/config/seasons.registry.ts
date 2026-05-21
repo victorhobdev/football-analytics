@@ -48,6 +48,13 @@ export const SUPPORTED_SEASONS: SeasonDef[] = [
     queryId: "2021",
     catalogLabel: "2021_22",
   },
+  {
+    id: "2020/2021",
+    label: "2020/2021",
+    calendar: "split_year",
+    queryId: "2020",
+    catalogLabel: "2020_21",
+  },
 ];
 
 export const SUPPORTED_SEASON_QUERY_IDS = Array.from(

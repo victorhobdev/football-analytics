@@ -87,7 +87,7 @@ export function PlayerMatchesSection({
           title={profileMeta && !profileMeta.hasHistoricalStats ? "Sem partidas consolidadas" : "Partidas indisponíveis"}
           description={
             profileMeta && !profileMeta.hasHistoricalStats
-              ? "Este perfil não possui histórico de partidas consolidado para navegação detalhada."
+              ? "Ainda não há partidas detalhadas para este jogador."
               : "Não há partidas suficientes para montar esta leitura do jogador agora."
           }
         />

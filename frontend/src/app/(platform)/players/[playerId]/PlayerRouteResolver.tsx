@@ -26,7 +26,7 @@ function buildPlayerResolverFailureCopy(isError: boolean, status?: number) {
   if (status === 404) {
     return {
       title: "Jogador indisponível",
-      description: "Este jogador não está disponível no produto agora.",
+      description: "Este jogador não está disponível agora.",
       detail:
         "Volte para a lista de jogadores ou abra competições para seguir por uma visão disponível.",
     };
@@ -131,17 +131,12 @@ export function PlayerRouteResolver({ playerId }: PlayerRouteResolverProps) {
     );
   }
 
-  // Nem todo perfil elegível tem contexto competitivo navegável. Nesses casos,
-  // abrimos o perfil direto em vez de tratar a ausência de histórico como erro.
   if (!localContext && !contextsQuery.isError && !canonicalHref) {
     return (
       <PlayerProfileContent
         notice={
-          <ProfileAlert title="Perfil aberto em modo direto" tone="info">
-            <p>
-              Este jogador não possui contexto competitivo canônico para navegação. O perfil segue
-              disponível com o estado de dados atual.
-            </p>
+          <ProfileAlert title="Perfil básico" tone="info">
+            <p>Mostrando as informações disponíveis para este jogador.</p>
           </ProfileAlert>
         }
         playerId={playerId}

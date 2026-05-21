@@ -23,6 +23,7 @@ import type {
   WorldCupHistoricalTopScorer,
   WorldCupHubEdition,
 } from "@/features/world-cup/types/world-cup.types";
+import { resolveWorldCupPlayerImageAssetId } from "@/features/world-cup/utils/player-profile";
 
 const WORLD_CUP_COMPETITION_KEY = "wc_mens";
 
@@ -216,6 +217,7 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
                 fallback={buildFallbackLabel(championName)}
                 imageClassName="p-1.5"
                 shape="circle"
+                linkBehavior="none"
               />
               <div className="min-w-0">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
@@ -238,6 +240,7 @@ function TimelineEditionCard({ edition }: { edition: WorldCupHubEdition }) {
                 fallback={buildFallbackLabel(hostCountryName)}
                 imageClassName="p-1.5"
                 shape="circle"
+                linkBehavior="none"
               />
               <div className="min-w-0">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
@@ -365,7 +368,11 @@ export function WorldCupHubContent() {
               <div className="mt-3 flex items-center gap-3">
                 <ProfileMedia
                   alt={`Maior artilheiro ${describeTopScorer(summary.topScorer)}`}
-                  assetId={summary.topScorer?.playerId}
+                  assetId={resolveWorldCupPlayerImageAssetId(
+                    summary.topScorer?.imageAssetId,
+                    summary.topScorer?.playerId,
+                  )}
+                  href={summary.topScorer?.profileUrl ?? null}
                   category="players"
                   className="h-14 w-14 rounded-full"
                   fallback={buildFallbackLabel(describeTopScorer(summary.topScorer))}

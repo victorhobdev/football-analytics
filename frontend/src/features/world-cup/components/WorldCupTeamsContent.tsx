@@ -57,6 +57,7 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
           fallback={buildFallbackLabel(team.teamName)}
           imageClassName="p-2"
           shape="circle"
+          linkBehavior="none"
         />
         <div className="min-w-0 flex-1">
           <p className="font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">

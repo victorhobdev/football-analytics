@@ -327,6 +327,7 @@ function RankingsCatalogCard({
                 fallbackClassName={styles.leaderMediaFallback}
                 imageClassName={styles.leaderMediaImage}
                 shape={ranking.entity === "team" ? "rounded" : "circle"}
+                linkBehavior="none"
               />
               <p className={joinClasses(styles.statValue, styles.statValueLeader)}>{leaderLabel}</p>
             </div>
