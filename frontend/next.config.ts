@@ -21,8 +21,8 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        source: "/api/:path*",
-        destination: "http://163.176.59.174/api/:path*",
+        source: "/bff/:path*",
+        destination: "http://163.176.59.174/:path*",
       },
     ];
   },
