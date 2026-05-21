@@ -43,7 +43,13 @@ class PlayerServingRoutesTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(payload["data"]["items"][0]["playerId"], "10")
+        item = payload["data"]["items"][0]
+        self.assertEqual(item["playerId"], "10")
+        self.assertIsInstance(item["minutesPlayed"], int)
+        self.assertIsInstance(item["goals"], int)
+        self.assertIsInstance(item["assists"], int)
+        self.assertIsInstance(item["yellowCards"], int)
+        self.assertIsInstance(item["redCards"], int)
         query, _params = fetch_all_mock.call_args.args
         self.assertIn("mart.player_serving_summary", query)
         self.assertNotIn("mart.player_match_summary pms", query)
@@ -103,6 +109,55 @@ class PlayerServingRoutesTests(unittest.TestCase):
         query, _params = fetch_all_mock.call_args.args
         self.assertIn("mart.player_serving_summary", query)
         self.assertNotIn("mart.player_match_summary pms", query)
+
+    @patch("api.src.routers.players._profile_coverage")
+    @patch("api.src.routers.players._fetch_player_profile_meta")
+    @patch("api.src.routers.players.db_client.fetch_one")
+    def test_player_profile_serializes_count_fields_as_int(
+        self,
+        fetch_one_mock,
+        fetch_profile_meta_mock,
+        profile_coverage_mock,
+    ) -> None:
+        fetch_profile_meta_mock.return_value = {"hasHistoricalStats": True}
+        profile_coverage_mock.return_value = {"status": "complete", "label": "Player profile coverage"}
+        fetch_one_mock.side_effect = [
+            {"player_id": 10, "player_name": "Jogador A", "nationality": "BR"},
+            {
+                "team_id": 100,
+                "team_name": "Clube A",
+                "position_name": "Forward",
+                "matches_played": 12,
+                "last_match_date": None,
+                "minutes_played": 900.0,
+                "goals": 8.0,
+                "assists": 3.0,
+                "shots_total": 24.0,
+                "shots_on_target": 12.0,
+                "passes_attempted": 300.0,
+                "yellow_cards": 1.0,
+                "red_cards": 0.0,
+                "rating": 7.5,
+            },
+        ]
+
+        response = self.client.get(
+            "/api/v1/players/10?includeRecentMatches=false&includeHistory=false&includeStats=false"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        summary = response.json()["data"]["summary"]
+        for field in [
+            "minutesPlayed",
+            "goals",
+            "assists",
+            "shotsTotal",
+            "shotsOnTarget",
+            "passesAttempted",
+            "yellowCards",
+            "redCards",
+        ]:
+            self.assertIsInstance(summary[field], int)
 
 
 if __name__ == "__main__":

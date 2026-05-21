@@ -117,7 +117,7 @@ function getAmountValue(item: {
   return parseAmount(item.amount);
 }
 
-function formatAmountInMillions(value: number | null | undefined): string {
+function formatAmountInMillions(value: number | null | undefined, currency?: string | null): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return "Valor não divulgado";
   }
@@ -128,8 +128,9 @@ function formatAmountInMillions(value: number | null | undefined): string {
     minimumFractionDigits: 0,
   }).format(millions);
   const unit = Math.abs(millions - 1) < 0.005 ? "milhão" : "milhões";
+  const normalizedCurrency = currency?.trim();
 
-  return `€ ${formattedValue} ${unit}`;
+  return normalizedCurrency ? `${normalizedCurrency} ${formattedValue} ${unit}` : `${formattedValue} ${unit}`;
 }
 
 function formatInteger(value: number): string {
@@ -171,7 +172,7 @@ function getPlayerMonogram(playerName: string): string {
   return initials.length > 0 ? initials : "TRF";
 }
 
-function getTeamFallback(teamName: string | null | undefined, teamId: string | null | undefined): string {
+function getTeamFallback(teamName: string | null | undefined): string {
   if (teamName && !teamName.startsWith("Team #")) {
     const initials = teamName
       .split(/\s+/)
@@ -184,7 +185,7 @@ function getTeamFallback(teamName: string | null | undefined, teamId: string | n
     return initials.length > 0 ? initials : "CLB";
   }
 
-  return teamId ? `#${teamId.slice(-3)}` : "CLB";
+  return "CLB";
 }
 
 export function MarketPageContent() {
@@ -306,15 +307,22 @@ export function MarketPageContent() {
   const hasPreviousPage = pagination?.hasPreviousPage ?? currentPage > 1;
   const hasNextPage = pagination?.hasNextPage ?? currentPage < totalPages;
   const valuedTransfers = items.filter((item) => getAmountValue(item) !== null).length;
-  const topAmount = items.reduce<number | null>((currentTop, item) => {
+  const topAmount = items.reduce<{ value: number; currency: string | null } | null>((currentTop, item) => {
     const amountValue = getAmountValue(item);
 
     if (amountValue === null) {
       return currentTop;
     }
 
-    return currentTop === null ? amountValue : Math.max(currentTop, amountValue);
+    if (currentTop === null || amountValue > currentTop.value) {
+      return { value: amountValue, currency: item.currency ?? null };
+    }
+
+    return currentTop;
   }, null);
+  const trustedCurrencyLabels = Array.from(
+    new Set(items.map((item) => item.currency?.trim()).filter((currency): currency is string => Boolean(currency))),
+  );
 
   return (
     <ProfileShell className="space-y-6">
@@ -327,7 +335,11 @@ export function MarketPageContent() {
                 <ProfileTag className="bg-white/12 text-white/82">
                   {resolvedContext ? "Contexto fechado" : "Entrada direta"}
                 </ProfileTag>
-                <ProfileTag className="bg-white/12 text-white/82">EUR</ProfileTag>
+                {trustedCurrencyLabels.map((currency) => (
+                  <ProfileTag className="bg-white/12 text-white/82" key={currency}>
+                    {currency}
+                  </ProfileTag>
+                ))}
                 <ProfileTag className="bg-white/12 text-white/82">{activeWindowLabel}</ProfileTag>
               </div>
               <div>
@@ -367,7 +379,7 @@ export function MarketPageContent() {
                   Maior valor
                 </p>
                 <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold">
-                  {formatAmountInMillions(topAmount)}
+                  {formatAmountInMillions(topAmount?.value ?? null, topAmount?.currency)}
                 </p>
               </div>
             </div>
@@ -513,7 +525,7 @@ export function MarketPageContent() {
           const fromTeamHref = item.fromTeamId ? buildTeamResolverPath(item.fromTeamId, sharedFilters) : null;
           const toTeamHref = item.toTeamId ? buildTeamResolverPath(item.toTeamId, sharedFilters) : null;
           const amountValue = getAmountValue(item);
-          const amountLabel = formatAmountInMillions(amountValue);
+          const amountLabel = formatAmountInMillions(amountValue, item.currency);
 
           return (
             <article
@@ -553,9 +565,9 @@ export function MarketPageContent() {
                   <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
                     {amountLabel}
                   </p>
-                  {amountValue !== null ? (
+                  {amountValue !== null && item.currency ? (
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a1f]">
-                      EUR
+                      {item.currency}
                     </p>
                   ) : null}
                 </div>
@@ -572,7 +584,7 @@ export function MarketPageContent() {
                       assetId={item.fromTeamId}
                       category="clubs"
                       className="h-9 w-9 rounded-lg border-[rgba(191,201,195,0.6)] bg-white"
-                      fallback={getTeamFallback(item.fromTeamName, item.fromTeamId)}
+                      fallback={getTeamFallback(item.fromTeamName)}
                       href={fromTeamHref}
                       shape="rounded"
                     />
@@ -591,7 +603,7 @@ export function MarketPageContent() {
                       assetId={item.toTeamId}
                       category="clubs"
                       className="h-9 w-9 rounded-lg border-[rgba(191,201,195,0.6)] bg-white"
-                      fallback={getTeamFallback(item.toTeamName, item.toTeamId)}
+                      fallback={getTeamFallback(item.toTeamName)}
                       href={toTeamHref}
                       shape="rounded"
                     />

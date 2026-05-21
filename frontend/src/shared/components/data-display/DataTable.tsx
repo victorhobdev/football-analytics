@@ -166,7 +166,7 @@ export function DataTable<TData extends object>({
           className={shouldVirtualize ? "overflow-y-auto" : undefined}
           style={shouldVirtualize ? { maxHeight: `${virtualizerMaxHeight}px` } : undefined}
         >
-          <table className="min-w-full border-collapse">
+          <table className="w-full min-w-[52rem] border-collapse">
             <thead className={headClasses}>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>

@@ -20,6 +20,7 @@ from .world_cup_labels import (
 router = APIRouter(tags=["world-cup"])
 
 WORLD_CUP_COMPETITION_KEY = "fifa_world_cup_mens"
+WORLD_CUP_COMPETITION_NAME = "Copa do Mundo FIFA"
 NAME_PREFIX_NOISE_PATTERN = re.compile(r"^not applicable\s+", re.IGNORECASE)
 HISTORICAL_CHAMPION_LINEAGE_ALIASES = {
     "west germany": "germany",
@@ -193,8 +194,56 @@ def _normalize_compare_key(value: str | None) -> str | None:
     return normalized_value.casefold()
 
 
+def _build_world_cup_team_identity(
+    team_id: int | str | None,
+    serialized_team: dict[str, Any],
+) -> dict[str, Any]:
+    source_id = str(team_id).strip() if team_id is not None and str(team_id).strip() else None
+    canonical_id = serialized_team.get("teamId")
+    is_canonical = isinstance(canonical_id, str) and canonical_id.startswith("world-cup-")
+
+    return {
+        "entityType": "team",
+        "competitionKey": WORLD_CUP_COMPETITION_KEY,
+        "canonicalId": canonical_id,
+        "displayName": serialized_team.get("teamName"),
+        "sourceId": source_id,
+        "sourceSystem": "world_cup_source",
+        "confidence": "confirmed" if is_canonical else "unmapped",
+        "editorialStatus": "canonical" if is_canonical else "source",
+    }
+
+
+def _build_world_cup_competition_identity() -> dict[str, Any]:
+    return {
+        "entityType": "competition",
+        "competitionKey": WORLD_CUP_COMPETITION_KEY,
+        "canonicalId": WORLD_CUP_COMPETITION_KEY,
+        "displayName": WORLD_CUP_COMPETITION_NAME,
+        "sourceId": "0",
+        "sourceSystem": "football_analytics",
+        "confidence": "confirmed",
+        "editorialStatus": "canonical",
+    }
+
+
+def _serialize_world_cup_competition() -> dict[str, Any]:
+    return {
+        "competitionKey": WORLD_CUP_COMPETITION_KEY,
+        "competitionName": WORLD_CUP_COMPETITION_NAME,
+        "identity": _build_world_cup_competition_identity(),
+    }
+
+
 def _serialize_team(team_id: int | None, team_name: str | None) -> dict[str, Any] | None:
-    return serialize_world_cup_display_team(team_id, _normalize_text(team_name))
+    serialized_team = serialize_world_cup_display_team(team_id, _normalize_text(team_name))
+    if serialized_team is None:
+        return None
+
+    return {
+        **serialized_team,
+        "identity": _build_world_cup_team_identity(team_id, serialized_team),
+    }
 
 
 def _team_reference_key(team_id: int | str | None, team_name: str | None) -> str | None:
@@ -259,7 +308,7 @@ def _filter_scorer_list_by_minimum_goals(rows: list[dict[str, Any]]) -> list[dic
     ]
 
 
-def _fetch_wc_player_profile_refs(wc_player_ids: list[int | None]) -> dict[int, dict[str, str]]:
+def _fetch_wc_player_profile_refs(wc_player_ids: list[int | None]) -> dict[int, dict[str, Any]]:
     normalized_player_ids = sorted({player_id for player_id in wc_player_ids if player_id is not None})
     if not normalized_player_ids:
         return {}
@@ -294,9 +343,9 @@ def _fetch_wc_player_profile_refs(wc_player_ids: list[int | None]) -> dict[int, 
 
 
 def _resolve_wc_player_profile_ref(
-    profile_refs: dict[int, dict[str, str]],
+    profile_refs: dict[int, dict[str, Any]],
     wc_player_id: int | None,
-) -> dict[str, str] | None:
+) -> dict[str, Any] | None:
     if wc_player_id is None:
         return None
 
@@ -305,7 +354,7 @@ def _resolve_wc_player_profile_ref(
 
 def _serialize_wc_player_id(
     wc_player_id: int | None,
-    profile_refs: dict[int, dict[str, str]],
+    profile_refs: dict[int, dict[str, Any]],
 ) -> str | None:
     if wc_player_id is None:
         return None
@@ -315,6 +364,29 @@ def _serialize_wc_player_id(
         return profile_ref["playerId"]
 
     return str(wc_player_id)
+
+
+def _serialize_wc_player_identity(
+    wc_player_id: int | None,
+    profile_refs: dict[int, dict[str, Any]],
+) -> dict[str, Any] | None:
+    if wc_player_id is None:
+        return None
+
+    profile_ref = _resolve_wc_player_profile_ref(profile_refs, wc_player_id)
+    source_id = str(wc_player_id)
+    mapped_player_id = profile_ref.get("playerId") if profile_ref is not None else None
+    canonical_id = mapped_player_id or source_id
+
+    return {
+        "entityType": "player",
+        "competitionKey": WORLD_CUP_COMPETITION_KEY,
+        "canonicalId": canonical_id,
+        "sourceId": source_id,
+        "sourceSystem": "sportmonks" if mapped_player_id else "world_cup_source",
+        "confidence": "confirmed" if mapped_player_id else "unmapped",
+        "editorialStatus": "mapped" if mapped_player_id else "source",
+    }
 
 
 def _build_champion_identity_key(team: dict[str, Any] | None) -> str | None:
@@ -693,11 +765,13 @@ def _fetch_historical_top_scorer() -> dict[str, Any] | None:
     team = _serialize_team(_safe_int(row.get("team_id")), row.get("team_name"))
     return {
         "playerId": _serialize_wc_player_id(player_id, profile_refs),
+        "identity": _serialize_wc_player_identity(player_id, profile_refs),
         "imageAssetId": str(player_id) if player_id is not None else None,
         "playerName": _sanitize_display_name(row.get("player_name")),
         "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
         "teamId": team.get("teamId") if team else None,
         "teamName": team.get("teamName") if team else None,
+        "teamIdentity": team.get("identity") if team else None,
         "goals": int(row.get("goals") or 0),
     }
 
@@ -749,11 +823,13 @@ def _fetch_edition_top_scorers(season_label: str) -> list[dict[str, Any]]:
             {
                 "rank": int(row.get("scorer_rank") or 0),
                 "playerId": _serialize_wc_player_id(player_id, profile_refs),
+                "identity": _serialize_wc_player_identity(player_id, profile_refs),
                 "imageAssetId": str(player_id) if player_id is not None else None,
                 "playerName": _sanitize_display_name(row.get("player_name")),
                 "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
+                "teamIdentity": team.get("identity") if team else None,
                 "goals": int(row.get("goals") or 0),
             }
         )
@@ -1038,6 +1114,7 @@ def _fetch_team_historical_scorers(team_ids: list[int]) -> list[dict[str, Any]]:
             {
                 "rank": int(row.get("scorer_rank") or 0),
                 "playerId": _serialize_wc_player_id(player_id, profile_refs),
+                "identity": _serialize_wc_player_identity(player_id, profile_refs),
                 "imageAssetId": str(player_id) if player_id is not None else None,
                 "playerName": _sanitize_display_name(row.get("player_name")),
                 "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
@@ -1311,6 +1388,7 @@ def _build_world_cup_titles_team_ranking(
                 "rank": current_team_rank,
                 "teamId": team["teamId"],
                 "teamName": team["teamName"],
+                "identity": team.get("identity"),
                 "titlesCount": int(team["titlesCount"]),
                 "participationsCount": int(team["participationsCount"]),
                 "finalsCount": finals_count,
@@ -1340,6 +1418,7 @@ def _build_world_cup_team_stat_rankings(
         team_stats_by_key[team_key] = {
             "teamId": team["teamId"],
             "teamName": team.get("teamName"),
+            "identity": team.get("identity"),
             "matches": 0,
             "wins": 0,
             "goalsScored": 0,
@@ -1359,6 +1438,7 @@ def _build_world_cup_team_stat_rankings(
             {
                 "teamId": serialized_team["teamId"],
                 "teamName": serialized_team.get("teamName"),
+                "identity": serialized_team.get("identity"),
                 "matches": 0,
                 "wins": 0,
                 "goalsScored": 0,
@@ -1444,6 +1524,7 @@ def _build_world_cup_team_stat_rankings(
                     {
                         "teamId": item["teamId"],
                         "teamName": item.get("teamName"),
+                        "identity": item.get("identity"),
                         "wins": int(item["wins"]),
                         "matches": int(item["matches"]),
                     }
@@ -1460,6 +1541,7 @@ def _build_world_cup_team_stat_rankings(
                     {
                         "teamId": item["teamId"],
                         "teamName": item.get("teamName"),
+                        "identity": item.get("identity"),
                         "matches": int(item["matches"]),
                         "wins": int(item["wins"]),
                     }
@@ -1476,6 +1558,7 @@ def _build_world_cup_team_stat_rankings(
                     {
                         "teamId": item["teamId"],
                         "teamName": item.get("teamName"),
+                        "identity": item.get("identity"),
                         "goalsScored": int(item["goalsScored"]),
                         "matches": int(item["matches"]),
                     }
@@ -1492,6 +1575,7 @@ def _build_world_cup_team_stat_rankings(
                     {
                         "teamId": item["teamId"],
                         "teamName": item.get("teamName"),
+                        "identity": item.get("identity"),
                         "topFourCount": int(item["topFourCount"]),
                         "titlesCount": int(item["titlesCount"]),
                     }
@@ -1606,7 +1690,7 @@ def _build_world_cup_edition_rankings(
 
 def _build_world_cup_squad_appearance_rankings(
     squad_rows: list[dict[str, Any]],
-    profile_refs: dict[int, dict[str, str]] | None = None,
+    profile_refs: dict[int, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     players_by_key: dict[str, dict[str, Any]] = {}
     resolved_profile_refs = profile_refs or {}
@@ -1627,11 +1711,13 @@ def _build_world_cup_squad_appearance_rankings(
             player_key,
             {
                 "playerId": player_key,
+                "identity": _serialize_wc_player_identity(player_id, resolved_profile_refs),
                 "imageAssetId": str(player_id),
                 "playerName": _sanitize_display_name(row.get("player_name")),
                 "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
+                "teamIdentity": team.get("identity") if team else None,
                 "editions": [],
             },
         )
@@ -1639,6 +1725,7 @@ def _build_world_cup_squad_appearance_rankings(
         if team is not None:
             player_entry["teamId"] = team.get("teamId")
             player_entry["teamName"] = team.get("teamName")
+            player_entry["teamIdentity"] = team.get("identity")
 
         player_entry["editions"].append(
             {
@@ -1664,11 +1751,13 @@ def _build_world_cup_squad_appearance_rankings(
                 [
                     {
                         "playerId": item["playerId"],
+                        "identity": item.get("identity"),
                         "imageAssetId": item.get("imageAssetId"),
                         "playerName": item.get("playerName"),
                         "profileUrl": item.get("profileUrl"),
                         "teamId": item.get("teamId"),
                         "teamName": item.get("teamName"),
+                        "teamIdentity": item.get("teamIdentity"),
                         "appearancesCount": len(item["editions"]),
                         "editions": sorted(item["editions"], key=lambda edition: edition["year"]),
                     }
@@ -1948,7 +2037,7 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
     for season_row in edition_rows:
         season_label = season_row["season_label"]
         host_country = translate_world_cup_display_name(_normalize_text(season_row.get("host_country")))
-        host_country_team = serialize_world_cup_display_team(None, host_country)
+        host_country_team = _serialize_team(None, host_country)
         matches_count = match_counts_by_season.get(season_label, 0)
         count_teams = _safe_int(season_row.get("count_teams"))
         format_flags = season_row.get("format_flags") or {}
@@ -2034,6 +2123,7 @@ def _build_world_cup_hub_payload() -> tuple[dict[str, Any], dict[str, Any]]:
 
     return (
         {
+            "competition": _serialize_world_cup_competition(),
             "summary": summary,
             "editions": editions,
             "updatedAt": datetime.now(UTC).isoformat(),
@@ -2076,6 +2166,7 @@ def _build_group_stage_payload(season_label: str) -> list[dict[str, Any]]:
                         {
                             "teamId": (_serialize_team(_safe_int(row.get("team_id")), row.get("team_name")) or {}).get("teamId"),
                             "teamName": (_serialize_team(_safe_int(row.get("team_id")), row.get("team_name")) or {}).get("teamName"),
+                            "identity": (_serialize_team(_safe_int(row.get("team_id")), row.get("team_name")) or {}).get("identity"),
                             "position": int(row.get("position") or 0),
                             "matchesPlayed": int(row.get("games_played") or 0),
                             "wins": int(row.get("won") or 0),
@@ -2327,6 +2418,7 @@ def _build_world_cup_edition_payload(season_label: str) -> tuple[dict[str, Any],
 
     return (
         {
+            "competition": _serialize_world_cup_competition(),
             "edition": edition_summary,
             "navigation": {
                 "previousEdition": _serialize_navigation_edition(previous_edition),
@@ -2418,6 +2510,7 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
         profile_ref = _resolve_wc_player_profile_ref(top_scorer_profile_refs, player_id)
         top_scorer_index[(row["season_label"], int(row["team_id"]))] = {
             "playerId": _serialize_wc_player_id(player_id, top_scorer_profile_refs),
+            "identity": _serialize_wc_player_identity(player_id, top_scorer_profile_refs),
             "imageAssetId": str(player_id) if player_id is not None else None,
             "playerName": _sanitize_display_name(row.get("player_name")),
             "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
@@ -2453,6 +2546,7 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
             {
                 "teamId": display_team_id,
                 "teamName": display_team_name,
+                "identity": serialized_team.get("identity") if serialized_team else None,
                 "participations": [],
                 "sourceTeamIds": set(),
             },
@@ -2494,6 +2588,7 @@ def _build_world_cup_team_catalog() -> tuple[list[dict[str, Any]], dict[str, dic
         team_payload = {
             "teamId": team_entry["teamId"],
             "teamName": team_entry["teamName"],
+            "identity": team_entry.get("identity"),
             "participationsCount": len(participations),
             "titlesCount": titles_count,
             "bestResultLabel": best_participation["resultLabel"],
@@ -2526,10 +2621,12 @@ def _build_world_cup_team_list_payload() -> tuple[dict[str, Any], dict[str, Any]
     teams_payload, _ = _build_world_cup_team_catalog()
     return (
         {
+            "competition": _serialize_world_cup_competition(),
             "teams": [
                 {
                     "teamId": team["teamId"],
                     "teamName": team["teamName"],
+                    "identity": team.get("identity"),
                     "participationsCount": team["participationsCount"],
                     "titlesCount": team["titlesCount"],
                     "bestResultLabel": team["bestResultLabel"],
@@ -2563,9 +2660,11 @@ def _build_world_cup_team_detail_payload(team_id: str) -> tuple[dict[str, Any], 
 
     return (
         {
+            "competition": _serialize_world_cup_competition(),
             "team": {
                 "teamId": team_payload["teamId"],
                 "teamName": team_payload["teamName"],
+                "identity": team_payload.get("identity"),
                 "participationsCount": team_payload["participationsCount"],
                 "titlesCount": team_payload["titlesCount"],
                 "bestResultLabel": team_payload["bestResultLabel"],
@@ -2615,6 +2714,7 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
                 "year": int(season_label),
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
+                "teamIdentity": team.get("identity") if team else None,
                 "goals": int(row.get("goals") or 0),
             }
         )
@@ -2636,11 +2736,13 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
             {
                 "rank": current_scorer_rank,
                 "playerId": _serialize_wc_player_id(player_id, scorer_profile_refs),
+                "identity": _serialize_wc_player_identity(player_id, scorer_profile_refs),
                 "imageAssetId": str(player_id) if player_id is not None else None,
                 "playerName": _sanitize_display_name(scorer_row.get("player_name")),
                 "profileUrl": profile_ref["profileUrl"] if profile_ref is not None else None,
                 "teamId": team.get("teamId") if team else None,
                 "teamName": team.get("teamName") if team else None,
+                "teamIdentity": team.get("identity") if team else None,
                 "goals": goals,
                 "editions": sorted(
                     scorer_editions_index.get(scorer_key or "", []),
@@ -2713,6 +2815,7 @@ def _build_world_cup_rankings_payload() -> tuple[dict[str, Any], dict[str, Any]]
 
     return (
         {
+            "competition": _serialize_world_cup_competition(),
             "scorers": scorers_payload,
             "teams": team_rankings_payload,
             "teamRankings": {

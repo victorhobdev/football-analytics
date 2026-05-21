@@ -278,7 +278,7 @@ function FieldHeader({
       <span
         className={joinClasses(
           "font-bold uppercase text-[#69778d]",
-          compact ? "text-[0.62rem] tracking-[0.16em]" : "text-[0.68rem] tracking-[0.2em]",
+          compact ? "text-[0.68rem] tracking-[0.14em]" : "text-[0.74rem] tracking-[0.16em]",
         )}
       >
         {label}

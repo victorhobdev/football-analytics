@@ -11,11 +11,13 @@
   --app-text-muted: #57657a;
   --app-primary: #003526;
   --app-primary-strong: #004e39;
+  --app-focus-ring: #00513b;
+  --app-focus-ring-shadow: rgba(0, 81, 59, 0.2);
   --button-pill-standard-min-height: 2.35rem;
   --button-pill-standard-padding-block: 0.5rem;
   --button-pill-standard-padding-inline: 1rem;
-  --button-pill-standard-font-size: 0.72rem;
-  --button-pill-standard-letter-spacing: 0.16em;
+  --button-pill-standard-font-size: 0.8125rem;
+  --button-pill-standard-letter-spacing: 0.12em;
   --wc-surface: #fff9ec;
   --wc-surface-soft: #f6edd6;
   --wc-surface-card: #fffdf7;
@@ -67,7 +69,6 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  overflow-x: hidden;
 }
 
 :where(a) {
@@ -91,6 +92,43 @@ svg {
 ::selection {
   background: rgba(139, 214, 182, 0.36);
   color: var(--app-text);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 9999px;
+  background: var(--app-primary);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 18px 42px -24px rgba(0, 53, 38, 0.78);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+body :is(a, button, input, select, textarea, summary, [role="button"], [role="link"], [role="option"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 3px;
+}
+
+body :is(input, select, textarea):focus-visible {
+  box-shadow: 0 0 0 4px var(--app-focus-ring-shadow);
+}
+
+body :is(.button-pill, [class*="rounded-full"], [class*="rounded-["]):focus-visible {
+  box-shadow: 0 0 0 4px var(--app-focus-ring-shadow);
+}
+
+#main-content:focus {
+  outline: none;
 }
 
 /* Standard platform size for pill-style buttons and links. */

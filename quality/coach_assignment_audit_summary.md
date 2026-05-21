@@ -24,9 +24,9 @@
 
 - `serie_a_it` 2022 | Hellas Verona | sem técnico: 39 | conflitos: 0 | risco assistant: 0
 - `serie_a_it` 2022 | Spezia | sem técnico: 39 | conflitos: 0 | risco assistant: 0
-- `brasileirao_a` 2023 | América Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
-- `brasileirao_a` 2022 | América Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
 - `brasileirao_a` 2021 | América Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
+- `brasileirao_a` 2022 | América Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
+- `brasileirao_a` 2023 | América Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
 - `brasileirao_a` 2021 | Atlético GO | sem técnico: 38 | conflitos: 0 | risco assistant: 0
 - `brasileirao_a` 2021 | Atlético Mineiro | sem técnico: 38 | conflitos: 0 | risco assistant: 0
 - `brasileirao_a` 2022 | Avaí | sem técnico: 38 | conflitos: 0 | risco assistant: 0
@@ -51,13 +51,13 @@
 - `serie_a_it` 2022 | times impactados: `20/20` | sem técnico: `762` | conflitos: `0`
 - `brasileirao_b` 2021 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 - `ligue_1` 2022 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
-- `ligue_1` 2020 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 - `ligue_1` 2021 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
+- `ligue_1` 2020 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 - `premier_league` 2024 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
-- `premier_league` 2022 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 - `premier_league` 2023 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
-- `premier_league` 2020 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
+- `premier_league` 2022 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 - `premier_league` 2021 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
+- `premier_league` 2020 | times impactados: `20/20` | sem técnico: `760` | conflitos: `0`
 
 ## Flamengo 2020-2025
 

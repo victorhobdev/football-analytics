@@ -5,7 +5,6 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Query, Request
 
-from ..core.contracts import build_api_response, build_coverage_from_counts, build_pagination
 from ..core.errors import AppError
 from ..core.filters import VenueFilter, validate_and_build_global_filters
 
@@ -21,7 +20,7 @@ def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
 
 
-@router.get("")
+@router.get("", deprecated=True)
 def get_insights(
     request: Request,
     entityType: EntityType = "global",
@@ -61,20 +60,19 @@ def get_insights(
             details={"entityType": entityType},
         )
 
-    _ = severity, sortBy, sortDirection
-
-    insights: list[dict[str, Any]] = []
-    total_count = 0
-    pagination = build_pagination(page, pageSize, total_count)
-    coverage = build_coverage_from_counts(
-        available_count=0,
-        total_count=1,
-        label="Insights not available for selected context yet.",
-    )
-
-    return build_api_response(
-        insights,
-        request_id=_request_id(request),
-        pagination=pagination,
-        coverage=coverage,
+    raise AppError(
+        message="Insights endpoint is not implemented yet.",
+        code="FEATURE_NOT_IMPLEMENTED",
+        status=501,
+        details={
+            "entityType": entityType,
+            "entityId": entityId,
+            "unsupportedParameters": {
+                "severity": severity,
+                "sortBy": sortBy,
+                "sortDirection": sortDirection,
+                "page": page,
+                "pageSize": pageSize,
+            },
+        },
     )

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { useHomePage } from "@/features/home/hooks/useHomePage";
@@ -23,6 +23,8 @@ import {
 type PlatformShellProps = {
   children: ReactNode;
 };
+
+const SIDEBAR_PANEL_ID = "platform-mobile-sidebar";
 
 type ShellIconName =
   | "analytics"
@@ -274,6 +276,23 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute;
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const sidebarPanelRef = useRef<HTMLElement | null>(null);
+  const sidebarCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const shouldRestoreSidebarFocusRef = useRef(false);
+  const shouldTreatSidebarAsDialog = isMobileSidebarMode && isSidebarOpen;
+  const shouldHideMobileSidebar = isMobileSidebarMode && !isSidebarOpen;
+
+  const openSidebar = useCallback(() => {
+    shouldRestoreSidebarFocusRef.current = true;
+    setIsSidebarOpen(true);
+  }, []);
+
+  const closeSidebar = useCallback((options?: { restoreFocus?: boolean }) => {
+    shouldRestoreSidebarFocusRef.current = options?.restoreFocus ?? true;
+    setIsSidebarOpen(false);
+  }, []);
 
   const sharedFilters = {
     competitionId,
@@ -328,9 +347,31 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const sidebarNavLinks = [...platformNavLinks, ...secondaryPublicLinks] as const;
 
   useEffect(() => {
+    shouldRestoreSidebarFocusRef.current = false;
     setIsSearchOpen(false);
     setIsSidebarOpen(false);
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    const syncSidebarMode = () => {
+      setIsMobileSidebarMode(mediaQuery.matches);
+    };
+
+    syncSidebarMode();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncSidebarMode);
+      return () => {
+        mediaQuery.removeEventListener("change", syncSidebarMode);
+      };
+    }
+
+    mediaQuery.addListener(syncSidebarMode);
+    return () => {
+      mediaQuery.removeListener(syncSidebarMode);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -342,7 +383,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
       if (event.key === "Escape") {
         setIsSearchOpen(false);
-        setIsSidebarOpen(false);
+        closeSidebar();
       }
     };
 
@@ -350,7 +391,99 @@ export function PlatformShell({ children }: PlatformShellProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [closeSidebar]);
+
+  useEffect(() => {
+    if (!shouldTreatSidebarAsDialog || !shouldRestoreSidebarFocusRef.current) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      sidebarCloseButtonRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [shouldTreatSidebarAsDialog]);
+
+  useEffect(() => {
+    if (isSidebarOpen || !shouldRestoreSidebarFocusRef.current) {
+      return;
+    }
+
+    shouldRestoreSidebarFocusRef.current = false;
+    menuButtonRef.current?.focus();
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    if (!shouldTreatSidebarAsDialog) {
+      return;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const getFocusableElements = () => {
+      const panel = sidebarPanelRef.current;
+
+      if (!panel) {
+        return [];
+      }
+
+      return Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => {
+        const style = window.getComputedStyle(element);
+        return !element.hasAttribute("disabled") && style.display !== "none" && style.visibility !== "hidden";
+      });
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSidebar();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = getFocusableElements();
+      const panel = sidebarPanelRef.current;
+
+      if (!panel || focusableElements.length === 0) {
+        event.preventDefault();
+        panel?.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === firstElement || !panel.contains(activeElement))) {
+        event.preventDefault();
+        lastElement.focus();
+        return;
+      }
+
+      if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeSidebar, shouldTreatSidebarAsDialog]);
 
   useEffect(() => {
     const handlePlatformSearchOpen = () => {
@@ -366,27 +499,36 @@ export function PlatformShell({ children }: PlatformShellProps) {
   return (
     <div className="min-h-screen bg-[var(--app-surface)] text-[var(--app-text)]">
       <div
+        aria-hidden="true"
         className={joinClasses(
           "fixed inset-0 z-40 bg-[rgba(7,16,12,0.52)] backdrop-blur-sm transition-opacity lg:hidden",
           isSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => {
-          setIsSidebarOpen(false);
+          closeSidebar();
         }}
       />
 
       <aside
+        aria-hidden={shouldHideMobileSidebar ? true : undefined}
+        aria-label={shouldTreatSidebarAsDialog ? "Navegação principal" : undefined}
+        aria-modal={shouldTreatSidebarAsDialog ? true : undefined}
         className={joinClasses(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/8 bg-[#081612] text-white transition-transform duration-300 lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
+        id={SIDEBAR_PANEL_ID}
+        inert={shouldHideMobileSidebar ? true : undefined}
+        ref={sidebarPanelRef}
+        role={shouldTreatSidebarAsDialog ? "dialog" : undefined}
+        tabIndex={shouldTreatSidebarAsDialog ? -1 : undefined}
       >
         <div className="flex items-start justify-between px-6 pb-6 pt-5 lg:min-h-24 lg:items-end lg:px-8 lg:pb-5 lg:pt-7">
           <Link
             className="min-w-0"
             href="/"
             onClick={() => {
-              setIsSidebarOpen(false);
+              closeSidebar({ restoreFocus: false });
             }}
           >
             <span className="block font-[family:var(--font-app-headline)] text-xl font-extrabold tracking-[-0.04em] text-emerald-50 lg:text-[1.9rem]">
@@ -398,10 +540,12 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </Link>
 
           <button
+            aria-label="Fechar navegação"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-slate-200 transition-colors hover:border-emerald-300/40 hover:text-white lg:hidden"
             onClick={() => {
-              setIsSidebarOpen(false);
+              closeSidebar();
             }}
+            ref={sidebarCloseButtonRef}
             type="button"
           >
             <ShellIcon icon="close" />
@@ -416,7 +560,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
               return (
                 <Link
                   className={joinClasses(
-                    "flex items-center gap-3 px-4 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
+                    "flex items-center gap-3 px-4 py-3.5 text-[0.8rem] font-semibold uppercase tracking-[0.16em] transition-colors",
                     isActive
                       ? item.href === "/copa-do-mundo"
                         ? "border-r-4 border-[var(--wc-accent)] bg-[rgba(138,109,24,0.18)] text-[var(--wc-accent-soft)]"
@@ -428,13 +572,14 @@ export function PlatformShell({ children }: PlatformShellProps) {
                   href={item.href}
                   key={item.href}
                   onClick={() => {
-                    setIsSidebarOpen(false);
+                    closeSidebar({ restoreFocus: false });
                   }}
+                  aria-current={isActive ? "page" : undefined}
                 >
                   <ShellIcon icon={item.icon} />
                   <span>{item.label}</span>
                   {item.href === "/copa-do-mundo" ? (
-                    <span className="world-cup-nav-badge ml-auto rounded-full px-2 py-0.5 text-[0.56rem] font-bold uppercase tracking-[0.16em]">
+                    <span className="world-cup-nav-badge ml-auto rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.14em]">
                       Copa
                     </span>
                   ) : null}
@@ -481,10 +626,10 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </div>
 
           <Link
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] px-4 py-3 text-[0.68rem] font-bold uppercase tracking-[0.26em] text-white transition-transform hover:-translate-y-0.5"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] px-4 py-3 text-[0.78rem] font-bold uppercase tracking-[0.16em] text-white transition-transform hover:-translate-y-0.5"
             href="/competitions"
             onClick={() => {
-              setIsSidebarOpen(false);
+              closeSidebar({ restoreFocus: false });
             }}
           >
             Abrir catálogo
@@ -493,10 +638,10 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
         <div className="border-t border-white/10 p-3">
           <button
-            className="flex w-full items-center gap-3 px-4 py-2 text-xs text-slate-400 transition-colors hover:text-emerald-100"
+            className="flex w-full items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
             onClick={() => {
               setIsSearchOpen(true);
-              setIsSidebarOpen(false);
+              closeSidebar({ restoreFocus: false });
             }}
             type="button"
           >
@@ -504,10 +649,10 @@ export function PlatformShell({ children }: PlatformShellProps) {
             <span>Busca global</span>
           </button>
           <Link
-            className="flex items-center gap-3 px-4 py-2 text-xs text-slate-400 transition-colors hover:text-emerald-100"
+            className="flex items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
             href={buildRankingsHubPath(sharedFilters)}
             onClick={() => {
-              setIsSidebarOpen(false);
+              closeSidebar({ restoreFocus: false });
             }}
           >
             <ShellIcon icon="analytics" />
@@ -520,17 +665,22 @@ export function PlatformShell({ children }: PlatformShellProps) {
         <header className="fixed left-0 right-0 top-0 z-30 h-16 border-b border-[rgba(225,230,240,0.92)] bg-white/95 shadow-[0_16px_36px_-32px_rgba(15,23,42,0.45)] backdrop-blur-xl lg:left-64 lg:h-24">
           <div className="flex h-full items-center gap-4 px-4 md:px-8 lg:gap-8 lg:px-10 xl:gap-12 xl:px-12">
             <button
+              aria-controls={SIDEBAR_PANEL_ID}
+              aria-expanded={isSidebarOpen}
+              aria-label="Abrir navegação"
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 text-[#1f2d40] transition-colors hover:border-[#8bd6b6] hover:text-[#003526] lg:hidden"
               onClick={() => {
-                setIsSidebarOpen(true);
+                openSidebar();
               }}
+              ref={menuButtonRef}
               type="button"
             >
               <ShellIcon icon="menu" />
             </button>
 
             <button
-              aria-label="02 Busca global Buscar competições, partidas, times ou jogadores"
+              aria-label="Busca global: buscar competições, partidas, times ou jogadores"
+              aria-controls="global-search-dialog"
               aria-expanded={isSearchOpen}
               aria-haspopup="dialog"
               className="group inline-flex min-w-0 flex-1 items-center justify-between gap-4 rounded-[1rem] bg-[#eef3ff] px-4 py-2.5 text-left transition-colors hover:bg-[#e3ebff] md:max-w-[520px] lg:flex-none lg:min-w-[29rem] lg:max-w-[32rem] lg:rounded-[1.15rem] lg:px-5 lg:py-4"
@@ -540,8 +690,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
               type="button"
             >
               <span className="flex min-w-0 items-center gap-3.5">
-                <ShellIcon className="h-5 w-5 shrink-0 text-[#9aa9c4]" icon="search" />
-                <span className="block truncate text-sm font-medium text-[#7d889e] lg:text-[1.02rem]">
+                <ShellIcon className="h-5 w-5 shrink-0 text-[#57657a]" icon="search" />
+                <span className="block truncate text-sm font-medium text-[#344256] lg:text-[1.02rem]">
                   Buscar competições, times, partidas ou jogadores...
                 </span>
               </span>
@@ -564,6 +714,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
                     )}
                     href={item.href}
                     key={item.href}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     <span>{item.label}</span>
                     {"badge" in item && item.badge ? (
@@ -623,6 +774,8 @@ export function PlatformShell({ children }: PlatformShellProps) {
                     ? "min-h-[calc(100vh-4rem)]"
                     : joinClasses("mx-auto w-full", surfaceContentWidthClassName),
                 )}
+                id="main-content"
+                tabIndex={-1}
               >
                 {children}
               </main>

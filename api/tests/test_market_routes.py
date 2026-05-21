@@ -7,6 +7,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from api.src.main import app
+from api.src.routers.market import PRODUCT_DATA_CUTOFF
 
 
 class MarketTransfersApiTests(unittest.TestCase):
@@ -41,6 +42,7 @@ class MarketTransfersApiTests(unittest.TestCase):
         payload = response.json()
         self.assertEqual(payload["data"]["items"][0]["typeId"], 219)
         self.assertEqual(payload["data"]["items"][0]["typeName"], "Transferência definitiva")
+        self.assertEqual(payload["data"]["items"][0]["movementKind"], "permanent_transfer")
         self.assertEqual(payload["meta"]["pagination"]["page"], 2)
         self.assertEqual(payload["meta"]["pagination"]["pageSize"], 1)
         self.assertEqual(payload["meta"]["pagination"]["totalCount"], 3)
@@ -49,7 +51,11 @@ class MarketTransfersApiTests(unittest.TestCase):
 
         query, params = fetch_all_mock.call_args.args
         self.assertIn("spt.type_id = %s", query)
+        self.assertIn("spt.transfer_date <= %s", query)
+        self.assertNotIn("Unknown Player #", query)
+        self.assertNotIn("Team #", query)
         self.assertEqual(params.count(219), 2)
+        self.assertIn(PRODUCT_DATA_CUTOFF, params)
 
     @patch("api.src.routers.market.db_client.fetch_all")
     def test_market_transfers_returns_unknown_type_fallback(self, fetch_all_mock) -> None:
@@ -76,6 +82,37 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload["data"]["items"][0]["typeName"], "Tipo desconhecido")
+        self.assertEqual(payload["data"]["items"][0]["movementKind"], "unknown")
+
+    @patch("api.src.routers.market.db_client.fetch_all")
+    def test_market_transfers_neutralizes_public_technical_fallbacks(self, fetch_all_mock) -> None:
+        fetch_all_mock.return_value = [
+            {
+                "transfer_id": 7,
+                "player_id": 70,
+                "player_name": "Unknown Player #70",
+                "from_team_id": 700,
+                "from_team_name": "Team #700",
+                "to_team_id": 800,
+                "to_team_name": "Unknown Team #800",
+                "transfer_date": date(2025, 1, 10),
+                "completed": True,
+                "career_ended": False,
+                "type_id": 9688,
+                "amount": None,
+                "amount_value": None,
+                "_total_count": 1,
+            }
+        ]
+
+        response = self.client.get("/api/v1/market/transfers")
+
+        self.assertEqual(response.status_code, 200)
+        item = response.json()["data"]["items"][0]
+        self.assertEqual(item["playerName"], "Nome indisponível")
+        self.assertEqual(item["fromTeamName"], "Origem indisponível")
+        self.assertEqual(item["toTeamName"], "Destino indisponível")
+        self.assertEqual(item["movementKind"], "loan_return")
 
     @patch("api.src.routers.market.db_client.fetch_all")
     def test_market_transfers_sorts_and_filters_by_amount(self, fetch_all_mock) -> None:
@@ -106,6 +143,7 @@ class MarketTransfersApiTests(unittest.TestCase):
         payload = response.json()
         self.assertEqual(payload["data"]["items"][0]["amountValue"], 25000000)
         self.assertIsNone(payload["data"]["items"][0]["currency"])
+        self.assertEqual(payload["data"]["items"][0]["movementKind"], "permanent_transfer")
 
         query, params = fetch_all_mock.call_args.args
         self.assertIn("order by amount_value desc", query)

@@ -1705,7 +1705,7 @@ def get_competition_structure(
     )
 
 
-@router.get("/api/v1/group-standings")
+@router.get("/api/v1/group-standings", deprecated=True)
 def get_group_standings(
     request: Request,
     competitionKey: str | None = None,
@@ -2064,7 +2064,7 @@ def get_team_journey_history(
     )
 
 
-@router.get("/api/v1/team-progression")
+@router.get("/api/v1/team-progression", deprecated=True)
 def get_team_progression(
     request: Request,
     competitionKey: str | None = None,

@@ -1154,7 +1154,7 @@ export default function PlayersPage() {
         ) : (
           <div className="overflow-hidden rounded-[1.4rem] border border-[rgba(191,201,195,0.52)] bg-white/92">
             <div className="overflow-x-auto">
-              <table className="w-full table-fixed border-collapse text-left text-sm text-[#1f2d40]">
+              <table className="w-full min-w-[920px] table-fixed border-collapse text-left text-sm text-[#1f2d40]">
                 <thead className="bg-[rgba(240,243,255,0.82)] text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
                   <tr>
                     <th className="w-14 px-2 py-3 text-center font-semibold">#</th>
@@ -1296,7 +1296,7 @@ export default function PlayersPage() {
                         <td className="px-2 py-3 text-center">
                           <button
                             aria-pressed={isSelected}
-                            className={`rounded-full px-2.5 py-1.5 text-[0.7rem] font-semibold transition-colors ${
+                            className={`rounded-full px-2.5 py-1.5 text-[0.78rem] font-semibold transition-colors ${
                               isSelected
                                 ? "bg-[#003526] text-white"
                                 : "border border-[rgba(112,121,116,0.28)] bg-white/90 text-[#1f2d40]"

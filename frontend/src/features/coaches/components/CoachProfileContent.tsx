@@ -283,7 +283,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             <ProfileKpi
               hint="Pontos/jogo ponderado por amostra"
               invert
-              label="Índice"
+              label="Pontos/Jogo"
               value={formatPointsPerMatch(summary.adjustedPpm)}
             />
             <ProfileKpi hint="Marcados pelos times treinados" invert label="Gols pró" value={formatInteger(summary.goalsFor)} />
@@ -296,10 +296,10 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
           <ProfilePanel className="space-y-4">
             <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
               Leitura atual
-            </p>
-            <dl className="space-y-3 text-sm text-[#1f2d40]">
+              </p>
+              <dl className="space-y-3 text-sm text-[#1f2d40]">
               <div className="rounded-[1rem] bg-[#f4f8f6] px-3 py-3">
-                <dt className="text-[#57657a]">Índice de campanha</dt>
+                <dt className="text-[#57657a]">Pontos/Jogo</dt>
                 <dd className="mt-1 font-medium">{formatPointsPerMatch(summary.adjustedPpm)}</dd>
                 <p className="mt-1 text-xs/5 text-[#69778d]">
                   Pontos por jogo ponderado pelo tamanho da amostra do recorte.
@@ -320,7 +320,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                 <dd className="text-right font-medium">{formatInteger(summary.points)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-[#57657a]">Pontos/jogo</dt>
+                <dt className="text-[#57657a]">Pontos/Jogo bruto</dt>
                 <dd className="text-right font-medium">{formatPointsPerMatch(summary.pointsPerMatch)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
@@ -457,7 +457,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                       <p className="text-xl font-extrabold text-[#111c2d]">{formatInteger(tenure.matches)}</p>
                     </ProfilePanel>
                     <ProfilePanel className="space-y-1" tone="soft">
-                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Pontos/jogo</p>
+                      <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">Pontos/Jogo</p>
                       <p className="text-xl font-extrabold text-[#111c2d]">
                         {formatPointsPerMatch(tenure.pointsPerMatch)}
                       </p>
