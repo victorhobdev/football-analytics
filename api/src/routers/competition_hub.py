@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 import re
 from typing import Any
 
@@ -1646,7 +1646,7 @@ def get_competition_historical_stats(
             data["scorers"]["source"] = "player_season_summary"
             data["scorers"]["asOfYear"] = normalized_as_of_year
 
-    data["updatedAt"] = datetime.now(UTC).isoformat()
+    data["updatedAt"] = datetime.now(timezone.utc).isoformat()
 
     return build_api_response(
         data,
@@ -1691,7 +1691,7 @@ def get_competition_structure(
             }
             for stage in stages
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(
@@ -1820,7 +1820,7 @@ def get_group_standings(
             }
             for row in rows
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(
@@ -1901,7 +1901,7 @@ def get_stage_ties(
             }
             for row in ties
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(
@@ -1998,7 +1998,7 @@ def get_competition_analytics(
             }
             for row in comparison_rows
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(
@@ -2054,7 +2054,7 @@ def get_team_journey_history(
             "teamName": team_name_row.get("team_name") if team_name_row else str(normalized_team_id),
         },
         "seasons": _build_team_journey_history_payload(journey_rows),
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(
@@ -2133,7 +2133,7 @@ def get_team_progression(
             }
             for row in progression_rows
         ],
-        "updatedAt": datetime.now(UTC).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
     }
 
     return build_api_response(

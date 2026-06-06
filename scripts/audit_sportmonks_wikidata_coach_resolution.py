@@ -7,7 +7,7 @@ import re
 import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +21,7 @@ JSON_PATH = QUALITY_DIR / "sportmonks_wikidata_coach_resolution_summary.json"
 
 
 def utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def resolve_db_dsn() -> str:

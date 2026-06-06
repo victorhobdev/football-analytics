@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -36,7 +36,7 @@ def error_payload(
         "error": error,
         "meta": {
             "requestId": request_id,
-            "generatedAt": datetime.now(UTC).isoformat(),
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
         },
         "message": message,
         "code": code,

@@ -7,7 +7,7 @@ import os
 import sys
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -43,7 +43,7 @@ class CoachRow:
 
 
 def utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def safe_text(value: str) -> str:
