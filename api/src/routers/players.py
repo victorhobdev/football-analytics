@@ -429,7 +429,9 @@ def get_players(
     search_pattern = f"%{normalized_search}%" if normalized_search else None
     position_pattern = f"%{position.strip()}%" if position and position.strip() else None
 
-    if _can_use_player_serving_summary(global_filters):
+    rows: list[dict[str, Any]]
+    use_serving_summary = _can_use_player_serving_summary(global_filters)
+    if use_serving_summary:
         rows = _fetch_players_from_serving_summary(
             search_pattern=search_pattern,
             team_id=team_id_int,
@@ -440,7 +442,7 @@ def get_players(
             sort_by=sortBy,
             sort_direction=sortDirection,
         )
-    else:
+    if not use_serving_summary or not rows:
         query = f"""
         with scoped as (
             select

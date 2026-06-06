@@ -653,7 +653,7 @@ def _fetch_player_ranking_rows(
     sort_direction: str,
 ) -> tuple[list[dict[str, Any]], int, str | None]:
     if _can_use_player_serving_summary(filters):
-        return _fetch_player_ranking_rows_from_serving_summary(
+        rows, total_count, updated_at = _fetch_player_ranking_rows_from_serving_summary(
             ranking_config=ranking_config,
             search=search,
             min_sample_value=min_sample_value,
@@ -661,6 +661,8 @@ def _fetch_player_ranking_rows(
             page_size=page_size,
             sort_direction=sort_direction,
         )
+        if rows:
+            return rows, total_count, updated_at
 
     where_sql, where_params = _player_scope_filters_sql(filters)
     value_column = ranking_config["valueColumn"]

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import {
   SUPPORTED_COMPETITIONS,
   getCompetitionById,
+  getCompetitionByKey,
   getCompetitionVisualAssetId,
   type CompetitionDef,
 } from "@/config/competitions.registry";
@@ -139,7 +140,9 @@ function buildCompetitionGroups(competitions: HomeCompetitionCard[]) {
   const world: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
 
   for (const competition of orderedCompetitions) {
-    const meta = getCompetitionById(competition.competitionId);
+    const meta =
+      getCompetitionById(competition.competitionId) ??
+      getCompetitionByKey(competition.competitionKey);
     if (!meta) {
       continue;
     }
