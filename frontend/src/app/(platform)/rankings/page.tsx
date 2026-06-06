@@ -45,11 +45,14 @@ function readSearchParam(
 ): string | null {
   const rawValue = searchParams[key];
 
-  if (Array.isArray(rawValue)) {
-    return rawValue[0] ?? null;
+  const value = Array.isArray(rawValue) ? (rawValue[0] ?? null) : (rawValue ?? null);
+
+  if (!value) {
+    return null;
   }
 
-  return rawValue ?? null;
+  const normalizedValue = value.trim();
+  return normalizedValue.toLowerCase() === "all" ? null : normalizedValue;
 }
 
 function parseLastNValue(value: string | null): number | null {
