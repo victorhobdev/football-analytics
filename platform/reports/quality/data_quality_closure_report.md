@@ -8,8 +8,8 @@ Este fechamento cobre as recomendacoes executaveis sem reprocessamento amplo, se
 
 ## Blocos concluidos
 
-- Contrato editorial minimo criado em `quality/editorial-data-quality-contract.md`.
-- Inventario SQL criado e executado em `quality/data_quality_inventory.sql`.
+- Contrato editorial minimo criado em `platform/reports/quality/editorial-data-quality-contract.md`.
+- Inventario SQL criado e executado em `platform/reports/quality/data_quality_inventory.sql`.
 - Rotas publicas de mercado neutralizam sentinels tecnicos e nao inventam moeda.
 - `type_id = 9688` e tratado como `loan_return` no BFF e em `mart.stg_player_transfers.movement_kind`.
 - Rota publica de mercado filtra eventos depois de `PRODUCT_DATA_CUTOFF`.

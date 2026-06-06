@@ -10,7 +10,7 @@ Para transferencias, o grao correto e `transfer_event`. A API cobre bem evento c
 
 ## Estado atual confirmado
 
-Auditoria local em `quality/coach_assignment_audit_summary.md`:
+Auditoria local em `platform/reports/quality/coach_assignment_audit_summary.md`:
 
 - `34.322` match-team publicos auditados;
 - `7.494` com tecnico atribuivel hoje;
@@ -231,7 +231,7 @@ Transferencias:
 
 1. Criar script de probe SportMonks para Flamengo e Everton Ribeiro.
 2. Criar DDL raw/staging SportMonks com chaves idempotentes.
-3. Rodar probe e gerar `quality/sportmonks_probe_report.md`.
+3. Rodar probe e gerar `platform/reports/quality/sportmonks_probe_report.md`.
 4. Implementar backfill piloto de `fact_coach_match_assignment` para Flamengo 2021-2022.
 5. Trocar a rota de tecnicos para consumir assignments publicos apenas no recorte piloto.
 6. Corrigir a moeda em transferencias para nao inferir `EUR` sem fonte.

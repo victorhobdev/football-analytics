@@ -94,10 +94,10 @@ Esta amostra nao altera criterio por clube; serve apenas para conferir nomes con
 
 ## Arquivos gerados
 
-- Resumo JSON: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_coupling_summary.json`
-- Candidatos promoviveis: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_coupling_promotable_candidates.csv`
-- Conflitos: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_coupling_conflicts.csv`
-- Cobertura por recorte: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\quality\external_coach_coupling_coverage.csv`
+- Resumo JSON: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_coupling_summary.json`
+- Candidatos promoviveis: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_coupling_promotable_candidates.csv`
+- Conflitos: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_coupling_conflicts.csv`
+- Cobertura por recorte: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\platform\reports\quality\external_coach_coupling_coverage.csv`
 
 ## Leitura operacional
 

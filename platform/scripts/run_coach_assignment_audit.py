@@ -3,18 +3,20 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api.src.db.client import db_client
 
-SQL_PATH = ROOT / "quality" / "coach_assignment_audit.sql"
-CSV_PATH = ROOT / "quality" / "coach_assignment_audit_sample.csv"
-JSON_PATH = ROOT / "quality" / "coach_assignment_audit_sample.json"
-SUMMARY_PATH = ROOT / "quality" / "coach_assignment_audit_summary.md"
+SQL_PATH = ROOT / "platform" / "reports" / "quality" / "coach_assignment_audit.sql"
+CSV_PATH = ROOT / "platform" / "reports" / "quality" / "coach_assignment_audit_sample.csv"
+JSON_PATH = ROOT / "platform" / "reports" / "quality" / "coach_assignment_audit_sample.json"
+SUMMARY_PATH = ROOT / "platform" / "reports" / "quality" / "coach_assignment_audit_summary.md"
 
 
 def _to_int(row: dict[str, object], key: str) -> int:

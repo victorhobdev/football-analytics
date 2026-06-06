@@ -12,12 +12,14 @@ from collections import Counter
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = resolve_repo_root()
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 

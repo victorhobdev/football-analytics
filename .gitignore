@@ -68,6 +68,9 @@ quality/gx/uncommitted/
 platform/quality/great_expectations/uncommitted/
 platform/quality/great_expectations/.ge_store_backend_id
 platform/quality/gx/uncommitted/
+platform/reports/quality/great_expectations/uncommitted/
+platform/reports/quality/great_expectations/.ge_store_backend_id
+platform/reports/quality/gx/uncommitted/
 
 # =========================
 # NODE / FRONTEND

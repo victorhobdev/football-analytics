@@ -9,13 +9,15 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 
 import psycopg2
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-QUALITY_DIR = ROOT_DIR / "quality"
+ROOT_DIR = resolve_repo_root()
+QUALITY_DIR = ROOT_DIR / "platform" / "reports" / "quality"
 CSV_PATH = QUALITY_DIR / "sportmonks_wikidata_coach_resolution_candidates.csv"
 JSON_PATH = QUALITY_DIR / "sportmonks_wikidata_coach_resolution_summary.json"
 

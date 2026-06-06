@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any, Iterable
 
 import psycopg
@@ -20,16 +22,16 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 DEFAULT_ENV_PATH = ROOT / ".env"
-SUMMARY_PATH = ROOT / "quality" / "external_coach_sources_summary.json"
+SUMMARY_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_sources_summary.json"
 MIGRATION_PATH = ROOT / "db" / "migrations" / "20260424150000_external_coach_coupling.sql"
 ALIAS_MIGRATION_PATH = ROOT / "db" / "migrations" / "20260425160000_coach_identity_alias_layer.sql"
-REPORT_PATH = ROOT / "quality" / "external_coach_coupling_report.md"
-SUMMARY_JSON_PATH = ROOT / "quality" / "external_coach_coupling_summary.json"
-PROMOTABLE_CSV_PATH = ROOT / "quality" / "external_coach_coupling_promotable_candidates.csv"
-CONFLICTS_CSV_PATH = ROOT / "quality" / "external_coach_coupling_conflicts.csv"
-COVERAGE_CSV_PATH = ROOT / "quality" / "external_coach_coupling_coverage.csv"
+REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_coupling_report.md"
+SUMMARY_JSON_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_coupling_summary.json"
+PROMOTABLE_CSV_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_coupling_promotable_candidates.csv"
+CONFLICTS_CSV_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_coupling_conflicts.csv"
+COVERAGE_CSV_PATH = ROOT / "platform" / "reports" / "quality" / "external_coach_coupling_coverage.csv"
 
 WINDOW_START = date(2020, 1, 1)
 PRODUCT_MAX_CUTOFF = date(2025, 12, 31)

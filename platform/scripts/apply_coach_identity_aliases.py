@@ -5,17 +5,19 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 
 import psycopg
 from psycopg.rows import dict_row
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 DEFAULT_ENV_PATH = ROOT / ".env"
 MIGRATION_PATH = ROOT / "db" / "migrations" / "20260425160000_coach_identity_alias_layer.sql"
-REPORT_PATH = ROOT / "quality" / "coach_identity_alias_application_report.md"
-SUMMARY_JSON_PATH = ROOT / "quality" / "coach_identity_alias_application_summary.json"
+REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "coach_identity_alias_application_report.md"
+SUMMARY_JSON_PATH = ROOT / "platform" / "reports" / "quality" / "coach_identity_alias_application_summary.json"
 WINDOW_START = "2020-01-01"
 WINDOW_END = "2025-12-31"
 

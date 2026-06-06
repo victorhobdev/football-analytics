@@ -10,12 +10,14 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, unquote
 from urllib.request import Request, urlopen
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -28,9 +30,9 @@ BASE_DIR = ROOT / "data" / "external_coach_sources" / RUN_ID
 RAW_DIR = BASE_DIR / "raw"
 NORMALIZED_DIR = BASE_DIR / "normalized"
 REPORT_DIR = BASE_DIR / "reports"
-QUALITY_REPORT = ROOT / "quality" / "external_coach_sources_ingestion_report.md"
-QUALITY_COVERAGE_CSV = ROOT / "quality" / "external_coach_sources_coverage.csv"
-QUALITY_SUMMARY_JSON = ROOT / "quality" / "external_coach_sources_summary.json"
+QUALITY_REPORT = ROOT / "platform" / "reports" / "quality" / "external_coach_sources_ingestion_report.md"
+QUALITY_COVERAGE_CSV = ROOT / "platform" / "reports" / "quality" / "external_coach_sources_coverage.csv"
+QUALITY_SUMMARY_JSON = ROOT / "platform" / "reports" / "quality" / "external_coach_sources_summary.json"
 
 
 @dataclass(frozen=True)

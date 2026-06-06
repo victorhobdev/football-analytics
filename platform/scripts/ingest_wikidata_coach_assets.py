@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 from urllib.parse import quote
 
@@ -18,7 +20,7 @@ import requests
 from PIL import Image, ImageOps
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = resolve_repo_root()
 VISUAL_ASSETS_ROOT = ROOT_DIR / "data" / "visual_assets"
 COACH_ASSETS_DIR = VISUAL_ASSETS_ROOT / "coaches"
 MANIFEST_PATH = VISUAL_ASSETS_ROOT / "manifests" / "coaches.json"

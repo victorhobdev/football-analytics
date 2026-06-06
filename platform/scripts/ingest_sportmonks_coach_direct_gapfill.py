@@ -6,15 +6,17 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
+
+from _repo_root import resolve_repo_root
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = resolve_repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api.src.core.config import get_settings
 from api.src.db.client import db_client
-from scripts.ingest_sportmonks_reliability_pilot import (
+from ingest_sportmonks_reliability_pilot import (
     PROVIDER,
     SportMonksClient,
     _coach_name,
@@ -24,8 +26,8 @@ from scripts.ingest_sportmonks_reliability_pilot import (
     _table_count,
 )
 
-REPORT_PATH = ROOT / "quality" / "sportmonks_coach_direct_gapfill_report.md"
-JSON_PATH = ROOT / "quality" / "sportmonks_coach_direct_gapfill_report.json"
+REPORT_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_coach_direct_gapfill_report.md"
+JSON_PATH = ROOT / "platform" / "reports" / "quality" / "sportmonks_coach_direct_gapfill_report.json"
 PROVIDER_YEARS = [2024, 2025]
 
 

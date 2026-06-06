@@ -128,7 +128,7 @@ function titleCaseFromSlug(raw: string): string {
 function assertTeamSlugArg(): string {
   const teamSlugArg = process.argv[2]?.trim();
   if (!teamSlugArg) {
-    console.error("Uso: node scripts/preview-team-honors.ts <team_slug>");
+    console.error("Uso: node platform/scripts/preview-team-honors.ts <team_slug>");
     process.exit(1);
   }
   return teamSlugArg;
