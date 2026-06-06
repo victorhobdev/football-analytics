@@ -656,6 +656,112 @@ where h.as_of_year <= 2025
     where s.competition_key = h.competition_key
   );
 
+create table if not exists mart.competition_serving_summary (
+  league_id bigint primary key,
+  league_name text,
+  matches_count integer not null default 0,
+  seasons_count integer not null default 0,
+  min_season integer,
+  max_season integer,
+  match_statistics_count integer not null default 0,
+  lineups_count integer not null default 0,
+  events_count integer not null default 0,
+  player_statistics_count integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+delete from mart.competition_serving_summary;
+
+insert into mart.competition_serving_summary (
+  league_id,
+  league_name,
+  matches_count,
+  seasons_count,
+  min_season,
+  max_season,
+  match_statistics_count,
+  lineups_count,
+  events_count,
+  player_statistics_count,
+  updated_at
+)
+with match_totals as (
+  select
+    fm.league_id,
+    count(distinct fm.match_id)::int as matches_count,
+    count(distinct fm.season)::int as seasons_count,
+    min(fm.season)::int as min_season,
+    max(fm.season)::int as max_season
+  from mart.fact_matches fm
+  group by fm.league_id
+),
+match_statistics as (
+  select
+    rf.league_id,
+    count(distinct ms.fixture_id)::int as available_count
+  from raw.match_statistics ms
+  inner join raw.fixtures rf
+    on rf.fixture_id = ms.fixture_id
+  group by rf.league_id
+),
+fixture_lineups as (
+  select
+    rf.league_id,
+    count(distinct fl.fixture_id)::int as available_count
+  from raw.fixture_lineups fl
+  inner join raw.fixtures rf
+    on rf.fixture_id = fl.fixture_id
+  group by rf.league_id
+),
+match_events as (
+  select
+    rf.league_id,
+    count(distinct me.fixture_id)::int as available_count
+  from raw.match_events me
+  inner join raw.fixtures rf
+    on rf.fixture_id = me.fixture_id
+  group by rf.league_id
+),
+fixture_player_statistics as (
+  select
+    rf.league_id,
+    count(distinct fps.fixture_id)::int as available_count
+  from raw.fixture_player_statistics fps
+  inner join raw.fixtures rf
+    on rf.fixture_id = fps.fixture_id
+  group by rf.league_id
+),
+competition_names as (
+  select distinct on (dc.league_id)
+    dc.league_id,
+    dc.league_name
+  from mart.dim_competition dc
+  order by dc.league_id, dc.updated_at desc nulls last
+)
+select
+  mt.league_id,
+  cn.league_name,
+  mt.matches_count,
+  mt.seasons_count,
+  mt.min_season,
+  mt.max_season,
+  coalesce(ms.available_count, 0) as match_statistics_count,
+  coalesce(fl.available_count, 0) as lineups_count,
+  coalesce(me.available_count, 0) as events_count,
+  coalesce(fps.available_count, 0) as player_statistics_count,
+  now() as updated_at
+from match_totals mt
+left join competition_names cn
+  on cn.league_id = mt.league_id
+left join match_statistics ms
+  on ms.league_id = mt.league_id
+left join fixture_lineups fl
+  on fl.league_id = mt.league_id
+left join match_events me
+  on me.league_id = mt.league_id
+left join fixture_player_statistics fps
+  on fps.league_id = mt.league_id;
+
 drop schema if exists source_control cascade;
 drop schema if exists source_mart_control cascade;
 drop schema if exists source_mart cascade;

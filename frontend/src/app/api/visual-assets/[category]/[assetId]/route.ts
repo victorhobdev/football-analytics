@@ -279,11 +279,6 @@ function buildOverlayRelativePath(category: string, assetId: string): string {
   return `data/visual_assets/wc_overlay/${category}/${assetId}.png`;
 }
 
-function isOverlayLocalPath(localPath: string): boolean {
-  const normalizedLocalPath = localPath.replaceAll("\\", "/");
-  return normalizedLocalPath.startsWith("data/visual_assets/wc_overlay/");
-}
-
 async function resolveOverlayEntry(category: string, assetId: string): Promise<ManifestEntry | null> {
   const localPath = buildOverlayRelativePath(category, assetId);
   const assetPath = resolveAssetPath(localPath);
@@ -333,9 +328,7 @@ export async function GET(
     return NextResponse.json({ message: "Asset não encontrado." }, { status: 404 });
   }
 
-  const publicAssetUrl = isOverlayLocalPath(entry.local_path)
-    ? null
-    : resolvePublicAssetUrl(entry.local_path);
+  const publicAssetUrl = resolvePublicAssetUrl(entry.local_path);
   if (publicAssetUrl) {
     return fetchPublicAsset(publicAssetUrl, entry.content_type);
   }
