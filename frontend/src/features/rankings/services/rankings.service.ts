@@ -60,6 +60,7 @@ export async function fetchRanking({ rankingDefinition, filters = {} }: RankingF
 
   return apiRequest<ApiResponse<RankingTableData>>(normalizeRankingEndpoint(rankingDefinition), {
     method: "GET",
+    cache: "no-store",
     params: toQueryParams(filters),
   });
 }

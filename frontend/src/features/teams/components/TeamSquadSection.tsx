@@ -74,8 +74,8 @@ export function TeamSquadSection({
         </div>
       </ProfilePanel>
 
-      <ProfileAlert title="Disponibilidade ainda não entrou no elenco público" tone="info">
-        Esta informação pertence ao elenco, mas os dados atuais ainda não expõem afastamentos com
+      <ProfileAlert title="Disponibilidade do elenco" tone="info">
+        Os dados disponíveis ainda não trazem afastamentos com
         consistência suficiente. Por enquanto, a leitura pública fica concentrada em participação,
         minutos e última aparição.
       </ProfileAlert>

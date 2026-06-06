@@ -22,7 +22,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         <PlatformStateSurface
           actionHref="/"
           actionLabel="Voltar ao início"
-          description="Encontramos um problema ao abrir a aplicação. Tente novamente ou retome por uma área estável."
+          description="Encontramos um problema ao abrir a aplicação. Tente novamente ou retome por uma área principal."
           detail="A falha aconteceu antes da renderização completa. Reabrir o início ou as competições costuma ser o caminho mais seguro."
           kicker="Aplicação"
           secondaryAction={

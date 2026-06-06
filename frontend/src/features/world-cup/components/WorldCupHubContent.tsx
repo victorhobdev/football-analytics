@@ -185,7 +185,7 @@ function QuickLinkCard({
       </div>
 
       <div className="mt-5 flex items-center justify-between border-t border-[rgba(191,201,195,0.38)] pt-4 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
-        <span>Abrir rota</span>
+        <span>Abrir</span>
         <span className="transition-transform group-hover:translate-x-1">-&gt;</span>
       </div>
     </Link>
@@ -344,7 +344,7 @@ export function WorldCupHubContent() {
   if (hubQuery.isLoading && !hubQuery.data) {
     return (
       <PlatformStateSurface
-        description="Estamos consolidando a linha do tempo das edições, métricas centrais e portas de entrada da vertical."
+        description="Estamos carregando edições, métricas principais e páginas da Copa do Mundo."
         kicker="Copa do Mundo"
         loading
         title="Carregando o hub da Copa do Mundo"
@@ -359,7 +359,7 @@ export function WorldCupHubContent() {
         actionLabel="Voltar ao início"
         description="Não foi possível carregar o hub dedicado da Copa do Mundo agora."
         kicker="Copa do Mundo"
-        title="Falha ao abrir a vertical"
+        title="Falha ao abrir Copa do Mundo"
         tone="critical"
       />
     );
@@ -370,7 +370,7 @@ export function WorldCupHubContent() {
       <PlatformStateSurface
         actionHref="/"
         actionLabel="Voltar ao início"
-        description="A vertical não recebeu dados suficientes para montar o hub neste momento."
+        description="Não há dados suficientes para exibir o hub da Copa do Mundo agora."
         kicker="Copa do Mundo"
         title="Hub indisponível"
         tone="warning"
@@ -410,7 +410,7 @@ export function WorldCupHubContent() {
               />
               <div className="space-y-2">
                 <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/70">
-                  Entrada dedicada
+                  Área dedicada
                 </p>
                 <p className="font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold leading-none tracking-[-0.05em] text-white">
                   {formatWholeNumber(summary.editionsCount)} edições
@@ -484,7 +484,7 @@ export function WorldCupHubContent() {
         <div className="grid gap-4 md:grid-cols-3">
           <QuickLinkCard
             badge="Seleções"
-            description="Abre a superfície dedicada para exploração do histórico por seleção."
+            description="Abra o histórico da Copa por seleção."
             href={buildWorldCupTeamsPath()}
             icon="teams"
             label="Explorar por seleção"
@@ -492,7 +492,7 @@ export function WorldCupHubContent() {
           />
           <QuickLinkCard
             badge="Rankings"
-            description="Entra na área de rankings multi-edição do arquivo da Copa."
+            description="Compare rankings históricos entre edições da Copa."
             href={buildWorldCupRankingsPath()}
             icon="rankings"
             label="Rankings históricos"
@@ -500,7 +500,7 @@ export function WorldCupHubContent() {
           />
           <QuickLinkCard
             badge="Finais"
-            description="Abre a rota das decisões históricas, sem antecipar o conteúdo do bloco de rankings."
+            description="Acesse as decisões históricas da Copa do Mundo."
             href={buildWorldCupFinalsPath()}
             icon="finals"
             label="Finais"

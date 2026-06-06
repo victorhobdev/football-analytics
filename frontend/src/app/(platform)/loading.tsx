@@ -3,7 +3,7 @@ import { PlatformStateSurface } from "@/shared/components/feedback/PlatformState
 export default function PlatformLoading() {
   return (
     <PlatformStateSurface
-      description="Estamos abrindo a próxima área e preservando o recorte atual da navegação."
+      description="Estamos abrindo a próxima página e preservando seus filtros."
       loading
       title="Preparando a próxima área"
     />

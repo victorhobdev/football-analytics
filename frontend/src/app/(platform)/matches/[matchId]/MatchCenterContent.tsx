@@ -392,7 +392,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
 
       {matchCenterQuery.isPartial ? (
         <ProfileAlert title="Algumas áreas ainda estão incompletas" tone="warning">
-          <p>Parte do detalhamento da partida ainda não chegou por completo.</p>
+          <p>Parte do detalhamento da partida ainda não está disponível.</p>
         </ProfileAlert>
       ) : null}
 
@@ -560,7 +560,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                     </div>
                   ) : (
                     <p className="text-sm leading-6 text-white/75">
-                      Nenhum destaque adicional disponível com os dados atuais.
+                      Nenhum destaque adicional disponível para esta partida.
                     </p>
                   )}
                 </div>

@@ -321,7 +321,7 @@ export function TeamAggregateProfileContent({
                   {aggregateTeam.teamName}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/62">
-                  Recorte consolidado a partir das competições e temporadas disponíveis no acervo.
+                  Resumo consolidado a partir das competições e temporadas disponíveis.
                 </p>
               </div>
             </div>
@@ -384,7 +384,7 @@ export function TeamAggregateProfileContent({
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-              Entradas do clube no acervo
+              Participações disponíveis
             </p>
             <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-3xl font-extrabold text-[#111c2d]">
               Competições e temporadas disponíveis
@@ -415,8 +415,8 @@ export function TeamAggregateProfileContent({
           </div>
         ) : (
           <EmptyState
-            title="Sem recortes detalhados"
-            description="O agregado existe, mas os caminhos por competição e temporada ainda não foram retornados."
+            title="Sem contextos detalhados"
+            description="O resumo existe, mas os detalhes por competição e temporada ainda não estão disponíveis."
           />
         )}
       </ProfilePanel>

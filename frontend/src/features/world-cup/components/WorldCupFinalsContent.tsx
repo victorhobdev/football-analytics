@@ -24,10 +24,10 @@ export function WorldCupFinalsContent() {
   if (rankingsQuery.isLoading && !rankingsQuery.data) {
     return (
       <PlatformStateSurface
-        description="Estamos consolidando a lista historica de finais de Copa do Mundo."
+        description="Estamos carregando a lista histórica de finais da Copa do Mundo."
         kicker="Copa do Mundo"
         loading
-        title="Carregando finais historicas"
+        title="Carregando finais históricas"
       />
     );
   }
@@ -37,7 +37,7 @@ export function WorldCupFinalsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="Nao foi possivel carregar a lista de finais agora."
+        description="Não foi possível carregar a lista de finais agora."
         kicker="Copa do Mundo"
         title="Falha ao abrir finais"
         tone="critical"
@@ -50,9 +50,9 @@ export function WorldCupFinalsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="A vertical nao retornou finais suficientes para montar esta pagina."
+        description="Não há finais suficientes para exibir esta página agora."
         kicker="Copa do Mundo"
-        title="Finais indisponiveis"
+        title="Finais indisponíveis"
         tone="warning"
       />
     );
@@ -65,7 +65,7 @@ export function WorldCupFinalsContent() {
     <ProfileShell className="world-cup-theme space-y-6" variant="plain">
       <div className="flex flex-wrap items-center gap-2 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-[#455468]">
         <Link className="transition-colors hover:text-[#003526]" href="/">
-          Inicio
+          Início
         </Link>
         <span className="text-[#8fa097]">/</span>
         <Link className="transition-colors hover:text-[#003526]" href={buildWorldCupHubPath()}>

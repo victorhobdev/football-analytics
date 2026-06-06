@@ -9,6 +9,9 @@ import { buildRankingPath } from "@/shared/utils/context-routing";
 
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type RankingsHubPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };

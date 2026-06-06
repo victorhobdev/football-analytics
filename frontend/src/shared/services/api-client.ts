@@ -42,10 +42,19 @@ export class ApiClientError extends Error {
 }
 
 function resolveBffBaseUrl(): string {
+  const serverBaseUrl = process.env.FOOTBALL_BFF_ORIGIN?.trim() ?? process.env.BFF_ORIGIN?.trim();
+  if (typeof window === "undefined" && serverBaseUrl) {
+    return serverBaseUrl;
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_BFF_BASE_URL?.trim();
 
   if (baseUrl) {
     return baseUrl;
+  }
+
+  if (serverBaseUrl) {
+    return serverBaseUrl;
   }
 
   throw new ApiClientError(

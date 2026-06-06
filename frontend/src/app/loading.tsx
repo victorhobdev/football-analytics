@@ -3,7 +3,7 @@ import { PlatformStateSurface } from "@/shared/components/feedback/PlatformState
 export default function RootLoading() {
   return (
     <PlatformStateSurface
-      description="Estamos preparando a aplicação e conectando a navegação principal."
+      description="Estamos preparando a aplicação e carregando a navegação principal."
       kicker="Aplicação"
       loading
       title="Preparando a aplicação"

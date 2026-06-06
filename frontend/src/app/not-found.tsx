@@ -8,7 +8,7 @@ export default function RootNotFound() {
       actionHref="/"
       actionLabel="Voltar ao início"
       description="Este endereço não está disponível na aplicação."
-      detail="Retome a navegação pelo início ou por uma das entradas principais do acervo."
+      detail="Retome a navegação pelo início ou por uma das áreas principais."
       kicker="Aplicação"
       secondaryAction={
         <>

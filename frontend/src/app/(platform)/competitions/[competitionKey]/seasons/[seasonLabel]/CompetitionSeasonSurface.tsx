@@ -3183,7 +3183,7 @@ function EditionHighlightsSection({
   return (
     <div className="space-y-5">
       {!playerGoalsDefinition || !teamPossessionDefinition ? (
-        <ProfileAlert title="Rankings indisponiveis" tone="critical">
+        <ProfileAlert title="Rankings indisponíveis" tone="critical">
           Os destaques principais desta edição não puderam ser carregados agora.
         </ProfileAlert>
       ) : (
@@ -3205,7 +3205,7 @@ function EditionHighlightsSection({
         <SeasonCompetitionAnalyticsSection context={context} structure={structure} />
       ) : (
         <ProfileAlert title="Estrutura indisponível para análises avançadas" tone="warning">
-          Sem a estrutura tipada da edição, o produto não consegue abrir comparativos estruturais desta temporada.
+          Ainda não há dados estruturais suficientes para abrir comparativos desta temporada.
         </ProfileAlert>
       )}
     </div>

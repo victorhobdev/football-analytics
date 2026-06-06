@@ -1457,7 +1457,7 @@ export function WorldCupEditionContent({ seasonLabel }: { seasonLabel: string })
       {editionQuery.isPartial ? (
         <PartialDataBanner
           coverage={editionQuery.coverage}
-          message="Alguns recortes desta edição dependem de fallback controlado."
+          message="Algumas áreas desta edição usam dados complementares."
         />
       ) : null}
 

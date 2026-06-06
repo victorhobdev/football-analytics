@@ -183,7 +183,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
         {isNotFound ? (
           <EmptyState
             title="Técnico indisponível"
-            description="Não encontramos este técnico no produto agora."
+            description="Não encontramos este técnico agora."
           />
         ) : (
           <ProfileAlert title="Erro no carregamento" tone="critical">
@@ -392,12 +392,12 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
 
       <PartialDataBanner
         coverage={profileQuery.coverage}
-        message="Este técnico existe no produto, mas o recorte atual não tem todas as partidas materializadas."
+        message="Este técnico foi encontrado, mas os dados de partidas estão incompletos no contexto atual."
       />
 
       {summary.matches === 0 ? (
         <ProfileAlert title="Sem partidas no recorte atual" tone="warning">
-          O técnico foi encontrado, mas não há partidas materializadas neste contexto para montar
+          O técnico foi encontrado, mas não há partidas disponíveis neste contexto para montar
           campanha agregada agora.
         </ProfileAlert>
       ) : null}
@@ -410,7 +410,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                 Passagens
               </p>
               <h2 className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-                Histórico de passagens no recorte
+                Histórico de passagens
               </h2>
             </div>
             <ProfileCoveragePill coverage={sectionCoverage.tenures} />
@@ -448,7 +448,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
                   <p className="mt-1 text-sm/6 text-[#57657a]">
                     {tenure.context
                       ? `${tenure.context.competitionName} ${tenure.context.seasonLabel}`
-                      : "Sem contexto canônico resolvido"}
+                      : "Sem contexto principal disponível"}
                   </p>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">

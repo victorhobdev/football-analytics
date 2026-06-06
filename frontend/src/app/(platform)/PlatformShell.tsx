@@ -335,13 +335,13 @@ export function PlatformShell({ children }: PlatformShellProps) {
       href: buildCoachesPath(sharedFilters),
       icon: "player" as const,
       label: "Técnicos",
-      summary: "Domínio em preparação",
+      summary: "Perfis e desempenho",
     },
     {
       href: "/landing",
       icon: "info" as const,
       label: "Sobre",
-      summary: "Papel institucional",
+      summary: "Visão da plataforma",
     },
   ] as const;
   const sidebarNavLinks = [...platformNavLinks, ...secondaryPublicLinks] as const;

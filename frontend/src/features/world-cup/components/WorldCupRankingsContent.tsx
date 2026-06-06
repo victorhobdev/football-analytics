@@ -794,7 +794,7 @@ export function WorldCupRankingsContent() {
       <PlatformStateSurface
         actionHref={buildWorldCupHubPath()}
         actionLabel="Voltar ao hub"
-        description="A vertical não retornou dados suficientes para montar os rankings."
+        description="Não há dados suficientes para exibir os rankings da Copa do Mundo agora."
         kicker="Copa do Mundo"
         title="Rankings indisponíveis"
         tone="warning"
@@ -944,7 +944,7 @@ export function WorldCupRankingsContent() {
           </>
         }
         asideClassName="grid gap-2.5 sm:grid-cols-2"
-        description="Seleções, edições, jogadores e partidas em um recorte único dos recordes históricos da Copa do Mundo."
+        description="Seleções, edições, jogadores e partidas em uma visão única dos recordes históricos da Copa do Mundo."
         footer={
           <nav aria-label="Âncoras dos rankings" className="flex flex-wrap items-center gap-2">
             <SectionJumpLink href="#rankings-selecoes">Seleções</SectionJumpLink>
@@ -1161,7 +1161,7 @@ export function WorldCupRankingsContent() {
                 <p className="max-w-3xl text-sm/6 text-[#6d5c3f]">
                   {selectedEditionView === "volume"
                     ? "Um ranking mais bruto e direto, para entender quais Copas empilharam produção total mesmo com formatos diferentes."
-                    : "Um recorte normalizado por partida, melhor para comparar edições curtas e longas sem distorção de calendário."}
+                    : "Uma leitura normalizada por partida, melhor para comparar edições curtas e longas sem distorção de calendário."}
                 </p>
               </div>
 
