@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useRef } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
@@ -8,6 +11,7 @@ import { ProfileKpi, ProfilePanel, ProfileShell, ProfileTag } from "@/shared/com
 
 import { WorldCupArchiveHero } from "@/features/world-cup/components/WorldCupArchiveHero";
 import { useWorldCupTeams } from "@/features/world-cup/hooks/useWorldCupTeams";
+import { prefetchWorldCupTeam } from "@/features/world-cup/prefetch";
 import { buildWorldCupHubPath, buildWorldCupTeamPath } from "@/features/world-cup/routes";
 import type { WorldCupTeamListItem } from "@/features/world-cup/types/world-cup.types";
 
@@ -42,11 +46,23 @@ function buildFallbackLabel(value: string | null | undefined): string {
     .toUpperCase();
 }
 
-function TeamCard({ team }: { team: WorldCupTeamListItem }) {
+function TeamCard({
+  team,
+  onPrefetch,
+}: {
+  team: WorldCupTeamListItem;
+  onPrefetch?: (teamId: string) => void;
+}) {
   return (
     <Link
       className="group flex h-full flex-col rounded-[1.45rem] border border-[rgba(191,201,195,0.44)] bg-white/82 px-4 py-4 transition-[transform,border-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:border-[#8bd6b6] hover:shadow-[0_28px_64px_-48px_rgba(17,28,45,0.24)]"
       href={buildWorldCupTeamPath(team.teamId)}
+      onFocus={() => {
+        onPrefetch?.(team.teamId);
+      }}
+      onMouseEnter={() => {
+        onPrefetch?.(team.teamId);
+      }}
     >
       <div className="flex items-start gap-3">
         <ProfileMedia
@@ -100,6 +116,21 @@ function TeamCard({ team }: { team: WorldCupTeamListItem }) {
 
 export function WorldCupTeamsContent() {
   const teamsQuery = useWorldCupTeams();
+  const queryClient = useQueryClient();
+  const prefetchedTeamIdsRef = useRef<Set<string>>(new Set());
+
+  const prefetchTeam = useCallback(
+    (teamId: string) => {
+      const normalizedTeamId = teamId.trim();
+      if (normalizedTeamId.length === 0 || prefetchedTeamIdsRef.current.has(normalizedTeamId)) {
+        return;
+      }
+
+      prefetchedTeamIdsRef.current.add(normalizedTeamId);
+      void prefetchWorldCupTeam(queryClient, normalizedTeamId);
+    },
+    [queryClient],
+  );
 
   if (teamsQuery.isLoading && !teamsQuery.data) {
     return (
@@ -197,7 +228,7 @@ export function WorldCupTeamsContent() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {teams.map((team) => (
-            <TeamCard key={team.teamId} team={team} />
+            <TeamCard key={team.teamId} team={team} onPrefetch={prefetchTeam} />
           ))}
         </div>
       </ProfilePanel>

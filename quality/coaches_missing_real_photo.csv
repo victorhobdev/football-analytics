@@ -1,27 +1,23 @@
 coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_image_url,source_ref,source_status,source_file_name,source_url,source_error
 2,sportmonks,1076985,Flavio Robatto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-3,sportmonks,127564,Hernán Crespo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 4,sportmonks,1470,Filipe Luís,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 5,sportmonks,1552122,Daniel Cravero,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-6,sportmonks,1552810,Ramón Díaz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 7,sportmonks,1553199,Rafael Silva Guanaes,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 8,sportmonks,164179,Daniel Paulista,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 11,sportmonks,212007,Juan Vojvoda,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 12,sportmonks,213970,Eduardo Domínguez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 14,sportmonks,216140,César Lucena,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 15,sportmonks,222993,Thiago Carpini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-17,sportmonks,2511092,Abel Moreira Ferreira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 18,sportmonks,260639,Martín Varini Di Zioli,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 19,sportmonks,282479,Edgar Pérez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 20,sportmonks,29303607,Renato Alves Paiva,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 21,sportmonks,3526244,Alberto Gamero Morillo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-22,sportmonks,37522422,Artur Jorge,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 23,sportmonks,37522878,Bruno Marques Fernandes Pivetti,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 24,sportmonks,37552314,Rodrigo José Queiroz das Chagas,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 25,sportmonks,37563969,Fábio Matias,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 26,sportmonks,37573825,António José Cardoso de Oliveira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 27,sportmonks,37614399,Fernando Seabra,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-28,sportmonks,37633961,Bernardo Franco,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+28,sportmonks,37633961,Bernardo Franco,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q130442899,missing_source_url,,,wikidata entity has no P18 image
 29,sportmonks,37646014,Davide Ancelotti,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 30,sportmonks,37662210,Orlando Ribeiro de Oliveira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 31,sportmonks,37690429,Cledson Rafael de Paiva,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -35,7 +31,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 42,sportmonks,459854,Roger Machado Marques,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 44,sportmonks,463593,Leonardo Condé,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 45,sportmonks,466416,Eduardo Saragó,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-46,sportmonks,467344,Cláudio Tencati,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 47,sportmonks,467623,Luiz Vieira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 48,sportmonks,467951,Omar De Felippe,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 49,sportmonks,468348,Martín Palermo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -44,16 +39,11 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 52,sportmonks,471810,Pablo Sánchez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 53,sportmonks,474441,Gustavo Quinteros Desábato,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 54,sportmonks,474720,Adenor Bacchi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-57,sportmonks,524328,Fábio Carille,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 58,sportmonks,524431,Luis Zubeldía,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 60,sportmonks,6971228,Petit,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 61,sportmonks,785151,Márcio Fernandes Figueiredo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 62,sportmonks,896469,Pedro Faria Caixinha,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-65,sportmonks,127889,Roberto De Zerbi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 66,sportmonks,25187743,Liam Manning,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-67,sportmonks,455400,Chris Wilder,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-71,sportmonks,455991,Nuno Espírito Santo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-78,sportmonks,270,Gary O'Neil,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 87,sportmonks,7502,Ben Strevens,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 88,sportmonks,379788,Claudio Giráldez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 91,sportmonks,37524146,Kieran McKenna,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -67,7 +57,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 111,sportmonks,1272,Tom Cleverley,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 112,sportmonks,37552530,Leam Richardson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 116,sportmonks,323316,Chris Davies,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-117,sportmonks,10127,Paul Heckingbottom,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+117,sportmonks,10127,Paul Heckingbottom,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q7151218,missing_source_url,,,wikidata entity has no P18 image
 119,sportmonks,120469,John Russell,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 120,sportmonks,455357,Karl Robinson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 122,sportmonks,127483,Daniele De Rossi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -75,17 +65,15 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 125,sportmonks,9882,Graham Coughlan,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 126,sportmonks,37664990,Alfred Johansson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 128,sportmonks,524236,Darrell Clarke,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-129,sportmonks,645,Michael Carrick,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 130,sportmonks,2141,Matt Sadler,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 131,sportmonks,78952,Michal Gašparík,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 134,sportmonks,13633409,Andrei,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-136,sportmonks,4115,Nuri Şahin,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 137,sportmonks,7464,Matt Bloomfield,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 138,sportmonks,460535,Daniel Farke,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 139,sportmonks,6983785,Phil Parkinson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 142,sportmonks,4713,Stephen Clemence,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 144,sportmonks,491,Ian Ross Evatt,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-145,sportmonks,37633958,Michael Beale,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+145,sportmonks,37633958,Michael Beale,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q112339753,missing_source_url,,,wikidata entity has no P18 image
 146,sportmonks,2146,John Eustace,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 147,sportmonks,1552477,Tim Walter,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 149,sportmonks,3873,Harry Kewell,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -94,7 +82,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 154,sportmonks,185780,Iñigo Pérez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 157,sportmonks,25583713,Hakan Keleş,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 159,sportmonks,7693712,Recep Uçar,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-160,sportmonks,460597,Abdullah Avcı,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 161,sportmonks,37584223,Osman Zeki Korkmaz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 162,sportmonks,456665,Marius Şumudică,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 166,sportmonks,2823326,Ali Yalçın,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -110,8 +97,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 182,sportmonks,37289874,Özhan Pulat,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 184,sportmonks,459324,Mehmet Altıparmak,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 192,sportmonks,23440,Sinan Kaloglu,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-196,sportmonks,185095,Rubén Baraja,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-201,sportmonks,459203,Mauricio Pellegrino,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 202,sportmonks,883095,Gaizka Garitano Aguirre,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 206,sportmonks,896644,José Sandoval Huertas,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 207,sportmonks,532667,Rubén De La Barrera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -123,20 +108,12 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 213,sportmonks,526440,Borja Jiménez Sáez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 214,sportmonks,527103,José González Álvarez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 216,sportmonks,456038,Gian Gasperini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-219,sportmonks,455848,Marco Baroni,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 220,sportmonks,37735048,Saad Al Sabei,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 221,sportmonks,127495,Filippo Inzaghi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-223,sportmonks,458783,Eusebio Di Francesco,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-224,sportmonks,128295,Raffaele Palladino,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 225,sportmonks,128261,Vincenzo Italiano,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 226,sportmonks,7387314,Davide Ballardini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-229,sportmonks,22877956,Gabriele Cioffi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-233,sportmonks,364995,Davide Nicola,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 234,sportmonks,332477,Gergely Geri,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-235,sportmonks,37700640,Carles Martínez Novell,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-237,sportmonks,131252,Roberto D'Aversa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 240,sportmonks,37610194,Paolo Vanoli,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-243,sportmonks,455819,Marco Giampaolo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 244,sportmonks,510,Cesc Fàbregas,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 245,sportmonks,524570,Gabriel Strefezza,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 246,sportmonks,3169772,Joe Edwards,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -149,7 +126,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 255,sportmonks,37359725,Neil Dewsnip,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 256,sportmonks,17867632,Paul Hurst,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 257,sportmonks,367568,Alessio Dionisi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-258,sportmonks,456421,Jess Thorup,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 259,sportmonks,5961878,William Still,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 260,sportmonks,9616627,Nigel Adkins,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 261,sportmonks,23287458,Ben Dawson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -161,8 +137,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 268,sportmonks,459717,Bernd Hollerbach,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 269,sportmonks,465900,Vincenzo Vivarini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 270,sportmonks,533904,Francisco López Fernández,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-276,sportmonks,37732840,Pierre Sage,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-277,sportmonks,2158433,László Bölöni,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 283,sportmonks,37566248,Francesco Farioli,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 286,sportmonks,3187813,Luka Elsner,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 287,sportmonks,95023,Adil Hermach,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -186,7 +160,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 338,sportmonks,37648493,Marc Unterberger,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 339,sportmonks,608123,Thomas Hofer,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 340,sportmonks,10307079,Pepijn Lijnders,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-341,sportmonks,37563968,Lars Friis,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+341,sportmonks,37563968,Lars Friis,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q104890214,missing_source_url,,,wikidata entity has no P18 image
 342,sportmonks,72750,Željko Sopić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 343,sportmonks,52236,Gernot Messner,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 344,sportmonks,37436278,P. Semlic,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -195,7 +169,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 348,sportmonks,37656543,Rene Poms,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 349,sportmonks,37575021,Manfred Schmid,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 350,sportmonks,37566240,Andy Woodman,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-351,sportmonks,7016,Nathan Jones,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 352,sportmonks,15322,Scott Lindsey,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 353,sportmonks,37680707,Johannes Hoff Thorup,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 354,sportmonks,524215,Stephen Robinson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -227,7 +200,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 385,sportmonks,1195,Sebastien Pocognoli,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 386,sportmonks,37289455,Tiago Carvalho Margarido,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 387,sportmonks,159773,Vítor Bruno,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-388,sportmonks,37674474,Daniel Sousa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 389,sportmonks,37652062,João Jorge Gândara Mendes Pereira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 390,sportmonks,158804,Ricardo Pessoa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 391,sportmonks,161668,Zé Augusto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -238,10 +210,8 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 397,sportmonks,37691811,Cristiano Bacci,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 398,sportmonks,37348961,Bruno Nogueira Pinheiro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 399,sportmonks,32957,João Pereira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-401,sportmonks,370847,Rui Borges,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 405,sportmonks,37293365,Luís Ferreira de Castro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 408,sportmonks,355563,Ralph Noncent,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-409,sportmonks,29582,Pal Dardai,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 410,sportmonks,117955,Jacob Neestrup Hansen,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 413,sportmonks,455350,Paul Cook,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 414,sportmonks,10293491,Eder Sarabia Armesto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -253,9 +223,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 421,sportmonks,10322399,Narcís Pèlach Nadal,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 425,sportmonks,31151,Timo Schultz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 426,sportmonks,526236,Thomas Letsch,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-432,sportmonks,32849,Dino Toppmöller,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 434,sportmonks,38217,Sebastian Hoeneß,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-436,sportmonks,518875,Bo Henriksen,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 437,sportmonks,39086,Backhaus Heiner,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 438,sportmonks,120141,Pavel Dochev,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 439,sportmonks,896791,Jung-Won Seo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -289,7 +257,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 487,sportmonks,1552555,Sascha Hildmann,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 488,sportmonks,896619,Lukas Kwasniok,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 489,sportmonks,35399,Marcel Rapp,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-490,sportmonks,460266,Florian Kohfeldt,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 492,sportmonks,37263067,Daniel Martinez Monzon,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 494,sportmonks,260206,Alexander Medina Reobasco,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 497,sportmonks,197029,Hakan Yakin,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -322,7 +289,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 542,sportmonks,455944,Luis Ramis Monfort,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 545,sportmonks,528513,Alberto González Fernández,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 547,sportmonks,37542993,Santiago Marín Andreu,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-548,sportmonks,94233,Vincent Hognon,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 549,sportmonks,95070,Omar Daf,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 550,sportmonks,529830,Antoine Conte,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 551,sportmonks,1552334,Laurent Guyot,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -354,8 +320,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 582,sportmonks,6971189,Tamas Peto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 583,sportmonks,76027,Balazs Borbely,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 584,sportmonks,37523758,Csaba Máté,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-587,sportmonks,10269848,Aurelio Andreazzoli,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-588,sportmonks,94575,Fabio Grosso,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 589,sportmonks,671,George Elokobi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 590,sportmonks,37523239,Ian Foster,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 592,sportmonks,37678409,Lucas Fidolo González Vélez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -427,7 +391,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 669,sportmonks,2511270,Julián Calero Fernández,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 671,sportmonks,896485,Dick Schreuder,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 672,sportmonks,185046,Álvaro Rubio,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-673,sportmonks,455705,Jindřich Trpišovský,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 674,sportmonks,6642509,Thomas Nørgaard,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 676,sportmonks,456498,José Soares Ribeiro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 677,sportmonks,8093367,Michal Hipp,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -451,7 +414,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 695,sportmonks,586853,Andreas Brännström,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 696,sportmonks,12844041,Petr Rada,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 697,sportmonks,35441,Martin Hysky,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-699,sportmonks,453012,Sebastián Beccacece,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 700,sportmonks,524657,Pedro Dólera Corpas,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 701,sportmonks,187326,Sergio Rodríguez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 702,sportmonks,460370,Diego Cocca Pera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -468,14 +430,13 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 718,sportmonks,127492,Eugenio Corini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 719,sportmonks,458774,Massimo Carrera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 720,sportmonks,367539,Andrea Malgrati,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-721,sportmonks,3509984,Marco Zaffaroni,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+721,sportmonks,3509984,Marco Zaffaroni,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q3846591,missing_source_url,,,wikidata entity has no P18 image
 722,sportmonks,5332165,Luca D'Angelo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 723,sportmonks,130912,Michele Mignani,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 724,sportmonks,896623,Roberto Stellone,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 725,sportmonks,6983792,Darije Kalezić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 726,sportmonks,468798,Fabrizio Castori,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 727,sportmonks,456552,Alfredo Aglietti,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-730,sportmonks,7741798,Odair Hellmann,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 731,sportmonks,37524040,Freyr Alexandersson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 732,sportmonks,98205,Grégory Poirier,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 733,sportmonks,523909,Óscar García Junyent,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -517,7 +478,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 780,sportmonks,497,Dirk Kuyt,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 781,sportmonks,128013,Fabio Liverani,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 782,sportmonks,456005,Ismail H'Maidat,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-783,sportmonks,128419,Fabio Cannavaro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 784,sportmonks,182469,Jani Sturm,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 785,sportmonks,19625638,Aleksey Shpilevskiy,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 788,sportmonks,75442,Dimitrios Grammozis,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -526,7 +486,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 794,sportmonks,39222,Sebastian Kmiec,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 795,sportmonks,30477,Ivan Radeljic,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 796,sportmonks,457134,Mark Zimmermann,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-797,sportmonks,189541,Henrik Rydström,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 802,sportmonks,17281534,Kim Hellberg,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 803,sportmonks,195506,Anes Mravac,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 804,sportmonks,1021714,Kalle Karlsson,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -626,7 +585,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 917,sportmonks,211589,Walter Ribonetto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 918,sportmonks,471322,Geovanny Cumbicus Castillo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 919,sportmonks,468932,Ever Almeida Almada,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-920,sportmonks,429896,Ariel Holan,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+920,sportmonks,429896,Ariel Holan,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q5704053,missing_source_url,,,wikidata entity has no P18 image
 921,sportmonks,472250,Jorge Célico,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 922,sportmonks,252558,Gerardo Espinoza Ahumada,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 923,sportmonks,243611,Norberto Araujo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -700,7 +659,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1003,sportmonks,204728,Oleksandr Babych,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1004,sportmonks,207921,Oleksandr Pozdeev,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1005,sportmonks,37568466,Jim Magilton,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1006,sportmonks,455867,Craig Harrison,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1006,sportmonks,455867,Craig Harrison,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q5181013,missing_source_url,,,wikidata entity has no P18 image
 1009,sportmonks,530157,Stéphane Dief,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1010,sportmonks,2511171,Antonio Calabro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1011,sportmonks,429944,Rubén Forestello,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -733,7 +692,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1045,sportmonks,20683988,Szymon Grabowski,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1046,sportmonks,205766,Valeriy Ivashchenko,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1047,sportmonks,5669971,Mislav Karoglan,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1048,sportmonks,74546,Sergej Jakirović,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1050,sportmonks,459666,Ronald Montero Iglesias,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1051,sportmonks,29560,Miroslav Klose,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1052,sportmonks,10249,Lee Bell,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -776,7 +734,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1102,sportmonks,76554,Ricardo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1103,sportmonks,3219443,Oskar Drobne,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1104,sportmonks,37686304,Milomir Kondić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1105,sportmonks,73424,Damir Krznar,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1106,sportmonks,141532,Toni Dzhangarovski,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1107,sportmonks,37573013,SilvijoČabraja,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1108,sportmonks,77111,Català,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -853,7 +810,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1186,sportmonks,5907,Oriol Riera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1187,sportmonks,511571,João Nuno,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1188,sportmonks,37909808,Hugo Filipe Carvalho Oliveira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1189,sportmonks,37691812,Adrian Siemieniec,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1190,sportmonks,37663386,Goncalo Feio,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1191,sportmonks,462526,Aleksandr Sednev,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1192,sportmonks,37556790,Daniel Myśliwiec,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -874,7 +830,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1211,sportmonks,456647,Jacek Zielinski,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1212,sportmonks,526036,Marek Papszun,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1213,sportmonks,154026,Robert Kolendowicz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1215,sportmonks,457649,Thomas Thomasberg,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1217,sportmonks,457094,Lars Sørensen,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1218,sportmonks,524374,Uwe Rösler,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1219,sportmonks,12036309,Rasmus Bertelsen,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -888,7 +843,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1228,sportmonks,23680684,Björn Joppe,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1229,sportmonks,37740986,Dietrich Claus,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1230,sportmonks,459010,Joe Enochs,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1231,sportmonks,323360,Albert Riera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1232,sportmonks,6,Paul Ifill,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1233,sportmonks,37738978,Rodeck Singh,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1234,sportmonks,37697473,David Muta,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -906,7 +860,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1251,sportmonks,530260,Benjamin Touchard,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1252,sportmonks,37554097,Guillaume Allanou,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1253,sportmonks,39433,Michél Kniat,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1254,sportmonks,3861781,Marco Grote,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1254,sportmonks,3861781,Marco Grote,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q97601443,missing_source_url,,,wikidata entity has no P18 image
 1255,sportmonks,2206532,Miroslav Jagatic,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1256,sportmonks,33117,Lars Fuchs,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1257,sportmonks,1553351,Filipe Nunes Cândido,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -917,7 +871,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1262,sportmonks,225720,Zé Augusto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1263,sportmonks,215997,Marcão,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1264,sportmonks,8100506,Robert Pevnik,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1265,sportmonks,1477271,Vinko Marinović,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1266,sportmonks,128120,Aimo Diana,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1267,sportmonks,675847,Carlos Vaz Pinto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1268,sportmonks,164070,Russiano,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -943,7 +896,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1290,sportmonks,456033,Augusto Ferreira,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1291,sportmonks,216470,Marcelo Cordeiro,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1293,sportmonks,37400329,D. Giacomini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1295,sportmonks,329291,Vladimir Weiss,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1297,sportmonks,4926001,José Murcia González,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1298,sportmonks,460192,Jaroslav Hynek,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1302,sportmonks,883019,Dan Petrescu,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1007,11 +959,10 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1361,sportmonks,459237,Vladan Milojević,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1362,sportmonks,896609,Nenad Lalatović,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1364,sportmonks,68482,Hristo Yanev,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1365,sportmonks,896528,Barak Bakhar,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1366,sportmonks,37563979,Marko Savic,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1367,sportmonks,146708,Igor Matić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1368,sportmonks,1552705,Gordan Petrić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1369,sportmonks,109857,Žarko Lazetić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1369,sportmonks,109857,Žarko Lazetić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q8083612,missing_source_url,,,wikidata entity has no P18 image
 1370,sportmonks,204630,Igor Duljaj,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1372,sportmonks,1552185,Radovan Ćurčić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1373,sportmonks,37578639,Nebojša Jandrić,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1091,7 +1042,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1454,sportmonks,37621955,Giovanni Mussa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1455,sportmonks,37438919,L. Blanc,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1456,sportmonks,27462686,Óscar Cano Moreno,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1457,sportmonks,187382,Ruben Torrecilla,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1457,sportmonks,187382,Ruben Torrecilla,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q4888917,missing_source_url,,,wikidata entity has no P18 image
 1458,sportmonks,124222,Eliyahu Levi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1460,sportmonks,3877018,Nissim Avitan,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1461,sportmonks,1068568,Sharon Mimer,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1161,7 +1112,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1531,sportmonks,467533,Jesús González Díaz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1532,sportmonks,282564,Elvis Martínez Dugarte,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1533,sportmonks,218447,Thiago Carvalho,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1534,sportmonks,35280512,Ilias Charalambous,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1536,sportmonks,524523,Gheorghe Hagi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1537,sportmonks,474761,Bernd Storck,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1538,sportmonks,37468473,I. Sabău,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1196,9 +1146,8 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1572,sportmonks,466369,José Fernandes Barros,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1573,sportmonks,224350,Junior Rocha,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1574,sportmonks,12036887,Luís de Oliveira Preto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1576,sportmonks,37522876,Marcelo Fernandes,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1576,sportmonks,37522876,Marcelo Fernandes,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q20664286,missing_source_url,,,wikidata entity has no P18 image
 1577,sportmonks,37642099,Sergio Alexsandro de Freitas,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1579,sportmonks,455674,Vadim Skripchenko,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1580,sportmonks,57016,Andrey Gorovtsov,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1581,sportmonks,464269,Vyacheslav Geraschenko,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1582,sportmonks,461102,Igor Kovalevich,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1214,7 +1163,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1593,sportmonks,258436,Luis Hernández Díaz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1594,sportmonks,37693542,Alejandro Russo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1595,sportmonks,882973,Kurban Berdyev,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1596,sportmonks,7386787,Mladen Žižović,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1597,sportmonks,163330,Florin Sandu Maxim,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1598,sportmonks,3655,Cláudio Caçapa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1600,sportmonks,33165747,Kurt Van Synghel,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1239,7 +1187,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1622,sportmonks,37525705,Robert Pereira Molina,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1623,sportmonks,37553996,Juan Castillo,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1624,sportmonks,204726,Mariusz Lewandowski,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1625,sportmonks,146356,Andriy Demchenko,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1625,sportmonks,146356,Andriy Demchenko,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q2040497,missing_source_url,,,wikidata entity has no P18 image
 1626,sportmonks,37574601,Vagner Dos Santos,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1627,sportmonks,456843,Fabiano Soares Pessoa,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1628,sportmonks,37739524,Márcio de Velasco Parreiras,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1341,7 +1289,7 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 1731,sportmonks,528749,Leocir Dall'Astra,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1732,sportmonks,896267,Gabriel Gómez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1733,sportmonks,896275,Iván Delfino,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1734,sportmonks,465533,Fernando Ortiz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
+1734,sportmonks,465533,Fernando Ortiz,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q933948,missing_source_url,,,wikidata entity has no P18 image
 1735,sportmonks,522672,Juan Kopriva Rivera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1736,sportmonks,608344,Wálter Perazzo Otero,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1737,sportmonks,37907499,Ernesto Ceferino Pedernera,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1586,8 +1534,6 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 2004,sportmonks,37264674,César Bustamante Pavez,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 2005,sportmonks,465517,Julio Baldivieso Rico,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 81730,sportmonks,896650,Joaquín de Jesús Caparrós Camino,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-101174,sportmonks,452683,Graham Potter,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-124532,sportmonks,128374,Cristian Stellini,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 198498,sportmonks,456128,Stuart Baxter,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 206292,sportmonks,38848,Daniel Bauer,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 219941,sportmonks,30770,Zsolt Low,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
@@ -1598,45 +1544,36 @@ coach_identity_id,provider,provider_coach_id,coach_name,missing_reason,current_i
 782263,sportmonks,37734327,Jorge António Pinto do Couto,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1343393,sportmonks,37919911,Antonio Gagliardi,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
 1458859,sportmonks,37918957,José Pedro Pinto Gonçalves,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-1913127,sportmonks,33835,Mike Tullberg,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,,,,,
-5380628,wikidata,101424710,Maurício Souza,missing_image_url,,Q101424710,missing_source_url,,,wikidata entity has no P18 image
-5380634,wikidata,106919375,Kirill Keker,missing_image_url,,Q106919375,missing_source_url,,,wikidata entity has no P18 image
-5380636,wikidata,108296381,Mick McElwee,missing_image_url,,Q108296381,missing_source_url,,,wikidata entity has no P18 image
-5380637,wikidata,1086686,Felipe Conceição,missing_image_url,,Q1086686,missing_source_url,,,wikidata entity has no P18 image
-5380641,wikidata,11684582,Javier Muñoz Arévalo,missing_image_url,,Q11684582,missing_source_url,,,wikidata entity has no P18 image
-5380642,wikidata,11697229,Pablo Machín,missing_image_url,,Q11697229,missing_source_url,,,wikidata entity has no P18 image
-5380644,wikidata,127256474,Rafael Paiva,missing_image_url,,Q127256474,missing_source_url,,,wikidata entity has no P18 image
-5380645,wikidata,1284791,Enderson Moreira,missing_image_url,,Q1284791,missing_source_url,,,wikidata entity has no P18 image
-5380649,wikidata,130914360,Jean-François Vulliez,missing_image_url,,Q130914360,missing_source_url,,,wikidata entity has no P18 image
-5380650,wikidata,1330190,Rúnar Kristinsson,missing_image_url,,Q1330190,missing_source_url,,,wikidata entity has no P18 image
-5380663,wikidata,1720889,Kakhaber Tskhadadze,missing_image_url,,Q1720889,missing_source_url,,,wikidata entity has no P18 image
-5380677,wikidata,24006864,Heimir Guðjónsson,missing_image_url,,Q24006864,missing_source_url,,,wikidata entity has no P18 image
-5380682,wikidata,2551128,Miguel Ángel Tena,missing_image_url,,Q2551128,missing_source_url,,,wikidata entity has no P18 image
-5380712,wikidata,371399,Alexander Medina,missing_image_url,,Q371399,missing_source_url,,,wikidata entity has no P18 image
-5380716,wikidata,381199,Ján Kozák,missing_image_url,,Q381199,missing_source_url,,,wikidata entity has no P18 image
-5380720,wikidata,4134702,Giorgi Geguchadze,missing_image_url,,Q4134702,missing_source_url,,,wikidata entity has no P18 image
-5380721,wikidata,4225548,Sergey Petrovich Kovalchuk,missing_image_url,,Q4225548,missing_source_url,,,wikidata entity has no P18 image
-5380729,wikidata,4684203,Adolfo Baines Pilart,missing_image_url,,Q4684203,missing_source_url,,,wikidata entity has no P18 image
-5380730,wikidata,4715999,Aleksey Shpilevsky,missing_image_url,,Q4715999,missing_source_url,,,wikidata entity has no P18 image
-5380732,wikidata,4788060,Ardian Nuhiu,missing_image_url,,Q4788060,missing_source_url,,,wikidata entity has no P18 image
-5380740,wikidata,5584479,Goran Simov,missing_image_url,,Q5584479,missing_source_url,,,wikidata entity has no P18 image
-5380741,wikidata,56044765,Qatip Osmani,missing_image_url,,Q56044765,missing_source_url,,,wikidata entity has no P18 image
-5380747,wikidata,61108628,David Campaña Piquer,missing_image_url,,Q61108628,missing_source_url,,,wikidata entity has no P18 image
-5380750,wikidata,63168936,Eduardo Barroca,missing_image_url,,Q63168936,missing_source_url,,,wikidata entity has no P18 image
-5380753,wikidata,677546,Heiko Herrlich,missing_image_url,,Q677546,download_failed,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Heiko_Herrlich%2C_August_2018.jpg/960px-Heiko_Herrlich%2C_August_2018.jpg
-5380754,wikidata,692306,Arne Erlandsen,missing_image_url,,Q692306,download_failed,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/3/3b/Arne_erlandsen.jpg
-5380755,wikidata,69414067,Miguel Ángel Ramírez,missing_image_url,,Q69414067,missing_source_url,,,wikidata entity has no P18 image
-5380756,wikidata,708808,Tayfun Korkut,missing_image_url,,Q708808,download_failed,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Tayfun_korkut.jpg/960px-Tayfun_korkut.jpg
-5380757,wikidata,7159755,Pedro Martins,missing_image_url,,Q7159755,missing_source_url,,,wikidata entity has no P18 image
-5380758,wikidata,7454313,Sergio Mantecón,missing_image_url,,Q7454313,missing_source_url,,,wikidata entity has no P18 image
-5380759,wikidata,746357,Philippe Montanier,missing_image_url,,Q746357,download_failed,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Lens_-_Sochaux_%2815-09-2018%29_79.jpg/960px-Lens_-_Sochaux_%2815-09-2018%29_79.jpg
-5380760,wikidata,7612354,Steve Davis,missing_image_url,,Q7612354,download_failed,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/d/db/Davis%2C_Steve.jpg
-5380763,wikidata,85772586,Anthony Limbrick,missing_image_url,,Q85772586,missing_source_url,,,wikidata entity has no P18 image
-5380764,wikidata,9008053,Imanol Alguacil,missing_image_url,,Q9008053,download_failed,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/0/04/Imanol_Alguacil_2018.jpg
-5380765,wikidata,912982,Brian Priske,missing_image_url,,Q912982,missing_source_url,,,wikidata entity has no P18 image
-5380766,wikidata,923131,Rudi Garcia,missing_image_url,,Q923131,download_failed,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Rudi_Garcia_Troph%C3%A9e_des_champions_2011_%28cropped%29.jpg/960px-Rudi_Garcia_Troph%C3%A9e_des_champions_2011_%28cropped%29.jpg
-5380767,wikidata,929118,Pavel Vrba,missing_image_url,,Q929118,download_failed,,,429 Client Error: Too many requests (f061ab2) for url: https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Pavel_Vrba_04.jpg/960px-Pavel_Vrba_04.jpg
-5380768,wikidata,96624646,Alberto Gallego,missing_image_url,,Q96624646,missing_source_url,,,wikidata entity has no P18 image
-5380769,wikidata,9697059,Carlos Fangueiro,missing_image_url,,Q9697059,missing_source_url,,,wikidata entity has no P18 image
-5380770,wikidata,97361028,Giorgi Chiabrishvili,missing_image_url,,Q97361028,missing_source_url,,,wikidata entity has no P18 image
-5380771,wikidata,99603611,Luís Freire,missing_image_url,,Q99603611,download_failed,,,429 Client Error: Too many requests - please contact noc@wikimedia.org to discuss a less disruptive approach or instead use thumbnail images in sizes listed on https://w.wiki/GHai. (0c640b1) for url: https://upload.wikimedia.org/wikipedia/commons/7/78/Lu%C3%ADs_Freire%2C_treinador_do_Rio_Ave.png
+1913127,sportmonks,33835,Mike Tullberg,placeholder_image_url,https://cdn.sportmonks.com/images/soccer/placeholder.png,Q460260,missing_source_url,,,wikidata entity has no P18 image
+5380628,wikidata,101424710,Maurício Souza,missing_image_url,,Q101424710,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380634,wikidata,106919375,Kirill Keker,missing_image_url,,Q106919375,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380636,wikidata,108296381,Mick McElwee,missing_image_url,,Q108296381,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380637,wikidata,1086686,Felipe Conceição,missing_image_url,,Q1086686,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380641,wikidata,11684582,Javier Muñoz Arévalo,missing_image_url,,Q11684582,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380642,wikidata,11697229,Pablo Machín,missing_image_url,,Q11697229,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380644,wikidata,127256474,Rafael Paiva,missing_image_url,,Q127256474,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380645,wikidata,1284791,Enderson Moreira,missing_image_url,,Q1284791,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380649,wikidata,130914360,Jean-François Vulliez,missing_image_url,,Q130914360,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380650,wikidata,1330190,Rúnar Kristinsson,missing_image_url,,Q1330190,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380663,wikidata,1720889,Kakhaber Tskhadadze,missing_image_url,,Q1720889,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380677,wikidata,24006864,Heimir Guðjónsson,missing_image_url,,Q24006864,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380682,wikidata,2551128,Miguel Ángel Tena,missing_image_url,,Q2551128,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380712,wikidata,371399,Alexander Medina,missing_image_url,,Q371399,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380716,wikidata,381199,Ján Kozák,missing_image_url,,Q381199,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380720,wikidata,4134702,Giorgi Geguchadze,missing_image_url,,Q4134702,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380721,wikidata,4225548,Sergey Petrovich Kovalchuk,missing_image_url,,Q4225548,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380729,wikidata,4684203,Adolfo Baines Pilart,missing_image_url,,Q4684203,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380730,wikidata,4715999,Aleksey Shpilevsky,missing_image_url,,Q4715999,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380732,wikidata,4788060,Ardian Nuhiu,missing_image_url,,Q4788060,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380740,wikidata,5584479,Goran Simov,missing_image_url,,Q5584479,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380741,wikidata,56044765,Qatip Osmani,missing_image_url,,Q56044765,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380747,wikidata,61108628,David Campaña Piquer,missing_image_url,,Q61108628,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380750,wikidata,63168936,Eduardo Barroca,missing_image_url,,Q63168936,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380755,wikidata,69414067,Miguel Ángel Ramírez,missing_image_url,,Q69414067,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380757,wikidata,7159755,Pedro Martins,missing_image_url,,Q7159755,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380758,wikidata,7454313,Sergio Mantecón,missing_image_url,,Q7454313,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380763,wikidata,85772586,Anthony Limbrick,missing_image_url,,Q85772586,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380765,wikidata,912982,Brian Priske,missing_image_url,,Q912982,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380768,wikidata,96624646,Alberto Gallego,missing_image_url,,Q96624646,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380769,wikidata,9697059,Carlos Fangueiro,missing_image_url,,Q9697059,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
+5380770,wikidata,97361028,Giorgi Chiabrishvili,missing_image_url,,Q97361028,missing_source_url,,,wikidata entity has no P18 image or wikipedia thumbnail
