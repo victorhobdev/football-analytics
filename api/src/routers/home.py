@@ -363,7 +363,7 @@ def _normalize_archive_summary_from_competitions(
     return normalized_summary
 
 
-def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
+def _fetch_competitions() -> list[dict[str, Any]]:
     rows = db_client.fetch_all(
         """
         with match_scope as (

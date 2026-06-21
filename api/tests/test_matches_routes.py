@@ -52,8 +52,8 @@ class MatchCenterApiTests(unittest.TestCase):
                 {
                     "player_id": "186815",
                     "player_name": "Pablo Fornals",
-                    "team_id": None,
-                    "team_name": None,
+                    "team_id": "1084",
+                    "team_name": "Málaga CF",
                     "position": "Central Midfield",
                     "formation_field": None,
                     "formation_position": None,
@@ -134,8 +134,13 @@ class MatchCenterApiTests(unittest.TestCase):
         self.assertEqual(len(payload["lineups"]), 1)
         self.assertEqual(len(payload["teamStats"]), 2)
         self.assertEqual(len(payload["playerStats"]), 1)
+        self.assertEqual(payload["lineups"][0]["teamId"], "1084")
+        self.assertEqual(payload["lineups"][0]["teamName"], "Málaga CF")
         self.assertEqual(payload["playerStats"][0]["teamName"], "Málaga CF")
         self.assertEqual(payload["teamStats"][0]["teamId"], "10")
+        lineups_fallback_query = fetch_all_mock.call_args_list[1].args[0]
+        self.assertIn("tml.tm_club_id::text as team_id", lineups_fallback_query)
+        self.assertIn("left join raw.tm_clubs club", lineups_fallback_query)
         self.assertEqual(payload["sectionCoverage"]["teamStats"]["status"], "partial")
         self.assertEqual(payload["sectionCoverage"]["playerStats"]["status"], "partial")
 
