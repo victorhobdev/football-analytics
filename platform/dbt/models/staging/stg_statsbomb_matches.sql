@@ -1,0 +1,35 @@
+with source_matches as (
+    select * from {{ source('postgres_raw', 'statsbomb_matches') }}
+)
+select
+    source_name,
+    match_id as source_match_id,
+    competition_id as source_competition_id,
+    season_id as source_season_id,
+    canonical_competition_key,
+    season_label,
+    match_date,
+    kick_off,
+    home_team_id as source_home_team_id,
+    home_team_name as source_home_team_name,
+    away_team_id as source_away_team_id,
+    away_team_name as source_away_team_name,
+    home_score,
+    away_score,
+    match_status,
+    match_status_360,
+    competition_stage_id,
+    competition_stage_name,
+    match_week,
+    stadium_id,
+    stadium_name,
+    referee_id,
+    referee_name,
+    local_match_id,
+    identity_status,
+    identity_confidence,
+    identity_reason,
+    metadata,
+    payload,
+    updated_at
+from source_matches

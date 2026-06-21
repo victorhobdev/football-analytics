@@ -21,3 +21,16 @@ sources:
       - name: team_coaches
       - name: coaches
       - name: head_to_head_fixtures
+      - name: statsbomb_matches
+      - name: statsbomb_events
+      - name: statsbomb_lineups
+      - name: statsbomb_three_sixty_frames
+      - name: statsbomb_three_sixty_freeze_frame
+
+  - name: postgres_mart
+    database: "{{ env_var('FOOTBALL_PG_DBNAME', env_var('POSTGRES_DB', 'football_dw')) }}"
+    schema: mart
+    tables:
+      - name: stg_statsbomb_match_identity
+      - name: stg_statsbomb_team_identity
+      - name: stg_statsbomb_player_identity

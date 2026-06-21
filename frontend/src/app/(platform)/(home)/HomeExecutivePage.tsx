@@ -8,7 +8,6 @@ import {
   SUPPORTED_COMPETITIONS,
   getCompetitionById,
   getCompetitionByKey,
-  getCompetitionVisualAssetId,
   type CompetitionDef,
 } from "@/config/competitions.registry";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
@@ -26,6 +25,13 @@ import {
 } from "@/shared/utils/context-routing";
 
 import styles from "./HomeExecutivePage.module.css";
+
+interface HomeCompetitionMeta {
+  country: string;
+  scope: CompetitionDef["scope"];
+  shortName: string;
+  visualAssetId?: string;
+}
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -133,19 +139,54 @@ function buildVisualAssetUrl(
   return `/api/visual-assets/${category}/${assetId}`;
 }
 
+function buildFallbackCompetitionShortName(competition: HomeCompetitionCard): string {
+  const tokens = competition.competitionName
+    .replace(/[^A-Za-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return competition.competitionKey.slice(0, 3).toUpperCase();
+  }
+
+  if (tokens.length === 1) {
+    return tokens[0].slice(0, 3).toUpperCase();
+  }
+
+  return tokens
+    .slice(0, 2)
+    .map((token) => token[0])
+    .join("")
+    .slice(0, 3)
+    .toUpperCase();
+}
+
+function buildHomeCompetitionMeta(competition: HomeCompetitionCard): HomeCompetitionMeta {
+  const registryMeta =
+    getCompetitionById(competition.competitionId) ??
+    getCompetitionByKey(competition.competitionKey);
+
+  if (registryMeta) {
+    return registryMeta;
+  }
+
+  return {
+    country: competition.country ?? competition.region ?? "Não informado",
+    scope: competition.scope ?? "domestic",
+    shortName: buildFallbackCompetitionShortName(competition),
+    visualAssetId: competition.assetId ?? competition.competitionId,
+  };
+}
+
 function buildCompetitionGroups(competitions: HomeCompetitionCard[]) {
   const orderedCompetitions = buildCompetitionOrder(competitions);
-  const domestic: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
-  const continental: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
-  const world: Array<HomeCompetitionCard & { meta: CompetitionDef }> = [];
+  const domestic: Array<HomeCompetitionCard & { meta: HomeCompetitionMeta }> = [];
+  const continental: Array<HomeCompetitionCard & { meta: HomeCompetitionMeta }> = [];
+  const world: Array<HomeCompetitionCard & { meta: HomeCompetitionMeta }> = [];
 
   for (const competition of orderedCompetitions) {
-    const meta =
-      getCompetitionById(competition.competitionId) ??
-      getCompetitionByKey(competition.competitionKey);
-    if (!meta) {
-      continue;
-    }
+    const meta = buildHomeCompetitionMeta(competition);
 
     if (meta.scope === "global") {
       world.push({ ...competition, meta });
@@ -350,12 +391,12 @@ function CompetitionCard({
   meta,
 }: {
   competition: HomeCompetitionCard;
-  meta: CompetitionDef;
+  meta: HomeCompetitionMeta;
 }) {
   const [hasCompetitionLogoError, setHasCompetitionLogoError] = useState(false);
   const assetUrl = buildVisualAssetUrl(
     "competitions",
-    getCompetitionVisualAssetId(meta) ?? competition.assetId,
+    meta.visualAssetId ?? competition.assetId,
   );
 
   return (

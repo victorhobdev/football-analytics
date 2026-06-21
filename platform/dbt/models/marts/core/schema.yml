@@ -619,3 +619,167 @@ models:
       - name: team_id
         tests:
           - not_null
+
+  - name: bridge_statsbomb_match_identity
+    description: "Ponte de identidade de partidas StatsBomb para o match canonico local quando resolvido."
+    columns:
+      - name: bridge_match_identity_sk
+        tests:
+          - not_null
+          - unique
+      - name: source_match_id
+        tests:
+          - not_null
+          - unique
+      - name: identity_status
+        tests:
+          - not_null
+      - name: local_match_id
+        tests:
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+              where: "local_match_id is not null"
+
+  - name: bridge_statsbomb_team_identity
+    description: "Ponte de identidade de times StatsBomb para o time canonico local quando resolvido."
+    columns:
+      - name: bridge_team_identity_sk
+        tests:
+          - not_null
+          - unique
+      - name: source_team_id
+        tests:
+          - not_null
+          - unique
+      - name: identity_status
+        tests:
+          - not_null
+      - name: local_team_id
+        tests:
+          - relationships:
+              to: ref('dim_team')
+              field: team_id
+              where: "local_team_id is not null"
+
+  - name: bridge_statsbomb_player_identity
+    description: "Ponte de identidade de jogadores StatsBomb para o jogador canonico local quando resolvido."
+    columns:
+      - name: bridge_player_identity_sk
+        tests:
+          - not_null
+          - unique
+      - name: source_player_id
+        tests:
+          - not_null
+          - unique
+      - name: identity_status
+        tests:
+          - not_null
+      - name: local_player_id
+        tests:
+          - relationships:
+              to: ref('dim_player')
+              field: player_id
+              where: "local_player_id is not null"
+
+  - name: dim_statsbomb_event_type
+    description: "Dimensao de tipos de evento exposta a partir do feed StatsBomb."
+    columns:
+      - name: event_type_sk
+        tests:
+          - not_null
+          - unique
+      - name: event_type
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_statsbomb_match_event
+    description: "Fato de eventos StatsBomb fora da trilha canonica de eventos SportMonks."
+    columns:
+      - name: statsbomb_match_event_id
+        tests:
+          - not_null
+          - unique
+      - name: source_match_id
+        tests:
+          - not_null
+      - name: source_event_id
+        tests:
+          - not_null
+      - name: event_type_sk
+        tests:
+          - relationships:
+              to: ref('dim_statsbomb_event_type')
+              field: event_type_sk
+              where: "event_type_sk is not null"
+      - name: local_match_id
+        tests:
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+              where: "local_match_id is not null"
+
+  - name: fact_statsbomb_lineup_slot
+    description: "Fato de slots taticos por jogador a partir dos lineups StatsBomb."
+    columns:
+      - name: statsbomb_lineup_slot_id
+        tests:
+          - not_null
+          - unique
+      - name: source_match_id
+        tests:
+          - not_null
+      - name: source_team_id
+        tests:
+          - not_null
+      - name: source_player_id
+        tests:
+          - not_null
+
+  - name: fact_statsbomb_360_freeze_frame
+    description: "Fato de freeze-frame 360 associado ao evento StatsBomb."
+    columns:
+      - name: statsbomb_360_freeze_frame_id
+        tests:
+          - not_null
+          - unique
+      - name: source_match_id
+        tests:
+          - not_null
+      - name: source_event_id
+        tests:
+          - not_null
+
+  - name: fact_statsbomb_shot
+    description: "Recorte de finalizacoes a partir do fato de eventos StatsBomb."
+    columns:
+      - name: statsbomb_match_event_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_statsbomb_pass
+    description: "Recorte de passes a partir do fato de eventos StatsBomb."
+    columns:
+      - name: statsbomb_match_event_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_statsbomb_carry
+    description: "Recorte de conducoes a partir do fato de eventos StatsBomb."
+    columns:
+      - name: statsbomb_match_event_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_statsbomb_pressure
+    description: "Recorte de pressoes a partir do fato de eventos StatsBomb."
+    columns:
+      - name: statsbomb_match_event_id
+        tests:
+          - not_null
+          - unique

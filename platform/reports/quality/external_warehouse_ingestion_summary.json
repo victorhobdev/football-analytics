@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-06-20T143910Z",
+  "dataset_root": "C:\\Users\\Vitinho\\Desktop\\UFRRJ\\Banco de Dados III\\football-analytics\\warehouse\\_inspect",
+  "phase": "brasileirao",
+  "tables": [
+    {
+      "target_table": "raw.brasileirao_matches",
+      "source_name": "dataset_brasileirao",
+      "relative_path": "brasileirao/campeonato-brasileiro-full.csv",
+      "rows_seen_after_filter": 9165,
+      "rows_skipped": 0,
+      "rows_inserted": 0
+    },
+    {
+      "target_table": "raw.brasileirao_stats",
+      "source_name": "dataset_brasileirao",
+      "relative_path": "brasileirao/campeonato-brasileiro-estatisticas-full.csv",
+      "rows_seen_after_filter": 18330,
+      "rows_skipped": 0,
+      "rows_inserted": 0
+    },
+    {
+      "target_table": "raw.brasileirao_goals",
+      "source_name": "dataset_brasileirao",
+      "relative_path": "brasileirao/campeonato-brasileiro-gols.csv",
+      "rows_seen_after_filter": 10820,
+      "rows_skipped": 0,
+      "rows_inserted": 0
+    },
+    {
+      "target_table": "raw.brasileirao_cards",
+      "source_name": "dataset_brasileirao",
+      "relative_path": "brasileirao/campeonato-brasileiro-cartoes.csv",
+      "rows_seen_after_filter": 20953,
+      "rows_skipped": 0,
+      "rows_inserted": 0
+    }
+  ]
+}

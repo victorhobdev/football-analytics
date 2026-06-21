@@ -106,6 +106,7 @@ docker-compose.override.yml
 transfermarkt-datasets.duckdb
 artifacts/
 data/
+warehouse/
 tmp/
 .tmp/
 __codex_write_probe.tmp

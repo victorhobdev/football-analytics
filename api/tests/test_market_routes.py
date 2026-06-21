@@ -41,6 +41,7 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload["data"]["items"][0]["typeId"], 219)
+        self.assertEqual(payload["data"]["items"][0]["source"], "sportmonks")
         self.assertEqual(payload["data"]["items"][0]["typeName"], "Transferência definitiva")
         self.assertEqual(payload["data"]["items"][0]["movementKind"], "permanent_transfer")
         self.assertEqual(payload["meta"]["pagination"]["page"], 2)
@@ -50,8 +51,9 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertTrue(payload["meta"]["pagination"]["hasPreviousPage"])
 
         query, params = fetch_all_mock.call_args.args
-        self.assertIn("spt.type_id = %s", query)
-        self.assertIn("spt.transfer_date <= %s", query)
+        self.assertIn("ut.type_id = %s", query)
+        self.assertIn("ut.transfer_date <= %s", query)
+        self.assertIn("transfermarkt_transfers", query)
         self.assertNotIn("Unknown Player #", query)
         self.assertNotIn("Team #", query)
         self.assertEqual(params.count(219), 2)

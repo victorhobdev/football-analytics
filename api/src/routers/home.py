@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request
 
 from ..core.context_registry import (
     build_canonical_context,
-    get_canonical_competition,
+    get_canonical_competition_by_key,
     list_canonical_competition_ids,
 )
 from ..core.contracts import build_api_response, build_coverage_from_counts
@@ -68,6 +68,163 @@ def _format_competition_coverage(
     )
 
 
+def _infer_competition_catalog_metadata(
+    competition_key: str,
+    competition_name: str,
+    catalog_row: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    if catalog_row is not None:
+        competition_type = str(catalog_row.get("competition_type") or "").strip().lower()
+        country = str(catalog_row.get("country_name") or "").strip() or "Mundo"
+        confederation = str(catalog_row.get("confederation_name") or "").strip().upper()
+        region_map = {
+            "AFC": "Ásia",
+            "CAF": "África",
+            "CONCACAF": "América do Norte",
+            "CONMEBOL": "América do Sul",
+            "FIFA": "Global",
+            "UEFA": "Europa",
+        }
+        region = region_map.get(confederation, "Global")
+
+        if competition_type == "league":
+            return {
+                "country": country,
+                "region": region,
+                "scope": "domestic",
+                "type": "domestic_league",
+            }
+
+        if competition_type == "continental_cup":
+            return {
+                "country": country if country not in {"", "Mundo"} else region,
+                "region": region,
+                "scope": "continental",
+                "type": "international_cup",
+            }
+
+        if confederation == "FIFA" or country == "Mundo":
+            return {
+                "country": "Mundo",
+                "region": "Global",
+                "scope": "global",
+                "type": "international_cup",
+            }
+
+        return {
+            "country": country,
+            "region": region,
+            "scope": "domestic",
+            "type": "domestic_cup",
+        }
+
+    normalized = f"{competition_key} {competition_name}".lower()
+
+    women_markers = ("women", "womens", "feminina", "feminino", "frauen", "nwsl", "liga_f")
+    is_women = any(marker in normalized for marker in women_markers)
+
+    region = "Global"
+    country = "Mundo"
+    scope = "continental"
+    competition_type = "international_cup"
+
+    if competition_key in {
+        "brasileirao_a",
+        "brasileirao_b",
+        "copa_do_brasil",
+        "supercopa_do_brasil",
+    }:
+        region = "América do Sul"
+        country = "Brasil"
+        scope = "domestic"
+        competition_type = "domestic_cup" if "copa" in competition_key else "domestic_league"
+    elif competition_key in {"premier_league", "fa_womens_super_league"}:
+        region = "Europa"
+        country = "Inglaterra"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key in {"la_liga", "copa_del_rey", "liga_f"}:
+        region = "Europa"
+        country = "Espanha"
+        scope = "domestic"
+        competition_type = "domestic_cup" if competition_key == "copa_del_rey" else "domestic_league"
+    elif competition_key in {"serie_a_it", "serie_a_women"}:
+        region = "Europa"
+        country = "Itália"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key in {"bundesliga", "frauen_bundesliga"}:
+        region = "Europa"
+        country = "Alemanha"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key == "ligue_1":
+        region = "Europa"
+        country = "França"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key == "primeira_liga":
+        region = "Europa"
+        country = "Portugal"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key in {"major_league_soccer", "nwsl", "north_american_league"}:
+        region = "América do Norte"
+        country = "Estados Unidos"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key == "liga_profesional_argentina":
+        region = "América do Sul"
+        country = "Argentina"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key == "indian_super_league":
+        region = "Ásia"
+        country = "Índia"
+        scope = "domestic"
+        competition_type = "domestic_league"
+    elif competition_key in {
+        "champions_league",
+        "uefa_europa_league",
+        "uefa_euro",
+        "uefa_womens_euro",
+    }:
+        region = "Europa"
+        country = "Europa"
+        scope = "continental"
+        competition_type = "international_cup"
+    elif competition_key in {"libertadores", "sudamericana", "copa_america"}:
+        region = "América do Sul"
+        country = "América do Sul"
+        scope = "continental"
+        competition_type = "international_cup"
+    elif competition_key == "african_cup_of_nations":
+        region = "África"
+        country = "África"
+        scope = "continental"
+        competition_type = "international_cup"
+    elif competition_key in {
+        "fifa_world_cup_mens",
+        "fifa_womens_world_cup",
+        "fifa_u20_world_cup",
+        "fifa_intercontinental_cup",
+    }:
+        region = "Global"
+        country = "Mundo"
+        scope = "global"
+        competition_type = "international_cup"
+
+    if is_women and country == "Mundo":
+        country = "Mundo"
+
+    return {
+        "country": country,
+        "region": region,
+        "scope": scope,
+        "type": competition_type,
+    }
+
+
 def _build_home_coverage(
     *,
     archive_summary: dict[str, Any],
@@ -105,12 +262,12 @@ def _fetch_archive_summary() -> dict[str, Any]:
                 ) as has_world_cup_in_fact
         )
         select
-            (select count(distinct league_id) from mart.fact_matches)
+            (select count(distinct competition_key) from mart.fact_matches where competition_key is not null)
                 + case
                     when wp.has_world_cup and not wp.has_world_cup_in_fact then 1
                     else 0
                   end as competitions,
-            (select count(distinct (league_id, season)) from mart.fact_matches)
+            (select count(distinct (competition_key, season)) from mart.fact_matches where competition_key is not null)
                 + case
                     when wp.has_world_cup and not wp.has_world_cup_in_fact
                         then (
@@ -143,159 +300,362 @@ def _fetch_archive_summary() -> dict[str, Any]:
     }
 
 
-def _fetch_competitions() -> list[dict[str, Any]]:
+def _normalize_archive_summary_from_competitions(
+    archive_summary: dict[str, Any],
+    competitions: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalized_summary = dict(archive_summary)
+    normalized_summary["competitions"] = len(competitions)
+    normalized_summary["seasons"] = sum(_to_int(item.get("seasonsCount")) for item in competitions)
+    normalized_summary["matches"] = sum(_to_int(item.get("matchesCount")) for item in competitions)
+    return normalized_summary
+
+
+def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
     rows = db_client.fetch_all(
         """
         select
-            league_id,
-            league_name,
-            matches_count,
-            seasons_count,
-            min_season,
-            max_season,
-            match_statistics_count,
-            lineups_count,
-            events_count,
-            player_statistics_count
-        from mart.competition_serving_summary
-        order by league_id asc;
+            competition_key,
+            competition_name,
+            competition_type,
+            country_name,
+            confederation_name,
+            tier,
+            display_priority
+        from control.competitions
+        where is_active = true;
+        """
+    )
+    return {
+        str(row["competition_key"]).strip(): row
+        for row in rows
+        if str(row.get("competition_key") or "").strip() != ""
+    }
+
+
+def _fetch_competitions() -> list[dict[str, Any]]:
+    rows = db_client.fetch_all(
+        """
+        with match_scope as (
+            select
+                fm.match_id,
+                fm.league_id,
+                fm.competition_key,
+                fm.season_label,
+                fm.date_day,
+                dc.league_name
+            from mart.fact_matches fm
+            left join mart.dim_competition dc
+              on dc.competition_sk = fm.competition_sk
+            where fm.competition_key is not null
+        ),
+        match_totals as (
+            select
+                competition_key,
+                min(league_id)::text as competition_id,
+                max(league_name) as competition_name,
+                count(distinct match_id)::int as matches_count,
+                count(distinct season_label)::int as seasons_count
+            from match_scope
+            group by competition_key
+        ),
+        first_season as (
+            select distinct on (competition_key)
+                competition_key,
+                season_label as min_season_label
+            from match_scope
+            order by competition_key, date_day asc nulls last, season_label asc
+        ),
+        latest_season as (
+            select distinct on (competition_key)
+                competition_key,
+                season_label as max_season_label
+            from match_scope
+            order by competition_key, date_day desc nulls last, season_label desc
+        ),
+        match_statistics as (
+            select
+                fm.competition_key,
+                count(distinct fps.match_id)::int as available_count
+            from mart.fact_fixture_player_stats fps
+            inner join mart.fact_matches fm
+              on fm.match_id = fps.match_id
+            group by fm.competition_key
+        ),
+        fixture_lineups as (
+            select
+                fm.competition_key,
+                count(distinct fl.match_id)::int as available_count
+            from mart.fact_fixture_lineups fl
+            inner join mart.fact_matches fm
+              on fm.match_id = fl.match_id
+            group by fm.competition_key
+        ),
+        match_events as (
+            select
+                fm.competition_key,
+                count(distinct me.match_id)::int as available_count
+            from mart.fact_match_events me
+            inner join mart.fact_matches fm
+              on fm.match_id = me.match_id
+            group by fm.competition_key
+        )
+        select
+            mt.competition_id,
+            mt.competition_key,
+            mt.competition_name,
+            mt.matches_count,
+            mt.seasons_count,
+            fs.min_season_label,
+            ls.max_season_label,
+            coalesce(ms.available_count, 0) as match_statistics_count,
+            coalesce(fl.available_count, 0) as lineups_count,
+            coalesce(me.available_count, 0) as events_count,
+            coalesce(ms.available_count, 0) as player_statistics_count
+        from match_totals mt
+        left join first_season fs
+          on fs.competition_key = mt.competition_key
+        left join latest_season ls
+          on ls.competition_key = mt.competition_key
+        left join match_statistics ms
+          on ms.competition_key = mt.competition_key
+        left join fixture_lineups fl
+          on fl.competition_key = mt.competition_key
+        left join match_events me
+          on me.competition_key = mt.competition_key
+        order by mt.competition_name asc;
         """
     )
 
-    merged_rows: dict[int, dict[str, Any]] = {}
     competition_order = {
         competition_id: index
         for index, competition_id in enumerate(list_canonical_competition_ids())
     }
 
-    for row in rows:
-        league_id = row.get("league_id")
-        if league_id is None:
-            continue
+    control_catalog = _fetch_control_competition_catalog()
+    external_depth_by_key = _fetch_external_competition_depth_by_key()
 
-        canonical_competition = get_canonical_competition(int(league_id))
-        if canonical_competition is None:
-            continue
+    def source_rank(source: str) -> int:
+        if source == "eloratings":
+            return 3
+        if source == "transfermarkt":
+            return 2
+        return 1
 
-        bucket = merged_rows.setdefault(
-            canonical_competition.competition_id,
-            {
-                "competitionId": str(canonical_competition.competition_id),
-                "competitionKey": canonical_competition.competition_key,
-                "competitionName": canonical_competition.default_name,
-                "assetId": None,
-                "matchesCount": 0,
-                "seasonsCount": 0,
-                "minSeason": None,
-                "maxSeason": None,
-                "matchStatisticsCount": 0,
-                "lineupsCount": 0,
-                "eventsCount": 0,
-                "playerStatisticsCount": 0,
-            },
-        )
+    def format_external_season_label(
+        canonical_competition: Any,
+        season_value: Any,
+    ) -> str | None:
+        if season_value is None:
+            return None
 
-        bucket["matchesCount"] += _to_int(row.get("matches_count"))
-        bucket["seasonsCount"] += _to_int(row.get("seasons_count"))
-        bucket["matchStatisticsCount"] += _to_int(row.get("match_statistics_count"))
-        bucket["lineupsCount"] += _to_int(row.get("lineups_count"))
-        bucket["eventsCount"] += _to_int(row.get("events_count"))
-        bucket["playerStatisticsCount"] += _to_int(row.get("player_statistics_count"))
+        normalized = str(season_value).strip()
+        if normalized == "":
+            return None
 
-        min_season = row.get("min_season")
-        max_season = row.get("max_season")
-        if isinstance(min_season, int):
-            bucket["minSeason"] = (
-                min_season
-                if bucket["minSeason"] is None
-                else min(bucket["minSeason"], min_season)
-            )
-        if isinstance(max_season, int):
-            bucket["maxSeason"] = (
-                max_season
-                if bucket["maxSeason"] is None
-                else max(bucket["maxSeason"], max_season)
-            )
+        if (
+            canonical_competition is not None
+            and canonical_competition.season_calendar == "split_year"
+            and normalized.isdigit()
+            and len(normalized) == 4
+        ):
+            return f"{normalized}/{int(normalized) + 1}"
 
-        if bucket["assetId"] is None:
-            bucket["assetId"] = str(league_id)
-
-    world_cup_row = db_client.fetch_one(
-        """
-        select
-            count(*)::int as matches_count,
-            count(distinct season_label)::int as seasons_count,
-            min(season_label::int) as min_season,
-            max(season_label::int) as max_season
-        from raw.fixtures
-        where competition_key = 'fifa_world_cup_mens';
-        """
-    ) or {}
-    world_cup_matches = _to_int(world_cup_row.get("matches_count"))
-    if world_cup_matches > 0 and 0 not in merged_rows:
-        merged_rows[0] = {
-            "competitionId": "0",
-            "competitionKey": "fifa_world_cup_mens",
-            "competitionName": "Copa do Mundo FIFA",
-            "assetId": "wc_mens",
-            "matchesCount": world_cup_matches,
-            "seasonsCount": _to_int(world_cup_row.get("seasons_count")),
-            "minSeason": world_cup_row.get("min_season"),
-            "maxSeason": world_cup_row.get("max_season"),
-            "matchStatisticsCount": world_cup_matches,
-            "lineupsCount": world_cup_matches,
-            "eventsCount": world_cup_matches,
-            "playerStatisticsCount": world_cup_matches,
-        }
+        return normalized
 
     payload: list[dict[str, Any]] = []
-    for competition in sorted(
-        merged_rows.values(),
-        key=lambda item: competition_order.get(int(item["competitionId"]), 999),
-    ):
-        min_season = competition["minSeason"]
-        max_season = competition["maxSeason"]
+    for row in rows:
+        competition_key = str(row.get("competition_key") or "").strip()
+        competition_name = str(row.get("competition_name") or competition_key).strip()
+        competition_id = str(row.get("competition_id") or competition_key).strip()
+        if competition_key == "" or competition_id == "":
+            continue
+
+        canonical_competition = get_canonical_competition_by_key(competition_key)
+        metadata = _infer_competition_catalog_metadata(
+            competition_key,
+            competition_name,
+            control_catalog.get(competition_key),
+        )
+        public_competition_id = (
+            str(canonical_competition.competition_id)
+            if canonical_competition is not None
+            else competition_id
+        )
+        public_competition_name = (
+            canonical_competition.default_name
+            if canonical_competition is not None
+            else competition_name
+        )
+
+        min_season = row.get("min_season_label")
+        max_season = row.get("max_season_label")
+        candidates = [
+            {
+                "source": "published",
+                "matchesCount": _to_int(row.get("matches_count")),
+                "seasonsCount": _to_int(row.get("seasons_count")),
+                "fromSeasonLabel": str(min_season) if min_season is not None else None,
+                "toSeasonLabel": str(max_season) if max_season is not None else None,
+            },
+            *external_depth_by_key.get(competition_key, []),
+        ]
+        dominant_candidate = max(
+            candidates,
+            key=lambda candidate: (
+                _to_int(candidate.get("seasonsCount")),
+                _to_int(candidate.get("matchesCount")),
+                source_rank(str(candidate.get("source") or "published")),
+            ),
+        )
+        additional_sources = sorted(
+            {
+                str(candidate.get("source") or "published")
+                for candidate in candidates
+                if str(candidate.get("source") or "published")
+                != str(dominant_candidate.get("source") or "published")
+            }
+        )
+        source_label = (
+            "multi"
+            if len({str(candidate.get("source") or "published") for candidate in candidates}) > 1
+            else str(dominant_candidate.get("source") or "published")
+        )
+        from_season_label = dominant_candidate.get("fromSeasonLabel") or format_external_season_label(
+            canonical_competition,
+            dominant_candidate.get("fromSeason"),
+        )
+        to_season_label = dominant_candidate.get("toSeasonLabel") or format_external_season_label(
+            canonical_competition,
+            dominant_candidate.get("toSeason"),
+        )
         from_context = (
-            build_canonical_context(
-                competition_id=int(competition["competitionId"]),
-                competition_name=competition["competitionName"],
-                season_id=min_season,
-            )
+            {
+                "competitionId": public_competition_id,
+                "competitionKey": competition_key,
+                "competitionName": public_competition_name,
+                "seasonId": str(min_season),
+                "seasonLabel": str(min_season),
+            }
             if min_season is not None
             else None
         )
         latest_context = (
-            build_canonical_context(
-                competition_id=int(competition["competitionId"]),
-                competition_name=competition["competitionName"],
-                season_id=max_season,
-            )
+            {
+                "competitionId": public_competition_id,
+                "competitionKey": competition_key,
+                "competitionName": public_competition_name,
+                "seasonId": str(max_season),
+                "seasonLabel": str(max_season),
+            }
             if max_season is not None
             else None
         )
 
         payload.append(
             {
-                "competitionId": competition["competitionId"],
-                "competitionKey": competition["competitionKey"],
-                "competitionName": competition["competitionName"],
-                "assetId": competition["assetId"],
-                "matchesCount": competition["matchesCount"],
-                "seasonsCount": competition["seasonsCount"],
+                "competitionId": public_competition_id,
+                "competitionKey": competition_key,
+                "competitionName": public_competition_name,
+                "assetId": "wc_mens" if competition_key == "fifa_world_cup_mens" else public_competition_id,
+                "source": source_label,
+                "dominantSource": str(dominant_candidate.get("source") or "published"),
+                "additionalSources": additional_sources,
+                "country": metadata["country"],
+                "region": metadata["region"],
+                "scope": metadata["scope"],
+                "type": metadata["type"],
+                "matchesCount": _to_int(dominant_candidate.get("matchesCount")),
+                "seasonsCount": _to_int(dominant_candidate.get("seasonsCount")),
                 "range": {
                     "fromSeasonId": str(min_season) if min_season is not None else None,
-                    "fromSeasonLabel": from_context["seasonLabel"] if from_context else None,
+                    "fromSeasonLabel": from_season_label,
                     "toSeasonId": str(max_season) if max_season is not None else None,
-                    "toSeasonLabel": latest_context["seasonLabel"] if latest_context else None,
+                    "toSeasonLabel": to_season_label,
                 },
                 "latestContext": latest_context,
                 "coverage": _format_competition_coverage(
-                    matches_count=_to_int(competition["matchesCount"]),
-                    match_statistics_count=_to_int(competition["matchStatisticsCount"]),
-                    lineups_count=_to_int(competition["lineupsCount"]),
-                    events_count=_to_int(competition["eventsCount"]),
-                    player_statistics_count=_to_int(competition["playerStatisticsCount"]),
+                    matches_count=_to_int(row.get("matches_count")),
+                    match_statistics_count=_to_int(row.get("match_statistics_count")),
+                    lineups_count=_to_int(row.get("lineups_count")),
+                    events_count=_to_int(row.get("events_count")),
+                    player_statistics_count=_to_int(row.get("player_statistics_count")),
                 ),
+            }
+        )
+
+    return sorted(
+        payload,
+        key=lambda item: (
+            competition_order.get(int(item["competitionId"]), 999)
+            if str(item["competitionId"]).isdigit()
+            else 999,
+            item["competitionName"],
+        ),
+    )
+
+
+def _fetch_external_competition_depth_by_key() -> dict[str, list[dict[str, Any]]]:
+    rows = db_client.fetch_all(
+        """
+        with transfermarkt_depth as (
+            select
+                cpm.competition_key,
+                'transfermarkt'::text as source,
+                count(*)::int as matches_count,
+                count(distinct tg.season)::int as seasons_count,
+                min(tg.season)::text as min_season,
+                max(tg.season)::text as max_season
+            from control.competition_provider_map cpm
+            inner join raw.tm_games tg
+              on cpm.provider = 'transfermarkt'
+             and cpm.provider_league_code = tg.competition_id
+            where tg.season ~ '^\\d+$'
+            group by cpm.competition_key
+        ),
+        elo_depth as (
+            select
+                cpm.competition_key,
+                'eloratings'::text as source,
+                count(*)::int as matches_count,
+                count(distinct split_part(em.match_date_raw, '-', 1))::int as seasons_count,
+                min(split_part(em.match_date_raw, '-', 1)) as min_season,
+                max(split_part(em.match_date_raw, '-', 1)) as max_season
+            from control.competition_provider_map cpm
+            inner join raw.elo_matches em
+              on cpm.provider = 'eloratings'
+             and cpm.provider_league_code = em.division
+            where em.match_date_raw ~ '^\\d{4}-\\d{2}-\\d{2}$'
+            group by cpm.competition_key
+        )
+        select
+            competition_key,
+            source,
+            matches_count,
+            seasons_count,
+            min_season,
+            max_season
+        from (
+            select * from transfermarkt_depth
+            union all
+            select * from elo_depth
+        ) depth
+        order by competition_key, source;
+        """
+    )
+
+    payload: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        competition_key = str(row.get("competition_key") or "").strip()
+        if competition_key == "":
+            continue
+        payload.setdefault(competition_key, []).append(
+            {
+                "source": str(row.get("source") or "").strip(),
+                "matchesCount": _to_int(row.get("matches_count")),
+                "seasonsCount": _to_int(row.get("seasons_count")),
+                "fromSeason": row.get("min_season"),
+                "toSeason": row.get("max_season"),
             }
         )
 
@@ -432,8 +792,11 @@ def _fetch_editorial_highlights() -> list[dict[str, Any]]:
 
 @router.get("")
 def get_home_page(request: Request) -> dict[str, Any]:
-    archive_summary = _fetch_archive_summary()
     competitions = _fetch_competitions()
+    archive_summary = _normalize_archive_summary_from_competitions(
+        _fetch_archive_summary(),
+        competitions,
+    )
     editorial_highlights = _fetch_editorial_highlights()
 
     return build_api_response(
