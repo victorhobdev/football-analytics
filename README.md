@@ -129,6 +129,12 @@ Dados de futebol -> Transformação -> API de produto -> Interface web -> BI
 <details>
 <summary>Ver instruções para desenvolvimento</summary>
 
+### 0. Um comando para subir tudo
+
+```powershell
+.\start-local.ps1
+```
+
 ### 1. Infraestrutura base
 
 ```powershell

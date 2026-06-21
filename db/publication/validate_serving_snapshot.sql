@@ -65,6 +65,56 @@ future_matches as (
   from mart.fact_matches
   where season > 2025
 ),
+scope_without_catalog as (
+  select count(*)::bigint as rows_count
+  from publication.serving_scope s
+  where not exists (
+    select 1
+    from control.competitions c
+    where c.competition_key = s.competition_key
+  )
+),
+duplicate_scoped_competition_names as (
+  select count(*)::bigint as rows_count
+  from (
+    select lower(trim(c.competition_name)) as normalized_competition_name
+    from control.competitions c
+    where exists (
+      select 1
+      from publication.serving_scope s
+      where s.competition_key = c.competition_key
+    )
+    group by lower(trim(c.competition_name))
+    having count(*) > 1
+  ) duplicates
+),
+duplicate_match_ids as (
+  select count(*)::bigint as rows_count
+  from (
+    select match_id
+    from mart.fact_matches
+    group by match_id
+    having count(*) > 1
+  ) duplicates
+),
+duplicate_player_ids as (
+  select count(*)::bigint as rows_count
+  from (
+    select player_id
+    from mart.dim_player
+    group by player_id
+    having count(*) > 1
+  ) duplicates
+),
+duplicate_team_ids as (
+  select count(*)::bigint as rows_count
+  from (
+    select team_id
+    from mart.dim_team
+    group by team_id
+    having count(*) > 1
+  ) duplicates
+),
 raw_fixture_orphans as (
   select count(*)::bigint as rows_count
   from raw.fixtures rf
@@ -102,6 +152,16 @@ union all
 select 'event_orphans', rows_count from event_orphans
 union all
 select 'lineup_orphans', rows_count from lineup_orphans
+union all
+select 'scope_without_catalog', rows_count from scope_without_catalog
+union all
+select 'duplicate_scoped_competition_names', rows_count from duplicate_scoped_competition_names
+union all
+select 'duplicate_match_ids', rows_count from duplicate_match_ids
+union all
+select 'duplicate_player_ids', rows_count from duplicate_player_ids
+union all
+select 'duplicate_team_ids', rows_count from duplicate_team_ids
 union all
 select 'player_stat_orphans', rows_count from player_stat_orphans
 order by check_name;

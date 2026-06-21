@@ -534,6 +534,7 @@ export function MarketPageContent() {
           const toTeamHref = item.toTeamId ? buildTeamResolverPath(item.toTeamId, sharedFilters) : null;
           const amountValue = getAmountValue(item);
           const amountLabel = formatAmountInMillions(amountValue, item.currency);
+          const marketValueLabel = formatAmountInMillions(item.marketValueEur, "EUR");
 
           return (
             <article
@@ -577,6 +578,11 @@ export function MarketPageContent() {
                   {amountValue !== null && item.currency ? (
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#8c6a1f]">
                       {item.currency}
+                    </p>
+                  ) : null}
+                  {typeof item.marketValueEur === "number" && Number.isFinite(item.marketValueEur) ? (
+                    <p className="mt-2 text-xs font-semibold text-[#8c6a1f]">
+                      Mercado: {marketValueLabel}
                     </p>
                   ) : null}
                 </div>

@@ -1,4 +1,12 @@
-{{ config(materialized='incremental', unique_key='event_id', on_schema_change='sync_all_columns') }}
+{{ config(
+    materialized='incremental',
+    unique_key='event_id',
+    on_schema_change='sync_all_columns',
+    indexes=[
+        {'columns': ['match_id', 'time_elapsed'], 'type': 'btree'},
+        {'columns': ['event_id'], 'type': 'btree'}
+    ]
+) }}
 {% set lookback_hours = var('fact_match_events_incremental_lookback_hours', 24) %}
 
 with base as (

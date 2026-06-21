@@ -6,6 +6,11 @@ export interface HomeArchiveSummary {
   seasons: number;
   matches: number;
   players: number;
+  matchesWithOdds?: number;
+  matchesWithTeamStats?: number;
+  teamStatRows?: number;
+  marketTransfers?: number;
+  marketValuations?: number;
 }
 
 export interface HomeCompetitionRange {
@@ -20,9 +25,9 @@ export interface HomeCompetitionCard {
   competitionKey: string;
   competitionName: string;
   assetId: string | null;
-  source?: "published" | "transfermarkt" | "eloratings" | "multi" | null;
-  dominantSource?: "published" | "transfermarkt" | "eloratings" | null;
-  additionalSources?: Array<"published" | "transfermarkt" | "eloratings">;
+  source?: "published" | "transfermarkt" | "eloratings" | "brasileirao" | "multi" | null;
+  dominantSource?: "published" | "transfermarkt" | "eloratings" | "brasileirao" | null;
+  additionalSources?: Array<"published" | "transfermarkt" | "eloratings" | "brasileirao">;
   country?: string | null;
   region?: string | null;
   scope?: "domestic" | "continental" | "global" | null;

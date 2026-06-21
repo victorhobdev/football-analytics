@@ -117,6 +117,17 @@ export interface PlayerProfileStats {
   trend?: PlayerStatsTrendPoint[];
 }
 
+export interface PlayerMarketSummary {
+  currentMarketValueEur?: number | null;
+  peakMarketValueEur?: number | null;
+  lastValuationDate?: string | null;
+  transferCount: number;
+  lastTransferDate?: string | null;
+  lastTransferFromTeamName?: string | null;
+  lastTransferToTeamName?: string | null;
+  lastTransferFeeEur?: number | null;
+}
+
 export interface PlayerProfileSectionCoverage {
   overview?: CoverageState;
   history?: CoverageState;
@@ -153,6 +164,7 @@ export interface PlayerProfileMeta {
 export interface PlayerProfile {
   player: Player;
   summary: PlayerStatsSummary;
+  market?: PlayerMarketSummary | null;
   profileMeta: PlayerProfileMeta;
   recentMatches?: PlayerMatchStatsPoint[];
   history?: PlayerHistoryEntry[];

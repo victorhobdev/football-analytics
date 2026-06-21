@@ -50,6 +50,22 @@ function formatDecimal(value: number | null | undefined): string {
   return value.toFixed(2);
 }
 
+function formatCompactMoney(value: number | null | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  if (value >= 1_000_000) {
+    return `EUR ${(value / 1_000_000).toFixed(value >= 10_000_000 ? 1 : 2)} mi`;
+  }
+
+  if (value >= 1_000) {
+    return `EUR ${(value / 1_000).toFixed(0)} mil`;
+  }
+
+  return `EUR ${Math.round(value)}`;
+}
+
 function formatResultLabel(result: string | null | undefined): string {
   if (result === "win") {
     return "V";
@@ -112,6 +128,7 @@ export function PlayerOverviewSection({
   insights,
 }: PlayerOverviewSectionProps) {
   const { player, profileMeta, recentMatches, summary } = profile;
+  const market = profile.market;
   const latestMatch = recentMatches?.[0] ?? null;
   const goalContribution =
     (typeof summary.goals === "number" ? summary.goals : 0) +
@@ -311,6 +328,8 @@ export function PlayerOverviewSection({
             <ProfileKpi label="Gols + assistências" value={goalContribution} hint={`${summary.goals ?? 0} gols · ${summary.assists ?? 0} assistências`} />
             <ProfileKpi label="Nota" value={formatDecimal(summary.rating)} hint={`No alvo ${formatPercentage(shotsOnTargetPct)}`} />
             <ProfileKpi label="Finalizações" value={summary.shotsTotal ?? "-"} hint={`${summary.shotsOnTarget ?? 0} no alvo`} />
+            <ProfileKpi label="Valor atual" value={formatCompactMoney(market?.currentMarketValueEur)} hint={market?.lastValuationDate ? `Base ${formatDate(market.lastValuationDate)}` : "Sem valuation"} />
+            <ProfileKpi label="Pico" value={formatCompactMoney(market?.peakMarketValueEur)} hint={`${market?.transferCount ?? 0} transferências`} />
           </div>
         </ProfilePanel>
 

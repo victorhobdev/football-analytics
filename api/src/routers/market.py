@@ -296,6 +296,7 @@ def get_market_transfers(
                     then nullif(trim(coalesce(spt.amount, '')), '')::numeric
                     else null
                 end as amount_value,
+                null::numeric as market_value_eur,
                 null::text as currency,
                 {_normalized_sql("coalesce(nullif(trim(spt.player_name), ''), 'Nome indisponível')")} as normalized_player_name
             from mart.stg_player_transfers spt
@@ -306,32 +307,28 @@ def get_market_transfers(
         ),
         transfermarkt_transfers as (
             select
-                concat('transfermarkt:', tm.record_hash) as transfer_id,
+                concat('transfermarkt:', tm.source_transfer_id) as transfer_id,
                 'transfermarkt'::text as source,
-                null::bigint as player_id,
+                tm.player_id,
                 coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível') as player_name,
                 null::bigint as from_team_id,
                 nullif(trim(tm.from_club_name), '') as from_team_name,
                 null::bigint as to_team_id,
                 nullif(trim(tm.to_club_name), '') as to_team_name,
-                to_date(tm.transfer_date_raw, 'YYYY-MM-DD') as transfer_date,
+                tm.transfer_date,
                 true as completed,
                 false as career_ended,
                 null::bigint as type_id,
-                nullif(trim(tm.transfer_fee), '') as amount,
-                case
-                    when nullif(trim(tm.transfer_fee), '') ~ '^[0-9]+(\\.[0-9]+)?$'
-                    then nullif(trim(tm.transfer_fee), '')::numeric
-                    else null
-                end as amount_value,
+                tm.transfer_fee_eur::text as amount,
+                tm.transfer_fee_eur as amount_value,
+                tm.market_value_eur,
                 'EUR'::text as currency,
                 {_normalized_sql("coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível')")} as normalized_player_name
-            from raw.tm_transfers tm
-            where tm.transfer_date_raw ~ '^\\d{{4}}-\\d{{2}}-\\d{{2}}$'
-              and not exists (
+            from mart.fact_transfermarkt_transfers tm
+            where not exists (
                 select 1
                 from sportmonks_transfers sm
-                where sm.transfer_date = to_date(tm.transfer_date_raw, 'YYYY-MM-DD')
+                where sm.transfer_date = tm.transfer_date
                   and sm.normalized_player_name = {_normalized_sql("coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível')")}
               )
         ),
@@ -351,6 +348,7 @@ def get_market_transfers(
                 type_id,
                 amount,
                 amount_value,
+                market_value_eur,
                 currency
             from sportmonks_transfers
 
@@ -371,6 +369,7 @@ def get_market_transfers(
                 type_id,
                 amount,
                 amount_value,
+                market_value_eur,
                 currency
             from transfermarkt_transfers
         ),
@@ -390,6 +389,7 @@ def get_market_transfers(
                 ut.type_id,
                 ut.amount,
                 ut.amount_value,
+                ut.market_value_eur,
                 ut.currency
             from unified_transfers ut
             where (
@@ -460,6 +460,7 @@ def get_market_transfers(
             type_id,
             amount,
             amount_value,
+            market_value_eur,
             currency,
             count(*) over() as _total_count
         from filtered_transfers
@@ -520,6 +521,7 @@ def get_market_transfers(
             "movementKind": _movement_kind(row.get("type_id"), career_ended=bool(row.get("career_ended"))),
             "amount": row.get("amount"),
             "amountValue": row.get("amount_value"),
+            "marketValueEur": row.get("market_value_eur"),
             "currency": row.get("currency"),
         }
         for row in rows

@@ -1,0 +1,915 @@
+Schema;Tabela;Coluna;Tipo de Dado;Nulo?;Default;Chave;Constraints;Descrição
+raw;fixtures;fixture_id;BIGINT;NOT NULL;;PK;;Identificador único da partida
+raw;fixtures;date_utc;TIMESTAMPTZ;NULL;;;;Data/hora UTC da partida
+raw;fixtures;timestamp;BIGINT;NULL;;;;Timestamp Unix da partida
+raw;fixtures;timezone;TEXT;NULL;;;;Fuso horário
+raw;fixtures;referee;TEXT;NULL;;;;Nome do árbitro
+raw;fixtures;venue_id;BIGINT;NULL;;;;ID do estádio
+raw;fixtures;venue_name;TEXT;NULL;;;;Nome do estádio
+raw;fixtures;venue_city;TEXT;NULL;;;;Cidade do estádio
+raw;fixtures;status_short;TEXT;NULL;;;;Status abreviado da partida (FT, NS, etc)
+raw;fixtures;status_long;TEXT;NULL;;;;Status por extenso
+raw;fixtures;league_id;BIGINT;NOT NULL;;;;ID da liga/competição
+raw;fixtures;league_name;TEXT;NULL;;;;Nome da liga
+raw;fixtures;season;INT;NOT NULL;;;;Ano da temporada
+raw;fixtures;round;TEXT;NULL;;;;Rodada textual
+raw;fixtures;home_team_id;BIGINT;NULL;;;;ID do time mandante
+raw;fixtures;home_team_name;TEXT;NULL;;;;Nome do time mandante
+raw;fixtures;away_team_id;BIGINT;NULL;;;;ID do time visitante
+raw;fixtures;away_team_name;TEXT;NULL;;;;Nome do time visitante
+raw;fixtures;home_goals;INT;NULL;;;;Gols do mandante
+raw;fixtures;away_goals;INT;NULL;;;;Gols do visitante
+raw;fixtures;year;TEXT;NULL;;;;Ano textual
+raw;fixtures;month;TEXT;NULL;;;;Mês textual
+raw;fixtures;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;fixtures;source_provider;TEXT;NULL;;;;Provedor de dados (sportmonks, etc)
+raw;fixtures;referee_id;BIGINT;NULL;;;;ID do árbitro no provedor
+raw;fixtures;stage_id;BIGINT;NULL;;;;ID da fase da competição
+raw;fixtures;round_id;BIGINT;NULL;;;;ID da rodada estruturada
+raw;fixtures;attendance;INT;NULL;;;;Público presente
+raw;fixtures;weather_description;TEXT;NULL;;;;Descrição do clima
+raw;fixtures;weather_temperature_c;NUMERIC(6,2);NULL;;;;Temperatura em Celsius
+raw;fixtures;weather_wind_kph;NUMERIC(6,2);NULL;;;;Velocidade do vento em km/h
+raw;fixtures;home_goals_ht;INT;NULL;;;;Gols mandante no intervalo
+raw;fixtures;away_goals_ht;INT;NULL;;;;Gols visitante no intervalo
+raw;fixtures;home_goals_ft;INT;NULL;;;;Gols mandante no tempo regulamentar
+raw;fixtures;away_goals_ft;INT;NULL;;;;Gols visitante no tempo regulamentar
+raw;match_statistics;fixture_id;BIGINT;NOT NULL;;PK;FK→raw.fixtures;ID da partida
+raw;match_statistics;team_id;BIGINT;NOT NULL;;PK;;ID do time
+raw;match_statistics;team_name;TEXT;NULL;;;;Nome do time
+raw;match_statistics;shots_on_goal;INT;NULL;;;;Finalizações no gol
+raw;match_statistics;shots_off_goal;INT;NULL;;;;Finalizações fora do gol
+raw;match_statistics;total_shots;INT;NULL;;;;Total de finalizações
+raw;match_statistics;blocked_shots;INT;NULL;;;;Finalizações bloqueadas
+raw;match_statistics;shots_inside_box;INT;NULL;;;;Finalizações dentro da área
+raw;match_statistics;shots_outside_box;INT;NULL;;;;Finalizações fora da área
+raw;match_statistics;fouls;INT;NULL;;;;Faltas cometidas
+raw;match_statistics;corner_kicks;INT;NULL;;;;Escanteios
+raw;match_statistics;offsides;INT;NULL;;;;Impedimentos
+raw;match_statistics;ball_possession;INT;NULL;;;;Posse de bola (%)
+raw;match_statistics;yellow_cards;INT;NULL;;;;Cartões amarelos
+raw;match_statistics;red_cards;INT;NULL;;;;Cartões vermelhos
+raw;match_statistics;goalkeeper_saves;INT;NULL;;;;Defesas do goleiro
+raw;match_statistics;total_passes;INT;NULL;;;;Total de passes
+raw;match_statistics;passes_accurate;INT;NULL;;;;Passes corretos
+raw;match_statistics;passes_pct;NUMERIC(5,2);NULL;;;;Percentual de passes corretos
+raw;match_statistics;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;match_statistics;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;match_statistics;provider;TEXT;NULL;;;;Provedor de dados
+raw;match_statistics;provider_league_id;BIGINT;NULL;;;;ID da liga no provedor
+raw;match_statistics;competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;match_statistics;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;match_statistics;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+raw;match_statistics;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;match_statistics;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;match_events;event_id;TEXT;NOT NULL;;PK;;ID do evento
+raw;match_events;season;INT;NOT NULL;;PK;;Temporada (chave de partição LIST)
+raw;match_events;fixture_id;BIGINT;NOT NULL;;PK;FK→raw.fixtures;ID da partida
+raw;match_events;time_elapsed;INT;NULL;;;;Minuto do evento
+raw;match_events;time_extra;INT;NULL;;;;Acréscimo (minutos)
+raw;match_events;team_id;BIGINT;NULL;;;;ID do time
+raw;match_events;team_name;TEXT;NULL;;;;Nome do time
+raw;match_events;player_id;BIGINT;NULL;;;;ID do jogador
+raw;match_events;player_name;TEXT;NULL;;;;Nome do jogador
+raw;match_events;assist_id;BIGINT;NULL;;;;ID do jogador que deu assistência
+raw;match_events;assist_name;TEXT;NULL;;;;Nome do assistente
+raw;match_events;type;TEXT;NULL;;;;Tipo do evento (Goal, Card, Subst)
+raw;match_events;detail;TEXT;NULL;;;;Detalhe do evento
+raw;match_events;comments;TEXT;NULL;;;;Comentários
+raw;match_events;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;match_events;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;match_events;is_time_elapsed_anomalous;BOOLEAN;NOT NULL;FALSE;;;Sinaliza anomalia no minuto
+raw;match_events;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;match_events;provider_league_id;BIGINT;NULL;;;;ID da liga no provedor
+raw;match_events;competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;match_events;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;match_events;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+raw;match_events;provider_event_id;TEXT;NULL;;;;ID do evento no provedor
+raw;match_events;ingested_at;TIMESTAMPTZ;NULL;;;;Timestamp de ingestão
+raw;match_events;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;competition_leagues;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;competition_leagues;league_id;BIGINT;NOT NULL;;PK;;ID da liga
+raw;competition_leagues;league_name;TEXT;NULL;;;;Nome da liga
+raw;competition_leagues;country_id;BIGINT;NULL;;;;ID do país
+raw;competition_leagues;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;competition_leagues;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;competition_leagues;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;competition_seasons;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;competition_seasons;season_id;BIGINT;NOT NULL;;PK;;ID da temporada
+raw;competition_seasons;league_id;BIGINT;NULL;;;;ID da liga
+raw;competition_seasons;season_year;INT;NULL;;;;Ano da temporada
+raw;competition_seasons;season_name;TEXT;NULL;;;;Nome da temporada
+raw;competition_seasons;starting_at;DATE;NULL;;;;Data de início
+raw;competition_seasons;ending_at;DATE;NULL;;;;Data de fim
+raw;competition_seasons;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;competition_seasons;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;competition_seasons;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;competition_stages;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;competition_stages;stage_id;BIGINT;NOT NULL;;PK;;ID da fase
+raw;competition_stages;season_id;BIGINT;NULL;;;;ID da temporada
+raw;competition_stages;league_id;BIGINT;NULL;;;;ID da liga
+raw;competition_stages;stage_name;TEXT;NULL;;;;Nome da fase (Fase de Grupos, Oitavas, etc)
+raw;competition_stages;sort_order;INT;NULL;;;;Ordem de exibição
+raw;competition_stages;finished;BOOLEAN;NULL;;;;Fase finalizada?
+raw;competition_stages;is_current;BOOLEAN;NULL;;;;Fase atual?
+raw;competition_stages;starting_at;DATE;NULL;;;;Data de início
+raw;competition_stages;ending_at;DATE;NULL;;;;Data de fim
+raw;competition_stages;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;competition_stages;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;competition_stages;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;competition_rounds;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;competition_rounds;round_id;BIGINT;NOT NULL;;PK;;ID da rodada
+raw;competition_rounds;stage_id;BIGINT;NULL;;;;ID da fase
+raw;competition_rounds;season_id;BIGINT;NULL;;;;ID da temporada
+raw;competition_rounds;league_id;BIGINT;NULL;;;;ID da liga
+raw;competition_rounds;round_name;TEXT;NULL;;;;Nome da rodada
+raw;competition_rounds;finished;BOOLEAN;NULL;;;;Rodada finalizada?
+raw;competition_rounds;is_current;BOOLEAN;NULL;;;;Rodada atual?
+raw;competition_rounds;starting_at;DATE;NULL;;;;Data de início
+raw;competition_rounds;ending_at;DATE;NULL;;;;Data de fim
+raw;competition_rounds;games_in_week;INT;NULL;;;;Jogos na semana
+raw;competition_rounds;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;competition_rounds;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;competition_rounds;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;standings_snapshots;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;standings_snapshots;league_id;BIGINT;NOT NULL;;;;ID da liga
+raw;standings_snapshots;season_id;BIGINT;NOT NULL;;PK;;ID da temporada
+raw;standings_snapshots;stage_id;BIGINT;NOT NULL;0;PK;;ID da fase
+raw;standings_snapshots;round_id;BIGINT;NOT NULL;0;PK;;ID da rodada
+raw;standings_snapshots;team_id;BIGINT;NOT NULL;;PK;;ID do time
+raw;standings_snapshots;position;INT;NULL;;;;Posição na classificação
+raw;standings_snapshots;points;INT;NULL;;;;Pontos
+raw;standings_snapshots;games_played;INT;NULL;;;;Jogos disputados
+raw;standings_snapshots;won;INT;NULL;;;;Vitórias
+raw;standings_snapshots;draw;INT;NULL;;;;Empates
+raw;standings_snapshots;lost;INT;NULL;;;;Derrotas
+raw;standings_snapshots;goals_for;INT;NULL;;;;Gols marcados
+raw;standings_snapshots;goals_against;INT;NULL;;;;Gols sofridos
+raw;standings_snapshots;goal_diff;INT;NULL;;;;Saldo de gols
+raw;standings_snapshots;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;standings_snapshots;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;standings_snapshots;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;fixture_lineups;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;fixture_lineups;fixture_id;BIGINT;NOT NULL;;PK;;ID da partida
+raw;fixture_lineups;team_id;BIGINT;NOT NULL;;PK;;ID do time
+raw;fixture_lineups;player_id;BIGINT;NOT NULL;;PK;;ID do jogador
+raw;fixture_lineups;lineup_id;BIGINT;NULL;;;;ID da escalação
+raw;fixture_lineups;position_id;BIGINT;NULL;;;;ID da posição
+raw;fixture_lineups;position_name;TEXT;NULL;;;;Nome da posição (Goalkeeper, Defender, etc)
+raw;fixture_lineups;lineup_type_id;INT;NULL;;;;Tipo da escalação (titular/reserva)
+raw;fixture_lineups;formation_field;TEXT;NULL;;;;Campo de formação
+raw;fixture_lineups;formation_position;INT;NULL;;;;Posição na formação
+raw;fixture_lineups;jersey_number;INT;NULL;;;;Número da camisa
+raw;fixture_lineups;details;JSONB;NOT NULL;'[]'::jsonb;;;Detalhes adicionais (substituições, cartões)
+raw;fixture_lineups;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;fixture_lineups;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;fixture_lineups;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;fixture_lineups;provider_league_id;BIGINT;NULL;;;;ID da liga no provedor
+raw;fixture_lineups;competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;fixture_lineups;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;fixture_lineups;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+raw;fixture_lineups;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;fixture_lineups;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;fixture_player_statistics;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;fixture_player_statistics;fixture_id;BIGINT;NOT NULL;;PK;;ID da partida
+raw;fixture_player_statistics;team_id;BIGINT;NOT NULL;;PK;;ID do time
+raw;fixture_player_statistics;player_id;BIGINT;NOT NULL;;PK;;ID do jogador
+raw;fixture_player_statistics;statistics;JSONB;NOT NULL;'[]'::jsonb;;;Estatísticas individuais do jogador na partida
+raw;fixture_player_statistics;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;fixture_player_statistics;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;fixture_player_statistics;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;player_season_statistics;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;player_season_statistics;player_id;BIGINT;NOT NULL;;PK;;ID do jogador
+raw;player_season_statistics;season_id;BIGINT;NOT NULL;;PK;;ID da temporada
+raw;player_season_statistics;team_id;BIGINT;NOT NULL;0;PK;;ID do time (0 se não especificado)
+raw;player_season_statistics;league_id;BIGINT;NULL;;;;ID da liga
+raw;player_season_statistics;season_name;TEXT;NULL;;;;Nome da temporada
+raw;player_season_statistics;position_name;TEXT;NULL;;;;Posição do jogador
+raw;player_season_statistics;statistics;JSONB;NOT NULL;'[]'::jsonb;;;Estatísticas consolidadas da temporada
+raw;player_season_statistics;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;player_season_statistics;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;player_season_statistics;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;player_season_statistics;provider_league_id;BIGINT;NULL;;;;ID da liga no provedor
+raw;player_season_statistics;competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;player_season_statistics;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;player_season_statistics;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+raw;player_season_statistics;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;player_season_statistics;player_nationality;TEXT;NULL;;;;Nacionalidade do jogador
+raw;player_transfers;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;player_transfers;transfer_id;BIGINT;NOT NULL;;PK;;ID da transferência
+raw;player_transfers;player_id;BIGINT;NOT NULL;;;;ID do jogador
+raw;player_transfers;from_team_id;BIGINT;NULL;;;;ID do time de origem
+raw;player_transfers;to_team_id;BIGINT;NULL;;;;ID do time de destino
+raw;player_transfers;transfer_date;DATE;NULL;;;;Data da transferência
+raw;player_transfers;completed;BOOLEAN;NULL;;;;Transferência concluída?
+raw;player_transfers;career_ended;BOOLEAN;NULL;;;;Carreira encerrada?
+raw;player_transfers;type_id;BIGINT;NULL;;;;Tipo da transferência
+raw;player_transfers;position_id;BIGINT;NULL;;;;ID da posição
+raw;player_transfers;amount;TEXT;NULL;;;;Valor da transferência
+raw;player_transfers;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;player_transfers;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;player_transfers;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;team_sidelined;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;team_sidelined;sidelined_id;BIGINT;NOT NULL;;PK;;ID do afastamento
+raw;team_sidelined;team_id;BIGINT;NOT NULL;;;;ID do time
+raw;team_sidelined;player_id;BIGINT;NOT NULL;;;;ID do jogador
+raw;team_sidelined;season_id;BIGINT;NULL;;;;ID da temporada
+raw;team_sidelined;category;TEXT;NULL;;;;Categoria do afastamento
+raw;team_sidelined;type_id;BIGINT;NULL;;;;Tipo do afastamento
+raw;team_sidelined;start_date;DATE;NULL;;;;Data de início
+raw;team_sidelined;end_date;DATE;NULL;;;;Data de fim
+raw;team_sidelined;games_missed;INT;NULL;;;;Jogos perdidos
+raw;team_sidelined;completed;BOOLEAN;NULL;;;;Afastamento finalizado?
+raw;team_sidelined;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;team_sidelined;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;team_sidelined;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;team_coaches;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;team_coaches;coach_tenure_id;BIGINT;NOT NULL;;PK;;ID do mandato do técnico
+raw;team_coaches;team_id;BIGINT;NOT NULL;;;;ID do time
+raw;team_coaches;coach_id;BIGINT;NOT NULL;;;;ID do técnico
+raw;team_coaches;position_id;BIGINT;NULL;;;;ID da posição
+raw;team_coaches;active;BOOLEAN;NULL;;;;Mandato ativo?
+raw;team_coaches;temporary;BOOLEAN;NULL;;;;Mandato temporário/interino?
+raw;team_coaches;start_date;DATE;NULL;;;;Data de início do mandato
+raw;team_coaches;end_date;DATE;NULL;;;;Data de fim do mandato
+raw;team_coaches;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;team_coaches;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;team_coaches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;head_to_head_fixtures;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;head_to_head_fixtures;pair_team_id;BIGINT;NOT NULL;;PK;;ID do primeiro time do confronto
+raw;head_to_head_fixtures;pair_opponent_id;BIGINT;NOT NULL;;PK;;ID do oponente do confronto
+raw;head_to_head_fixtures;fixture_id;BIGINT;NOT NULL;;PK;;ID da partida
+raw;head_to_head_fixtures;league_id;BIGINT;NULL;;;;ID da liga
+raw;head_to_head_fixtures;season_id;BIGINT;NULL;;;;ID da temporada
+raw;head_to_head_fixtures;match_date;TIMESTAMPTZ;NULL;;;;Data do jogo
+raw;head_to_head_fixtures;home_team_id;BIGINT;NULL;;;;ID do mandante
+raw;head_to_head_fixtures;away_team_id;BIGINT;NULL;;;;ID do visitante
+raw;head_to_head_fixtures;home_goals;INT;NULL;;;;Gols do mandante
+raw;head_to_head_fixtures;away_goals;INT;NULL;;;;Gols do visitante
+raw;head_to_head_fixtures;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;head_to_head_fixtures;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;head_to_head_fixtures;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;head_to_head_fixtures;provider_league_id;BIGINT;NULL;;;;ID da liga no provedor
+raw;head_to_head_fixtures;competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;head_to_head_fixtures;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;head_to_head_fixtures;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+raw;head_to_head_fixtures;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;head_to_head_fixtures;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;coaches;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;coaches;coach_id;BIGINT;NOT NULL;;PK;;ID do técnico
+raw;coaches;coach_name;TEXT;NULL;;;;Nome do técnico
+raw;coaches;image_path;TEXT;NULL;;;;URL da foto
+raw;coaches;payload;JSONB;NULL;;;;Payload bruto do provedor
+raw;coaches;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;coaches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;provider_entity_map;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;provider_entity_map;entity_type;TEXT;NOT NULL;;PK;;Tipo da entidade (team, player, etc)
+raw;provider_entity_map;source_id;TEXT;NOT NULL;;PK;;ID no provedor
+raw;provider_entity_map;canonical_id;TEXT;NOT NULL;;;;ID canônico local
+raw;provider_entity_map;first_seen_at;TIMESTAMPTZ;NOT NULL;now();;;Primeira vez visto
+raw;provider_entity_map;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;provider_sync_state;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+raw;provider_sync_state;entity_type;TEXT;NOT NULL;;PK;;Tipo da entidade
+raw;provider_sync_state;scope_key;TEXT;NOT NULL;'global';PK;;Escopo da sincronização
+raw;provider_sync_state;league_id;BIGINT;NULL;;;;ID da liga
+raw;provider_sync_state;season;INT;NULL;;;;Temporada
+raw;provider_sync_state;last_successful_sync;TIMESTAMPTZ;NULL;;;;Última sincronização bem-sucedida
+raw;provider_sync_state;last_provider_updated_at;TIMESTAMPTZ;NULL;;;;Última atualização no provedor
+raw;provider_sync_state;cursor;TEXT;NULL;;;;Cursor de paginação
+raw;provider_sync_state;status;TEXT;NOT NULL;'idle';;;Status da sincronização
+raw;provider_sync_state;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;sportmonks_coaches;provider;TEXT;NOT NULL;'sportmonks';PK;;Provedor (fixo: sportmonks)
+raw;sportmonks_coaches;coach_id;BIGINT;NOT NULL;;PK;;ID do técnico no SportMonks
+raw;sportmonks_coaches;coach_name;TEXT;NULL;;;;Nome completo do técnico
+raw;sportmonks_coaches;display_name;TEXT;NULL;;;;Nome de exibição
+raw;sportmonks_coaches;common_name;TEXT;NULL;;;;Nome popular
+raw;sportmonks_coaches;firstname;TEXT;NULL;;;;Primeiro nome
+raw;sportmonks_coaches;lastname;TEXT;NULL;;;;Sobrenome
+raw;sportmonks_coaches;image_path;TEXT;NULL;;;;URL da foto
+raw;sportmonks_coaches;payload;JSONB;NOT NULL;'{}'::jsonb;;;Payload bruto da API
+raw;sportmonks_coaches;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;sportmonks_coaches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;sportmonks_fixture_coaches;provider;TEXT;NOT NULL;'sportmonks';PK;;Provedor (fixo: sportmonks)
+raw;sportmonks_fixture_coaches;fixture_id;BIGINT;NOT NULL;;PK;;ID da partida
+raw;sportmonks_fixture_coaches;team_id;BIGINT;NOT NULL;;PK;;ID do time
+raw;sportmonks_fixture_coaches;coach_id;BIGINT;NOT NULL;;PK;;ID do técnico
+raw;sportmonks_fixture_coaches;fixture_date;DATE;NULL;;;;Data da partida
+raw;sportmonks_fixture_coaches;league_id;BIGINT;NULL;;;;ID da liga
+raw;sportmonks_fixture_coaches;season_id;BIGINT;NULL;;;;ID da temporada
+raw;sportmonks_fixture_coaches;state_id;BIGINT;NULL;;;;ID do estado/status da partida
+raw;sportmonks_fixture_coaches;coach_payload;JSONB;NOT NULL;'{}'::jsonb;;;Payload do técnico
+raw;sportmonks_fixture_coaches;fixture_payload;JSONB;NOT NULL;'{}'::jsonb;;;Payload da partida
+raw;sportmonks_fixture_coaches;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;sportmonks_fixture_coaches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;sportmonks_transfer_events;provider;TEXT;NOT NULL;'sportmonks';PK;;Provedor (fixo: sportmonks)
+raw;sportmonks_transfer_events;transfer_id;BIGINT;NOT NULL;;PK;;ID da transferência
+raw;sportmonks_transfer_events;player_id;BIGINT;NOT NULL;;;;ID do jogador
+raw;sportmonks_transfer_events;from_team_id;BIGINT;NULL;;;;ID do time de origem
+raw;sportmonks_transfer_events;to_team_id;BIGINT;NULL;;;;ID do time de destino
+raw;sportmonks_transfer_events;transfer_date;DATE;NULL;;;;Data da transferência
+raw;sportmonks_transfer_events;completed;BOOLEAN;NULL;;;;Transferência concluída?
+raw;sportmonks_transfer_events;career_ended;BOOLEAN;NULL;;;;Carreira encerrada?
+raw;sportmonks_transfer_events;type_id;BIGINT;NULL;;;;Tipo da transferência
+raw;sportmonks_transfer_events;position_id;BIGINT;NULL;;;;ID da posição
+raw;sportmonks_transfer_events;amount;TEXT;NULL;;;;Valor da transferência
+raw;sportmonks_transfer_events;payload;JSONB;NOT NULL;'{}'::jsonb;;;Payload bruto da API
+raw;sportmonks_transfer_events;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;sportmonks_transfer_events;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;external_coach_source_facts;source;TEXT;NOT NULL;;PK;;Fonte externa (wikidata, etc)
+raw;external_coach_source_facts;source_record_id;TEXT;NOT NULL;;PK;;ID do registro na fonte
+raw;external_coach_source_facts;source_url;TEXT;NULL;;;;URL da fonte
+raw;external_coach_source_facts;external_person_id;TEXT;NULL;;;;ID externo da pessoa
+raw;external_coach_source_facts;external_team_id;TEXT;NULL;;;;ID externo do time
+raw;external_coach_source_facts;coach_name;TEXT;NULL;;;;Nome do técnico
+raw;external_coach_source_facts;team_name;TEXT;NULL;;;;Nome do time
+raw;external_coach_source_facts;source_role;TEXT;NULL;;;;Papel na fonte
+raw;external_coach_source_facts;start_date_original;DATE;NULL;;;;Data de início original
+raw;external_coach_source_facts;end_date_original;DATE;NULL;;;;Data de fim original
+raw;external_coach_source_facts;source_confidence;NUMERIC(5,4);NULL;;;;Confiança da fonte
+raw;external_coach_source_facts;payload;JSONB;NOT NULL;'{}'::jsonb;;;Payload bruto
+raw;external_coach_source_facts;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;external_coach_source_facts;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;external_coach_source_facts;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;wikipedia_competition_tables;id;BIGSERIAL;NOT NULL;;PK;;ID auto-incremento
+raw;wikipedia_competition_tables;ingestion_run_id;TEXT;NOT NULL;;;"CHECK btrim<>''";ID da execução de ingestão
+raw;wikipedia_competition_tables;competition_key;TEXT;NOT NULL;;FK;FK→control.competition_wiki_mapping;Chave da competição
+raw;wikipedia_competition_tables;source_url;TEXT;NOT NULL;;;"CHECK ^https?://";URL da Wikipedia
+raw;wikipedia_competition_tables;table_index;INTEGER;NULL;;;"CHECK >=0";Índice da tabela na página
+raw;wikipedia_competition_tables;table_caption;TEXT;NULL;;;;Título da tabela
+raw;wikipedia_competition_tables;source_hash;TEXT;NULL;;;;Hash do conteúdo fonte
+raw;wikipedia_competition_tables;payload_jsonb;JSONB;NULL;;;;Dados da tabela em JSON
+raw;wikipedia_competition_tables;fetched_at;TIMESTAMPTZ;NOT NULL;now();;;Quando foi buscado
+raw;wikipedia_competition_tables;parse_status;TEXT;NOT NULL;;;"CHECK IN (success,failed_fetch,...)";Status do parsing
+raw;wikipedia_competition_tables;error_message;TEXT;NULL;;;;Mensagem de erro
+raw;wikipedia_competition_tables;metadata;JSONB;NOT NULL;'{}'::jsonb;;"CHECK typeof='object'";Metadados adicionais
+raw;wikipedia_competition_tables;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_goals;wc_goal_pk;BIGSERIAL;NOT NULL;;PK;;ID auto-incremento
+raw;wc_goals;fixture_id;BIGINT;NOT NULL;;;;ID da partida local
+raw;wc_goals;internal_match_id;TEXT;NOT NULL;;;;ID canônico da partida no dataset Copa
+raw;wc_goals;edition_key;TEXT;NOT NULL;;;;Chave da edição da Copa (1930, 2022, etc)
+raw;wc_goals;provider;TEXT;NOT NULL;;;;Provedor de dados
+raw;wc_goals;competition_key;TEXT;NOT NULL;;;"CHECK='fifa_world_cup_mens'";Chave da competição (fixo)
+raw;wc_goals;season_label;TEXT;NOT NULL;;;;Rótulo da temporada/edição
+raw;wc_goals;source_name;TEXT;NOT NULL;;;"CHECK='fjelstul_worldcup'";Fonte do dataset (fixo)
+raw;wc_goals;source_version;TEXT;NOT NULL;;;;Versão do dataset
+raw;wc_goals;source_match_id;TEXT;NOT NULL;;;;ID da partida na fonte
+raw;wc_goals;source_goal_id;TEXT;NOT NULL;;UNIQUE;UNIQUE(source_name,edition_key,source_goal_id);ID do gol na fonte
+raw;wc_goals;source_team_id;TEXT;NOT NULL;;;;ID do time na fonte
+raw;wc_goals;source_player_id;TEXT;NOT NULL;;;;ID do jogador na fonte
+raw;wc_goals;source_player_team_id;TEXT;NOT NULL;;;;ID do time do jogador na fonte
+raw;wc_goals;team_internal_id;TEXT;NOT NULL;;;;ID canônico interno do time
+raw;wc_goals;player_internal_id;TEXT;NOT NULL;;;;ID canônico interno do jogador
+raw;wc_goals;player_team_internal_id;TEXT;NOT NULL;;;;ID canônico interno do time do jogador
+raw;wc_goals;team_id;BIGINT;NOT NULL;;;;ID canônico do time
+raw;wc_goals;player_id;BIGINT;NOT NULL;;;;ID canônico do jogador
+raw;wc_goals;player_team_id;BIGINT;NOT NULL;;;;ID canônico do time do jogador no gol
+raw;wc_goals;team_name;TEXT;NOT NULL;;;;Nome do time
+raw;wc_goals;player_name;TEXT;NOT NULL;;;;Nome do jogador
+raw;wc_goals;player_team_name;TEXT;NOT NULL;;;;Nome do time do jogador
+raw;wc_goals;minute_regulation;INTEGER;NULL;;;;Minuto regulamentar do gol
+raw;wc_goals;minute_stoppage;INTEGER;NULL;;;;Minuto de acréscimo do gol
+raw;wc_goals;match_period;TEXT;NULL;;;;Período do jogo (1H, 2H, ET, PK)
+raw;wc_goals;minute_label;TEXT;NULL;;;;Rótulo textual original do minuto
+raw;wc_goals;is_penalty;BOOLEAN;NOT NULL;FALSE;;;Gol de pênalti?
+raw;wc_goals;is_own_goal;BOOLEAN;NOT NULL;FALSE;;;Gol contra?
+raw;wc_goals;payload;JSONB;NOT NULL;;;;Payload bruto para auditoria
+raw;wc_goals;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;wc_goals;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;wc_goals;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_goals;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;wc_squads;wc_squad_pk;BIGSERIAL;NOT NULL;;PK;;ID auto-incremento
+raw;wc_squads;edition_key;TEXT;NOT NULL;;;;Chave da edição da Copa
+raw;wc_squads;provider;TEXT;NOT NULL;;;;Provedor de dados
+raw;wc_squads;competition_key;TEXT;NOT NULL;;;"CHECK='fifa_world_cup_mens'";Chave da competição
+raw;wc_squads;season_label;TEXT;NOT NULL;;;;Rótulo da temporada
+raw;wc_squads;source_name;TEXT;NOT NULL;;;"CHECK='fjelstul_worldcup'";Fonte do dataset
+raw;wc_squads;source_version;TEXT;NOT NULL;;;;Versão do dataset
+raw;wc_squads;source_row_id;TEXT;NOT NULL;;UNIQUE;UNIQUE(source_name,edition_key,source_row_id);ID da linha na fonte
+raw;wc_squads;source_team_id;TEXT;NOT NULL;;;;ID do time na fonte
+raw;wc_squads;source_player_id;TEXT;NOT NULL;;;;ID do jogador na fonte
+raw;wc_squads;team_internal_id;TEXT;NOT NULL;;UNIQUE;UNIQUE(edition_key,team_internal_id,player_internal_id,source_name);ID interno do time
+raw;wc_squads;player_internal_id;TEXT;NOT NULL;;;;ID interno do jogador
+raw;wc_squads;team_id;BIGINT;NOT NULL;;;;ID canônico do time
+raw;wc_squads;player_id;BIGINT;NOT NULL;;;;ID canônico do jogador
+raw;wc_squads;team_name;TEXT;NOT NULL;;;;Nome do time/seleção
+raw;wc_squads;team_code;TEXT;NOT NULL;;;;Código curto da seleção (BRA, ARG, etc)
+raw;wc_squads;player_name;TEXT;NOT NULL;;;;Nome do jogador
+raw;wc_squads;jersey_number;INTEGER;NULL;;;;Número da camisa
+raw;wc_squads;position_name;TEXT;NULL;;;;Nome da posição
+raw;wc_squads;position_code;TEXT;NULL;;;;Código da posição
+raw;wc_squads;payload;JSONB;NOT NULL;;;;Payload bruto para auditoria
+raw;wc_squads;source_run_id;TEXT;NULL;;;;ID da execução fonte
+raw;wc_squads;ingested_run;TEXT;NULL;;;;ID da execução de ingestão
+raw;wc_squads;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_squads;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;wc_match_events;wc_match_event_pk;BIGSERIAL;NOT NULL;;PK;;ID auto-incremento
+raw;wc_match_events;internal_match_id;TEXT;NOT NULL;;UNIQUE;UNIQUE(internal_match_id,source_name,event_index);ID canônico da partida
+raw;wc_match_events;edition_key;TEXT;NOT NULL;;;;Chave da edição da Copa
+raw;wc_match_events;source_name;TEXT;NOT NULL;;;"CHECK IN (statsbomb,fjelstul,openfootball)";Fonte do dataset
+raw;wc_match_events;source_version;TEXT;NOT NULL;;;;Versão do dataset
+raw;wc_match_events;source_match_id;TEXT;NOT NULL;;UNIQUE;UNIQUE(source_name,source_match_id,source_event_id);ID da partida na fonte
+raw;wc_match_events;source_event_id;TEXT;NOT NULL;;;;ID do evento na fonte
+raw;wc_match_events;event_index;INTEGER;NOT NULL;;;;Sequência do evento para ordenação
+raw;wc_match_events;team_internal_id;TEXT;NULL;;;;ID interno do time
+raw;wc_match_events;player_internal_id;TEXT;NULL;;;;ID interno do jogador
+raw;wc_match_events;event_type;TEXT;NOT NULL;;;;Tipo do evento
+raw;wc_match_events;period;INTEGER;NULL;;;;Período do jogo
+raw;wc_match_events;minute;INTEGER;NULL;;;;Minuto do evento
+raw;wc_match_events;second;NUMERIC;NULL;;;;Segundo do evento
+raw;wc_match_events;location_x;NUMERIC;NULL;;;;Coordenada X no campo
+raw;wc_match_events;location_y;NUMERIC;NULL;;;;Coordenada Y no campo
+raw;wc_match_events;outcome_label;TEXT;NULL;;;;Resultado do evento
+raw;wc_match_events;play_pattern_label;TEXT;NULL;;;;Padrão de jogo
+raw;wc_match_events;is_three_sixty_backed;BOOLEAN;NOT NULL;FALSE;;;Enriquecido por dados 360?
+raw;wc_match_events;event_payload;JSONB;NOT NULL;;;;Payload bruto do evento
+raw;wc_match_events;fixture_id;BIGINT;NULL;;;;ID da partida local (crosswalk)
+raw;wc_match_events;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_match_events;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;wc_player_identity_map;wc_player_id;BIGINT;NOT NULL;;PK;;ID do jogador no dataset Copa
+raw;wc_player_identity_map;sportmonks_player_id;BIGINT;NULL;;;;ID correspondente no SportMonks
+raw;wc_player_identity_map;match_confidence;TEXT;NOT NULL;;;"CHECK IN (confirmed,probable,ambiguous,none)";Nível de confiança do match
+raw;wc_player_identity_map;match_signals;JSONB;NULL;;;;Evidências do matching
+raw;wc_player_identity_map;source_run_id;TEXT;NULL;;;;ID da execução do crosswalk
+raw;wc_player_identity_map;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_player_identity_map;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;wc_team_identity_map;wc_team_id;BIGINT;NOT NULL;;PK;;ID do time no dataset Copa
+raw;wc_team_identity_map;wc_display_slug;TEXT;NULL;;;;Slug de exibição da seleção
+raw;wc_team_identity_map;sportmonks_team_id;BIGINT;NULL;;;;ID correspondente no SportMonks
+raw;wc_team_identity_map;confidence;TEXT;NOT NULL;;;"CHECK IN (confirmed,probable,none)";Nível de confiança
+raw;wc_team_identity_map;status;TEXT;NOT NULL;;;"CHECK IN (active,extinct,ambiguous)";Status operacional
+raw;wc_team_identity_map;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+raw;wc_team_identity_map;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;statsbomb_competition_seasons;source_name;TEXT;NOT NULL;'statsbomb_open_data';PK;;Fonte do dataset
+raw;statsbomb_competition_seasons;competition_id;BIGINT;NOT NULL;;PK;;ID da competição no StatsBomb
+raw;statsbomb_competition_seasons;season_id;BIGINT;NOT NULL;;PK;;ID da temporada no StatsBomb
+raw;statsbomb_competition_seasons;competition_name;TEXT;NOT NULL;;;;Nome da competição
+raw;statsbomb_competition_seasons;country_name;TEXT;NULL;;;;País
+raw;statsbomb_competition_seasons;competition_gender;TEXT;NULL;;;;Gênero (male/female)
+raw;statsbomb_competition_seasons;competition_youth;BOOLEAN;NULL;;;;Competição sub-?
+raw;statsbomb_competition_seasons;competition_international;BOOLEAN;NULL;;;;Competição internacional?
+raw;statsbomb_competition_seasons;season_name;TEXT;NOT NULL;;;;Nome da temporada
+raw;statsbomb_competition_seasons;match_updated;TIMESTAMPTZ;NULL;;;;Última atualização de partidas
+raw;statsbomb_competition_seasons;match_updated_360;TIMESTAMPTZ;NULL;;;;Última atualização 360
+raw;statsbomb_competition_seasons;match_available;TIMESTAMPTZ;NULL;;;;Partidas disponíveis desde
+raw;statsbomb_competition_seasons;match_available_360;TIMESTAMPTZ;NULL;;;;Dados 360 disponíveis desde
+raw;statsbomb_competition_seasons;payload;JSONB;NOT NULL;;;;Payload bruto
+raw;statsbomb_competition_seasons;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;statsbomb_matches;source_name;TEXT;NOT NULL;'statsbomb_open_data';PK;;Fonte do dataset
+raw;statsbomb_matches;match_id;BIGINT;NOT NULL;;PK;;ID da partida no StatsBomb
+raw;statsbomb_matches;competition_id;BIGINT;NOT NULL;;;;ID da competição
+raw;statsbomb_matches;season_id;BIGINT;NOT NULL;;;;ID da temporada
+raw;statsbomb_matches;canonical_competition_key;TEXT;NULL;;;;Chave canônica da competição
+raw;statsbomb_matches;season_label;TEXT;NULL;;;;Rótulo da temporada
+raw;statsbomb_matches;match_date;DATE;NULL;;;;Data da partida
+raw;statsbomb_matches;kick_off;TEXT;NULL;;;;Horário de início
+raw;statsbomb_matches;home_team_id;BIGINT;NULL;;;;ID do mandante no StatsBomb
+raw;statsbomb_matches;home_team_name;TEXT;NULL;;;;Nome do mandante
+raw;statsbomb_matches;away_team_id;BIGINT;NULL;;;;ID do visitante no StatsBomb
+raw;statsbomb_matches;away_team_name;TEXT;NULL;;;;Nome do visitante
+raw;statsbomb_matches;home_score;INTEGER;NULL;;;;Placar mandante
+raw;statsbomb_matches;away_score;INTEGER;NULL;;;;Placar visitante
+raw;statsbomb_matches;match_status;TEXT;NULL;;;;Status da partida
+raw;statsbomb_matches;match_status_360;TEXT;NULL;;;;Status dos dados 360
+raw;statsbomb_matches;competition_stage_id;BIGINT;NULL;;;;ID da fase
+raw;statsbomb_matches;competition_stage_name;TEXT;NULL;;;;Nome da fase
+raw;statsbomb_matches;match_week;INTEGER;NULL;;;;Semana do jogo
+raw;statsbomb_matches;stadium_id;BIGINT;NULL;;;;ID do estádio
+raw;statsbomb_matches;stadium_name;TEXT;NULL;;;;Nome do estádio
+raw;statsbomb_matches;referee_id;BIGINT;NULL;;;;ID do árbitro
+raw;statsbomb_matches;referee_name;TEXT;NULL;;;;Nome do árbitro
+raw;statsbomb_matches;local_match_id;BIGINT;NULL;;;;ID local reconciliado
+raw;statsbomb_matches;identity_status;TEXT;NOT NULL;;;;Status da reconciliação de identidade
+raw;statsbomb_matches;identity_confidence;NUMERIC(5,4);NULL;;;;Confiança da reconciliação
+raw;statsbomb_matches;identity_reason;TEXT;NULL;;;;Razão da reconciliação
+raw;statsbomb_matches;metadata;JSONB;NOT NULL;'{}'::jsonb;;;Metadados
+raw;statsbomb_matches;payload;JSONB;NOT NULL;;;;Payload bruto
+raw;statsbomb_matches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;statsbomb_events;source_name;TEXT;NOT NULL;'statsbomb_open_data';PK;;Fonte do dataset
+raw;statsbomb_events;match_id;BIGINT;NOT NULL;;PK;;ID da partida
+raw;statsbomb_events;event_id;TEXT;NOT NULL;;PK;;ID do evento
+raw;statsbomb_events;event_index;INTEGER;NOT NULL;;UNIQUE;UNIQUE(source_name,match_id,event_index);Índice sequencial do evento
+raw;statsbomb_events;period;INTEGER;NULL;;;;Período do jogo
+raw;statsbomb_events;event_timestamp;TEXT;NULL;;;;Timestamp do evento
+raw;statsbomb_events;minute;INTEGER;NULL;;;;Minuto do evento
+raw;statsbomb_events;second;NUMERIC;NULL;;;;Segundo do evento
+raw;statsbomb_events;event_type;TEXT;NULL;;;;Tipo do evento (Pass, Shot, Duel, etc)
+raw;statsbomb_events;possession;INTEGER;NULL;;;;Sequência de posse
+raw;statsbomb_events;possession_team_id;BIGINT;NULL;;;;ID do time com posse
+raw;statsbomb_events;possession_team_name;TEXT;NULL;;;;Nome do time com posse
+raw;statsbomb_events;play_pattern;TEXT;NULL;;;;Padrão de jogo
+raw;statsbomb_events;source_team_id;BIGINT;NULL;;;;ID do time no StatsBomb
+raw;statsbomb_events;source_team_name;TEXT;NULL;;;;Nome do time no StatsBomb
+raw;statsbomb_events;source_player_id;BIGINT;NULL;;;;ID do jogador no StatsBomb
+raw;statsbomb_events;source_player_name;TEXT;NULL;;;;Nome do jogador
+raw;statsbomb_events;local_match_id;BIGINT;NULL;;;;ID local reconciliado
+raw;statsbomb_events;local_team_id;BIGINT;NULL;;;;ID local do time
+raw;statsbomb_events;local_player_id;BIGINT;NULL;;;;ID local do jogador
+raw;statsbomb_events;match_identity_status;TEXT;NULL;;;;Status de identidade da partida
+raw;statsbomb_events;player_identity_status;TEXT;NULL;;;;Status de identidade do jogador
+raw;statsbomb_events;payload;JSONB;NOT NULL;;;;Payload bruto do evento
+raw;statsbomb_events;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+raw;brasileirao_matches;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;brasileirao_matches;source_name;TEXT;NOT NULL;'dataset_brasileirao';;;Fonte do dataset
+raw;brasileirao_matches;match_id;TEXT;NULL;;;;ID da partida
+raw;brasileirao_matches;rodada;TEXT;NULL;;;;Rodada do campeonato
+raw;brasileirao_matches;match_date_raw;TEXT;NULL;;;;Data bruta da partida
+raw;brasileirao_matches;match_time_raw;TEXT;NULL;;;;Horário bruto
+raw;brasileirao_matches;home_team_name;TEXT;NULL;;;;Nome do mandante
+raw;brasileirao_matches;away_team_name;TEXT;NULL;;;;Nome do visitante
+raw;brasileirao_matches;home_formation;TEXT;NULL;;;;Formação do mandante
+raw;brasileirao_matches;away_formation;TEXT;NULL;;;;Formação do visitante
+raw;brasileirao_matches;home_coach_name;TEXT;NULL;;;;Técnico do mandante
+raw;brasileirao_matches;away_coach_name;TEXT;NULL;;;;Técnico do visitante
+raw;brasileirao_matches;winner_name;TEXT;NULL;;;;Nome do vencedor
+raw;brasileirao_matches;venue_name;TEXT;NULL;;;;Nome do estádio
+raw;brasileirao_matches;home_score;TEXT;NULL;;;;Placar mandante (texto)
+raw;brasileirao_matches;away_score;TEXT;NULL;;;;Placar visitante (texto)
+raw;brasileirao_matches;home_state;TEXT;NULL;;;;Estado do mandante
+raw;brasileirao_matches;away_state;TEXT;NULL;;;;Estado do visitante
+raw;brasileirao_matches;revenue_raw;TEXT;NULL;;;;Receita bruta
+raw;brasileirao_matches;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;brasileirao_matches;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;brasileirao_stats;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;brasileirao_stats;source_name;TEXT;NOT NULL;'dataset_brasileirao';;;Fonte do dataset
+raw;brasileirao_stats;partida_id;TEXT;NULL;;;;ID da partida
+raw;brasileirao_stats;rodada;TEXT;NULL;;;;Rodada
+raw;brasileirao_stats;clube;TEXT;NULL;;;;Nome do clube
+raw;brasileirao_stats;chutes;TEXT;NULL;;;;Chutes
+raw;brasileirao_stats;chutes_no_alvo;TEXT;NULL;;;;Chutes no alvo
+raw;brasileirao_stats;posse_de_bola;TEXT;NULL;;;;Posse de bola (%)
+raw;brasileirao_stats;passes;TEXT;NULL;;;;Total de passes
+raw;brasileirao_stats;precisao_passes;TEXT;NULL;;;;Precisão de passes (%)
+raw;brasileirao_stats;faltas;TEXT;NULL;;;;Faltas
+raw;brasileirao_stats;cartao_amarelo;TEXT;NULL;;;;Cartões amarelos
+raw;brasileirao_stats;cartao_vermelho;TEXT;NULL;;;;Cartões vermelhos
+raw;brasileirao_stats;impedimentos;TEXT;NULL;;;;Impedimentos
+raw;brasileirao_stats;escanteios;TEXT;NULL;;;;Escanteios
+raw;brasileirao_stats;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;brasileirao_stats;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;brasileirao_goals;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;brasileirao_goals;source_name;TEXT;NOT NULL;'dataset_brasileirao';;;Fonte do dataset
+raw;brasileirao_goals;partida_id;TEXT;NULL;;;;ID da partida
+raw;brasileirao_goals;rodada;TEXT;NULL;;;;Rodada
+raw;brasileirao_goals;clube;TEXT;NULL;;;;Nome do clube
+raw;brasileirao_goals;atleta;TEXT;NULL;;;;Nome do jogador
+raw;brasileirao_goals;minuto;TEXT;NULL;;;;Minuto do gol
+raw;brasileirao_goals;tipo_de_gol;TEXT;NULL;;;;Tipo do gol (normal, pênalti, contra)
+raw;brasileirao_goals;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;brasileirao_goals;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;brasileirao_cards;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;brasileirao_cards;source_name;TEXT;NOT NULL;'dataset_brasileirao';;;Fonte do dataset
+raw;brasileirao_cards;partida_id;TEXT;NULL;;;;ID da partida
+raw;brasileirao_cards;rodada;TEXT;NULL;;;;Rodada
+raw;brasileirao_cards;clube;TEXT;NULL;;;;Nome do clube
+raw;brasileirao_cards;cartao;TEXT;NULL;;;;Tipo do cartão (amarelo/vermelho)
+raw;brasileirao_cards;atleta;TEXT;NULL;;;;Nome do jogador
+raw;brasileirao_cards;num_camisa;TEXT;NULL;;;;Número da camisa
+raw;brasileirao_cards;posicao;TEXT;NULL;;;;Posição do jogador
+raw;brasileirao_cards;minuto;TEXT;NULL;;;;Minuto do cartão
+raw;brasileirao_cards;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;brasileirao_cards;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;elo_ratings;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;elo_ratings;source_name;TEXT;NOT NULL;'dataset_elo_matches';;;Fonte do dataset
+raw;elo_ratings;rating_date_raw;TEXT;NULL;;;;Data do rating (texto)
+raw;elo_ratings;club_name;TEXT;NULL;;;;Nome do clube
+raw;elo_ratings;country_code;TEXT;NULL;;;;Código do país
+raw;elo_ratings;elo_rating_raw;TEXT;NULL;;;;Rating ELO (texto)
+raw;elo_ratings;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;elo_ratings;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;elo_matches;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;elo_matches;source_name;TEXT;NOT NULL;'dataset_elo_matches';;;Fonte do dataset
+raw;elo_matches;division;TEXT;NULL;;;;Divisão/liga
+raw;elo_matches;match_date_raw;TEXT;NULL;;;;Data (texto)
+raw;elo_matches;match_time_raw;TEXT;NULL;;;;Horário (texto)
+raw;elo_matches;home_team_name;TEXT;NULL;;;;Mandante
+raw;elo_matches;away_team_name;TEXT;NULL;;;;Visitante
+raw;elo_matches;home_elo_raw;TEXT;NULL;;;;ELO mandante (texto)
+raw;elo_matches;away_elo_raw;TEXT;NULL;;;;ELO visitante (texto)
+raw;elo_matches;ft_home_raw;TEXT;NULL;;;;Placar final mandante (texto)
+raw;elo_matches;ft_away_raw;TEXT;NULL;;;;Placar final visitante (texto)
+raw;elo_matches;ft_result;TEXT;NULL;;;;Resultado final (H/D/A)
+raw;elo_matches;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;elo_matches;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;tm_players;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;tm_players;source_name;TEXT;NOT NULL;'dataset_transfermarket';;;Fonte Transfermarkt
+raw;tm_players;player_id;TEXT;NULL;;;;ID do jogador no TM
+raw;tm_players;first_name;TEXT;NULL;;;;Primeiro nome
+raw;tm_players;last_name;TEXT;NULL;;;;Sobrenome
+raw;tm_players;name;TEXT;NULL;;;;Nome completo
+raw;tm_players;current_club_id;TEXT;NULL;;;;ID do clube atual
+raw;tm_players;country_of_birth;TEXT;NULL;;;;País de nascimento
+raw;tm_players;country_of_citizenship;TEXT;NULL;;;;Nacionalidade
+raw;tm_players;date_of_birth_raw;TEXT;NULL;;;;Data de nascimento (texto)
+raw;tm_players;position;TEXT;NULL;;;;Posição
+raw;tm_players;sub_position;TEXT;NULL;;;;Sub-posição
+raw;tm_players;foot;TEXT;NULL;;;;Pé preferido
+raw;tm_players;height_in_cm;TEXT;NULL;;;;Altura em cm (texto)
+raw;tm_players;market_value_in_eur;TEXT;NULL;;;;Valor de mercado em EUR (texto)
+raw;tm_players;highest_market_value_in_eur;TEXT;NULL;;;;Maior valor de mercado (texto)
+raw;tm_players;current_club_name;TEXT;NULL;;;;Nome do clube atual
+raw;tm_players;image_url;TEXT;NULL;;;;URL da foto
+raw;tm_players;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;tm_players;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;tm_transfers;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;tm_transfers;source_name;TEXT;NOT NULL;'dataset_transfermarket';;;Fonte Transfermarkt
+raw;tm_transfers;player_id;TEXT;NULL;;;;ID do jogador
+raw;tm_transfers;transfer_date_raw;TEXT;NULL;;;;Data da transferência (texto)
+raw;tm_transfers;transfer_season;TEXT;NULL;;;;Temporada da transferência
+raw;tm_transfers;from_club_id;TEXT;NULL;;;;ID do clube de origem
+raw;tm_transfers;to_club_id;TEXT;NULL;;;;ID do clube de destino
+raw;tm_transfers;from_club_name;TEXT;NULL;;;;Nome do clube de origem
+raw;tm_transfers;to_club_name;TEXT;NULL;;;;Nome do clube de destino
+raw;tm_transfers;transfer_fee;TEXT;NULL;;;;Valor da transferência
+raw;tm_transfers;market_value_in_eur;TEXT;NULL;;;;Valor de mercado (EUR)
+raw;tm_transfers;player_name;TEXT;NULL;;;;Nome do jogador
+raw;tm_transfers;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;tm_transfers;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;tm_games;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;tm_games;source_name;TEXT;NOT NULL;'dataset_transfermarket';;;Fonte Transfermarkt
+raw;tm_games;game_id;TEXT;NULL;;;;ID do jogo
+raw;tm_games;competition_id;TEXT;NULL;;;;ID da competição
+raw;tm_games;season;TEXT;NULL;;;;Temporada
+raw;tm_games;round;TEXT;NULL;;;;Rodada
+raw;tm_games;match_date_raw;TEXT;NULL;;;;Data (texto)
+raw;tm_games;home_club_id;TEXT;NULL;;;;ID clube mandante
+raw;tm_games;away_club_id;TEXT;NULL;;;;ID clube visitante
+raw;tm_games;home_club_goals;TEXT;NULL;;;;Gols mandante (texto)
+raw;tm_games;away_club_goals;TEXT;NULL;;;;Gols visitante (texto)
+raw;tm_games;home_club_name;TEXT;NULL;;;;Nome mandante
+raw;tm_games;away_club_name;TEXT;NULL;;;;Nome visitante
+raw;tm_games;stadium;TEXT;NULL;;;;Estádio
+raw;tm_games;attendance;TEXT;NULL;;;;Público (texto)
+raw;tm_games;referee;TEXT;NULL;;;;Árbitro
+raw;tm_games;competition_type;TEXT;NULL;;;;Tipo da competição
+raw;tm_games;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;tm_games;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+raw;tm_appearances;record_hash;TEXT;NOT NULL;;PK;;Hash do registro (dedup)
+raw;tm_appearances;source_name;TEXT;NOT NULL;'dataset_transfermarket';;;Fonte Transfermarkt
+raw;tm_appearances;appearance_id;TEXT;NULL;;;;ID da aparição
+raw;tm_appearances;game_id;TEXT;NULL;;;;ID do jogo
+raw;tm_appearances;player_id;TEXT;NULL;;;;ID do jogador
+raw;tm_appearances;player_club_id;TEXT;NULL;;;;ID do clube do jogador
+raw;tm_appearances;match_date_raw;TEXT;NULL;;;;Data (texto)
+raw;tm_appearances;player_name;TEXT;NULL;;;;Nome do jogador
+raw;tm_appearances;competition_id;TEXT;NULL;;;;ID da competição
+raw;tm_appearances;yellow_cards;TEXT;NULL;;;;Cartões amarelos (texto)
+raw;tm_appearances;red_cards;TEXT;NULL;;;;Cartões vermelhos (texto)
+raw;tm_appearances;goals;TEXT;NULL;;;;Gols (texto)
+raw;tm_appearances;assists;TEXT;NULL;;;;Assistências (texto)
+raw;tm_appearances;minutes_played;TEXT;NULL;;;;Minutos jogados (texto)
+raw;tm_appearances;source_file;TEXT;NOT NULL;;;;Arquivo de origem
+raw;tm_appearances;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Timestamp de ingestão
+gold;dim_team;team_id;BIGINT;NOT NULL;;PK;;ID do time
+gold;dim_team;team_name;TEXT;NOT NULL;;;;Nome do time
+gold;dim_team;logo_url;TEXT;NULL;;;;URL do escudo
+gold;dim_team;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+gold;dim_venue;venue_id;BIGINT;NOT NULL;;PK;;ID do estádio
+gold;dim_venue;venue_name;TEXT;NOT NULL;;;;Nome do estádio
+gold;dim_venue;venue_city;TEXT;NULL;;;;Cidade do estádio
+gold;dim_venue;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+gold;dim_competition;league_id;BIGINT;NOT NULL;;PK;;ID da competição
+gold;dim_competition;league_name;TEXT;NOT NULL;;;;Nome da competição
+gold;dim_competition;country;TEXT;NULL;;;;País da competição
+gold;dim_competition;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+gold;dim_player;player_id;BIGINT;NOT NULL;;PK;;ID do jogador
+gold;dim_player;player_name;TEXT;NOT NULL;;;;Nome do jogador
+gold;dim_player;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+gold;dim_date;date_day;DATE;NOT NULL;;PK;;Data (chave natural)
+gold;dim_date;year;INT;NOT NULL;;;;Ano
+gold;dim_date;month;INT;NOT NULL;;;;Mês
+gold;dim_date;day;INT;NOT NULL;;;;Dia
+gold;dim_date;day_of_week_name;TEXT;NOT NULL;;;;Nome do dia da semana
+gold;dim_date;is_weekend;BOOLEAN;NOT NULL;;;;É fim de semana?
+gold;fact_matches;match_id;BIGINT;NOT NULL;;PK;;ID da partida
+gold;fact_matches;league_id;BIGINT;NOT NULL;;FK;FK→gold.dim_competition;ID da competição
+gold;fact_matches;season;INT;NOT NULL;;;;Temporada
+gold;fact_matches;date_day;DATE;NOT NULL;;FK;FK→gold.dim_date;Data da partida
+gold;fact_matches;home_team_id;BIGINT;NOT NULL;;FK;FK→gold.dim_team;ID do mandante
+gold;fact_matches;away_team_id;BIGINT;NOT NULL;;FK;FK→gold.dim_team;ID do visitante
+gold;fact_matches;venue_id;BIGINT;NULL;;FK;FK→gold.dim_venue;ID do estádio
+gold;fact_matches;home_goals;INT;NULL;;;;Gols do mandante
+gold;fact_matches;away_goals;INT;NULL;;;;Gols do visitante
+gold;fact_matches;total_goals;INT;NULL;;;;Total de gols
+gold;fact_matches;result;TEXT;NULL;;;;Resultado (H/D/A)
+gold;fact_matches;home_shots;INT;NULL;;;;Finalizações mandante
+gold;fact_matches;home_shots_on_target;INT;NULL;;;;Finalizações no gol mandante
+gold;fact_matches;home_possession;INT;NULL;;;;Posse mandante
+gold;fact_matches;home_corners;INT;NULL;;;;Escanteios mandante
+gold;fact_matches;home_fouls;INT;NULL;;;;Faltas mandante
+gold;fact_matches;away_shots;INT;NULL;;;;Finalizações visitante
+gold;fact_matches;away_shots_on_target;INT;NULL;;;;Finalizações no gol visitante
+gold;fact_matches;away_possession;INT;NULL;;;;Posse visitante
+gold;fact_matches;away_corners;INT;NULL;;;;Escanteios visitante
+gold;fact_matches;away_fouls;INT;NULL;;;;Faltas visitante
+gold;fact_matches;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+gold;fact_match_events;event_id;TEXT;NOT NULL;;PK;;ID do evento
+gold;fact_match_events;match_id;BIGINT;NOT NULL;;FK;FK→gold.fact_matches;ID da partida
+gold;fact_match_events;team_id;BIGINT;NULL;;FK;FK→gold.dim_team;ID do time
+gold;fact_match_events;player_id;BIGINT;NULL;;FK;FK→gold.dim_player;ID do jogador
+gold;fact_match_events;assist_player_id;BIGINT;NULL;;FK;FK→gold.dim_player;ID do assistente
+gold;fact_match_events;time_elapsed;INT;NULL;;;;Minuto do evento
+gold;fact_match_events;time_extra;INT;NULL;;;;Minuto de acréscimo
+gold;fact_match_events;event_type;TEXT;NULL;;;;Tipo do evento
+gold;fact_match_events;event_detail;TEXT;NULL;;;;Detalhe do evento
+gold;fact_match_events;is_goal;BOOLEAN;NOT NULL;false;;;É gol?
+gold;fact_match_events;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;competition_serving_summary;league_id;BIGINT;NOT NULL;;PK;;ID da competição
+mart;competition_serving_summary;league_name;TEXT;NULL;;;;Nome da competição
+mart;competition_serving_summary;matches_count;INTEGER;NOT NULL;0;;;Total de partidas
+mart;competition_serving_summary;seasons_count;INTEGER;NOT NULL;0;;;Total de temporadas
+mart;competition_serving_summary;min_season;INTEGER;NULL;;;;Primeira temporada
+mart;competition_serving_summary;max_season;INTEGER;NULL;;;;Última temporada
+mart;competition_serving_summary;match_statistics_count;INTEGER;NOT NULL;0;;;Partidas com estatísticas
+mart;competition_serving_summary;lineups_count;INTEGER;NOT NULL;0;;;Partidas com escalações
+mart;competition_serving_summary;events_count;INTEGER;NOT NULL;0;;;Partidas com eventos
+mart;competition_serving_summary;player_statistics_count;INTEGER;NOT NULL;0;;;Partidas com stats de jogadores
+mart;competition_serving_summary;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;player_serving_summary;player_id;BIGINT;NOT NULL;;PK;;ID do jogador
+mart;player_serving_summary;player_name;TEXT;NULL;;;;Nome do jogador
+mart;player_serving_summary;team_id;BIGINT;NULL;;;;ID do time atual
+mart;player_serving_summary;team_name;TEXT;NULL;;;;Nome do time atual
+mart;player_serving_summary;position_name;TEXT;NULL;;;;Posição
+mart;player_serving_summary;nationality;TEXT;NULL;;;;Nacionalidade
+mart;player_serving_summary;team_count;INTEGER;NOT NULL;0;;;Quantidade de times
+mart;player_serving_summary;recent_teams;JSONB;NOT NULL;'[]'::jsonb;;;Top 3 times recentes
+mart;player_serving_summary;recent_teams_5;JSONB;NOT NULL;'[]'::jsonb;;;Top 5 times recentes
+mart;player_serving_summary;matches_played;INTEGER;NOT NULL;0;;;Partidas jogadas
+mart;player_serving_summary;minutes_played;NUMERIC;NOT NULL;0;;;Minutos jogados
+mart;player_serving_summary;goals;NUMERIC;NOT NULL;0;;;Gols marcados
+mart;player_serving_summary;assists;NUMERIC;NOT NULL;0;;;Assistências
+mart;player_serving_summary;shots_total;NUMERIC;NOT NULL;0;;;Finalizações totais
+mart;player_serving_summary;shots_on_goal;NUMERIC;NOT NULL;0;;;Finalizações no gol
+mart;player_serving_summary;yellow_cards;NUMERIC;NOT NULL;0;;;Cartões amarelos
+mart;player_serving_summary;red_cards;NUMERIC;NOT NULL;0;;;Cartões vermelhos
+mart;player_serving_summary;cards_total;NUMERIC;NOT NULL;0;;;Total de cartões
+mart;player_serving_summary;rating;NUMERIC;NULL;;;;Nota média
+mart;player_serving_summary;data_updated_at;TIMESTAMPTZ;NULL;;;;Dados atualizados em
+mart;player_serving_summary;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;coach_identity;coach_identity_id;BIGSERIAL;NOT NULL;;PK;;ID da identidade do técnico
+mart;coach_identity;provider;TEXT;NOT NULL;;UNIQUE;UNIQUE(provider,provider_coach_id);Provedor de dados
+mart;coach_identity;provider_coach_id;BIGINT;NOT NULL;;;;ID do técnico no provedor
+mart;coach_identity;canonical_name;TEXT;NULL;;;;Nome canônico
+mart;coach_identity;display_name;TEXT;NULL;;;;Nome de exibição
+mart;coach_identity;aliases;JSONB;NOT NULL;'[]'::jsonb;;;Aliases conhecidos
+mart;coach_identity;image_url;TEXT;NULL;;;;URL da foto
+mart;coach_identity;identity_confidence;NUMERIC(5,4);NULL;;;;Confiança da identidade
+mart;coach_identity;source_refs;JSONB;NOT NULL;'[]'::jsonb;;;Referências de fontes
+mart;coach_identity;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+mart;coach_identity;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;coach_tenure;coach_tenure_id;BIGSERIAL;NOT NULL;;PK;;ID do mandato
+mart;coach_tenure;coach_identity_id;BIGINT;NOT NULL;;FK;FK→mart.coach_identity;ID da identidade do técnico
+mart;coach_tenure;team_id;BIGINT;NOT NULL;;;;ID do time
+mart;coach_tenure;role;TEXT;NOT NULL;;;"CHECK IN (head_coach,interim,assistant,unknown)";Papel (técnico principal, interino, etc)
+mart;coach_tenure;start_date;DATE;NULL;;;;Data de início
+mart;coach_tenure;end_date;DATE;NULL;;;;Data de fim
+mart;coach_tenure;source;TEXT;NOT NULL;;;;Fonte do dado
+mart;coach_tenure;source_confidence;NUMERIC(5,4);NULL;;;;Confiança da fonte
+mart;coach_tenure;is_date_estimated;BOOLEAN;NOT NULL;false;;;Data estimada?
+mart;coach_tenure;is_current_as_of_source;BOOLEAN;NOT NULL;false;;;Atual conforme a fonte?
+mart;coach_tenure;source_updated_at;TIMESTAMPTZ;NULL;;;;Atualizado na fonte em
+mart;coach_tenure;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+mart;coach_tenure;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;fact_coach_match_assignment;match_id;BIGINT;NOT NULL;;PK;;ID da partida
+mart;fact_coach_match_assignment;team_id;BIGINT;NOT NULL;;PK;;ID do time
+mart;fact_coach_match_assignment;coach_identity_id;BIGINT;NULL;;FK;FK→mart.coach_identity;ID da identidade do técnico
+mart;fact_coach_match_assignment;coach_tenure_id;BIGINT;NULL;;FK;FK→mart.coach_tenure;ID do mandato
+mart;fact_coach_match_assignment;assignment_method;TEXT;NOT NULL;;;"CHECK IN (lineup_source,single_head_coach,...)";Método de atribuição
+mart;fact_coach_match_assignment;assignment_confidence;NUMERIC(5,4);NULL;;;;Confiança da atribuição
+mart;fact_coach_match_assignment;conflict_reason;TEXT;NULL;;;;Razão do conflito
+mart;fact_coach_match_assignment;is_public_eligible;BOOLEAN;NOT NULL;false;;;Elegível para exibição pública?
+mart;fact_coach_match_assignment;source;TEXT;NULL;;;;Fonte do dado
+mart;fact_coach_match_assignment;source_record_id;TEXT;NULL;;;;ID do registro na fonte
+mart;fact_coach_match_assignment;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+mart;fact_coach_match_assignment;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+mart;competition_historical_stats;id;BIGSERIAL;NOT NULL;;PK;;ID auto-incremento
+mart;competition_historical_stats;competition_key;TEXT;NOT NULL;;FK;FK→control.competitions;Chave da competição
+mart;competition_historical_stats;competition_id;BIGINT;NULL;;;;ID numérico da competição
+mart;competition_historical_stats;stat_code;TEXT;NOT NULL;;FK;FK→control.historical_stat_definitions;Código da estatística
+mart;competition_historical_stats;stat_group;TEXT;NOT NULL;;;"CHECK IN (champions,scorers,team_records,...)";Grupo da estatística
+mart;competition_historical_stats;entity_type;TEXT;NULL;;;"CHECK IN (team,player,match)";Tipo da entidade
+mart;competition_historical_stats;entity_id;BIGINT;NULL;;;;ID da entidade
+mart;competition_historical_stats;entity_name;TEXT;NULL;;;;Nome da entidade
+mart;competition_historical_stats;value_numeric;NUMERIC;NULL;;;;Valor numérico
+mart;competition_historical_stats;value_label;TEXT;NULL;;;;Valor textual
+mart;competition_historical_stats;rank;INTEGER;NULL;;;"CHECK >0";Ranking
+mart;competition_historical_stats;season_label;TEXT;NULL;;;;Rótulo da temporada
+mart;competition_historical_stats;occurred_on;DATE;NULL;;;;Data de ocorrência
+mart;competition_historical_stats;source;TEXT;NOT NULL;'wikipedia';;"CHECK='wikipedia'";Fonte dos dados
+mart;competition_historical_stats;source_url;TEXT;NOT NULL;;;"CHECK ^https?://";URL da fonte
+mart;competition_historical_stats;as_of_year;INTEGER;NOT NULL;;;"CHECK >=1800";Ano de referência
+mart;competition_historical_stats;record_key;TEXT;NOT NULL;;UNIQUE;UNIQUE(competition_key,stat_code,as_of_year,source,record_key);Chave do registro
+mart;competition_historical_stats;metadata;JSONB;NOT NULL;'{}'::jsonb;;;Metadados
+mart;competition_historical_stats;ingestion_run_id;TEXT;NOT NULL;;;;ID da execução de ingestão
+mart;competition_historical_stats;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+mart;competition_historical_stats;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;competitions;competition_key;TEXT;NOT NULL;;PK;"CHECK ^[a-z0-9_]+$";Chave canônica da competição
+control;competitions;competition_name;TEXT;NOT NULL;;;;Nome da competição
+control;competitions;competition_type;TEXT;NOT NULL;;;"CHECK IN (league,cup,continental_cup)";Tipo da competição
+control;competitions;country_name;TEXT;NULL;;;;País
+control;competitions;confederation_name;TEXT;NULL;;;;Confederação (UEFA, CONMEBOL, etc)
+control;competitions;tier;SMALLINT;NULL;;;;Nível/divisão
+control;competitions;is_active;BOOLEAN;NOT NULL;TRUE;;;Competição ativa?
+control;competitions;display_priority;INTEGER;NOT NULL;100;;;Prioridade de exibição
+control;competitions;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;competitions;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;competition_provider_map;competition_key;TEXT;NOT NULL;;PK;FK→control.competitions;Chave da competição
+control;competition_provider_map;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+control;competition_provider_map;provider_league_id;BIGINT;NULL;;UNIQUE;UNIQUE(provider,provider_league_id);ID da liga no provedor
+control;competition_provider_map;provider_league_code;TEXT;NULL;;;;Código da liga no provedor
+control;competition_provider_map;provider_name;TEXT;NULL;;;;Nome no provedor
+control;competition_provider_map;is_active;BOOLEAN;NOT NULL;TRUE;;;Mapeamento ativo?
+control;competition_provider_map;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;competition_provider_map;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;season_catalog;competition_key;TEXT;NOT NULL;;PK;FK→control.competitions;Chave da competição
+control;season_catalog;season_label;TEXT;NOT NULL;;PK;"CHECK ^[0-9]{4}(_[0-9]{2})?$";Rótulo da temporada (2024 ou 2024_25)
+control;season_catalog;season_start_date;DATE;NULL;;;;Data de início da temporada
+control;season_catalog;season_end_date;DATE;NULL;;;;Data de fim da temporada
+control;season_catalog;is_closed;BOOLEAN;NOT NULL;FALSE;;;Temporada encerrada?
+control;season_catalog;provider;TEXT;NOT NULL;;PK;;Provedor de dados
+control;season_catalog;provider_season_id;BIGINT;NULL;;;;ID da temporada no provedor
+control;season_catalog;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;season_catalog;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;historical_stat_definitions;stat_code;TEXT;NOT NULL;;PK;"CHECK ^[a-z0-9_]+$";Código da estatística
+control;historical_stat_definitions;stat_group;TEXT;NOT NULL;;;"CHECK IN (champions,scorers,...)";Grupo da estatística
+control;historical_stat_definitions;display_name;TEXT;NOT NULL;;;"CHECK btrim<>''";Nome de exibição
+control;historical_stat_definitions;description;TEXT;NULL;;;;Descrição da estatística
+control;historical_stat_definitions;entity_type;TEXT;NULL;;;"CHECK IN (team,player,match)";Tipo da entidade
+control;historical_stat_definitions;value_unit;TEXT;NULL;;;;Unidade do valor
+control;historical_stat_definitions;is_ranking;BOOLEAN;NOT NULL;FALSE;;;É um ranking?
+control;historical_stat_definitions;is_active;BOOLEAN;NOT NULL;TRUE;;;Definição ativa?
+control;historical_stat_definitions;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;historical_stat_definitions;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;competition_wiki_mapping;competition_key;TEXT;NOT NULL;;PK;FK→control.competitions;Chave da competição
+control;competition_wiki_mapping;competition_id;BIGINT;NULL;;;;ID numérico da competição
+control;competition_wiki_mapping;competition_name;TEXT;NOT NULL;;;;Nome da competição
+control;competition_wiki_mapping;wiki_main_url;TEXT;NOT NULL;;;"CHECK ^https?://";URL principal da Wikipedia
+control;competition_wiki_mapping;wiki_scorers_url;TEXT;NULL;;;"CHECK ^https?://";URL da página de artilheiros
+control;competition_wiki_mapping;wiki_records_url;TEXT;NULL;;;"CHECK ^https?://";URL da página de recordes
+control;competition_wiki_mapping;is_active;BOOLEAN;NOT NULL;TRUE;;;Mapeamento ativo?
+control;competition_wiki_mapping;notes;TEXT;NULL;;;;Observações
+control;competition_wiki_mapping;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;competition_wiki_mapping;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;external_data_sources;source_name;TEXT;NOT NULL;;PK;;Nome da fonte de dados
+control;external_data_sources;source_kind;TEXT;NOT NULL;;;;Tipo da fonte (github_repo, etc)
+control;external_data_sources;source_root;TEXT;NULL;;;;URL raiz da fonte
+control;external_data_sources;license_summary;TEXT;NULL;;;;Resumo da licença
+control;external_data_sources;attribution_required;BOOLEAN;NOT NULL;false;;;Requer atribuição?
+control;external_data_sources;usage_scope;TEXT;NOT NULL;'research';;;Escopo de uso
+control;external_data_sources;terms_summary;TEXT;NULL;;;;Resumo dos termos de uso
+control;external_data_sources;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;external_data_sources;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;external_file_manifest;source_name;TEXT;NOT NULL;;PK;;Nome da fonte
+control;external_file_manifest;relative_path;TEXT;NOT NULL;;PK;;Caminho relativo do arquivo
+control;external_file_manifest;detected_entity;TEXT;NOT NULL;;;;Entidade detectada
+control;external_file_manifest;provider_match_id;BIGINT;NULL;;;;ID do match no provedor
+control;external_file_manifest;file_size_bytes;BIGINT;NOT NULL;;;;Tamanho do arquivo em bytes
+control;external_file_manifest;sha256;TEXT;NOT NULL;;;;Hash SHA256 do arquivo
+control;external_file_manifest;load_status;TEXT;NOT NULL;;;;Status do carregamento
+control;external_file_manifest;parse_error;TEXT;NULL;;;;Erro de parsing
+control;external_file_manifest;ingested_at;TIMESTAMPTZ;NOT NULL;now();;;Data de ingestão
+control;external_file_manifest;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;brasileirao_fixture_xref;brasileirao_match_id;TEXT;NOT NULL;;PK;;ID da partida no dataset Brasileirão
+control;brasileirao_fixture_xref;local_fixture_id;BIGINT;NULL;;;;ID local da partida reconciliada
+control;brasileirao_fixture_xref;match_date;DATE;NULL;;;;Data da partida
+control;brasileirao_fixture_xref;home_team_name_raw;TEXT;NOT NULL;;;;Nome bruto do mandante
+control;brasileirao_fixture_xref;away_team_name_raw;TEXT;NOT NULL;;;;Nome bruto do visitante
+control;brasileirao_fixture_xref;identity_status;TEXT;NOT NULL;'unmatched';;;Status da reconciliação
+control;brasileirao_fixture_xref;confidence;NUMERIC(5,4);NULL;;;;Confiança do match
+control;brasileirao_fixture_xref;resolved_at;TIMESTAMPTZ;NULL;;;;Data da resolução
+control;brasileirao_fixture_xref;match_method;TEXT;NULL;;;;Método de matching
+control;brasileirao_fixture_xref;review_status;TEXT;NOT NULL;'pending';;"CHECK IN (pending,auto_approved,...)";Status de revisão
+control;brasileirao_fixture_xref;source_evidence;JSONB;NOT NULL;'{}'::jsonb;;;Evidências do matching
+control;brasileirao_fixture_xref;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;brasileirao_fixture_xref;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;elo_match_xref;elo_match_hash;TEXT;NOT NULL;;PK;;Hash da partida ELO
+control;elo_match_xref;local_fixture_id;BIGINT;NULL;;;;ID local reconciliado
+control;elo_match_xref;match_date;DATE;NULL;;;;Data da partida
+control;elo_match_xref;competition_key;TEXT;NULL;;;;Chave da competição
+control;elo_match_xref;division;TEXT;NULL;;;;Divisão
+control;elo_match_xref;home_team_name_raw;TEXT;NOT NULL;;;;Mandante (texto bruto)
+control;elo_match_xref;away_team_name_raw;TEXT;NOT NULL;;;;Visitante (texto bruto)
+control;elo_match_xref;identity_status;TEXT;NOT NULL;'unmatched';;;Status da reconciliação
+control;elo_match_xref;confidence;NUMERIC(5,4);NULL;;;;Confiança do match
+control;elo_match_xref;resolved_at;TIMESTAMPTZ;NULL;;;;Data da resolução
+control;elo_match_xref;match_method;TEXT;NULL;;;;Método de matching
+control;elo_match_xref;review_status;TEXT;NOT NULL;'pending';;"CHECK IN (pending,auto_approved,...)";Status de revisão
+control;elo_match_xref;source_evidence;JSONB;NOT NULL;'{}'::jsonb;;;Evidências do matching
+control;elo_match_xref;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;elo_match_xref;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+control;entity_reconciliation_review_queue;review_queue_id;BIGSERIAL;NOT NULL;;PK;;ID da fila de revisão
+control;entity_reconciliation_review_queue;entity_type;TEXT;NOT NULL;;;"CHECK IN (match,player,team,coach,competition,season)";Tipo da entidade
+control;entity_reconciliation_review_queue;source;TEXT;NOT NULL;;;;Fonte do dado
+control;entity_reconciliation_review_queue;source_entity_id;TEXT;NOT NULL;;;;ID da entidade na fonte
+control;entity_reconciliation_review_queue;candidate_canonical_id;BIGINT;NULL;;;;ID canônico candidato
+control;entity_reconciliation_review_queue;candidate_competition_key;TEXT;NULL;;;;Chave da competição candidata
+control;entity_reconciliation_review_queue;status;TEXT;NOT NULL;'pending';;"CHECK IN (pending,approved,rejected,blocked)";Status da revisão
+control;entity_reconciliation_review_queue;reason;TEXT;NULL;;;;Razão da entrada na fila
+control;entity_reconciliation_review_queue;source_label;TEXT;NULL;;;;Rótulo da fonte
+control;entity_reconciliation_review_queue;evidence;JSONB;NOT NULL;'{}'::jsonb;;;Evidências
+control;entity_reconciliation_review_queue;created_at;TIMESTAMPTZ;NOT NULL;now();;;Data de criação
+control;entity_reconciliation_review_queue;updated_at;TIMESTAMPTZ;NOT NULL;now();;;Última atualização
+publication;serving_scope;competition_key;TEXT;NOT NULL;;;;Chave da competição
+publication;serving_scope;canonical_competition_id;BIGINT;NOT NULL;;;;ID canônico da competição
+publication;serving_scope;source_competition_id;BIGINT;NOT NULL;;PK;;ID da competição na fonte
+publication;serving_scope;season_query_id;INT;NOT NULL;;PK;;ID de consulta da temporada
+publication;serving_scope;season_label;TEXT;NOT NULL;;PK;;Rótulo da temporada

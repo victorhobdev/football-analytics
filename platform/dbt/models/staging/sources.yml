@@ -26,6 +26,13 @@ sources:
       - name: statsbomb_lineups
       - name: statsbomb_three_sixty_frames
       - name: statsbomb_three_sixty_freeze_frame
+      - name: elo_matches
+      - name: elo_ratings
+      - name: tm_transfers
+      - name: tm_player_valuations
+      - name: tm_appearances
+      - name: tm_game_lineups
+      - name: tm_game_events
 
   - name: postgres_mart
     database: "{{ env_var('FOOTBALL_PG_DBNAME', env_var('POSTGRES_DB', 'football_dw')) }}"

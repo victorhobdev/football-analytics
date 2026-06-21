@@ -783,3 +783,174 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: fact_match_odds
+    description: "Fato de odds por partida canonica a partir do dataset Elo, sem publicar partidas duplicadas por fonte."
+    columns:
+      - name: match_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+      - name: competition_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_competition')
+              field: competition_sk
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_elo_match_team_stats
+    description: "Fato de estatisticas por partida/time derivado do Elo, ligado somente a partidas canonicas publicadas."
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - match_id
+            - side
+    columns:
+      - name: elo_match_team_stat_id
+        tests:
+          - not_null
+          - unique
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+      - name: team_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_team')
+              field: team_sk
+      - name: side
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['home', 'away']
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_transfermarkt_transfers
+    description: "Fato de transferencias Transfermarkt para jogadores reconciliados com a dimensao canonica."
+    columns:
+      - name: transfer_event_id
+        tests:
+          - not_null
+          - unique
+      - name: player_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: player_id
+        tests:
+          - not_null
+      - name: transfer_date
+        tests:
+          - not_null
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_transfermarkt_player_valuations
+    description: "Historico de valor de mercado Transfermarkt para jogadores reconciliados com a dimensao canonica."
+    columns:
+      - name: player_valuation_id
+        tests:
+          - not_null
+          - unique
+      - name: player_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: player_id
+        tests:
+          - not_null
+      - name: valuation_date
+        tests:
+          - not_null
+      - name: market_value_eur
+        tests:
+          - not_null
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_transfermarkt_appearances
+    description: "Aparicoes por partida/jogador Transfermarkt para partidas e jogadores reconciliados."
+    columns:
+      - name: transfermarkt_appearance_id
+        tests:
+          - not_null
+          - unique
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+      - name: player_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_transfermarkt_lineups
+    description: "Lineups Transfermarkt para partidas e jogadores reconciliados."
+    columns:
+      - name: transfermarkt_lineup_id
+        tests:
+          - not_null
+          - unique
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+      - name: player_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: source_provider
+        tests:
+          - not_null
+
+  - name: fact_transfermarkt_match_events
+    description: "Eventos Transfermarkt para partidas e jogadores reconciliados."
+    columns:
+      - name: transfermarkt_event_id
+        tests:
+          - not_null
+          - unique
+      - name: match_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fact_matches')
+              field: match_id
+      - name: player_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: source_provider
+        tests:
+          - not_null
