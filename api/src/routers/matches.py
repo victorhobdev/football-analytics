@@ -686,7 +686,7 @@ def get_match_center(
     if includeTimeline:
         timeline_query = """
             select
-                fme.event_id::text as event_id,
+                fme.event_id,
                 fme.time_elapsed as minute,
                 cast(null as integer) as second,
                 cast(null as text) as period,
@@ -705,26 +705,6 @@ def get_match_center(
             order by fme.time_elapsed asc nulls last, fme.event_id asc;
         """
         timeline_result = db_client.fetch_all(timeline_query, [match_id])
-        if not timeline_result:
-            transfermarkt_timeline_query = """
-            select
-                tme.transfermarkt_event_id::text as event_id,
-                tme.minute,
-                cast(null as integer) as second,
-                cast(null as text) as period,
-                tme.event_type as type,
-                coalesce(tme.description, tme.event_type) as detail,
-                cast(null as text) as team_id,
-                tme.club_name as team_name,
-                tme.player_id::text as player_id,
-                player.player_name
-            from mart.fact_transfermarkt_match_events tme
-            left join mart.dim_player player
-              on player.player_id = tme.player_id
-            where tme.match_id = %s
-            order by minute asc nulls last, event_id asc;
-            """
-            timeline_result = db_client.fetch_all(transfermarkt_timeline_query, [match_id])
         timeline_rows = [
             {
                 "eventId": row.get("event_id"),
@@ -768,35 +748,6 @@ def get_match_center(
                 ffl.player_name asc;
         """
         lineups_result = db_client.fetch_all(lineups_query, [match_id])
-        if not lineups_result:
-            transfermarkt_lineups_query = """
-            select
-                tml.player_id::text as player_id,
-                player.player_name,
-                cast(null as text) as team_id,
-                cast(null as text) as team_name,
-                tml.position_name as position,
-                cast(null as text) as formation_field,
-                cast(null as integer) as formation_position,
-                tml.shirt_number,
-                case
-                    when tml.lineup_type = 'starting_lineup' then true
-                    when tml.lineup_type is not null then false
-                    else null
-                end as is_starter,
-                cast(null as integer) as minutes_played
-            from mart.fact_transfermarkt_lineups tml
-            left join mart.dim_player player
-              on player.player_id = tml.player_id
-            where tml.match_id = %s
-            order by
-                team_id asc nulls last,
-                is_starter desc nulls last,
-                formation_position asc nulls last,
-                shirt_number asc nulls last,
-                player_name asc;
-            """
-            lineups_result = db_client.fetch_all(transfermarkt_lineups_query, [match_id])
         lineup_rows = [
             {
                 "playerId": row.get("player_id"),
@@ -851,42 +802,6 @@ def get_match_center(
                 match_row.get("away_team_id"),
             ],
         )
-        if not team_stats_result:
-            elo_team_stats_query = """
-                select
-                    ets.team_id::text as team_id,
-                    coalesce(ets.team_name, team.team_name) as team_name,
-                    ets.shots as total_shots,
-                    ets.shots_on_target,
-                    cast(null as numeric) as ball_possession,
-                    cast(null as numeric) as total_passes,
-                    cast(null as numeric) as passes_accurate,
-                    cast(null as numeric) as passes_pct,
-                    ets.corners as corner_kicks,
-                    ets.fouls,
-                    ets.yellow_cards,
-                    ets.red_cards,
-                    cast(null as numeric) as goalkeeper_saves
-                from mart.fact_elo_match_team_stats ets
-                left join mart.dim_team team
-                  on team.team_id = ets.team_id
-                where ets.match_id = %s
-                order by
-                    case
-                        when ets.team_id::text = %s then 0
-                        when ets.team_id::text = %s then 1
-                        else 2
-                    end,
-                    ets.team_id asc;
-            """
-            team_stats_result = db_client.fetch_all(
-                elo_team_stats_query,
-                [
-                    match_id,
-                    match_row.get("home_team_id"),
-                    match_row.get("away_team_id"),
-                ],
-            )
         team_stat_rows = [
             {
                 "teamId": row.get("team_id"),
@@ -941,50 +856,6 @@ def get_match_center(
             order by fps.team_id asc, fps.rating desc nulls last, fps.player_name asc;
         """
         stats_result = db_client.fetch_all(player_stats_query, [match_id])
-        if not stats_result:
-            transfermarkt_player_stats_query = """
-                select
-                    fta.player_id::text as player_id,
-                    coalesce(fta.player_name, player.player_name) as player_name,
-                    cast(null as text) as team_id,
-                    coalesce(club.name, lineup_club.name) as team_name,
-                    tml.position_name,
-                    case
-                        when tml.lineup_type = 'starting_lineup' then true
-                        when tml.lineup_type is not null then false
-                        else null
-                    end as is_starter,
-                    fta.minutes_played,
-                    fta.goals,
-                    fta.assists,
-                    cast(null as numeric) as shots_total,
-                    cast(null as numeric) as shots_on_goal,
-                    cast(null as numeric) as passes_total,
-                    cast(null as numeric) as key_passes,
-                    cast(null as numeric) as tackles,
-                    cast(null as numeric) as interceptions,
-                    cast(null as numeric) as duels,
-                    cast(null as numeric) as fouls_committed,
-                    fta.yellow_cards,
-                    fta.red_cards,
-                    cast(null as numeric) as goalkeeper_saves,
-                    cast(null as numeric) as clean_sheets,
-                    cast(null as numeric) as xg,
-                    cast(null as numeric) as rating
-                from mart.fact_transfermarkt_appearances fta
-                left join mart.dim_player player
-                  on player.player_id = fta.player_id
-                left join mart.fact_transfermarkt_lineups tml
-                  on tml.match_id = fta.match_id
-                 and tml.player_id = fta.player_id
-                left join raw.tm_clubs club
-                  on club.club_id = fta.player_club_id
-                left join raw.tm_clubs lineup_club
-                  on lineup_club.club_id = tml.tm_club_id
-                where fta.match_id = %s
-                order by coalesce(club.name, lineup_club.name) asc nulls last, fta.goals desc nulls last, coalesce(fta.player_name, player.player_name) asc;
-            """
-            stats_result = db_client.fetch_all(transfermarkt_player_stats_query, [match_id])
         player_stat_rows = [
             {
                 "playerId": row.get("player_id"),

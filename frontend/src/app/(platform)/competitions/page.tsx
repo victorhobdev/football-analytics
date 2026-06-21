@@ -24,9 +24,9 @@ interface CatalogCompetition {
   key: string;
   name: string;
   shortName: string;
-  source: "published" | "transfermarkt" | "eloratings" | "brasileirao" | "multi";
-  dominantSource: "published" | "transfermarkt" | "eloratings" | "brasileirao";
-  additionalSources: Array<"published" | "transfermarkt" | "eloratings" | "brasileirao">;
+  source: "published" | "transfermarkt" | "eloratings" | "multi";
+  dominantSource: "published" | "transfermarkt" | "eloratings";
+  additionalSources: Array<"published" | "transfermarkt" | "eloratings">;
   country: string;
   region: string;
   type: CatalogCompetitionType;
@@ -98,10 +98,6 @@ function getCompetitionSourceLabel(competition: CatalogCompetition): string {
 
   if (competition.dominantSource === "eloratings") {
     return "Elo+Matches";
-  }
-
-  if (competition.dominantSource === "brasileirao") {
-    return "Brasileirão";
   }
 
   return "Publicado";

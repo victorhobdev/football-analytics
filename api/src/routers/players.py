@@ -367,85 +367,6 @@ def _fetch_player_profile_meta(player_id: int) -> dict[str, Any]:
     }
 
 
-def _fetch_player_market_summary(player_id: int) -> dict[str, Any] | None:
-    row = db_client.fetch_one(
-        """
-        with latest_valuation as (
-            select
-                market_value_eur,
-                valuation_date
-            from mart.fact_transfermarkt_player_valuations
-            where player_id = %s
-            order by valuation_date desc, player_valuation_id desc
-            limit 1
-        ),
-        peak_valuation as (
-            select max(market_value_eur) as peak_market_value_eur
-            from mart.fact_transfermarkt_player_valuations
-            where player_id = %s
-        ),
-        transfer_summary as (
-            select
-                count(*)::int as transfer_count,
-                max(transfer_date) as last_transfer_date
-            from mart.fact_transfermarkt_transfers
-            where player_id = %s
-        ),
-        latest_transfer as (
-            select
-                from_club_name,
-                to_club_name,
-                transfer_fee_eur,
-                transfer_date
-            from mart.fact_transfermarkt_transfers
-            where player_id = %s
-            order by transfer_date desc, transfer_event_id desc
-            limit 1
-        )
-        select
-            lv.market_value_eur as current_market_value_eur,
-            lv.valuation_date as last_valuation_date,
-            pv.peak_market_value_eur,
-            ts.transfer_count,
-            ts.last_transfer_date,
-            lt.from_club_name,
-            lt.to_club_name,
-            lt.transfer_fee_eur as last_transfer_fee_eur
-        from latest_valuation lv
-        full outer join peak_valuation pv on true
-        full outer join transfer_summary ts on true
-        full outer join latest_transfer lt on true;
-        """,
-        [player_id, player_id, player_id, player_id],
-    ) or {}
-
-    has_any_market_signal = any(
-        row.get(field) is not None
-        for field in [
-            "current_market_value_eur",
-            "peak_market_value_eur",
-            "transfer_count",
-            "last_transfer_date",
-            "from_club_name",
-            "to_club_name",
-            "last_transfer_fee_eur",
-        ]
-    )
-    if not has_any_market_signal:
-        return None
-
-    return {
-        "currentMarketValueEur": float(row["current_market_value_eur"]) if row.get("current_market_value_eur") is not None else None,
-        "peakMarketValueEur": float(row["peak_market_value_eur"]) if row.get("peak_market_value_eur") is not None else None,
-        "lastValuationDate": row.get("last_valuation_date"),
-        "transferCount": _to_int_count(row.get("transfer_count")),
-        "lastTransferDate": row.get("last_transfer_date"),
-        "lastTransferFromTeamName": row.get("from_club_name"),
-        "lastTransferToTeamName": row.get("to_club_name"),
-        "lastTransferFeeEur": float(row["last_transfer_fee_eur"]) if row.get("last_transfer_fee_eur") is not None else None,
-    }
-
-
 @router.get("")
 def get_players(
     request: Request,
@@ -1266,7 +1187,6 @@ def get_player_profile(
 
     stats_payload: dict[str, Any] | None = None
     stats_coverage: dict[str, Any] | None = None
-    market_summary = _fetch_player_market_summary(player_id)
     if includeStats:
         stats_rows = db_client.fetch_all(
             f"""
@@ -1396,7 +1316,6 @@ def get_player_profile(
     data: dict[str, Any] = {
         "player": player_payload,
         "summary": summary_payload,
-        "market": market_summary,
         "profileMeta": profile_meta,
         "sectionCoverage": {
             "overview": overview_coverage,

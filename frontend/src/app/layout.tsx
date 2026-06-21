@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
       </head>
-      <body className={`${appBodyFont.variable} ${appHeadlineFont.variable}`} suppressHydrationWarning>
+      <body className={`${appBodyFont.variable} ${appHeadlineFont.variable}`}>
         <a className="skip-link" href="#main-content">
           Pular para o conteúdo principal
         </a>
