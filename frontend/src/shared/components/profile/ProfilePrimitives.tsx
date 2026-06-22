@@ -27,6 +27,8 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 const PROFILE_COVERAGE_CLASSES: Record<CoverageStatus, string> = {
   complete: "bg-[#a6f2d1] text-[#00513b]",
   partial: "bg-[#ffdcc3] text-[#6e3900]",
+  insufficient: "bg-[#ffdad6] text-[#93000a]",
+  not_available: "bg-[#d8e3fb] text-[#404944]",
   empty: "bg-[#ffdad6] text-[#93000a]",
   unknown: "bg-[#d8e3fb] text-[#404944]",
 };

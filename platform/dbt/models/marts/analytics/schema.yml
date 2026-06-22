@@ -273,3 +273,227 @@ models:
       - name: total_matches
         tests:
           - not_null
+
+  - name: analytics_overview_summary
+    description: "Sumario por competicao/temporada com metricas de cobertura."
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - competition_sk
+            - season_label
+    columns:
+      - name: competition_sk
+        description: "Chave substituta da competicao."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_competition')
+              field: competition_sk
+      - name: season_label
+        description: "Rotulo da temporada."
+        tests:
+          - not_null
+      - name: total_matches
+        description: "Total de partidas no recorte."
+        tests:
+          - not_null
+      - name: total_goals
+        description: "Total de gols no recorte."
+        tests:
+          - not_null
+      - name: total_teams
+        description: "Total de times distintos no recorte."
+      - name: total_coaches
+        description: "Total de tecnicos com atribuicao no recorte (parcial pos-2020)."
+      - name: total_players
+        description: "Total de jogadores com lineup no recorte."
+      - name: total_matches_with_score
+        description: "Partidas com placar valido."
+      - name: total_matches_with_events
+        description: "Partidas com eventos registrados."
+
+  - name: analytics_trend_series
+    description: "Tendencias temporais por competicao/temporada nos tipos round e month."
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - competition_sk
+            - season_label
+            - period_type
+            - period
+    columns:
+      - name: competition_sk
+        description: "Chave substituta da competicao."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_competition')
+              field: competition_sk
+      - name: season_label
+        description: "Rotulo da temporada."
+        tests:
+          - not_null
+      - name: period_type
+        description: "Tipo do periodo: 'round' ou 'month'."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['round', 'month']
+      - name: period
+        description: "Identificador do periodo (numero da rodada ou YYYY-MM)."
+        tests:
+          - not_null
+      - name: matches
+        description: "Total de partidas no periodo."
+        tests:
+          - not_null
+      - name: total_goals
+        description: "Total de gols no periodo."
+      - name: avg_goals
+        description: "Media de gols por partida."
+      - name: home_wins
+        description: "Vitorias mandantes."
+      - name: away_wins
+        description: "Vitorias visitantes."
+      - name: draws
+        description: "Empates."
+
+  - name: analytics_olap_metric_cube
+    description: "Cubo OLAP unificado em 6 grains distintos para slicing/dicing multidimensionais."
+    columns:
+      - name: grain_name
+        description: "Nome do grain: competition_season, competition_season_round, competition_season_team, competition_season_team_round, competition_season_team_venue, competition_season_coach."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['competition_season', 'competition_season_round', 'competition_season_team', 'competition_season_team_round', 'competition_season_team_venue', 'competition_season_coach']
+      - name: competition_key
+        description: "Chave natural da competicao."
+        tests:
+          - not_null
+      - name: season_label
+        description: "Rotulo da temporada."
+        tests:
+          - not_null
+      - name: matches
+        description: "Total de partidas no grain."
+        tests:
+          - not_null
+
+  - name: analytics_comparison_summary
+    description: "Comparacoes lado a lado entre pares de entidades (times, temporadas, mandos, periodos)."
+    columns:
+      - name: comparison_type
+        description: "Tipo da comparacao: team_vs_team, season_vs_season, home_vs_away, period_vs_period."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['team_vs_team', 'season_vs_season', 'home_vs_away', 'period_vs_period']
+      - name: entity_a_id
+        description: "Identificador da entidade A."
+        tests:
+          - not_null
+      - name: entity_b_id
+        description: "Identificador da entidade B."
+        tests:
+          - not_null
+      - name: entity_a_label
+        description: "Nome/rotulo da entidade A."
+      - name: entity_b_label
+        description: "Nome/rotulo da entidade B."
+      - name: scope_description
+        description: "Descricao do escopo da comparacao."
+
+  - name: analytics_superlative_summary
+    description: "Recordes e extremos por competicao/temporada em 10 categorias."
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - category
+            - scope
+    columns:
+      - name: category
+        description: "Categoria do recorde: most_goals_match, biggest_win, best_attack, best_defense, best_goal_diff, most_goals_round, highest_avg_goals_round, best_team_ppg, coach_best_ppm, coach_most_matches."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['most_goals_match', 'biggest_win', 'best_attack', 'best_defense', 'best_goal_diff', 'most_goals_round', 'highest_avg_goals_round', 'best_team_ppg', 'coach_best_ppm', 'coach_most_matches']
+      - name: metric_name
+        description: "Nome da metrica usada."
+        tests:
+          - not_null
+      - name: entity_id
+        description: "Identificador da entidade detentora do recorde."
+      - name: entity_name
+        description: "Nome da entidade detentora."
+        tests:
+          - not_null
+      - name: value
+        description: "Valor do recorde."
+        tests:
+          - not_null
+      - name: scope
+        description: "Escopo do recorde (competicao / temporada)."
+        tests:
+          - not_null
+      - name: sample_size
+        description: "Tamanho da amostra considerada."
+
+  - name: analytics_coverage_summary
+    description: "Metricas de cobertura por competicao/temporada com percentuais e status."
+    tests:
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - competition_sk
+            - season_label
+    columns:
+      - name: competition_sk
+        description: "Chave substituta da competicao."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_competition')
+              field: competition_sk
+      - name: season_label
+        description: "Rotulo da temporada."
+        tests:
+          - not_null
+      - name: total_matches
+        description: "Total de partidas no recorte."
+        tests:
+          - not_null
+      - name: matches_with_score
+        description: "Partidas com placar."
+      - name: matches_with_events
+        description: "Partidas com eventos."
+      - name: matches_with_lineups
+        description: "Partidas com escalacao."
+      - name: matches_with_player_stats
+        description: "Partidas com estatisticas de jogador."
+      - name: matches_with_team_stats
+        description: "Partidas com estatisticas de time."
+      - name: score_status
+        description: "Status da cobertura de placar: complete, partial, insufficient."
+        tests:
+          - accepted_values:
+              values: ['complete', 'partial', 'insufficient']
+      - name: events_status
+        description: "Status da cobertura de eventos."
+        tests:
+          - accepted_values:
+              values: ['complete', 'partial', 'insufficient']
+      - name: lineups_status
+        description: "Status da cobertura de escalacoes."
+        tests:
+          - accepted_values:
+              values: ['complete', 'partial', 'insufficient']
+      - name: player_stats_status
+        description: "Status da cobertura de estatisticas de jogador."
+        tests:
+          - accepted_values:
+              values: ['complete', 'partial', 'insufficient']
+      - name: team_stats_status
+        description: "Status da cobertura de estatisticas de time."
+        tests:
+          - accepted_values:
+              values: ['complete', 'partial', 'insufficient']

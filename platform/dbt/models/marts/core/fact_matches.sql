@@ -4,9 +4,6 @@
     materialized='incremental',
     unique_key='match_id',
     on_schema_change='sync_all_columns',
-    pre_hook=[
-        "set max_parallel_workers_per_gather = 0"
-    ],
     indexes=[
         {'columns': ['match_id'], 'type': 'btree'},
         {'columns': ['league_id', 'season', 'date_day desc', 'match_id desc'], 'type': 'btree'},

@@ -103,15 +103,6 @@ def _infer_competition_catalog_metadata(
                 "type": "international_cup",
             }
 
-        if competition_type == "cup":
-            scope = "global" if confederation == "FIFA" or country == "Mundo" else "domestic"
-            return {
-                "country": country,
-                "region": region,
-                "scope": scope,
-                "type": "international_cup" if scope == "global" else "domestic_cup",
-            }
-
         if confederation == "FIFA" or country == "Mundo":
             return {
                 "country": "Mundo",
@@ -296,12 +287,7 @@ def _fetch_archive_summary() -> dict[str, Any]:
                         )
                     else 0
                   end as matches,
-            (select count(distinct player_id) from mart.dim_player) as players,
-            (select count(*) from mart.fact_match_odds) as matches_with_odds,
-            (select count(distinct match_id) from mart.fact_elo_match_team_stats) as matches_with_team_stats,
-            (select count(*) from mart.fact_elo_match_team_stats) as team_stat_rows,
-            (select count(*) from mart.fact_transfermarkt_transfers) as market_transfers,
-            (select count(*) from mart.fact_transfermarkt_player_valuations) as market_valuations
+            (select count(distinct player_id) from mart.dim_player) as players
         from world_cup_presence wp;
         """
     ) or {}
@@ -311,11 +297,6 @@ def _fetch_archive_summary() -> dict[str, Any]:
         "seasons": _to_int(row.get("seasons")),
         "matches": _to_int(row.get("matches")),
         "players": _to_int(row.get("players")),
-        "matchesWithOdds": _to_int(row.get("matches_with_odds")),
-        "matchesWithTeamStats": _to_int(row.get("matches_with_team_stats")),
-        "teamStatRows": _to_int(row.get("team_stat_rows")),
-        "marketTransfers": _to_int(row.get("market_transfers")),
-        "marketValuations": _to_int(row.get("market_valuations")),
     }
 
 
@@ -352,18 +333,7 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
     }
 
 
-def _normalize_archive_summary_from_competitions(
-    archive_summary: dict[str, Any],
-    competitions: list[dict[str, Any]],
-) -> dict[str, Any]:
-    normalized_summary = dict(archive_summary)
-    normalized_summary["competitions"] = len(competitions)
-    normalized_summary["seasons"] = sum(_to_int(item.get("seasonsCount")) for item in competitions)
-    normalized_summary["matches"] = sum(_to_int(item.get("matchesCount")) for item in competitions)
-    return normalized_summary
-
-
-def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
+def _fetch_competitions() -> list[dict[str, Any]]:
     rows = db_client.fetch_all(
         """
         with match_scope as (
@@ -403,21 +373,32 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
             from match_scope
             order by competition_key, date_day desc nulls last, season_label desc
         ),
-        summary_by_competition as (
+        match_statistics as (
             select
-                league_scope.competition_key,
-                sum(coalesce(css.match_statistics_count, 0))::int as match_statistics_count,
-                sum(coalesce(css.lineups_count, 0))::int as lineups_count,
-                sum(coalesce(css.events_count, 0))::int as events_count,
-                sum(coalesce(css.player_statistics_count, 0))::int as player_statistics_count
-            from (
-                select distinct league_id, competition_key
-                from match_scope
-                where league_id is not null
-            ) league_scope
-            left join mart.competition_serving_summary css
-              on css.league_id = league_scope.league_id
-            group by league_scope.competition_key
+                fm.competition_key,
+                count(distinct fps.match_id)::int as available_count
+            from mart.fact_fixture_player_stats fps
+            inner join mart.fact_matches fm
+              on fm.match_id = fps.match_id
+            group by fm.competition_key
+        ),
+        fixture_lineups as (
+            select
+                fm.competition_key,
+                count(distinct fl.match_id)::int as available_count
+            from mart.fact_fixture_lineups fl
+            inner join mart.fact_matches fm
+              on fm.match_id = fl.match_id
+            group by fm.competition_key
+        ),
+        match_events as (
+            select
+                fm.competition_key,
+                count(distinct me.match_id)::int as available_count
+            from mart.fact_match_events me
+            inner join mart.fact_matches fm
+              on fm.match_id = me.match_id
+            group by fm.competition_key
         )
         select
             mt.competition_id,
@@ -427,17 +408,21 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
             mt.seasons_count,
             fs.min_season_label,
             ls.max_season_label,
-            coalesce(sbc.match_statistics_count, 0) as match_statistics_count,
-            coalesce(sbc.lineups_count, 0) as lineups_count,
-            coalesce(sbc.events_count, 0) as events_count,
-            coalesce(sbc.player_statistics_count, 0) as player_statistics_count
+            coalesce(ms.available_count, 0) as match_statistics_count,
+            coalesce(fl.available_count, 0) as lineups_count,
+            coalesce(me.available_count, 0) as events_count,
+            coalesce(ms.available_count, 0) as player_statistics_count
         from match_totals mt
         left join first_season fs
           on fs.competition_key = mt.competition_key
         left join latest_season ls
           on ls.competition_key = mt.competition_key
-        left join summary_by_competition sbc
-          on sbc.competition_key = mt.competition_key
+        left join match_statistics ms
+          on ms.competition_key = mt.competition_key
+        left join fixture_lineups fl
+          on fl.competition_key = mt.competition_key
+        left join match_events me
+          on me.competition_key = mt.competition_key
         order by mt.competition_name asc;
         """
     )
@@ -505,7 +490,6 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
 
         min_season = row.get("min_season_label")
         max_season = row.get("max_season_label")
-        external_candidates = external_depth_by_key.get(competition_key, [])
         candidates = [
             {
                 "source": "published",
@@ -514,10 +498,8 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
                 "fromSeasonLabel": str(min_season) if min_season is not None else None,
                 "toSeasonLabel": str(max_season) if max_season is not None else None,
             },
-            *external_candidates,
+            *external_depth_by_key.get(competition_key, []),
         ]
-        canonical_matches_count = _to_int(row.get("matches_count"))
-        canonical_seasons_count = _to_int(row.get("seasons_count"))
         dominant_candidate = max(
             candidates,
             key=lambda candidate: (
@@ -583,8 +565,8 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
                 "region": metadata["region"],
                 "scope": metadata["scope"],
                 "type": metadata["type"],
-                "matchesCount": canonical_matches_count,
-                "seasonsCount": canonical_seasons_count,
+                "matchesCount": _to_int(dominant_candidate.get("matchesCount")),
+                "seasonsCount": _to_int(dominant_candidate.get("seasonsCount")),
                 "range": {
                     "fromSeasonId": str(min_season) if min_season is not None else None,
                     "fromSeasonLabel": from_season_label,
@@ -616,33 +598,7 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
 def _fetch_external_competition_depth_by_key() -> dict[str, list[dict[str, Any]]]:
     rows = db_client.fetch_all(
         """
-        with split_year_competitions(competition_key) as (
-            values
-                ('bundesliga'),
-                ('champions_league'),
-                ('la_liga'),
-                ('ligue_1'),
-                ('premier_league'),
-                ('primeira_liga'),
-                ('serie_a_it')
-        ),
-        brasileirao_depth as (
-            select
-                'brasileirao_a'::text as competition_key,
-                'brasileirao'::text as source,
-                count(*)::int as matches_count,
-                count(distinct extract(year from bx.match_date)::int)::int as seasons_count,
-                min(extract(year from bx.match_date)::int)::text as min_season,
-                max(extract(year from bx.match_date)::int)::text as max_season
-            from control.brasileirao_fixture_xref bx
-            inner join control.external_match_publication_xref px
-              on px.source = 'dataset_brasileirao'
-             and px.source_entity_id = bx.brasileirao_match_id
-            where bx.identity_status = 'new_coverage'
-              and px.publication_status = 'publishable'
-              and bx.match_date is not null
-        ),
-        transfermarkt_depth as (
+        with transfermarkt_depth as (
             select
                 cpm.competition_key,
                 'transfermarkt'::text as source,
@@ -654,50 +610,23 @@ def _fetch_external_competition_depth_by_key() -> dict[str, list[dict[str, Any]]
             inner join raw.tm_games tg
               on cpm.provider = 'transfermarkt'
              and cpm.provider_league_code = tg.competition_id
-            inner join control.tm_game_fixture_xref tx
-              on tx.tm_game_id = tg.game_id
-            inner join control.external_match_publication_xref px
-              on px.source = 'transfermarkt'
-             and px.source_entity_id = tx.tm_game_id
             where tg.season ~ '^\\d+$'
-              and tx.identity_status = 'new_coverage'
-              and px.publication_status = 'publishable'
             group by cpm.competition_key
         ),
         elo_depth as (
             select
                 cpm.competition_key,
-                case
-                    when syc.competition_key is not null
-                     and extract(month from em.match_date_raw::date)::int <= 6
-                        then extract(year from em.match_date_raw::date)::int - 1
-                    else extract(year from em.match_date_raw::date)::int
-                end as season_start_year
+                'eloratings'::text as source,
+                count(*)::int as matches_count,
+                count(distinct split_part(em.match_date_raw, '-', 1))::int as seasons_count,
+                min(split_part(em.match_date_raw, '-', 1)) as min_season,
+                max(split_part(em.match_date_raw, '-', 1)) as max_season
             from control.competition_provider_map cpm
             inner join raw.elo_matches em
               on cpm.provider = 'eloratings'
              and cpm.provider_league_code = em.division
-            inner join control.elo_match_xref ex
-              on ex.elo_match_hash = em.record_hash
-            inner join control.external_match_publication_xref px
-              on px.source = 'eloratings'
-             and px.source_entity_id = ex.elo_match_hash
-            left join split_year_competitions syc
-              on syc.competition_key = cpm.competition_key
             where em.match_date_raw ~ '^\\d{4}-\\d{2}-\\d{2}$'
-              and ex.identity_status = 'new_coverage'
-              and px.publication_status = 'publishable'
-        ),
-        elo_depth_grouped as (
-            select
-                competition_key,
-                'eloratings'::text as source,
-                count(*)::int as matches_count,
-                count(distinct season_start_year)::int as seasons_count,
-                min(season_start_year)::text as min_season,
-                max(season_start_year)::text as max_season
-            from elo_depth
-            group by competition_key
+            group by cpm.competition_key
         )
         select
             competition_key,
@@ -707,16 +636,12 @@ def _fetch_external_competition_depth_by_key() -> dict[str, list[dict[str, Any]]
             min_season,
             max_season
         from (
-            select * from brasileirao_depth
-            union all
             select * from transfermarkt_depth
             union all
-            select * from elo_depth_grouped
+            select * from elo_depth
         ) depth
-        where matches_count > 0
         order by competition_key, source;
-        """,
-        disable_parallel=True,
+        """
     )
 
     payload: dict[str, list[dict[str, Any]]] = {}

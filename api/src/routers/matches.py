@@ -12,8 +12,9 @@ from ..db.client import db_client
 
 router = APIRouter(prefix="/api/v1/matches", tags=["matches"])
 
-MatchesSortBy = Literal["kickoffAt", "status", "homeTeamName", "awayTeamName"]
+MatchesSortBy = Literal["kickoffAt", "status", "homeTeamName", "awayTeamName", "depthScore"]
 SortDirection = Literal["asc", "desc"]
+ContentSection = Literal["events", "lineups", "teamStats", "playerStats"]
 
 
 def _request_id(request: Request) -> str | None:
@@ -64,6 +65,8 @@ def _can_use_unfiltered_match_list(
     team_id: int | None,
     search_pattern: str | None,
     status_pattern: str | None,
+    has_content: bool,
+    content_section: ContentSection | None,
 ) -> bool:
     return (
         not filters.competition_ids
@@ -78,6 +81,8 @@ def _can_use_unfiltered_match_list(
         and team_id is None
         and search_pattern is None
         and status_pattern is None
+        and not has_content
+        and content_section is None
     )
 
 
@@ -121,7 +126,24 @@ def _fetch_unfiltered_match_list(
                 fm.away_team_id::text as away_team_id,
                 away_team.team_name as away_team_name,
                 fm.home_goals as home_score,
-                fm.away_goals as away_score
+                fm.away_goals as away_score,
+                mdp.has_match_context,
+                mdp.has_score,
+                mdp.has_odds,
+                mdp.has_team_stats,
+                mdp.has_events,
+                mdp.has_lineups,
+                mdp.has_player_stats,
+                mdp.has_player_layer,
+                mdp.has_minimum_rich_depth,
+                mdp.valid_event_rows,
+                mdp.valid_lineup_rows,
+                mdp.valid_player_stat_rows,
+                mdp.valid_team_stat_rows,
+                mdp.valid_1x2_rows,
+                mdp.safe_sections,
+                mdp.depth_score,
+                mdp.refreshed_at
             from mart.fact_matches fm
             left join raw.fixtures rf
               on rf.fixture_id = fm.match_id
@@ -138,6 +160,8 @@ def _fetch_unfiltered_match_list(
               on away_team.team_id = fm.away_team_id
             left join mart.dim_venue dv
               on dv.venue_id = rf.venue_id
+            left join mart.match_depth_profile mdp
+              on mdp.match_id = fm.match_id
         )
         select
             f.*,
@@ -157,8 +181,58 @@ def _to_float(value: Any) -> float | None:
     return float(value)
 
 
-def _build_match_item(row: dict[str, Any]) -> dict[str, Any]:
+def _to_int(value: Any) -> int:
+    if value is None:
+        return 0
+
+    return int(value)
+
+
+def _to_isoformat(value: Any) -> str | None:
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+
+    return str(value)
+
+
+def _safe_sections(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value if item is not None]
+
+    return []
+
+
+def _build_match_depth_profile(row: dict[str, Any] | None) -> dict[str, Any]:
+    if row is None:
+        row = {}
+
     return {
+        "hasMatchContext": bool(row.get("has_match_context")),
+        "hasScore": bool(row.get("has_score")),
+        "hasOdds": bool(row.get("has_odds")),
+        "hasTeamStats": bool(row.get("has_team_stats")),
+        "hasEvents": bool(row.get("has_events")),
+        "hasLineups": bool(row.get("has_lineups")),
+        "hasPlayerStats": bool(row.get("has_player_stats")),
+        "hasPlayerLayer": bool(row.get("has_player_layer")),
+        "hasMinimumRichDepth": bool(row.get("has_minimum_rich_depth")),
+        "safeSections": _safe_sections(row.get("safe_sections")),
+        "depthScore": _to_int(row.get("depth_score")),
+        "counts": {
+            "validEventRows": _to_int(row.get("valid_event_rows")),
+            "validLineupRows": _to_int(row.get("valid_lineup_rows")),
+            "validPlayerStatRows": _to_int(row.get("valid_player_stat_rows")),
+            "validTeamStatRows": _to_int(row.get("valid_team_stat_rows")),
+            "valid1x2Rows": _to_int(row.get("valid_1x2_rows")),
+        },
+        "refreshedAt": _to_isoformat(row.get("refreshed_at")),
+    }
+
+
+def _build_match_item(row: dict[str, Any]) -> dict[str, Any]:
+    item = {
         "matchId": row["match_id"],
         "fixtureId": row["fixture_id"],
         "competitionId": row["competition_id"],
@@ -189,6 +263,102 @@ def _build_match_item(row: dict[str, Any]) -> dict[str, Any]:
         "homeScore": row.get("home_score"),
         "awayScore": row.get("away_score"),
     }
+
+    if "depth_score" in row:
+        item["depthProfile"] = _build_match_depth_profile(row)
+
+    return item
+
+
+def _build_match_content_summary(row: dict[str, Any] | None) -> dict[str, Any]:
+    if row is None:
+        row = {}
+
+    return {
+        "totalMatches": _to_int(row.get("total_matches")),
+        "withAnyContent": _to_int(row.get("with_any_content")),
+        "sections": {
+            "events": _to_int(row.get("events_count")),
+            "lineups": _to_int(row.get("lineups_count")),
+            "teamStats": _to_int(row.get("team_stats_count")),
+            "playerStats": _to_int(row.get("player_stats_count")),
+        },
+    }
+
+
+def _fetch_match_content_summary(
+    *,
+    where_sql: str,
+    where_params: list[Any],
+    last_n: int | None,
+    search_pattern: str | None,
+    status_pattern: str | None,
+) -> dict[str, Any]:
+    row = db_client.fetch_one(
+        f"""
+        with scoped_matches as (
+            select
+                fm.match_id,
+                fm.date_day,
+                fm.home_team_id,
+                fm.away_team_id,
+                row_number() over (order by fm.date_day desc, fm.match_id desc) as rn_recent
+            from mart.fact_matches fm
+            where {where_sql}
+        ),
+        filtered_matches as (
+            select *
+            from scoped_matches sm
+            where (%s::int is null or sm.rn_recent <= %s)
+        ),
+        enriched as (
+            select
+                coalesce(rf.status_short, rf.status_long) as status,
+                home_team.team_name as home_team_name,
+                away_team.team_name as away_team_name,
+                mdp.has_events,
+                mdp.has_lineups,
+                mdp.has_team_stats,
+                mdp.has_player_stats
+            from filtered_matches fm
+            left join raw.fixtures rf
+              on rf.fixture_id = fm.match_id
+            left join mart.dim_team home_team
+              on home_team.team_id = fm.home_team_id
+            left join mart.dim_team away_team
+              on away_team.team_id = fm.away_team_id
+            left join mart.match_depth_profile mdp
+              on mdp.match_id = fm.match_id
+            where (%s::text is null or home_team.team_name ilike %s or away_team.team_name ilike %s)
+              and (%s::text is null or coalesce(coalesce(rf.status_short, rf.status_long), '') ilike %s)
+        )
+        select
+            count(*) as total_matches,
+            count(*) filter (
+                where coalesce(has_events, false)
+                   or coalesce(has_lineups, false)
+                   or coalesce(has_team_stats, false)
+                   or coalesce(has_player_stats, false)
+            ) as with_any_content,
+            count(*) filter (where coalesce(has_events, false)) as events_count,
+            count(*) filter (where coalesce(has_lineups, false)) as lineups_count,
+            count(*) filter (where coalesce(has_team_stats, false)) as team_stats_count,
+            count(*) filter (where coalesce(has_player_stats, false)) as player_stats_count
+        from enriched;
+        """,
+        [
+            *where_params,
+            last_n,
+            last_n,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            status_pattern,
+            status_pattern,
+        ],
+    )
+
+    return _build_match_content_summary(row)
 
 
 def _build_section_coverage(status: str, *, label: str, percentage: float | int | None = None) -> dict[str, Any]:
@@ -407,6 +577,8 @@ def get_matches(
     teamId: str | None = None,
     search: str | None = None,
     status: str | None = None,
+    hasContent: bool = False,
+    contentSection: ContentSection | None = None,
     page: int = Query(default=1, ge=1),
     pageSize: int = Query(default=20, ge=1, le=100),
     sortBy: MatchesSortBy = "kickoffAt",
@@ -439,6 +611,7 @@ def get_matches(
         "status": "f.status",
         "homeTeamName": "f.home_team_name",
         "awayTeamName": "f.away_team_name",
+        "depthScore": "f.depth_score",
     }[sortBy]
     sort_dir = "asc" if sortDirection == "asc" else "desc"
     offset = (page - 1) * pageSize
@@ -448,6 +621,8 @@ def get_matches(
         team_id=team_id_int,
         search_pattern=search_pattern,
         status_pattern=status_pattern,
+        has_content=hasContent,
+        content_section=contentSection,
     ):
         rows = _fetch_unfiltered_match_list(
             page_size=pageSize,
@@ -518,7 +693,24 @@ def get_matches(
                 fm.away_team_id::text as away_team_id,
                 away_team.team_name as away_team_name,
                 fm.home_goals as home_score,
-                fm.away_goals as away_score
+                fm.away_goals as away_score,
+                mdp.has_match_context,
+                mdp.has_score,
+                mdp.has_odds,
+                mdp.has_team_stats,
+                mdp.has_events,
+                mdp.has_lineups,
+                mdp.has_player_stats,
+                mdp.has_player_layer,
+                mdp.has_minimum_rich_depth,
+                mdp.valid_event_rows,
+                mdp.valid_lineup_rows,
+                mdp.valid_player_stat_rows,
+                mdp.valid_team_stat_rows,
+                mdp.valid_1x2_rows,
+                mdp.safe_sections,
+                mdp.depth_score,
+                mdp.refreshed_at
             from filtered_matches fm
             left join raw.fixtures rf
               on rf.fixture_id = fm.match_id
@@ -535,12 +727,28 @@ def get_matches(
               on away_team.team_id = fm.away_team_id
             left join mart.dim_venue dv
               on dv.venue_id = rf.venue_id
+            left join mart.match_depth_profile mdp
+              on mdp.match_id = fm.match_id
         ),
         filtered_rows as (
             select *
             from enriched e
             where (%s::text is null or e.home_team_name ilike %s or e.away_team_name ilike %s)
               and (%s::text is null or coalesce(e.status, '') ilike %s)
+              and (
+                  %s::boolean is false
+                  or coalesce(e.has_events, false)
+                  or coalesce(e.has_lineups, false)
+                  or coalesce(e.has_team_stats, false)
+                  or coalesce(e.has_player_stats, false)
+              )
+              and (
+                  %s::text is null
+                  or (%s = 'events' and coalesce(e.has_events, false))
+                  or (%s = 'lineups' and coalesce(e.has_lineups, false))
+                  or (%s = 'teamStats' and coalesce(e.has_team_stats, false))
+                  or (%s = 'playerStats' and coalesce(e.has_player_stats, false))
+              )
         )
         select
             f.*,
@@ -560,17 +768,30 @@ def get_matches(
                 search_pattern,
                 status_pattern,
                 status_pattern,
+                hasContent,
+                contentSection,
+                contentSection,
+                contentSection,
+                contentSection,
+                contentSection,
                 pageSize,
                 offset,
             ],
         )
+    content_summary = _fetch_match_content_summary(
+        where_sql=where_sql,
+        where_params=where_params,
+        last_n=global_filters.last_n,
+        search_pattern=search_pattern,
+        status_pattern=status_pattern,
+    )
     total_count = int(rows[0]["_total_count"]) if rows else 0
     pagination = build_pagination(page, pageSize, total_count)
 
     items = [_build_match_item(row) for row in rows]
 
     return build_api_response(
-        {"items": items},
+        {"items": items, "contentSummary": content_summary},
         request_id=_request_id(request),
         pagination=pagination,
         coverage=None,
@@ -673,8 +894,37 @@ def get_match_center(
             details={"matchId": matchId},
         )
 
+    depth_profile_row = db_client.fetch_one(
+        """
+        select
+            has_match_context,
+            has_score,
+            has_odds,
+            has_team_stats,
+            has_events,
+            has_lineups,
+            has_player_stats,
+            has_player_layer,
+            has_minimum_rich_depth,
+            valid_event_rows,
+            valid_lineup_rows,
+            valid_player_stat_rows,
+            valid_team_stat_rows,
+            valid_1x2_rows,
+            safe_sections,
+            depth_score,
+            refreshed_at
+        from mart.match_depth_profile
+        where match_id = %s
+        limit 1;
+        """,
+        [match_id],
+    )
+    depth_profile = _build_match_depth_profile(depth_profile_row)
+
     data: dict[str, Any] = {
-        "match": _build_match_item(match_row)
+        "match": _build_match_item(match_row),
+        "depthProfile": depth_profile,
     }
 
     timeline_rows: list[dict[str, Any]] = []
@@ -683,10 +933,10 @@ def get_match_center(
     player_stat_rows: list[dict[str, Any]] = []
     section_coverage: dict[str, dict[str, Any]] = {}
 
-    if includeTimeline:
+    if includeTimeline and depth_profile["hasEvents"]:
         timeline_query = """
             select
-                fme.event_id::text as event_id,
+                fme.event_id,
                 fme.time_elapsed as minute,
                 cast(null as integer) as second,
                 cast(null as text) as period,
@@ -705,26 +955,6 @@ def get_match_center(
             order by fme.time_elapsed asc nulls last, fme.event_id asc;
         """
         timeline_result = db_client.fetch_all(timeline_query, [match_id])
-        if not timeline_result:
-            transfermarkt_timeline_query = """
-            select
-                tme.transfermarkt_event_id::text as event_id,
-                tme.minute,
-                cast(null as integer) as second,
-                cast(null as text) as period,
-                tme.event_type as type,
-                coalesce(tme.description, tme.event_type) as detail,
-                cast(null as text) as team_id,
-                tme.club_name as team_name,
-                tme.player_id::text as player_id,
-                player.player_name
-            from mart.fact_transfermarkt_match_events tme
-            left join mart.dim_player player
-              on player.player_id = tme.player_id
-            where tme.match_id = %s
-            order by minute asc nulls last, event_id asc;
-            """
-            timeline_result = db_client.fetch_all(transfermarkt_timeline_query, [match_id])
         timeline_rows = [
             {
                 "eventId": row.get("event_id"),
@@ -742,8 +972,10 @@ def get_match_center(
         ]
         data["timeline"] = timeline_rows
         section_coverage["timeline"] = _build_timeline_coverage(timeline_rows)
+    elif includeTimeline:
+        data["timeline"] = []
 
-    if includeLineups:
+    if includeLineups and depth_profile["hasLineups"]:
         lineups_query = """
             select
                 ffl.player_id::text as player_id,
@@ -772,9 +1004,9 @@ def get_match_center(
             transfermarkt_lineups_query = """
             select
                 tml.player_id::text as player_id,
-                player.player_name,
-                cast(null as text) as team_id,
-                cast(null as text) as team_name,
+                coalesce(tml.player_name, player.player_name) as player_name,
+                tml.tm_club_id::text as team_id,
+                club.name as team_name,
                 tml.position_name as position,
                 cast(null as text) as formation_field,
                 cast(null as integer) as formation_position,
@@ -788,6 +1020,8 @@ def get_match_center(
             from mart.fact_transfermarkt_lineups tml
             left join mart.dim_player player
               on player.player_id = tml.player_id
+            left join raw.tm_clubs club
+              on club.club_id = tml.tm_club_id
             where tml.match_id = %s
             order by
                 team_id asc nulls last,
@@ -814,8 +1048,10 @@ def get_match_center(
         ]
         data["lineups"] = lineup_rows
         section_coverage["lineups"] = _build_lineups_coverage(match_row, lineup_rows)
+    elif includeLineups:
+        data["lineups"] = []
 
-    if includeTeamStats:
+    if includeTeamStats and depth_profile["hasTeamStats"]:
         team_stats_query = """
             select
                 ms.team_id::text as team_id,
@@ -851,42 +1087,6 @@ def get_match_center(
                 match_row.get("away_team_id"),
             ],
         )
-        if not team_stats_result:
-            elo_team_stats_query = """
-                select
-                    ets.team_id::text as team_id,
-                    coalesce(ets.team_name, team.team_name) as team_name,
-                    ets.shots as total_shots,
-                    ets.shots_on_target,
-                    cast(null as numeric) as ball_possession,
-                    cast(null as numeric) as total_passes,
-                    cast(null as numeric) as passes_accurate,
-                    cast(null as numeric) as passes_pct,
-                    ets.corners as corner_kicks,
-                    ets.fouls,
-                    ets.yellow_cards,
-                    ets.red_cards,
-                    cast(null as numeric) as goalkeeper_saves
-                from mart.fact_elo_match_team_stats ets
-                left join mart.dim_team team
-                  on team.team_id = ets.team_id
-                where ets.match_id = %s
-                order by
-                    case
-                        when ets.team_id::text = %s then 0
-                        when ets.team_id::text = %s then 1
-                        else 2
-                    end,
-                    ets.team_id asc;
-            """
-            team_stats_result = db_client.fetch_all(
-                elo_team_stats_query,
-                [
-                    match_id,
-                    match_row.get("home_team_id"),
-                    match_row.get("away_team_id"),
-                ],
-            )
         team_stat_rows = [
             {
                 "teamId": row.get("team_id"),
@@ -907,8 +1107,10 @@ def get_match_center(
         ]
         data["teamStats"] = team_stat_rows
         section_coverage["teamStats"] = _build_team_stats_coverage(match_row, team_stat_rows)
+    elif includeTeamStats:
+        data["teamStats"] = []
 
-    if includePlayerStats:
+    if includePlayerStats and depth_profile["hasPlayerStats"]:
         player_stats_query = """
             select
                 fps.player_id::text as player_id,
@@ -941,50 +1143,6 @@ def get_match_center(
             order by fps.team_id asc, fps.rating desc nulls last, fps.player_name asc;
         """
         stats_result = db_client.fetch_all(player_stats_query, [match_id])
-        if not stats_result:
-            transfermarkt_player_stats_query = """
-                select
-                    fta.player_id::text as player_id,
-                    coalesce(fta.player_name, player.player_name) as player_name,
-                    cast(null as text) as team_id,
-                    coalesce(club.name, lineup_club.name) as team_name,
-                    tml.position_name,
-                    case
-                        when tml.lineup_type = 'starting_lineup' then true
-                        when tml.lineup_type is not null then false
-                        else null
-                    end as is_starter,
-                    fta.minutes_played,
-                    fta.goals,
-                    fta.assists,
-                    cast(null as numeric) as shots_total,
-                    cast(null as numeric) as shots_on_goal,
-                    cast(null as numeric) as passes_total,
-                    cast(null as numeric) as key_passes,
-                    cast(null as numeric) as tackles,
-                    cast(null as numeric) as interceptions,
-                    cast(null as numeric) as duels,
-                    cast(null as numeric) as fouls_committed,
-                    fta.yellow_cards,
-                    fta.red_cards,
-                    cast(null as numeric) as goalkeeper_saves,
-                    cast(null as numeric) as clean_sheets,
-                    cast(null as numeric) as xg,
-                    cast(null as numeric) as rating
-                from mart.fact_transfermarkt_appearances fta
-                left join mart.dim_player player
-                  on player.player_id = fta.player_id
-                left join mart.fact_transfermarkt_lineups tml
-                  on tml.match_id = fta.match_id
-                 and tml.player_id = fta.player_id
-                left join raw.tm_clubs club
-                  on club.club_id = fta.player_club_id
-                left join raw.tm_clubs lineup_club
-                  on lineup_club.club_id = tml.tm_club_id
-                where fta.match_id = %s
-                order by coalesce(club.name, lineup_club.name) asc nulls last, fta.goals desc nulls last, coalesce(fta.player_name, player.player_name) asc;
-            """
-            stats_result = db_client.fetch_all(transfermarkt_player_stats_query, [match_id])
         player_stat_rows = [
             {
                 "playerId": row.get("player_id"),
@@ -1019,6 +1177,8 @@ def get_match_center(
             lineup_rows,
             player_stat_rows,
         )
+    elif includePlayerStats:
+        data["playerStats"] = []
 
     if section_coverage:
         data["sectionCoverage"] = section_coverage
