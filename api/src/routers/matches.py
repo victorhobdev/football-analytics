@@ -748,6 +748,37 @@ def get_match_center(
                 ffl.player_name asc;
         """
         lineups_result = db_client.fetch_all(lineups_query, [match_id])
+        if not lineups_result:
+            transfermarkt_lineups_query = """
+            select
+                tml.player_id::text as player_id,
+                coalesce(tml.player_name, player.player_name) as player_name,
+                tml.tm_club_id::text as team_id,
+                club.name as team_name,
+                tml.position_name as position,
+                cast(null as text) as formation_field,
+                cast(null as integer) as formation_position,
+                tml.shirt_number,
+                case
+                    when tml.lineup_type = 'starting_lineup' then true
+                    when tml.lineup_type is not null then false
+                    else null
+                end as is_starter,
+                cast(null as integer) as minutes_played
+            from mart.fact_transfermarkt_lineups tml
+            left join mart.dim_player player
+              on player.player_id = tml.player_id
+            left join raw.tm_clubs club
+              on club.club_id = tml.tm_club_id
+            where tml.match_id = %s
+            order by
+                team_id asc nulls last,
+                is_starter desc nulls last,
+                formation_position asc nulls last,
+                shirt_number asc nulls last,
+                player_name asc;
+            """
+            lineups_result = db_client.fetch_all(transfermarkt_lineups_query, [match_id])
         lineup_rows = [
             {
                 "playerId": row.get("player_id"),
