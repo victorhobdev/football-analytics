@@ -89,6 +89,7 @@ export interface OlapRow {
   dimensionLabel: string;
   value: number;
   sampleSize: number;
+  matchId?: string;
   breakdown: {
     key: string;
     label: string;

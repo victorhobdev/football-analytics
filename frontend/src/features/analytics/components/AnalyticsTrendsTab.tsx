@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -16,6 +16,7 @@ import { CoverageBadge } from "@/shared/components/coverage/CoverageBadge";
 import { DataTable } from "@/shared/components/data-display/DataTable";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
+import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 
 const METRIC_OPTIONS = [
   { label: "Partidas", value: "matches" },
@@ -44,17 +45,41 @@ const DIRECTION_LABEL: Record<string, string> = {
 
 export function AnalyticsTrendsTab() {
   const [metric, setMetric] = useState("goals");
-  const [periodType, setPeriodType] = useState<"round" | "month">("round");
+  const [periodType, setPeriodType] = useState<"round" | "month">("month");
+  const { competitionId, seasonId } = useGlobalFiltersState();
+  const hasCompetitionSeasonScope = Boolean(competitionId && seasonId);
 
   const query = useAnalyticsTrends({ metric, periodType });
+
+  useEffect(() => {
+    if (!hasCompetitionSeasonScope && periodType === "round") {
+      setPeriodType("month");
+    }
+  }, [hasCompetitionSeasonScope, periodType]);
 
   const columns = useMemo<Array<ColumnDef<{ periodLabel: string; value: number; sampleSize: number }>>>(
     () => [
       { accessorKey: "periodLabel", header: "Período" },
-      { accessorKey: "value", header: "Valor" },
-      { accessorKey: "sampleSize", header: "Amostra" },
+      {
+        accessorKey: "value",
+        header: "Valor",
+        cell: ({ row }) => INTEGER_FORMATTER.format(row.original.value),
+      },
+      {
+        accessorKey: "sampleSize",
+        header: "Amostra",
+        cell: ({ row }) => INTEGER_FORMATTER.format(row.original.sampleSize),
+      },
     ],
     [],
+  );
+
+  const periodOptions = useMemo(
+    () =>
+      hasCompetitionSeasonScope
+        ? PERIOD_OPTIONS.map((option) => ({ ...option }))
+        : PERIOD_OPTIONS.filter((option) => option.value === "month").map((option) => ({ ...option })),
+    [hasCompetitionSeasonScope],
   );
 
   return (
@@ -76,10 +101,15 @@ export function AnalyticsTrendsTab() {
           <AnalyticsSelect
             label="Período"
             onChange={(value) => setPeriodType(value as "round" | "month")}
-            options={PERIOD_OPTIONS.map((option) => ({ ...option }))}
+            options={periodOptions}
             value={periodType}
           />
         </div>
+        {!hasCompetitionSeasonScope ? (
+          <div className="rounded-lg border border-[rgba(191,201,195,0.34)] bg-[rgba(240,243,255,0.72)] px-4 py-3 text-sm leading-6 text-[#57657a]">
+            A leitura por rodada so fica habilitada quando o recorte estiver fechado em uma competicao e uma temporada. Com o escopo amplo, a serie mensal preserva comparabilidade.
+          </div>
+        ) : null}
       </AnalyticsPanel>
 
       {query.isLoading && !query.data ? (
@@ -104,10 +134,22 @@ export function AnalyticsTrendsTab() {
           periodLabel: point.periodLabel,
           value: point.value,
         }));
+        const averageValue =
+          trends.series.length > 0
+            ? trends.series.reduce((total, point) => total + point.value, 0) / trends.series.length
+            : 0;
+        const peakPoint = trends.series.reduce(
+          (current, point) => (current === null || point.value > current.value ? point : current),
+          null as (typeof trends.series)[number] | null,
+        );
+        const lowPoint = trends.series.reduce(
+          (current, point) => (current === null || point.value < current.value ? point : current),
+          null as (typeof trends.series)[number] | null,
+        );
 
         return (
           <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <AnalyticsKpi label="Períodos" value={INTEGER_FORMATTER.format(trends.series.length)} />
               <AnalyticsKpi
                 label="Amostra"
@@ -120,14 +162,36 @@ export function AnalyticsTrendsTab() {
                 hint={`mínimo ${trends.minPeriodsRequired} períodos`}
                 tone="soft"
               />
+              <AnalyticsKpi
+                label="Pico"
+                value={peakPoint?.periodLabel ?? "-"}
+                hint={peakPoint ? INTEGER_FORMATTER.format(peakPoint.value) : undefined}
+              />
+              <AnalyticsKpi
+                label="Média"
+                value={INTEGER_FORMATTER.format(Math.round(averageValue))}
+                hint="por período"
+                tone="soft"
+              />
             </div>
 
             {chartData.length > 0 ? (
-              <AnalyticsPanel>
+              <AnalyticsPanel className="space-y-4">
+                <AnalyticsSectionHeader
+                  eyebrow="Leitura"
+                  title="Evolução da métrica no tempo"
+                  description={
+                    peakPoint && lowPoint
+                      ? `Pico em ${peakPoint.periodLabel} (${INTEGER_FORMATTER.format(peakPoint.value)}) e piso em ${lowPoint.periodLabel} (${INTEGER_FORMATTER.format(lowPoint.value)}).`
+                      : "Série temporal consolidada para o recorte atual."
+                  }
+                />
                 <LineChart
                   data={chartData}
                   xKey="periodLabel"
                   lines={[{ dataKey: "value", label: METRIC_OPTIONS.find((o) => o.value === trends.metric)?.label ?? trends.metric }]}
+                  height={320}
+                  yAxisMetricKey={trends.metric}
                 />
               </AnalyticsPanel>
             ) : null}

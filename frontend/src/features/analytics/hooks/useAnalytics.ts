@@ -24,6 +24,25 @@ import type {
 
 const ANALYTICS_STALE_TIME_MS = 60_000;
 
+/**
+ * Predicates that determine whether an analytics payload should be considered
+ * "empty" for the purposes of empty-state UI. The default object check in
+ * useQueryWithCoverage never triggers because every response carries structural
+ * keys (scope/summary/...) even when there are zero matches, so each analytics
+ * view needs a domain-specific rule.
+ */
+const isEmptyPredicates = {
+  overview: (data: AnalyticsOverview): boolean =>
+    data.summary.totalMatches === 0,
+  trends: (data: AnalyticsTrends): boolean => data.series.length === 0,
+  olap: (data: AnalyticsOlap): boolean => data.rows.length === 0,
+  comparisons: (data: AnalyticsComparison): boolean =>
+    (data.entityA?.matches ?? 0) === 0 && (data.entityB?.matches ?? 0) === 0,
+  superlatives: (data: AnalyticsSuperlatives): boolean =>
+    data.records.length === 0,
+  coverage: (data: AnalyticsCoverage): boolean => data.totalMatches === 0,
+};
+
 function useMergedAnalyticsFilters(extraFilters: AnalyticsFilters | Record<string, unknown> = {}) {
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
@@ -64,6 +83,7 @@ export function useAnalyticsOverview(
   return useQueryWithCoverage<AnalyticsOverview>({
     queryKey: analyticsQueryKeys.overview(mergedFilters as Record<string, unknown>),
     queryFn: () => fetchAnalyticsOverview(toAnalyticsRecord(mergedFilters)),
+    isDataEmpty: isEmptyPredicates.overview,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }
@@ -76,6 +96,7 @@ export function useAnalyticsTrends(
   return useQueryWithCoverage<AnalyticsTrends>({
     queryKey: analyticsQueryKeys.trends(toAnalyticsRecord(mergedFilters)),
     queryFn: () => fetchAnalyticsTrends(toAnalyticsRecord(mergedFilters)),
+    isDataEmpty: isEmptyPredicates.trends,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }
@@ -88,6 +109,7 @@ export function useAnalyticsOlap(
   return useQueryWithCoverage<AnalyticsOlap>({
     queryKey: analyticsQueryKeys.olap(toAnalyticsRecord(mergedFilters)),
     queryFn: () => fetchAnalyticsOlap(toAnalyticsRecord(mergedFilters)),
+    isDataEmpty: isEmptyPredicates.olap,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }
@@ -102,6 +124,7 @@ export function useAnalyticsComparisons(
     queryKey: analyticsQueryKeys.comparisons(toAnalyticsRecord(mergedFilters)),
     queryFn: () => fetchAnalyticsComparisons(toAnalyticsRecord(mergedFilters)),
     enabled,
+    isDataEmpty: isEmptyPredicates.comparisons,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }
@@ -114,6 +137,7 @@ export function useAnalyticsSuperlatives(
   return useQueryWithCoverage<AnalyticsSuperlatives>({
     queryKey: analyticsQueryKeys.superlatives(toAnalyticsRecord(mergedFilters)),
     queryFn: () => fetchAnalyticsSuperlatives(toAnalyticsRecord(mergedFilters)),
+    isDataEmpty: isEmptyPredicates.superlatives,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }
@@ -126,6 +150,7 @@ export function useAnalyticsCoverage(
   return useQueryWithCoverage<AnalyticsCoverage>({
     queryKey: analyticsQueryKeys.coverage(mergedFilters as Record<string, unknown>),
     queryFn: () => fetchAnalyticsCoverage(toAnalyticsRecord(mergedFilters)),
+    isDataEmpty: isEmptyPredicates.coverage,
     staleTime: ANALYTICS_STALE_TIME_MS,
   });
 }

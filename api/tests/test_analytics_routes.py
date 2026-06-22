@@ -12,8 +12,9 @@ class AnalyticsRouteContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.client = TestClient(app)
 
+    @patch("api.src.routers.analytics.db_client.fetch_one")
     @patch("api.src.routers.analytics.db_client.fetch_all")
-    def test_overview_returns_data(self, fetch_all_mock) -> None:
+    def test_overview_returns_data(self, fetch_all_mock, fetch_one_mock) -> None:
         fetch_all_mock.return_value = [
             {
                 "competition_key": "bra_serie_a",
@@ -25,23 +26,26 @@ class AnalyticsRouteContractTests(unittest.TestCase):
                 "home_wins": 152,
                 "away_wins": 114,
                 "draws": 114,
-                "home_win_rate": 40.0,
-                "away_win_rate": 30.0,
-                "draw_rate": 30.0,
-                "total_teams": 20,
-                "total_coaches": 34,
-                "total_players": 612,
+            }
+        ]
+        fetch_one_mock.side_effect = [
+            {"total_teams": 20},
+            {"total_coaches": 34},
+            {"total_players": 612},
+            {
                 "top_scorer_team_id": 123,
                 "top_scorer_team_name": "Flamengo",
                 "top_scorer_goals": 72,
                 "best_defense_team_id": 456,
                 "best_defense_team_name": "Palmeiras",
                 "best_defense_goals_against": 28,
-                "best_ppm_coach_id": "789",
-                "best_ppm_coach_name": "Abel Ferreira",
-                "best_ppm_coach_points_per_match": 2.18,
-                "best_ppm_coach_matches": 38,
-            }
+            },
+            {
+                "coach_id": "789",
+                "coach_name": "Abel Ferreira",
+                "points_per_match": 2.18,
+                "matches": 38,
+            },
         ]
 
         response = self.client.get("/api/v1/analytics/overview")
@@ -53,6 +57,9 @@ class AnalyticsRouteContractTests(unittest.TestCase):
         self.assertEqual(data["summary"]["avgGoalsPerMatch"], 2.6)
         self.assertEqual(data["summary"]["totalCoaches"], 34)
         self.assertEqual(data["summary"]["totalPlayers"], 612)
+        self.assertEqual(data["summary"]["homeWinRate"], 40.0)
+        self.assertEqual(data["summary"]["awayWinRate"], 30.0)
+        self.assertEqual(data["summary"]["drawRate"], 30.0)
         self.assertEqual(data["topScorerTeam"]["teamId"], "123")
         self.assertEqual(data["bestDefenseTeam"]["teamName"], "Palmeiras")
         self.assertEqual(data["bestPpmCoach"]["coachName"], "Abel Ferreira")
@@ -78,7 +85,7 @@ class AnalyticsRouteContractTests(unittest.TestCase):
             {"period": "3", "period_label": "Rodada 3", "value": 30, "sample_size": 10},
         ]
 
-        response = self.client.get("/api/v1/analytics/trends?metric=goals&periodType=round")
+        response = self.client.get("/api/v1/analytics/trends?metric=goals&periodType=round&competitionId=384&seasonId=2025")
 
         self.assertEqual(response.status_code, 200)
         data = response.json()["data"]

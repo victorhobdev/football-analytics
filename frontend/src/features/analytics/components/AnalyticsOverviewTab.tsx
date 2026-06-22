@@ -100,13 +100,13 @@ export function AnalyticsOverviewTab() {
         <AnalyticsPanel className="space-y-4">
           <AnalyticsSectionHeader
             eyebrow="Resultado"
-            title="Distribuição casa/fora"
+            title="Distribuição mandante/visitante"
             description="Leitura agregada do comportamento de resultado no escopo filtrado."
           />
           <div className="grid gap-3 sm:grid-cols-3">
-            <AnalyticsKpi label="Casa" value={formatInteger(summary.homeWins)} hint={formatRate(summary.homeWinRate)} />
+            <AnalyticsKpi label="Mandante" value={formatInteger(summary.homeWins)} hint={formatRate(summary.homeWinRate)} />
             <AnalyticsKpi label="Empates" value={formatInteger(summary.draws)} hint={formatRate(summary.drawRate)} />
-            <AnalyticsKpi label="Fora" value={formatInteger(summary.awayWins)} hint={formatRate(summary.awayWinRate)} />
+            <AnalyticsKpi label="Visitante" value={formatInteger(summary.awayWins)} hint={formatRate(summary.awayWinRate)} />
           </div>
         </AnalyticsPanel>
 

@@ -32,7 +32,7 @@ type LineChartProps<TData extends Record<string, unknown>> = {
   yAxisMetricKey?: string;
 };
 
-const DEFAULT_LINE_COLORS = ["#0f172a", "#0369a1", "#16a34a", "#9333ea", "#dc2626"];
+const DEFAULT_LINE_COLORS = ["#003526", "#0b6a56", "#16a34a", "#3b82f6", "#dc2626"];
 
 export function LineChart<TData extends Record<string, unknown>>({
   data,

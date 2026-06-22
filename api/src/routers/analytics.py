@@ -171,6 +171,29 @@ def _request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
 
 
+def _resolve_season_round_midpoint(filters: GlobalFilters) -> int:
+    """Return the round number that splits the season into two halves.
+
+    The midpoint is computed within the same filters scope (competition, season,
+    stage, date window) so it does not mix rounds from different editions.
+    Falls back to 0 (everything in the first half) when the scope is empty.
+    """
+    scope_clauses: list[str] = []
+    scope_params: list[Any] = []
+    append_fact_match_filters(scope_clauses, scope_params, alias="fm", filters=filters)
+    scope_sql = f"""
+        select coalesce(max(round_number), 0)::int as midpoint
+        from mart.fact_matches fm
+        where {_join_where_clauses(scope_clauses)} and fm.round_number > 0
+    """
+    rows = db_client.fetch_all(scope_sql, scope_params)
+    if not rows:
+        return 0
+    midpoint = _to_int(rows[0].get("midpoint"))
+    # Integer division is intentional: the first half is "rounds 1..N/2".
+    return midpoint // 2
+
+
 def _to_int(value: Any) -> int:
     if value is None:
         return 0
@@ -248,6 +271,10 @@ def _compute_trend_direction(values: list[float]) -> str | None:
     return "stable"
 
 
+def _has_competition_season_scope(filters: GlobalFilters) -> bool:
+    return filters.competition_id is not None and filters.season_id is not None
+
+
 @router.get("/overview")
 def get_overview(
     request: Request,
@@ -269,164 +296,28 @@ def get_overview(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
     where_sql, where_params = _build_match_filters(filters)
 
-    query = f"""
-        with match_scope as (
-            select
-                fm.competition_key,
-                fm.season,
-                fm.season_label,
-                fm.match_id,
-                fm.home_team_id,
-                fm.away_team_id,
-                fm.date_day,
-                coalesce(fm.total_goals, 0) as total_goals,
-                coalesce(fm.home_goals, 0) as home_goals,
-                coalesce(fm.away_goals, 0) as away_goals,
-                case when coalesce(fm.home_goals, 0) > coalesce(fm.away_goals, 0) then 1 else 0 end as home_win,
-                case when coalesce(fm.home_goals, 0) < coalesce(fm.away_goals, 0) then 1 else 0 end as away_win,
-                case when coalesce(fm.home_goals, 0) = coalesce(fm.away_goals, 0) then 1 else 0 end as draw
-            from mart.fact_matches fm
-            where {where_sql}
-        ),
-        match_agg as (
-            select
-                coalesce(max(ms.competition_key), '') as competition_key,
-                coalesce(max(ms.season), 0) as season,
-                coalesce(max(ms.season_label), '') as season_label,
-                count(distinct ms.match_id)::int as total_matches,
-                sum(ms.total_goals)::int as total_goals,
-                case when count(distinct ms.match_id) > 0
-                    then round(sum(ms.total_goals)::numeric / count(distinct ms.match_id), 4)
-                end as avg_goals_per_match,
-                sum(ms.home_win)::int as home_wins,
-                sum(ms.away_win)::int as away_wins,
-                sum(ms.draw)::int as draws
-            from match_scope ms
-        ),
-        team_list as (
-            select home_team_id as team_id from match_scope
-            union
-            select away_team_id as team_id from match_scope
-        ),
-        team_agg as (
-            select count(distinct team_id)::int as total_teams
-            from team_list
-        ),
-        team_match_stats as (
-            select
-                tr.team_id,
-                sum(tr.goals_for) as goals_for,
-                sum(tr.goals_against) as goals_against
-            from mart.int_team_match_rows tr
-            join match_scope ms on ms.match_id = tr.match_id
-            group by tr.team_id
-        ),
-        coach_match_stats as (
-            select
-                concat(tc.provider, ':', tc.coach_id::text) as coach_key,
-                coalesce(dc.coach_id::text, tc.coach_id::text) as coach_id,
-                coalesce(dc.coach_name, concat('Tecnico #', tc.coach_id::text)) as coach_name,
-                count(distinct tr.match_id)::int as matches,
-                round(sum(tr.points_round)::numeric / nullif(count(distinct tr.match_id), 0), 4) as points_per_match
-            from match_scope ms
-            join mart.int_team_match_rows tr on tr.match_id = ms.match_id
-            join mart.stg_team_coaches tc
-                on tc.team_id = tr.team_id
-                and ms.date_day >= coalesce(tc.start_date, date '1900-01-01')
-                and ms.date_day <= coalesce(tc.end_date, date '2999-12-31')
-            left join mart.dim_coach dc on dc.provider = tc.provider and dc.coach_id = tc.coach_id
-            where tc.coach_id is not null
-            group by tc.provider, tc.coach_id, dc.coach_id, dc.coach_name
-        ),
-        coach_agg as (
-            select count(distinct coach_key)::int as total_coaches
-            from coach_match_stats
-        ),
-        player_list as (
-            select fl.player_id
-            from mart.fact_fixture_lineups fl
-            join match_scope ms on ms.match_id = fl.match_id
-            where fl.player_id is not null
-            union
-            select fps.player_id
-            from mart.fact_fixture_player_stats fps
-            join match_scope ms on ms.match_id = fps.match_id
-            where fps.player_id is not null
-        ),
-        player_agg as (
-            select count(distinct player_id)::int as total_players
-            from player_list
-        ),
-        best_ppm_coach as (
-            select coach_id, coach_name, points_per_match, matches
-            from coach_match_stats
-            where matches >= 1
-            order by points_per_match desc nulls last, matches desc, coach_name
-            limit 1
-        ),
-        top_scorer as (
-            select tms.team_id, dt.team_name, tms.goals_for
-            from team_match_stats tms
-            left join mart.dim_team dt on dt.team_id = tms.team_id
-            order by tms.goals_for desc
-            limit 1
-        ),
-        best_def as (
-            select tms.team_id, dt.team_name, tms.goals_against
-            from team_match_stats tms
-            left join mart.dim_team dt on dt.team_id = tms.team_id
-            order by tms.goals_against asc
-            limit 1
-        )
+    summary_query = f"""
         select
-            ma.competition_key,
-            ma.season,
-            ma.season_label,
-            ma.total_matches,
-            ma.total_goals,
-            ma.avg_goals_per_match,
-            ma.home_wins,
-            ma.away_wins,
-            ma.draws,
-            coalesce(ta.total_teams, 0) as total_teams,
-            coalesce(ca.total_coaches, 0) as total_coaches,
-            coalesce(pa.total_players, 0) as total_players,
-            case
-                when ma.total_matches > 0
-                then round(100.0 * ma.home_wins / ma.total_matches, 2)
-            end as home_win_rate,
-            case
-                when ma.total_matches > 0
-                then round(100.0 * ma.away_wins / ma.total_matches, 2)
-            end as away_win_rate,
-            case
-                when ma.total_matches > 0
-                then round(100.0 * ma.draws / ma.total_matches, 2)
-            end as draw_rate,
-            ts.team_id as top_scorer_team_id,
-            ts.team_name as top_scorer_team_name,
-            ts.goals_for as top_scorer_goals,
-            bd.team_id as best_defense_team_id,
-            bd.team_name as best_defense_team_name,
-            bd.goals_against as best_defense_goals_against,
-            bpc.coach_id as best_ppm_coach_id,
-            bpc.coach_name as best_ppm_coach_name,
-            bpc.points_per_match as best_ppm_coach_points_per_match,
-            bpc.matches as best_ppm_coach_matches
-        from match_agg ma
-        cross join team_agg ta
-        cross join coach_agg ca
-        cross join player_agg pa
-        left join top_scorer ts on 1=1
-        left join best_def bd on 1=1
-        left join best_ppm_coach bpc on 1=1
+            coalesce(max(fm.competition_key), '') as competition_key,
+            coalesce(max(fm.season), 0) as season,
+            coalesce(max(fm.season_label), '') as season_label,
+            count(distinct fm.match_id)::int as total_matches,
+            sum(coalesce(fm.total_goals, 0))::int as total_goals,
+            case when count(distinct fm.match_id) > 0
+                then round(sum(coalesce(fm.total_goals, 0))::numeric / count(distinct fm.match_id), 4)
+            end as avg_goals_per_match,
+            sum(case when coalesce(fm.home_goals, 0) > coalesce(fm.away_goals, 0) then 1 else 0 end)::int as home_wins,
+            sum(case when coalesce(fm.home_goals, 0) < coalesce(fm.away_goals, 0) then 1 else 0 end)::int as away_wins,
+            sum(case when coalesce(fm.home_goals, 0) = coalesce(fm.away_goals, 0) then 1 else 0 end)::int as draws
+        from mart.fact_matches fm
+        where {where_sql}
     """
-    rows = db_client.fetch_all(query, where_params)
+    rows = db_client.fetch_all(summary_query, where_params)
 
     if not rows or _to_int(rows[0].get("total_matches")) == 0:
         return build_api_response(
@@ -444,47 +335,156 @@ def get_overview(
         )
 
     row = rows[0]
+    team_row = db_client.fetch_one(
+        f"""
+            with match_scope as (
+                select fm.home_team_id, fm.away_team_id
+                from mart.fact_matches fm
+                where {where_sql}
+            ),
+            team_list as (
+                select home_team_id as team_id from match_scope
+                union
+                select away_team_id as team_id from match_scope
+            )
+            select count(distinct team_id)::int as total_teams
+            from team_list
+            where team_id is not null
+        """,
+        where_params,
+    ) or {}
+    coach_count_row = db_client.fetch_one(
+        f"""
+            with match_scope as (
+                select fm.home_team_id, fm.away_team_id, fm.date_day
+                from mart.fact_matches fm
+                where {where_sql}
+            )
+            select
+                count(distinct concat(tc.provider, ':', tc.coach_id::text))::int as total_coaches
+            from match_scope ms
+            join mart.stg_team_coaches tc
+                on (tc.team_id = ms.home_team_id or tc.team_id = ms.away_team_id)
+                and ms.date_day >= coalesce(tc.start_date, date '1900-01-01')
+                and ms.date_day <= coalesce(tc.end_date, date '2999-12-31')
+            where tc.coach_id is not null
+        """,
+        where_params,
+    ) or {}
+    player_count_row = db_client.fetch_one(
+        f"""
+            select count(distinct fl.player_id)::int as total_players
+            from mart.fact_fixture_lineups fl
+            join mart.fact_matches fm on fm.match_id = fl.match_id
+            where {where_sql} and fl.player_id is not null
+        """,
+        where_params,
+    ) or {}
+    team_extremes_row = db_client.fetch_one(
+        f"""
+            with team_totals as (
+                select
+                    tr.team_id,
+                    coalesce(dt.team_name, 'Time indisponivel') as team_name,
+                    sum(tr.goals_for)::int as goals_for,
+                    sum(tr.goals_against)::int as goals_against
+                from mart.int_team_match_rows tr
+                join mart.fact_matches fm on fm.match_id = tr.match_id
+                left join mart.dim_team dt on dt.team_id = tr.team_id
+                where {where_sql}
+                group by tr.team_id, dt.team_name
+            ),
+            top_scorer as (
+                select team_id, team_name, goals_for
+                from team_totals
+                order by goals_for desc, team_name
+                limit 1
+            ),
+            best_def as (
+                select team_id, team_name, goals_against
+                from team_totals
+                order by goals_against asc, team_name
+                limit 1
+            )
+            select
+                ts.team_id as top_scorer_team_id,
+                ts.team_name as top_scorer_team_name,
+                ts.goals_for as top_scorer_goals,
+                bd.team_id as best_defense_team_id,
+                bd.team_name as best_defense_team_name,
+                bd.goals_against as best_defense_goals_against
+            from top_scorer ts
+            full outer join best_def bd on true
+        """,
+        where_params,
+    ) or {}
+    coach_ppm_row = db_client.fetch_one(
+        f"""
+            select
+                coalesce(dc.coach_id::text, tc.coach_id::text) as coach_id,
+                coalesce(dc.coach_name, concat('Tecnico #', tc.coach_id::text)) as coach_name,
+                round(sum(tr.points_round)::numeric / nullif(count(distinct tr.match_id), 0), 4) as points_per_match,
+                count(distinct tr.match_id)::int as matches
+            from mart.int_team_match_rows tr
+            join mart.fact_matches fm on fm.match_id = tr.match_id
+            join mart.stg_team_coaches tc
+                on tc.team_id = tr.team_id
+                and fm.date_day >= coalesce(tc.start_date, date '1900-01-01')
+                and fm.date_day <= coalesce(tc.end_date, date '2999-12-31')
+            left join mart.dim_coach dc on dc.provider = tc.provider and dc.coach_id = tc.coach_id
+            where {where_sql} and tc.coach_id is not null
+            group by tc.provider, tc.coach_id, dc.coach_id, dc.coach_name
+            having count(distinct tr.match_id) >= 1
+            order by points_per_match desc nulls last, matches desc, coach_name
+            limit 1
+        """,
+        where_params,
+    ) or {}
     summary = {
         "totalMatches": _to_int(row.get("total_matches")),
         "totalGoals": _to_int(row.get("total_goals")),
         "avgGoalsPerMatch": _to_float(row.get("avg_goals_per_match")),
-        "totalTeams": _to_int(row.get("total_teams")),
-        "totalCoaches": _to_int(row.get("total_coaches")),
-        "totalPlayers": _to_int(row.get("total_players")),
+        "totalTeams": _to_int(team_row.get("total_teams")),
+        "totalCoaches": _to_int(coach_count_row.get("total_coaches")),
+        "totalPlayers": _to_int(player_count_row.get("total_players")),
         "homeWins": _to_int(row.get("home_wins")),
         "awayWins": _to_int(row.get("away_wins")),
         "draws": _to_int(row.get("draws")),
-        "homeWinRate": _to_float(row.get("home_win_rate")),
-        "awayWinRate": _to_float(row.get("away_win_rate")),
-        "drawRate": _to_float(row.get("draw_rate")),
+        "homeWinRate": None,
+        "awayWinRate": None,
+        "drawRate": None,
     }
+    if summary["totalMatches"] > 0:
+        summary["homeWinRate"] = round((summary["homeWins"] / summary["totalMatches"]) * 100, 2)
+        summary["awayWinRate"] = round((summary["awayWins"] / summary["totalMatches"]) * 100, 2)
+        summary["drawRate"] = round((summary["draws"] / summary["totalMatches"]) * 100, 2)
     data: dict[str, Any] = {
         "scope": {
-            "competitionId": _to_text(row.get("competition_key")),
+            "competitionId": _to_text(competitionId),
             "competitionLabel": None,
-            "seasonId": _to_text(row.get("season")),
-            "seasonLabel": _to_text(row.get("season_label")),
+            "seasonId": _to_text(seasonId),
+            "seasonLabel": _to_text(seasonId),
         },
         "summary": summary,
     }
-    if row.get("top_scorer_team_id") is not None:
+    if team_extremes_row.get("top_scorer_team_id") is not None:
         data["topScorerTeam"] = {
-            "teamId": str(row["top_scorer_team_id"]),
-            "teamName": row.get("top_scorer_team_name") or "Time indisponivel",
-            "goalsFor": _to_int(row.get("top_scorer_goals")),
+            "teamId": str(team_extremes_row["top_scorer_team_id"]),
+            "teamName": team_extremes_row.get("top_scorer_team_name") or "Time indisponivel",
+            "goalsFor": _to_int(team_extremes_row.get("top_scorer_goals")),
         }
-    if row.get("best_defense_team_id") is not None:
+    if team_extremes_row.get("best_defense_team_id") is not None:
         data["bestDefenseTeam"] = {
-            "teamId": str(row["best_defense_team_id"]),
-            "teamName": row.get("best_defense_team_name") or "Time indisponivel",
-            "goalsAgainst": _to_int(row.get("best_defense_goals_against")),
+            "teamId": str(team_extremes_row["best_defense_team_id"]),
+            "teamName": team_extremes_row.get("best_defense_team_name") or "Time indisponivel",
+            "goalsAgainst": _to_int(team_extremes_row.get("best_defense_goals_against")),
         }
-    if row.get("best_ppm_coach_id") is not None:
+    if coach_ppm_row.get("coach_id") is not None:
         data["bestPpmCoach"] = {
-            "coachId": str(row["best_ppm_coach_id"]),
-            "coachName": row.get("best_ppm_coach_name") or "Tecnico indisponivel",
-            "pointsPerMatch": _to_float(row.get("best_ppm_coach_points_per_match")),
-            "matches": _to_int(row.get("best_ppm_coach_matches")),
+            "coachId": str(coach_ppm_row["coach_id"]),
+            "coachName": coach_ppm_row.get("coach_name") or "Tecnico indisponivel",
+            "pointsPerMatch": _to_float(coach_ppm_row.get("points_per_match")),
+            "matches": _to_int(coach_ppm_row.get("matches")),
             "coverageStatus": "available",
         }
 
@@ -537,18 +537,42 @@ def get_trends(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
 
     filter_clauses: list[str] = []
     filter_params: list[Any] = []
     append_fact_match_filters(filter_clauses, filter_params, alias="fm", filters=filters)
 
+    if periodType == "round":
+        filter_clauses.append("fm.round_number > 0")
+
     if filters.venue == VenueFilter.home:
         filter_clauses.append("fm.home_team_id is not null")
     elif filters.venue == VenueFilter.away:
         filter_clauses.append("fm.away_team_id is not null")
+
+    if periodType == "round" and not _has_competition_season_scope(filters):
+        return build_api_response(
+            {
+                "metric": metric,
+                "periodType": periodType,
+                "series": [],
+                "trendDirection": None,
+                "minPeriodsRequired": 3,
+                "totalPeriods": 0,
+            },
+            request_id=_request_id(request),
+            coverage={
+                "status": "insufficient",
+                "percentage": None,
+                "sampleSize": 0,
+                "expectedSize": 1,
+                "label": "Round scope for trends",
+                "details": "Round trends require both competition and season filters to avoid mixing unrelated editions.",
+            },
+        )
 
     if metric in TREND_TEAM_METRICS:
         trend_metrics: dict[str, str] = {
@@ -752,8 +776,8 @@ def get_olap(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
 
     if operation == "drill_through":
@@ -912,8 +936,8 @@ def get_comparisons(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
 
     where_clauses: list[str] = []
@@ -1059,21 +1083,24 @@ def get_comparisons(
 
     elif type == "period_vs_period":
         team_id_parsed = int(entityA) if entityA.isdigit() else 0
+        midpoint_round = _resolve_season_round_midpoint(filters)
+        first_half_clause = f"fm.round_number <= %s and tr.team_id = %s"
+        second_half_clause = f"fm.round_number > %s and tr.team_id = %s"
         entity_a_data = _fetch_entity(
             "1o Turno",
             "'first_half'",
             "'1o Turno'",
             "left join mart.dim_team dt on dt.team_id = tr.team_id",
-            "fm.round_number <= (select max(round_number)/2 from mart.fact_matches where league_id = coalesce(%s::int, league_id)) and tr.team_id = %s",
-            [filters.competition_id, team_id_parsed],
+            first_half_clause,
+            [midpoint_round, team_id_parsed],
         )
         entity_b_data = _fetch_entity(
             "2o Turno",
             "'second_half'",
             "'2o Turno'",
             "left join mart.dim_team dt on dt.team_id = tr.team_id",
-            "fm.round_number > (select max(round_number)/2 from mart.fact_matches where league_id = coalesce(%s::int, league_id)) and tr.team_id = %s",
-            [filters.competition_id, team_id_parsed],
+            second_half_clause,
+            [midpoint_round, team_id_parsed],
         )
         if entity_a_data:
             entity_a_data["label"] = "1o Turno"
@@ -1165,8 +1192,8 @@ def get_superlatives(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
 
     where_sql, where_params = _build_match_filters(filters)
@@ -1188,11 +1215,16 @@ def get_superlatives(
         "most_goals_match": f"""
             select
                 fm.match_id::text as entity_id,
-                concat('Match ', fm.match_id) as entity_label,
+                concat(
+                    coalesce(ht.team_name, 'Mandante'), ' ', coalesce(fm.home_goals, 0), 'x',
+                    coalesce(fm.away_goals, 0), ' ', coalesce(at.team_name, 'Visitante')
+                ) as entity_label,
                 coalesce(fm.total_goals, 0) as value,
                 concat(fm.competition_key, '/', fm.season_label) as scope,
                 count(*) over()::int as sample_size
             from mart.fact_matches fm
+            left join mart.dim_team ht on ht.team_id = fm.home_team_id
+            left join mart.dim_team at on at.team_id = fm.away_team_id
             where {where_sql} and fm.total_goals is not null
             order by fm.total_goals desc, fm.match_id
             limit %s
@@ -1200,11 +1232,16 @@ def get_superlatives(
         "biggest_win": f"""
             select
                 fm.match_id::text as entity_id,
-                concat('Match ', fm.match_id) as entity_label,
+                concat(
+                    coalesce(ht.team_name, 'Mandante'), ' ', coalesce(fm.home_goals, 0), 'x',
+                    coalesce(fm.away_goals, 0), ' ', coalesce(at.team_name, 'Visitante')
+                ) as entity_label,
                 abs(coalesce(fm.home_goals, 0) - coalesce(fm.away_goals, 0)) as value,
                 concat(fm.competition_key, '/', fm.season_label) as scope,
                 count(*) over()::int as sample_size
             from mart.fact_matches fm
+            left join mart.dim_team ht on ht.team_id = fm.home_team_id
+            left join mart.dim_team at on at.team_id = fm.away_team_id
             where {where_sql} and fm.home_goals is not null and fm.away_goals is not null
             order by value desc, fm.match_id
             limit %s
@@ -1411,8 +1448,8 @@ def get_coverage(
         last_n=lastN,
         date_start=dateStart,
         date_end=dateEnd,
-    date_range_start=None,
-    date_range_end=None,
+        date_range_start=None,
+        date_range_end=None,
     )
     where_sql, where_params = _build_match_filters(filters)
 
@@ -1527,8 +1564,8 @@ def get_coverage(
     for mk, mv in metrics.items():
         if mv["status"] in ("complete", "partial"):
             metric_map = {
-                "scores": ["matches", "goals", "avg_goals"],
-                "events": ["home_wins", "away_wins", "draws"],
+                "scores": ["matches", "goals", "avg_goals", "home_wins", "away_wins", "draws"],
+                "events": [],
                 "lineups": [],
                 "playerStats": [],
                 "teamStats": ["points", "goals_for", "goals_against", "goal_diff", "points_per_match", "win_rate", "ppg"],

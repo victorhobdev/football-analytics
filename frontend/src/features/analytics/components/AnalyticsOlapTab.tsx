@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -97,6 +97,7 @@ type OlapRowWithFormatted = {
   dimensionKey: string;
   dimensionLabel: string;
   formattedValue: string;
+  rawValue: number;
   sampleSize: number;
   breakdown: string | null;
 };
@@ -129,13 +130,34 @@ export function AnalyticsOlapTab() {
     breakdown: breakdown !== "none" ? breakdown : undefined,
   });
 
+  const [showDrillPanel, setShowDrillPanel] = useState(false);
+
+  const drillQuery = useAnalyticsOlap(
+    { metric, dimension, grain, operation: "drill_through", breakdown: "none" },
+  );
+
+  const handleDrillThrough = useCallback(() => {
+    if (query.data?.drillThroughAvailable) {
+      setShowDrillPanel((prev) => !prev);
+    }
+  }, [query.data?.drillThroughAvailable]);
+
   const columns = useMemo<Array<ColumnDef<OlapRowWithFormatted>>>(
     () => [
-      { accessorKey: "dimensionLabel", header: query.data?.dimension ?? "Dimensão" },
-      { accessorKey: "formattedValue", header: query.data?.metric ?? "Valor" },
-      { accessorKey: "sampleSize", header: "Amostra" },
+      {
+        accessorKey: "dimensionLabel",
+        header: query.data?.dimension ?? "Dimensão",
+        enableSorting: true,
+      },
+      {
+        accessorKey: "rawValue",
+        header: query.data?.metric ?? "Valor",
+        enableSorting: true,
+        cell: ({ row }) => <span>{row.original.formattedValue}</span>,
+      },
+      { accessorKey: "sampleSize", header: "Amostra", enableSorting: true },
       ...(query.data?.rows[0]?.breakdown
-        ? [{ accessorKey: "breakdown" as const, header: "Breakdown" }]
+        ? [{ accessorKey: "breakdown" as const, header: "Breakdown", enableSorting: false }]
         : []),
     ],
     [query.data],
@@ -146,6 +168,7 @@ export function AnalyticsOlapTab() {
       query.data?.rows.map((row) => ({
         ...row,
         formattedValue: formatValue(query.data!.metric, row.value),
+        rawValue: row.value,
         breakdown: row.breakdown?.label ?? null,
       })) ?? [],
     [query.data],
@@ -216,12 +239,47 @@ export function AnalyticsOlapTab() {
           <div className="grid gap-3 sm:grid-cols-3">
             <AnalyticsKpi label="Linhas" value={INTEGER_FORMATTER.format(query.data.rows.length)} />
             <AnalyticsKpi label="Amostra" value={INTEGER_FORMATTER.format(query.data.total)} tone="soft" />
-            <AnalyticsKpi
-              label="Drill-through"
-              value={query.data.drillThroughAvailable ? "Disponível" : "Indisponível"}
-              tone={query.data.drillThroughAvailable ? "soft" : "base"}
-            />
+            {query.data.drillThroughAvailable ? (
+              <button
+                className="rounded-lg border border-[#003526]/10 bg-[rgba(240,243,255,0.82)] px-4 py-3 text-left transition-colors hover:bg-[#003526] hover:text-white"
+                onClick={handleDrillThrough}
+                type="button"
+              >
+                <p className="text-[0.66rem] font-bold uppercase tracking-[0.12em] text-[#57657a] group-hover:text-white/68">
+                  Drill-through
+                </p>
+                <p className="mt-1.5 text-sm font-semibold">
+                  {showDrillPanel ? "Ocultar partidas" : "Ver partidas"}
+                </p>
+              </button>
+            ) : (
+              <AnalyticsKpi label="Drill-through" value="Indisponível" tone="base" />
+            )}
           </div>
+
+          {showDrillPanel && drillQuery.data ? (
+            <AnalyticsPanel className="space-y-3">
+              <p className="text-sm font-semibold text-[#111c2d]">
+                Partidas no escopo ({drillQuery.data.rows.length})
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {drillQuery.data.rows.slice(0, 20).map((row) => (
+                  <a
+                    className="inline-flex items-center rounded-full border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-3 py-1 text-xs font-medium text-[#111c2d] transition-colors hover:border-[#0f513c] hover:bg-white"
+                    href={`/matches/${row.matchId ?? row.dimensionKey}`}
+                    key={row.dimensionKey ?? row.matchId}
+                  >
+                    Match {row.dimensionKey ?? row.matchId}
+                  </a>
+                ))}
+                {drillQuery.data.rows.length > 20 ? (
+                  <span className="inline-flex items-center text-xs text-[#57657a]">
+                    +{drillQuery.data.rows.length - 20} mais
+                  </span>
+                ) : null}
+              </div>
+            </AnalyticsPanel>
+          ) : null}
 
           <AnalyticsPanel>
             <DataTable

@@ -41,7 +41,7 @@ services:
       - ./db/migrations:/db/migrations
     entrypoint:
       - /bin/sh
-      - -lc
+      - -c
     command: >
       export DATABASE_URL="postgres://$${POSTGRES_USER}:$$(cat /run/secrets/postgres_password)@postgres:5432/$${POSTGRES_DB}?sslmode=disable";
       dbmate --wait --migrations-dir "$${DBMATE_MIGRATIONS_DIR}" up
@@ -108,10 +108,9 @@ services:
     volumes:
       - ./infra/airflow/load_runtime_secrets.sh:/opt/airflow/load_runtime_secrets.sh:ro
     entrypoint:
-      - /bin/bash
-      - -lc
+      - /opt/airflow/load_runtime_secrets.sh
     command: >
-      bash /opt/airflow/load_runtime_secrets.sh bash -lc
+      /bin/bash -c
       'if [ -z "$${AIRFLOW__CORE__FERNET_KEY}" ]; then
         echo "AIRFLOW__CORE__FERNET_KEY obrigatoria (nao vazia).";
         exit 1;
@@ -169,9 +168,8 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     entrypoint:
-      - /bin/bash
-      - -lc
-    command: bash /opt/airflow/load_runtime_secrets.sh airflow webserver
+      - /opt/airflow/load_runtime_secrets.sh
+    command: airflow webserver
 
   airflow-scheduler:
     image: football-airflow:local
@@ -211,9 +209,8 @@ services:
       - ./platform/dbt:/opt/airflow/dbt
       - ./platform/quality:/opt/airflow/quality
     entrypoint:
-      - /bin/bash
-      - -lc
-    command: bash /opt/airflow/load_runtime_secrets.sh airflow scheduler
+      - /opt/airflow/load_runtime_secrets.sh
+    command: airflow scheduler
 
   minio-init:
     image: minio/mc:RELEASE.2025-08-13T08-35-41Z
