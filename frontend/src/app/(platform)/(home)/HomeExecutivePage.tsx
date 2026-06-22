@@ -548,26 +548,6 @@ export function HomeExecutivePage() {
       value: formatCompactNumber(archiveSummary.players),
       detail: "atletas catalogados",
     },
-    {
-      label: "Odds",
-      value: formatCompactNumber(archiveSummary.matchesWithOdds),
-      detail: "partidas com mercado",
-    },
-    {
-      label: "Stats",
-      value: formatCompactNumber(archiveSummary.teamStatRows),
-      detail: "linhas time-jogo",
-    },
-    {
-      label: "Mercado",
-      value: formatCompactNumber(archiveSummary.marketTransfers),
-      detail: "transferências",
-    },
-    {
-      label: "Valores",
-      value: formatCompactNumber(archiveSummary.marketValuations),
-      detail: "histórico de mercado",
-    },
   ];
 
   return (

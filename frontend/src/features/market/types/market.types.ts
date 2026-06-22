@@ -60,7 +60,6 @@ export interface MarketTransferItem {
   movementKind?: MarketTransferMovementKind | null;
   amount?: string | null;
   amountValue?: number | null;
-  marketValueEur?: number | null;
   currency?: string | null;
 }
 

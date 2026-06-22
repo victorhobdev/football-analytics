@@ -101,7 +101,6 @@ class MatchCenterApiTests(unittest.TestCase):
                     "minutes_played": None,
                 }
             ],
-            [],
             [
                 {
                     "team_id": "10",
@@ -134,7 +133,6 @@ class MatchCenterApiTests(unittest.TestCase):
                     "goalkeeper_saves": None,
                 },
             ],
-            [],
             [
                 {
                     "player_id": "186815",
