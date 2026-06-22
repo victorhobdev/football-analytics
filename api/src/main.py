@@ -26,6 +26,7 @@ from .routers.rankings import router as rankings_router
 from .routers.search import router as search_router
 from .routers.standings import router as standings_router
 from .routers.teams import router as teams_router
+from .routers.analytics import router as analytics_router
 from .routers.world_cup import router as world_cup_router
 
 
@@ -293,6 +294,7 @@ def _include_routers(application: FastAPI) -> None:
     application.include_router(standings_router)
     application.include_router(matches_router)
     application.include_router(insights_router)
+    application.include_router(analytics_router)
     application.include_router(world_cup_router)
 
 

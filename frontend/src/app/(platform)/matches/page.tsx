@@ -14,8 +14,8 @@ import { matchesQueryKeys } from "@/features/matches/queryKeys";
 import { fetchMatchCenter } from "@/features/matches/services/matches.service";
 import type {
   MatchCenterFilters,
+  MatchContentSection,
   MatchListItem,
-  MatchesListSortDirection,
 } from "@/features/matches/types";
 import {
   resolveMatchDisplayContext,
@@ -57,6 +57,20 @@ type GroupedMatches = {
   label: string;
   matches: MatchListItem[];
 };
+
+type MatchDepthChip = {
+  key: string;
+  label: string;
+};
+
+type MatchSortMode = "recent" | "oldest" | "depth";
+
+const CONTENT_SECTION_FILTERS: Array<{ key: MatchContentSection; label: string }> = [
+  { key: "events", label: "Lances" },
+  { key: "lineups", label: "Escalações" },
+  { key: "teamStats", label: "Times" },
+  { key: "playerStats", label: "Jogadores" },
+];
 
 const MATCHES_LIST_PAGE_SIZE = 30;
 
@@ -297,6 +311,38 @@ function buildMatchGroupLabel(match: MatchListItem): string {
   return formatDateHeading(match.kickoffAt);
 }
 
+function getMatchDepthChips(match: MatchListItem): MatchDepthChip[] {
+  const profile = match.depthProfile;
+
+  if (!profile) {
+    return [];
+  }
+
+  const chips: MatchDepthChip[] = [];
+
+  if (profile.hasEvents && profile.counts.validEventRows > 0) {
+    chips.push({ key: "events", label: "Lances" });
+  }
+
+  if (profile.hasLineups && profile.counts.validLineupRows > 0) {
+    chips.push({ key: "lineups", label: "Escalações" });
+  }
+
+  if (profile.hasTeamStats && profile.counts.validTeamStatRows > 0) {
+    chips.push({ key: "team-stats", label: "Times" });
+  }
+
+  if (profile.hasPlayerStats && profile.counts.validPlayerStatRows > 0) {
+    chips.push({ key: "player-stats", label: "Jogadores" });
+  }
+
+  return chips;
+}
+
+function hasNavigableDepth(match: MatchListItem): boolean {
+  return getMatchDepthChips(match).length > 0;
+}
+
 function MatchDiscoveryCard({
   href,
   match,
@@ -312,6 +358,8 @@ function MatchDiscoveryCard({
   const awayTeamName = match.awayTeamName ?? "Visitante";
   const score = formatScore(match);
   const isScheduled = normalizeStatus(match.status) === "scheduled";
+  const depthChips = getMatchDepthChips(match);
+  const hasDepth = depthChips.length > 0;
 
   return (
     <article
@@ -379,6 +427,14 @@ function MatchDiscoveryCard({
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-[#57657a]">
               {match.venueName ? <span>{match.venueName}</span> : null}
+              {depthChips.map((chip) => (
+                <span
+                  className="inline-flex rounded-full bg-[rgba(0,53,38,0.08)] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#003526]"
+                  key={`${match.matchId}-${chip.key}`}
+                >
+                  {chip.label}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -386,7 +442,7 @@ function MatchDiscoveryCard({
         <div className="flex shrink-0 flex-col gap-3 lg:items-end">
           <Link
             aria-label={`Abrir central da partida de ${homeTeamName} x ${awayTeamName}`}
-            className={`button-pill ${isScheduled ? "button-pill-soft" : "button-pill-primary"}`}
+            className={`button-pill ${hasDepth && !isScheduled ? "button-pill-primary" : "button-pill-soft"}`}
             href={href}
             onFocus={() => {
               onPrefetch(match.matchId);
@@ -444,7 +500,9 @@ function MatchesSkeleton() {
 export default function MatchesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [sortDirection, setSortDirection] = useState<MatchesListSortDirection>("desc");
+  const [sortMode, setSortMode] = useState<MatchSortMode>("recent");
+  const [hasContentOnly, setHasContentOnly] = useState(false);
+  const [contentSection, setContentSection] = useState<MatchContentSection | null>(null);
   const queryClient = useQueryClient();
   const prefetchedMatchIdsRef = useRef<Set<string>>(new Set());
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
@@ -452,14 +510,18 @@ export default function MatchesPage() {
   const resolvedContext = useResolvedCompetitionContext();
   const { params: timeRangeParams } = useTimeRange();
   const hasValidContext = Boolean(competitionId && seasonId);
+  const sortBy = sortMode === "depth" ? "depthScore" : "kickoffAt";
+  const sortDirection = sortMode === "oldest" ? "asc" : "desc";
 
   const matchesQuery = useMatchesList({
     allPages: false,
     enabled: hasValidContext,
+    hasContent: hasContentOnly,
+    contentSection,
     page,
     pageSize: MATCHES_LIST_PAGE_SIZE,
     search,
-    sortBy: "kickoffAt",
+    sortBy,
     sortDirection,
   });
 
@@ -478,6 +540,7 @@ export default function MatchesPage() {
       dateRangeEnd: timeRangeParams.dateRangeEnd,
       includeTimeline: true,
       includeLineups: true,
+      includeTeamStats: true,
       includePlayerStats: true,
     }),
     [
@@ -532,6 +595,7 @@ export default function MatchesPage() {
   );
 
   const currentPageMatches = matchesQuery.data?.items ?? [];
+  const contentSummary = matchesQuery.data?.contentSummary;
   const matchesPagination = matchesQuery.meta?.pagination;
   const totalMatches = matchesPagination?.totalCount ?? currentPageMatches.length;
   const totalPages = Math.max(
@@ -539,6 +603,13 @@ export default function MatchesPage() {
     page,
     matchesPagination?.totalPages ?? Math.ceil(totalMatches / MATCHES_LIST_PAGE_SIZE),
   );
+  const currentPageNavigableMatches = useMemo(
+    () => currentPageMatches.filter(hasNavigableDepth).length,
+    [currentPageMatches],
+  );
+  const contentSummaryTotal = contentSummary?.totalMatches ?? totalMatches;
+  const contentSummaryWithAnyContent = contentSummary?.withAnyContent ?? currentPageNavigableMatches;
+  const allContentSectionCount = hasContentOnly ? contentSummaryWithAnyContent : contentSummaryTotal;
 
   useEffect(() => {
     setPage(1);
@@ -548,9 +619,11 @@ export default function MatchesPage() {
     dateRangeStart,
     lastN,
     roundId,
+    contentSection,
+    hasContentOnly,
     search,
     seasonId,
-    sortDirection,
+    sortMode,
     venue,
   ]);
 
@@ -609,7 +682,14 @@ export default function MatchesPage() {
   }, [page, totalPages]);
 
   const activeWindowLabel = useMemo(() => describeTimeWindow(timeRangeParams), [timeRangeParams]);
-  const sortLabel = sortDirection === "desc" ? "Mais recentes primeiro" : "Mais antigas primeiro";
+  const sortLabel =
+    sortMode === "depth"
+      ? "Mais conteúdo primeiro"
+      : sortMode === "oldest"
+        ? "Mais antigas primeiro"
+        : "Mais recentes primeiro";
+  const contentSectionLabel =
+    CONTENT_SECTION_FILTERS.find((item) => item.key === contentSection)?.label ?? "Todas";
   const seasonHubHref = resolvedContext
     ? buildSeasonHubTabPath(resolvedContext, "calendar", {
         competitionId,
@@ -689,12 +769,18 @@ export default function MatchesPage() {
               </Link>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-1">
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
               <ProfileKpi
                 hint="No recorte atual"
                 invert
                 label="Jogos no recorte"
                 value={matchesQuery.isLoading ? "..." : formatInteger(totalMatches)}
+              />
+              <ProfileKpi
+                hint="No recorte atual"
+                invert
+                label="Com conteúdo"
+                value={matchesQuery.isLoading ? "..." : formatInteger(contentSummaryWithAnyContent)}
               />
             </div>
           </section>
@@ -724,6 +810,14 @@ export default function MatchesPage() {
                 <div className="flex items-start justify-between gap-4">
                   <dt className="text-[#57657a]">Ordenação</dt>
                   <dd className="text-right font-medium">{sortLabel}</dd>
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <dt className="text-[#57657a]">Com conteúdo</dt>
+                  <dd className="text-right font-medium">
+                    {matchesQuery.isLoading
+                      ? "..."
+                      : `${formatInteger(contentSummaryWithAnyContent)} no recorte`}
+                  </dd>
                 </div>
               </dl>
             </section>
@@ -794,10 +888,11 @@ export default function MatchesPage() {
             <ProfileTag>{competitionName ?? "Todas as competições"}</ProfileTag>
             <ProfileTag>{seasonLabel ?? "Todas as temporadas"}</ProfileTag>
             <ProfileTag>{sortLabel}</ProfileTag>
+            {contentSection ? <ProfileTag>{contentSectionLabel}</ProfileTag> : null}
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">
           <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
             Buscar partida
             <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
@@ -817,7 +912,7 @@ export default function MatchesPage() {
           </label>
 
           <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
-            Ordenação por data
+            Ordem da lista
             <div className="flex items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(216,227,251,0.82)] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
                 Ord
@@ -825,15 +920,77 @@ export default function MatchesPage() {
               <select
                 className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none"
                 onChange={(event) => {
-                  setSortDirection(event.target.value as MatchesListSortDirection);
+                  setSortMode(event.target.value as MatchSortMode);
                 }}
-                value={sortDirection}
+                value={sortMode}
               >
-                <option value="desc">Mais recentes primeiro</option>
-                <option value="asc">Mais antigas primeiro</option>
+                <option value="recent">Mais recentes primeiro</option>
+                <option value="oldest">Mais antigas primeiro</option>
+                <option value="depth">Mais conteúdo primeiro</option>
               </select>
             </div>
           </label>
+
+          <label className="flex flex-col gap-2 text-sm text-[#1f2d40]">
+            Conteúdo navegável
+            <div className="flex min-h-[64px] items-center gap-3 rounded-[1.3rem] border border-[rgba(191,201,195,0.55)] bg-[#f9f9ff] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <input
+                checked={hasContentOnly}
+                className="h-4 w-4 accent-[#003526]"
+                onChange={(event) => {
+                  setHasContentOnly(event.target.checked);
+                  if (!event.target.checked) {
+                    setContentSection(null);
+                  }
+                }}
+                type="checkbox"
+              />
+              <span className="text-sm font-medium text-[#1f2d40]">Somente com conteúdo</span>
+            </div>
+          </label>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+              contentSection === null
+                ? "bg-[#003526] text-white"
+                : "border border-[rgba(191,201,195,0.55)] bg-white text-[#1f2d40] hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526]"
+            }`}
+            onClick={() => {
+              setContentSection(null);
+            }}
+            type="button"
+          >
+            <span>Todas</span>
+            <span className="rounded-full bg-black/8 px-2 py-0.5 text-xs">
+              {matchesQuery.isLoading ? "..." : formatInteger(allContentSectionCount)}
+            </span>
+          </button>
+          {CONTENT_SECTION_FILTERS.map((section) => {
+            const sectionCount = contentSummary?.sections[section.key] ?? 0;
+
+            return (
+              <button
+                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+                  contentSection === section.key
+                    ? "bg-[#003526] text-white"
+                    : "border border-[rgba(191,201,195,0.55)] bg-white text-[#1f2d40] hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526]"
+                }`}
+                key={section.key}
+                onClick={() => {
+                  setHasContentOnly(true);
+                  setContentSection(section.key);
+                }}
+                type="button"
+              >
+                <span>{section.label}</span>
+                <span className="rounded-full bg-black/8 px-2 py-0.5 text-xs">
+                  {matchesQuery.isLoading ? "..." : formatInteger(sectionCount)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -972,8 +1129,7 @@ export default function MatchesPage() {
             </p>
             <div className="mt-4 space-y-3 text-sm/6 text-[#57657a]">
               <p>
-                Abra uma partida para acompanhar linha do tempo, escalações e estatísticas no mesmo
-                contexto deste recorte.
+                Os marcadores em cada partida mostram quais áreas já têm dados seguros para abrir.
               </p>
               <p>
                 Use a busca por time e a ordenação por data para ajustar a leitura do recorte.

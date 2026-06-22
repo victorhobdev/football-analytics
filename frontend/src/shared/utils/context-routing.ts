@@ -431,6 +431,10 @@ export function buildCoachesPath(contextInput: SharedFilterQueryInput = {}): str
   return `/coaches${buildFilterQueryString(contextInput)}`;
 }
 
+export function buildAnalyticsPath(contextInput: SharedFilterQueryInput = {}): string {
+  return `/analytics${buildFilterQueryString(contextInput)}`;
+}
+
 export function buildRetainedFilterQueryString(searchParams: Pick<URLSearchParams, "toString">): string {
   const retainedSearchParams = new URLSearchParams(searchParams.toString());
 

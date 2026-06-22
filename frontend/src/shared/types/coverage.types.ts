@@ -1,4 +1,4 @@
-export type CoverageStatus = "complete" | "partial" | "empty" | "unknown";
+export type CoverageStatus = "complete" | "partial" | "insufficient" | "not_available" | "empty" | "unknown";
 
 export interface CoverageState {
   status: CoverageStatus;

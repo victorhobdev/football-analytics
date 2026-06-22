@@ -69,6 +69,7 @@ import { useQueryWithCoverage } from "@/shared/hooks/useQueryWithCoverage";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
+import type { CoverageStatus } from "@/shared/types/coverage.types";
 import {
   buildCanonicalPlayerPath,
   buildCanonicalTeamPath,
@@ -95,7 +96,7 @@ type SurfaceNavLabels = {
 type CoverageLike = {
   label?: string;
   percentage?: number;
-  status: "complete" | "empty" | "partial" | "unknown";
+  status: CoverageStatus;
 };
 
 type GroupStandingsQueryState = {
