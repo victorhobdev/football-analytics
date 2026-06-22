@@ -57,20 +57,12 @@ class DatabaseClient:
     def close(self) -> None:
         self._pool.close()
 
-    def fetch_all(
-        self,
-        query: str,
-        params: Sequence[Any] | None = None,
-        *,
-        disable_parallel: bool = False,
-    ) -> list[dict[str, Any]]:
+    def fetch_all(self, query: str, params: Sequence[Any] | None = None) -> list[dict[str, Any]]:
         started_at = time.perf_counter()
         rows: list[Any] = []
         try:
             with self._connection() as conn:
                 with conn.cursor() as cursor:
-                    if disable_parallel:
-                        cursor.execute("set local max_parallel_workers_per_gather = 0")
                     cursor.execute(query, params or [])
                     rows = cursor.fetchall()
         finally:
