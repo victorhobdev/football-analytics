@@ -1,237 +1,191 @@
+<div align="center">
+
 # Football Analytics
 
-Plataforma de consulta e navegação de dados de futebol — competições, temporadas, partidas, times, jogadores, rankings, transferências e Copa do Mundo em uma única interface.
+**Uma plataforma para transformar dados de futebol em leitura competitiva: competições, temporadas, partidas, rankings, jogadores, times, mercado e Copa do Mundo em uma navegação única.**
 
-[Repositório](https://github.com/victorhob1981/football-analytics)
+[![Acessar Football Analytics](https://img.shields.io/badge/Acessar%20a%20plataforma-Football%20Analytics-00513B?style=for-the-badge)](https://football-analytics-victor-hugos-projects-f5572824.vercel.app)
 
----
+[Football Analytics](https://football-analytics-victor-hugos-projects-f5572824.vercel.app) · [Repositório](https://github.com/victorhob1981/football-analytics)
 
-## Contexto
+</div>
 
-Dados de futebol estão distribuídos entre múltiplas fontes (SportMonks, Transfermarkt, StatsBomb, etc.), cada uma com seu schema, cobertura e periodicidade. Este projeto consolida essas fontes em um banco analítico PostgreSQL e expõe os dados através de uma API FastAPI consumida por um frontend Next.js.
+![Football Analytics - página inicial](frontend/public/readme/home.jpg)
 
-O objetivo é permitir a navegação entre entidades do futebol — de uma competição a uma partida, de um ranking a um perfil de jogador — sem perder o contexto de filtros aplicados.
+## O Produto
 
----
+Football Analytics é uma experiência de análise para quem precisa entender futebol com contexto, velocidade e profundidade. A plataforma conecta competições, temporadas, partidas, times e jogadores em um fluxo contínuo: você começa em uma liga, abre uma edição, compara rankings, entra na central da partida e segue para perfis individuais sem perder os filtros de análise.
 
-## Arquitetura
+A proposta é simples: sair da leitura fragmentada e entregar uma interface em que scouting, performance, conteúdo e inteligência de mercado conseguem navegar pelo mesmo universo de dados.
 
-```
-APIs externas (SportMonks, API-Football)
-       |
-       v
-   [Airflow] --> MinIO (bronze/silver) --> PostgreSQL (raw)
-       |
-       v
-   [dbt] --> PostgreSQL (mart dimensional)
-       |
-       v
-   [FastAPI BFF] <--> [Next.js frontend + Metabase BI]
-```
+## Para Quem
 
-### Camadas
+- Analistas de desempenho que precisam comparar times, jogadores e partidas com rapidez.
+- Profissionais de scouting que querem encontrar destaques e validar contexto competitivo.
+- Conteúdo e mídia esportiva que precisam transformar números em histórias claras.
+- Gestão esportiva que acompanha elenco, mercado, campanhas e histórico competitivo.
+- Times de produto e dados que precisam de uma base visual pronta para exploração futebolística.
 
-1. **Ingestão** — Airflow DAGs extraem dados de APIs esportivas, armazenam JSON bruto no MinIO (bronze), transformam para Parquet (silver) e carregam no PostgreSQL (schema `raw`).
-2. **Transformação** — dbt converte tabelas `raw` em um modelo dimensional (schemas `staging` → `intermediate` → `mart`). 106 modelos, 46 testes de dados.
-3. **Servir** — Um subconjunto dos dados é publicado via `postgres_fdw` em um schema `publication` somente leitura.
-4. **API** — FastAPI BFF com 15 rotas consulta o schema `publication` e retorna dados prontos para a interface.
-5. **UI** — Next.js 15 com React 19, TanStack Query, Zustand para estado global, TailwindCSS.
-6. **BI** — Metabase conectado ao mesmo banco para consultas ad-hoc.
+## O Que Você Consegue Fazer
 
----
+- Explorar competições nacionais, continentais e globais com temporadas organizadas.
+- Entrar em partidas e navegar por placar, escalações, eventos e estatísticas disponíveis.
+- Comparar rankings de jogadores e times por gols, assistências, finalizações, nota, cartões, posse e passe.
+- Abrir perfis de times e jogadores mantendo competição e temporada selecionadas.
+- Analisar confrontos diretos entre equipes dentro do mesmo contexto competitivo.
+- Acompanhar movimentações de mercado com filtros por clube, direção e tipo de transferência.
+- Explorar uma vertical dedicada da Copa do Mundo com edições, seleções, finais e recordes históricos.
+- Investigar tendências, superlativos, comparações e recortes OLAP na área de Analytics.
 
-## Componentes
+## Galeria do Produto
 
-### Frontend (`frontend/`)
+<table>
+  <tr>
+    <td width="33%"><strong>Competições</strong><br /><img src="frontend/public/readme/competitions.jpg" alt="Catálogo de competições" /></td>
+    <td width="33%"><strong>Copa do Mundo</strong><br /><img src="frontend/public/readme/world-cup.jpg" alt="Hub da Copa do Mundo" /></td>
+    <td width="33%"><strong>Rankings</strong><br /><img src="frontend/public/readme/rankings.jpg" alt="Hub de rankings" /></td>
+  </tr>
+  <tr>
+    <td width="33%"><strong>Partidas</strong><br /><img src="frontend/public/readme/matches.jpg" alt="Lista de partidas" /></td>
+    <td width="33%"><strong>Times</strong><br /><img src="frontend/public/readme/teams.jpg" alt="Lista de times" /></td>
+    <td width="33%"><strong>Jogadores</strong><br /><img src="frontend/public/readme/players.jpg" alt="Lista de jogadores" /></td>
+  </tr>
+  <tr>
+    <td width="33%"><strong>Comparativos</strong><br /><img src="frontend/public/readme/head-to-head.jpg" alt="Confronto direto entre times" /></td>
+    <td width="33%"><strong>Mercado</strong><br /><img src="frontend/public/readme/market.jpg" alt="Área de mercado e transferências" /></td>
+    <td width="33%"><strong>Início</strong><br /><img src="frontend/public/readme/home.jpg" alt="Página inicial do Football Analytics" /></td>
+  </tr>
+</table>
 
-- **Páginas**: catálogo de competições, central da partida, rankings, perfis de time/jogador/técnico, confronto direto, mercado, Copa do Mundo, analytics
-- **Padrão**: cada módulo de funcionalidade segue `{components,hooks,services,types}/` dentro de `features/`
-- **Proxy BFF**: requisições `/api/*` são roteadas via Next.js para o backend FastAPI, com cache para GET
-- **Estado global**: Zustand para filtros (competição, temporada) preservados entre rotas
-- **Bibliotecas**: TanStack Table (virtualização), Recharts (gráficos), TanStack Query (cache/refetch)
+## Áreas Principais
 
-### API (`api/`)
+### Competições e Temporadas
 
-- FastAPI com pool de conexões psycopg
-- 15 rotas: competições, partidas, jogadores, times, rankings, mercado, analytics, Copa do Mundo, health, search
-- Middleware: CORS, logging (request_id + duration + DB stats), rate limiting in-memory (3 buckets)
-- Schemas Pydantic para validação e serialização (Decimal → float, datetime → ISO)
+O catálogo organiza campeonatos por país, região, tipo e temporada. Cada competição abre uma jornada própria: histórico, edições disponíveis, calendário, estrutura, rankings e caminhos para times, jogadores e partidas.
 
-### Banco (`db/`)
+### Central da Partida
 
-- PostgreSQL 16 com `pg_stat_statements`
-- 61 migrations (dbmate) organizadas por timestamp
-- Schemas: `raw` (dados ingeridos), `control` (catálogo de competições), `mart` (modelo dimensional), `publication` (visão de servir)
+A partida deixa de ser apenas placar. A central reúne contexto competitivo, escalações, estatísticas de equipe, eventos e destaques individuais quando os dados estão disponíveis.
 
-### Orquestração (`infra/airflow/`)
+### Rankings
 
-- 46 DAGs em três estágios: bronze → silver → postgres
-- Dois provedores de dados: SportMonks (principal) e API-Football (fallback), selecionáveis via env var
-- Operadores Python com mapeamento field-by-field entre API e schema do banco
+O hub de rankings serve como ponto de entrada para descobrir líderes e outliers. A experiência permite alternar entre leituras individuais e coletivas, preservando competição, temporada e filtros ativos.
 
-### Transformação (`platform/dbt/`)
+### Times e Jogadores
 
-- 106 modelos SQL versionados
-- Materialização: staging/intermediate como views, marts como tabelas
-- 46 testes de dados (asserções de consistência, unicidade, integridade referencial)
-- 17 modelos analíticos para BI (OLAP cube, trend series, summaries)
+Perfis conectam desempenho, participação, histórico, partidas e rankings. A navegação foi desenhada para responder rápido: quem se destacou, em qual contexto e contra qual nível de oposição.
 
-### Quality (`platform/quality/`)
+### Analytics
 
-- Great Expectations para validação de dados em staging
-- Scripts de release gate (`tools/frontend_release_gate.py`, `tools/backend_data_readiness_gate.py`)
-- Relatórios de qualidade em `platform/reports/`
+A área de Analytics reúne visão geral, tendências, superlativos, comparações, cobertura e recortes OLAP. Ela transforma as agregações do data warehouse em leitura exploratória para encontrar padrões por competição, temporada, time, jogador e período.
 
----
+### Comparativos
 
-## Exemplos de uso
+O confronto direto ajuda a colocar dois times lado a lado, com leitura de força relativa, histórico recente e atalhos para partidas e perfis relacionados.
 
-```bash
-# Catálogo de competições com estrutura
-curl http://localhost:8000/api/v1/competition-structure
+### Mercado
 
-# Partidas de uma competição/temporada
-curl "http://localhost:8000/api/v1/matches?competition_id=br1&season_id=2025"
+A área de mercado consolida transferências de jogadores com filtros por clube, direção e tipo de movimentação. É um ponto de apoio para acompanhar construção de elenco e movimentações relevantes.
 
-# Ranking de artilheiros
-curl "http://localhost:8000/api/v1/rankings/goals?competition_id=br1&season_id=2025"
+### Copa do Mundo
 
-# Perfil de jogador
-curl http://localhost:8000/api/v1/players/12345
+A Copa do Mundo tem uma área própria, com linha do tempo de edições, seleções, finais e recordes históricos. É uma experiência separada das competições de clubes para preservar o contexto do torneio.
 
-# Confronto direto entre dois times
-curl "http://localhost:8000/api/v1/head-to-head?team_a_id=10&team_b_id=20"
+## Números da Plataforma
 
-# Copa do Mundo - edições disponíveis
-curl http://localhost:8000/api/v1/world-cup/editions
-```
+| Métrica | Cobertura atual |
+| --- | ---: |
+| Competições publicadas | 31 |
+| Recortes de competição/temporada | 80+ |
+| Partidas navegáveis | 17.9k+ |
+| Jogadores catalogados | 22k+ |
+| Eventos promovidos para análise | 962k+ |
+| Rankings disponíveis | 8 |
+| Áreas de navegação | 10 |
+
+## Por Que Ele Se Destaca
+
+- **Contexto preservado:** filtros acompanham a navegação entre competições, partidas, rankings, times e jogadores.
+- **Leitura multidimensional:** a mesma temporada pode ser vista por calendário, tabela, elenco, ranking, partida ou perfil.
+- **Produto pronto para demonstração:** interface visual, dados conectados e caminhos de navegação consistentes.
+- **Arquitetura preparada para evoluir:** frontend, API, banco, orquestração e BI trabalham como uma base única de produto.
+- **Foco em decisão:** cada tela foi desenhada para reduzir ruído e acelerar a leitura do futebol.
 
 ## Stack
 
-| Camada | Tecnologia | Função |
-|---|---|---|
-| Frontend | Next.js 15 + React 19 + TypeScript 5.7 | SPA com server-side rendering e proxy BFF |
-| UI Components | TailwindCSS 4, TanStack Table 8, Recharts 3, Zustand 5 | Estilização, tabelas virtuais, gráficos, estado global |
-| API | Python 3.13 + FastAPI 0.116 + Uvicorn 0.35 | BFF com pooling assíncrono e rate limiting |
-| Database | PostgreSQL 16 + pg_stat_statements | Banco analítico com migrations versionadas |
-| Migration | dbmate 2 | Migrações SQL por timestamp |
-| Orchestration | Apache Airflow 2.9 (LocalExecutor) | Pipeline de ingestão bronze → silver → postgres |
-| Data Transformation | dbt-core 1.8 (adapter PostgreSQL) | Modelagem dimensional e testes de dados |
-| Data Quality | Great Expectations 0.18, dbt tests | Validação de schemas e consistência |
-| Object Storage | MinIO (S3-compatible) | Armazenamento intermediário bronze/silver |
-| BI | Metabase 0.60 | Interface de consulta ad-hoc |
-| Containerization | Docker Compose (10 serviços) | Ambiente local completo |
+![Next.js](https://img.shields.io/badge/Next.js-15-0f172a?logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-0f172a?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-UI-1d4ed8?logo=typescript)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-065f46?logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Data-1d4ed8?logo=postgresql)
+![Airflow](https://img.shields.io/badge/Airflow-Orquestração-b91c1c?logo=apacheairflow)
+![dbt](https://img.shields.io/badge/dbt-Modelagem-f97316?logo=dbt)
+![Metabase](https://img.shields.io/badge/Metabase-BI-2563eb?logo=metabase)
 
----
+## Experiência Técnica
 
-## Dados
+A interface é construída em Next.js e React, com uma API em FastAPI servindo dados prontos para consumo. A base analítica roda sobre PostgreSQL, com orquestração, transformação e validações para manter as páginas consistentes.
 
-### Fontes
-
-| Fonte | Cobertura | Tipo |
-|---|---|---|
-| SportMonks (primária) | Partidas, eventos, escalações, estatísticas, classificações, transferências, técnicos | API REST |
-| API-Football (fallback) | Mesma cobertura da SportMonks | API REST |
-| Transfermarkt | Valoração de jogadores, transferências, partidas | Dados abertos |
-| StatsBomb Open Data | Eventos de partida com coordenadas, 360 freeze frames | Dados abertos |
-| Wikidata | Imagens e metadados de técnicos | API pública |
-| ELO Ratings | Ratings históricos de partidas | Dataset |
-
-### Cobertura atual
-
-| Métrica | Valor |
-|---|---|
-| Competições | 15 |
-| Temporadas | 72 |
-| Partidas | 15k+ |
-| Jogadores | 22k+ |
-
----
-
-## Rodando localmente
-
-### Requisitos
-
-- Docker + Docker Compose
-- Python 3.13+
-- pnpm
-- Chave de API SportMonks (definida em `.env` como `API_KEY_SPORTMONKS`)
-
-### Docker (todos os serviços)
-
-```powershell
-docker compose up -d
+```text
+Dados de futebol -> Transformação -> API de produto -> Interface web -> BI
 ```
 
-### Serviços individuais (desenvolvimento)
+## Rodando Localmente
+
+<details>
+<summary>Ver instruções para desenvolvimento</summary>
+
+### 1. Infraestrutura base
 
 ```powershell
-# Infraestrutura base (PostgreSQL, MinIO, Airflow, Metabase)
 docker compose up -d postgres dbmate minio airflow-init airflow-webserver airflow-scheduler metabase
+```
 
-# API (fora do Docker, com hot reload)
+### 2. API
+
+```powershell
 python -m pip install -r api/requirements.txt
 uvicorn api.src.main:app --reload
+```
 
-# Frontend (fora do Docker, com hot reload)
+### 3. Frontend
+
+```powershell
 cd frontend
 pnpm install
 pnpm dev -- --port 3001
 ```
 
-### Endereços
+### 4. Endereços locais
 
-| Serviço | Porta (Docker) | Porta (dev direto) |
-|---|---|---|
-| Frontend | `localhost:3001` | `localhost:3001` |
-| API | `localhost:8010` | `127.0.0.1:8000` |
-| API docs | `localhost:8010/docs` | `127.0.0.1:8000/docs` |
-| Airflow | `localhost:8080` | — |
-| Metabase | `localhost:3000` | — |
-| MinIO (API) | `localhost:9000` | — |
-| MinIO (Console) | `localhost:9001` | — |
+| Serviço | URL |
+| --- | --- |
+| App | `http://localhost:3001` |
+| API docs | `http://127.0.0.1:8000/docs` |
+| Health | `http://127.0.0.1:8000/health` |
+| Airflow | `http://localhost:8080` |
+| Metabase | `http://localhost:3000` |
 
-### Validação
+</details>
+
+## Validação
 
 ```powershell
 cd frontend
 pnpm typecheck
+```
 
+```powershell
 python tools/frontend_release_gate.py
 python tools/backend_data_readiness_gate.py
 ```
 
----
+## Próximo Passo
 
-## Estrutura do projeto
+A forma mais rápida de entender o produto é abrir a versão web e navegar por uma competição completa.
 
-```
-├── api/                 # FastAPI BFF (15 rotas, schemas, testes)
-├── frontend/            # Next.js 15 (14 módulos de funcionalidade)
-├── db/                  # Migrations (61), bootstrap, publication
-├── infra/               # Airflow (46 DAGs), Docker Compose
-├── platform/            # dbt (106 modelos, 46 testes), quality, scripts
-├── ingestion/           # Scripts de ingestão histórica
-├── tools/               # Release gates, scripts de utilidade
-└── docker-compose.yml   # 10 serviços
-```
+<div align="center">
 
----
+[**Acessar Football Analytics**](https://football-analytics-victor-hugos-projects-f5572824.vercel.app)
 
-## Limitações conhecidas
-
-- **Cobertura de dados**: 15 competições. Dados históricos completos dependem da disponibilidade de cada fonte.
-- **Taxa de requisição**: A ingestão via APIs externas está sujeita a rate limits. A pipeline pode atrasar em picos de carga.
-- **Reconciliação**: Jogadores e partidas entre fontes diferentes (SportMonks vs Transfermarkt vs StatsBomb) são reconciliados por heurísticas; podem existir falsos positivos.
-- **Escrita concorrente**: O runtime do Airflow usa LocalExecutor — não há paralelismo distribuído entre workers.
-- **Autenticação**: A aplicação não implementa autenticação de usuário. O acesso aos dados é irrestrito na camada de consulta.
-
----
-
-## Evoluções possíveis
-
-- Expansão para novo conjunto de competições a partir da adição de registros no catálogo de controle e execução da pipeline
-- Migração para execução distribuída de tarefas (Airflow CeleryExecutor) para reduzir latência da ingestão
-- Camada de autenticação e autorização para cenários multi-usuário
-- Exportação de dados via API pública
-- Dashboards customizáveis no Metabase para análises específicas
+</div>
