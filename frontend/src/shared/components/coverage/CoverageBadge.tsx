@@ -8,6 +8,8 @@ type CoverageBadgeProps = {
 const STATUS_LABEL: Record<CoverageStatus, string> = {
   complete: "Cobertura completa",
   partial: "Cobertura parcial",
+  insufficient: "Cobertura insuficiente",
+  not_available: "Cobertura indisponível",
   empty: "Sem dados",
   unknown: "Cobertura desconhecida",
 };
@@ -15,6 +17,8 @@ const STATUS_LABEL: Record<CoverageStatus, string> = {
 const STATUS_CLASSES: Record<CoverageStatus, string> = {
   complete: "border-emerald-300 bg-emerald-50 text-emerald-700",
   partial: "border-amber-300 bg-amber-50 text-amber-700",
+  insufficient: "border-rose-300 bg-rose-50 text-rose-700",
+  not_available: "border-slate-300 bg-slate-50 text-slate-700",
   empty: "border-rose-300 bg-rose-50 text-rose-700",
   unknown: "border-slate-300 bg-slate-50 text-slate-700",
 };

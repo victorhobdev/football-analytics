@@ -45,6 +45,7 @@ export type MarketTransfersFilters = MarketGlobalFilters & MarketTransfersLocalF
 
 export interface MarketTransferItem {
   transferId: string;
+  source?: "sportmonks" | "transfermarkt" | null;
   playerId?: string | null;
   playerName: string;
   fromTeamId?: string | null;

@@ -3,6 +3,7 @@ export type {
   MatchCenterFilters,
   MatchCenterLocalFilters,
   MatchCenterSectionCoverage,
+  MatchContentSection,
   MatchLineupPlayer,
   MatchListItem,
   MatchPlayerStat,

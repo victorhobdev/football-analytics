@@ -188,7 +188,7 @@ export const SUPPORTED_COMPETITIONS: CompetitionDef[] = [
   },
   {
     id: "384", // Serie A Italy
-    key: "serie_a_italy",
+    key: "serie_a_it",
     name: "Serie A (Itália)",
     shortName: "Serie A IT",
     country: "Itália",

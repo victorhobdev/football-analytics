@@ -94,6 +94,13 @@ def _movement_kind(value: Any, *, career_ended: bool) -> str:
     return _TRANSFER_MOVEMENT_KINDS.get(int(value), "unknown")
 
 
+def _transfer_source_label(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized == "transfermarkt":
+        return "transfermarkt"
+    return "sportmonks"
+
+
 def _is_technical_fallback(value: Any) -> bool:
     if not isinstance(value, str):
         return False
@@ -235,16 +242,10 @@ def get_market_transfers(
             coverage=build_coverage_from_counts(0, 0, "Market transfers coverage"),
         )
 
-    player_name_sql = "coalesce(nullif(trim(spt.player_name), ''), 'Nome indisponível')"
-    from_team_name_sql = (
-        "coalesce(dim_from.team_name, nullif(trim(spt.payload -> 'fromTeam' ->> 'name'), ''), "
-        "nullif(trim(spt.payload -> 'from_team' ->> 'name'), ''), '')"
-    )
-    to_team_name_sql = (
-        "coalesce(dim_to.team_name, nullif(trim(spt.payload -> 'toTeam' ->> 'name'), ''), "
-        "nullif(trim(spt.payload -> 'to_team' ->> 'name'), ''), '')"
-    )
-    amount_sql = "nullif(trim(coalesce(spt.amount, '')), '')"
+    player_name_sql = "coalesce(nullif(trim(ut.player_name), ''), 'Nome indisponível')"
+    from_team_name_sql = "coalesce(ut.from_team_name, '')"
+    to_team_name_sql = "coalesce(ut.to_team_name, '')"
+    amount_sql = "nullif(trim(coalesce(ut.amount, '')), '')"
     normalized_market_search_sql = (
         f"{_normalized_sql(player_name_sql)} || ' ' || "
         f"{_normalized_sql(from_team_name_sql)} || ' ' || "
@@ -252,18 +253,19 @@ def get_market_transfers(
         f"{_normalized_sql(amount_sql)}"
     )
     normalized_from_team_search_sql = (
-        f"{_normalized_sql(from_team_name_sql)} || ' ' || coalesce(spt.from_team_id::text, '')"
+        f"{_normalized_sql(from_team_name_sql)} || ' ' || coalesce(ut.from_team_id::text, '')"
     )
     normalized_to_team_search_sql = (
-        f"{_normalized_sql(to_team_name_sql)} || ' ' || coalesce(spt.to_team_id::text, '')"
+        f"{_normalized_sql(to_team_name_sql)} || ' ' || coalesce(ut.to_team_id::text, '')"
     )
 
     query = f"""
-        with enriched_transfers as (
+        with sportmonks_transfers as (
             select
-                spt.transfer_id,
+                concat('sportmonks:', spt.transfer_id::text) as transfer_id,
+                'sportmonks'::text as source,
                 spt.player_id,
-                {player_name_sql} as player_name,
+                coalesce(nullif(trim(spt.player_name), ''), 'Nome indisponível') as player_name,
                 spt.from_team_id,
                 case
                     when spt.from_team_id is null then null
@@ -293,12 +295,103 @@ def get_market_transfers(
                     when nullif(trim(coalesce(spt.amount, '')), '') ~ '^[0-9]+(\\.[0-9]+)?$'
                     then nullif(trim(coalesce(spt.amount, '')), '')::numeric
                     else null
-                end as amount_value
+                end as amount_value,
+                null::text as currency,
+                {_normalized_sql("coalesce(nullif(trim(spt.player_name), ''), 'Nome indisponível')")} as normalized_player_name
             from mart.stg_player_transfers spt
             left join mart.dim_team dim_from
               on dim_from.team_id = spt.from_team_id
             left join mart.dim_team dim_to
               on dim_to.team_id = spt.to_team_id
+        ),
+        transfermarkt_transfers as (
+            select
+                concat('transfermarkt:', tm.record_hash) as transfer_id,
+                'transfermarkt'::text as source,
+                null::bigint as player_id,
+                coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível') as player_name,
+                null::bigint as from_team_id,
+                nullif(trim(tm.from_club_name), '') as from_team_name,
+                null::bigint as to_team_id,
+                nullif(trim(tm.to_club_name), '') as to_team_name,
+                to_date(tm.transfer_date_raw, 'YYYY-MM-DD') as transfer_date,
+                true as completed,
+                false as career_ended,
+                null::bigint as type_id,
+                nullif(trim(tm.transfer_fee), '') as amount,
+                case
+                    when nullif(trim(tm.transfer_fee), '') ~ '^[0-9]+(\\.[0-9]+)?$'
+                    then nullif(trim(tm.transfer_fee), '')::numeric
+                    else null
+                end as amount_value,
+                'EUR'::text as currency,
+                {_normalized_sql("coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível')")} as normalized_player_name
+            from raw.tm_transfers tm
+            where tm.transfer_date_raw ~ '^\\d{{4}}-\\d{{2}}-\\d{{2}}$'
+              and not exists (
+                select 1
+                from sportmonks_transfers sm
+                where sm.transfer_date = to_date(tm.transfer_date_raw, 'YYYY-MM-DD')
+                  and sm.normalized_player_name = {_normalized_sql("coalesce(nullif(trim(tm.player_name), ''), 'Nome indisponível')")}
+              )
+        ),
+        unified_transfers as (
+            select
+                transfer_id,
+                source,
+                player_id,
+                player_name,
+                from_team_id,
+                from_team_name,
+                to_team_id,
+                to_team_name,
+                transfer_date,
+                completed,
+                career_ended,
+                type_id,
+                amount,
+                amount_value,
+                currency
+            from sportmonks_transfers
+
+            union all
+
+            select
+                transfer_id,
+                source,
+                player_id,
+                player_name,
+                from_team_id,
+                from_team_name,
+                to_team_id,
+                to_team_name,
+                transfer_date,
+                completed,
+                career_ended,
+                type_id,
+                amount,
+                amount_value,
+                currency
+            from transfermarkt_transfers
+        ),
+        enriched_transfers as (
+            select
+                ut.transfer_id,
+                ut.source,
+                ut.player_id,
+                ut.player_name,
+                ut.from_team_id,
+                ut.from_team_name,
+                ut.to_team_id,
+                ut.to_team_name,
+                ut.transfer_date,
+                ut.completed,
+                ut.career_ended,
+                ut.type_id,
+                ut.amount,
+                ut.amount_value,
+                ut.currency
+            from unified_transfers ut
             where (
                 %s::text[] is null
                 or not exists (
@@ -326,14 +419,14 @@ def get_market_transfers(
                     )
                 )
               )
-              and (%s::bigint is null or spt.type_id = %s)
-              and (%s::date is null or spt.transfer_date >= %s)
-              and (%s::date is null or spt.transfer_date <= %s)
-              and (spt.transfer_date is null or spt.transfer_date <= %s)
+              and (%s::bigint is null or ut.type_id = %s)
+              and (%s::date is null or ut.transfer_date >= %s)
+              and (%s::date is null or ut.transfer_date <= %s)
+              and (ut.transfer_date is null or ut.transfer_date <= %s)
               and (
                 not %s::boolean
-                or spt.from_team_id = any(%s::bigint[])
-                or spt.to_team_id = any(%s::bigint[])
+                or ut.from_team_id = any(%s::bigint[])
+                or ut.to_team_id = any(%s::bigint[])
               )
         ),
         ranked_transfers as (
@@ -354,6 +447,7 @@ def get_market_transfers(
         )
         select
             transfer_id,
+            source,
             player_id,
             player_name,
             from_team_id,
@@ -366,6 +460,7 @@ def get_market_transfers(
             type_id,
             amount,
             amount_value,
+            currency,
             count(*) over() as _total_count
         from filtered_transfers
         order by {sort_column} {sort_dir} nulls last, transfer_id desc
@@ -406,20 +501,17 @@ def get_market_transfers(
     items = [
         {
             "transferId": str(row["transfer_id"]),
+            "source": _transfer_source_label(row.get("source")),
             "playerId": str(row["player_id"]) if row.get("player_id") is not None else None,
             "playerName": _public_player_name(row.get("player_name")),
             "fromTeamId": str(row["from_team_id"]) if row.get("from_team_id") is not None else None,
-            "fromTeamName": (
-                _public_team_name(row.get("from_team_name"), missing_label="Origem indisponível")
-                if row.get("from_team_id") is not None
-                else None
-            ),
+            "fromTeamName": _public_team_name(row.get("from_team_name"), missing_label="Origem indisponível")
+            if row.get("from_team_name") is not None
+            else None,
             "toTeamId": str(row["to_team_id"]) if row.get("to_team_id") is not None else None,
-            "toTeamName": (
-                _public_team_name(row.get("to_team_name"), missing_label="Destino indisponível")
-                if row.get("to_team_id") is not None
-                else None
-            ),
+            "toTeamName": _public_team_name(row.get("to_team_name"), missing_label="Destino indisponível")
+            if row.get("to_team_name") is not None
+            else None,
             "transferDate": row.get("transfer_date"),
             "completed": bool(row.get("completed")),
             "careerEnded": bool(row.get("career_ended")),
@@ -428,7 +520,7 @@ def get_market_transfers(
             "movementKind": _movement_kind(row.get("type_id"), career_ended=bool(row.get("career_ended"))),
             "amount": row.get("amount"),
             "amountValue": row.get("amount_value"),
-            "currency": None,
+            "currency": row.get("currency"),
         }
         for row in rows
     ]

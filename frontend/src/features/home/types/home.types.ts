@@ -20,6 +20,13 @@ export interface HomeCompetitionCard {
   competitionKey: string;
   competitionName: string;
   assetId: string | null;
+  source?: "published" | "transfermarkt" | "eloratings" | "multi" | null;
+  dominantSource?: "published" | "transfermarkt" | "eloratings" | null;
+  additionalSources?: Array<"published" | "transfermarkt" | "eloratings">;
+  country?: string | null;
+  region?: string | null;
+  scope?: "domestic" | "continental" | "global" | null;
+  type?: "domestic_league" | "domestic_cup" | "international_cup" | null;
   matchesCount: number;
   seasonsCount: number;
   range: HomeCompetitionRange;

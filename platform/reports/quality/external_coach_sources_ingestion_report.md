@@ -9,7 +9,7 @@
 ## Totais
 
 - Run id: `external_coach_sources_1777082244`
-- Base dir: `C:\Users\Vitinho\Desktop\Projetos\football-analytics\data\external_coach_sources\external_coach_sources_1777082244`
+- Base dir: `data/external_coach_sources/external_coach_sources_1777082244`
 - Fatos externos normalizados: `157017`
 - Fatos com nome de tecnico: `155567`
 - Fatos com nome de time: `155567`

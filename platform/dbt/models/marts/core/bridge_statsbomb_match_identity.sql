@@ -1,0 +1,20 @@
+select
+    source_name,
+    source_match_id,
+    canonical_competition_key,
+    season_label,
+    match_date,
+    source_home_team_id,
+    source_home_team_name,
+    source_away_team_id,
+    source_away_team_name,
+    source_home_score,
+    source_away_score,
+    identity_status,
+    confidence,
+    local_match_id,
+    md5(concat(source_name, ':', source_match_id::text)) as bridge_match_identity_sk,
+    resolution_reason,
+    evidence,
+    updated_at
+from {{ source('postgres_mart', 'stg_statsbomb_match_identity') }}

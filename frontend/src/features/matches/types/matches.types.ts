@@ -1,8 +1,9 @@
 import type { VenueFilter } from "@/shared/types/filters.types";
 import type { CoverageState } from "@/shared/types/coverage.types";
 
-export type MatchesListSortBy = "kickoffAt" | "status" | "homeTeamName" | "awayTeamName";
+export type MatchesListSortBy = "kickoffAt" | "status" | "homeTeamName" | "awayTeamName" | "depthScore";
 export type MatchesListSortDirection = "asc" | "desc";
+export type MatchContentSection = "events" | "lineups" | "teamStats" | "playerStats";
 export type MatchStageFormat =
   | "league_table"
   | "group_table"
@@ -42,6 +43,7 @@ export interface MatchListItem {
   awayTeamName?: string | null;
   homeScore?: number | null;
   awayScore?: number | null;
+  depthProfile?: MatchDepthProfile;
 }
 
 export interface MatchTimelineEvent {
@@ -119,17 +121,47 @@ export interface MatchCenterSectionCoverage {
   playerStats?: CoverageState;
 }
 
+export interface MatchDepthProfile {
+  hasMatchContext: boolean;
+  hasScore: boolean;
+  hasOdds: boolean;
+  hasTeamStats: boolean;
+  hasEvents: boolean;
+  hasLineups: boolean;
+  hasPlayerStats: boolean;
+  hasPlayerLayer: boolean;
+  hasMinimumRichDepth: boolean;
+  safeSections: string[];
+  depthScore: number;
+  counts: {
+    validEventRows: number;
+    validLineupRows: number;
+    validPlayerStatRows: number;
+    validTeamStatRows: number;
+    valid1x2Rows: number;
+  };
+  refreshedAt?: string | null;
+}
+
 export interface MatchCenterData {
   match: MatchListItem;
   timeline?: MatchTimelineEvent[];
   lineups?: MatchLineupPlayer[];
   teamStats?: MatchTeamStat[];
   playerStats?: MatchPlayerStat[];
+  depthProfile?: MatchDepthProfile;
   sectionCoverage?: MatchCenterSectionCoverage;
+}
+
+export interface MatchContentSummary {
+  totalMatches: number;
+  withAnyContent: number;
+  sections: Record<MatchContentSection, number>;
 }
 
 export interface MatchesListData {
   items: MatchListItem[];
+  contentSummary?: MatchContentSummary;
 }
 
 export interface MatchesGlobalFilters {
@@ -146,6 +178,8 @@ export interface MatchesListLocalFilters {
   search?: string;
   status?: string | null;
   teamId?: string | null;
+  hasContent?: boolean;
+  contentSection?: MatchContentSection | null;
   allPages?: boolean;
   enabled?: boolean;
   page?: number;

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import {
-  SUPPORTED_COMPETITIONS,
-  getCompetitionVisualAssetId,
+  getCompetitionByKey,
   type CompetitionDef,
 } from "@/config/competitions.registry";
-import { getLatestSeasonForCompetition, listSeasonsForCompetition } from "@/config/seasons.registry";
+import { useHomePage } from "@/features/home/hooks/useHomePage";
+import type { HomeCompetitionCard } from "@/features/home/types/home.types";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 import { buildCompetitionHubPath } from "@/shared/utils/context-routing";
@@ -16,7 +16,26 @@ import { buildCompetitionHubPath } from "@/shared/utils/context-routing";
 import styles from "./page.module.css";
 
 type ScopeFilter = "all" | "domestic" | "international" | "global";
-type TypeFilter = "all" | CompetitionDef["type"];
+type CatalogCompetitionType = CompetitionDef["type"];
+type TypeFilter = "all" | CatalogCompetitionType;
+
+interface CatalogCompetition {
+  id: string;
+  key: string;
+  name: string;
+  shortName: string;
+  source: "published" | "transfermarkt" | "eloratings" | "multi";
+  dominantSource: "published" | "transfermarkt" | "eloratings";
+  additionalSources: Array<"published" | "transfermarkt" | "eloratings">;
+  country: string;
+  region: string;
+  type: CatalogCompetitionType;
+  scope: CompetitionDef["scope"];
+  visualAssetId?: string;
+  matchesCount: number;
+  seasonsCount: number;
+  latestSeasonLabel: string | null;
+}
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -34,7 +53,57 @@ function normalizeSearchValue(value: string): string {
     .trim();
 }
 
-function describeCompetitionTypeLabel(competition: CompetitionDef): string {
+function coerceCompetitionScope(value: HomeCompetitionCard["scope"]): CatalogCompetition["scope"] {
+  return value === "domestic" || value === "continental" || value === "global" ? value : "domestic";
+}
+
+function coerceCompetitionType(value: HomeCompetitionCard["type"]): CatalogCompetitionType {
+  return value === "domestic_league" || value === "domestic_cup" || value === "international_cup"
+    ? value
+    : "domestic_league";
+}
+
+function buildCatalogCompetition(card: HomeCompetitionCard): CatalogCompetition {
+  const registryCompetition = getCompetitionByKey(card.competitionKey);
+  const scope = coerceCompetitionScope(card.scope ?? registryCompetition?.scope);
+  const type = coerceCompetitionType(card.type ?? registryCompetition?.type);
+
+  return {
+    id: card.competitionId,
+    key: card.competitionKey,
+    name: card.competitionName,
+    shortName: registryCompetition?.shortName ?? card.competitionName,
+    source: card.source ?? "published",
+    dominantSource: card.dominantSource ?? "published",
+    additionalSources: card.additionalSources ?? [],
+    country: card.country ?? registryCompetition?.country ?? "Não informado",
+    region: card.region ?? registryCompetition?.region ?? "Não informado",
+    type,
+    scope,
+    visualAssetId: card.assetId ?? registryCompetition?.visualAssetId,
+    matchesCount: card.matchesCount,
+    seasonsCount: card.seasonsCount,
+    latestSeasonLabel: card.latestContext?.seasonLabel ?? card.range.toSeasonLabel,
+  };
+}
+
+function getCompetitionSourceLabel(competition: CatalogCompetition): string {
+  if (competition.source === "multi" || competition.additionalSources.length > 0) {
+    return "Multi-fonte";
+  }
+
+  if (competition.dominantSource === "transfermarkt") {
+    return "Transfermarkt";
+  }
+
+  if (competition.dominantSource === "eloratings") {
+    return "Elo+Matches";
+  }
+
+  return "Publicado";
+}
+
+function describeCompetitionTypeLabel(competition: CatalogCompetition): string {
   if (competition.type === "domestic_league") {
     return "Liga";
   }
@@ -46,7 +115,7 @@ function describeCompetitionTypeLabel(competition: CompetitionDef): string {
   return competition.scope === "global" ? "Mundial" : "Intercontinental";
 }
 
-function describeCompetitionScopeLabel(competition: CompetitionDef): string {
+function describeCompetitionScopeLabel(competition: CatalogCompetition): string {
   if (competition.scope === "global") {
     return "Torneio global";
   }
@@ -62,7 +131,7 @@ function describeCompetitionScopeLabel(competition: CompetitionDef): string {
   return "Liga doméstica";
 }
 
-function getCompetitionRegionLabel(competition: CompetitionDef): string {
+function getCompetitionRegionLabel(competition: CatalogCompetition): string {
   const normalizedRegion = normalizeSearchValue(competition.region);
 
   if (normalizedRegion.includes("europa") || normalizedRegion.includes("europe")) {
@@ -84,7 +153,7 @@ function getCompetitionRegionLabel(competition: CompetitionDef): string {
   return competition.region;
 }
 
-function buildCompetitionGroups(competitions: CompetitionDef[]) {
+function buildCompetitionGroups(competitions: CatalogCompetition[]) {
   const domestic = competitions.filter((competition) => competition.scope === "domestic");
   const international = competitions.filter((competition) => competition.scope === "continental");
   const global = competitions.filter((competition) => competition.scope === "global");
@@ -92,15 +161,15 @@ function buildCompetitionGroups(competitions: CompetitionDef[]) {
   return { domestic, global, international };
 }
 
-function buildCompetitionCardHref(competition: CompetitionDef): string {
+function buildCompetitionCardHref(competition: CatalogCompetition): string {
   return buildCompetitionHubPath(competition.key);
 }
 
-function buildCompetitionCtaLabel(_competition: CompetitionDef): string {
+function buildCompetitionCtaLabel(_competition: CatalogCompetition): string {
   return "Ver temporadas";
 }
 
-function buildCompetitionFallbackLabel(competition: CompetitionDef): string {
+function buildCompetitionFallbackLabel(competition: CatalogCompetition): string {
   const normalizedTokens = competition.shortName
     .replace(/[^A-Za-z0-9]+/g, " ")
     .trim()
@@ -123,7 +192,7 @@ function buildCompetitionFallbackLabel(competition: CompetitionDef): string {
     .toUpperCase();
 }
 
-function buildCompetitionSearchContent(competition: CompetitionDef): string {
+function buildCompetitionSearchContent(competition: CatalogCompetition): string {
   return normalizeSearchValue(
     [
       competition.name,
@@ -191,12 +260,14 @@ function HeaderMetricCard({
   );
 }
 
-function TableAction({ competition }: { competition: CompetitionDef }) {
+function TableAction({ competition }: { competition: CatalogCompetition }) {
+  const href = buildCompetitionCardHref(competition);
+
   return (
     <Link
       aria-label={buildCompetitionCtaLabel(competition)}
       className={styles.tableAction}
-      href={buildCompetitionCardHref(competition)}
+      href={href}
       title={buildCompetitionCtaLabel(competition)}
     >
       <ArrowRightIcon />
@@ -204,17 +275,14 @@ function TableAction({ competition }: { competition: CompetitionDef }) {
   );
 }
 
-function CompetitionMatrixRow({ competition }: { competition: CompetitionDef }) {
-  const latestSeason = getLatestSeasonForCompetition(competition);
-  const seasonsCount = listSeasonsForCompetition(competition).length;
-
+function CompetitionMatrixRow({ competition }: { competition: CatalogCompetition }) {
   return (
     <tr className={styles.matrixRow}>
       <td className={styles.matrixCell}>
         <div className={styles.competitionIdentity}>
           <ProfileMedia
             alt={`Logo de ${competition.name}`}
-            assetId={getCompetitionVisualAssetId(competition)}
+            assetId={competition.visualAssetId ?? competition.id}
             category="competitions"
             className={styles.competitionMedia}
             fallback={buildCompetitionFallbackLabel(competition)}
@@ -224,7 +292,9 @@ function CompetitionMatrixRow({ competition }: { competition: CompetitionDef }) 
 
           <div className={styles.competitionLead}>
             <p className={styles.competitionName}>{competition.name}</p>
-            <p className={styles.competitionScope}>{describeCompetitionScopeLabel(competition)}</p>
+            <p className={styles.competitionScope}>
+              {describeCompetitionScopeLabel(competition)} · {getCompetitionSourceLabel(competition)}
+            </p>
           </div>
         </div>
       </td>
@@ -233,8 +303,8 @@ function CompetitionMatrixRow({ competition }: { competition: CompetitionDef }) 
       <td className={styles.matrixCell}>
         <span className={styles.typeBadge}>{describeCompetitionTypeLabel(competition)}</span>
       </td>
-      <td className={styles.matrixCellNumeric}>{formatWholeNumber(seasonsCount)}</td>
-      <td className={styles.matrixCellNumeric}>{latestSeason?.label ?? "-"}</td>
+      <td className={styles.matrixCellNumeric}>{formatWholeNumber(competition.seasonsCount)}</td>
+      <td className={styles.matrixCellNumeric}>{competition.latestSeasonLabel ?? "-"}</td>
       <td className={styles.matrixCellAction}>
         <TableAction competition={competition} />
       </td>
@@ -242,17 +312,15 @@ function CompetitionMatrixRow({ competition }: { competition: CompetitionDef }) 
   );
 }
 
-function CompetitionMobileCard({ competition }: { competition: CompetitionDef }) {
-  const latestSeason = getLatestSeasonForCompetition(competition);
-  const seasonsCount = listSeasonsForCompetition(competition).length;
-
-  return (
-    <Link className={styles.mobileCard} href={buildCompetitionCardHref(competition)}>
+function CompetitionMobileCard({ competition }: { competition: CatalogCompetition }) {
+  const href = buildCompetitionCardHref(competition);
+  const content = (
+    <>
       <div className={styles.mobileCardHeader}>
         <div className={styles.competitionIdentity}>
           <ProfileMedia
             alt={`Logo de ${competition.name}`}
-            assetId={getCompetitionVisualAssetId(competition)}
+            assetId={competition.visualAssetId ?? competition.id}
             category="competitions"
             className={styles.competitionMedia}
             fallback={buildCompetitionFallbackLabel(competition)}
@@ -263,7 +331,9 @@ function CompetitionMobileCard({ competition }: { competition: CompetitionDef })
 
           <div className={styles.competitionLead}>
             <p className={styles.competitionName}>{competition.name}</p>
-            <p className={styles.competitionScope}>{describeCompetitionScopeLabel(competition)}</p>
+            <p className={styles.competitionScope}>
+              {describeCompetitionScopeLabel(competition)} · {getCompetitionSourceLabel(competition)}
+            </p>
           </div>
         </div>
 
@@ -281,11 +351,11 @@ function CompetitionMobileCard({ competition }: { competition: CompetitionDef })
         </div>
         <div className={styles.mobileMetaItem}>
           <span className={styles.mobileMetaLabel}>Temporadas</span>
-          <span className={styles.mobileMetaValue}>{formatWholeNumber(seasonsCount)}</span>
+          <span className={styles.mobileMetaValue}>{formatWholeNumber(competition.seasonsCount)}</span>
         </div>
         <div className={styles.mobileMetaItem}>
           <span className={styles.mobileMetaLabel}>Última edição</span>
-          <span className={styles.mobileMetaValue}>{latestSeason?.label ?? "-"}</span>
+          <span className={styles.mobileMetaValue}>{competition.latestSeasonLabel ?? "-"}</span>
         </div>
       </div>
 
@@ -293,22 +363,35 @@ function CompetitionMobileCard({ competition }: { competition: CompetitionDef })
         <span>{buildCompetitionCtaLabel(competition)}</span>
         <ArrowRightIcon />
       </div>
+    </>
+  );
+
+  return (
+    <Link className={styles.mobileCard} href={href}>
+      {content}
     </Link>
   );
 }
 
 export default function CompetitionsIndexPage() {
-  const allCompetitions = SUPPORTED_COMPETITIONS;
+  const homeQuery = useHomePage();
+  const allCompetitions = useMemo(
+    () => (homeQuery.data?.competitions ?? []).map(buildCatalogCompetition),
+    [homeQuery.data?.competitions],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [regionFilter, setRegionFilter] = useState("all");
 
   const totalSeasonsTracked = allCompetitions.reduce(
-    (total, competition) => total + listSeasonsForCompetition(competition).length,
+    (total, competition) => total + competition.seasonsCount,
     0,
   );
   const { domestic, global, international } = buildCompetitionGroups(allCompetitions);
+  const unifiedCompetitionsCount = allCompetitions.filter(
+    (competition) => competition.source === "multi" || competition.additionalSources.length > 0,
+  ).length;
   const normalizedSearchQuery = normalizeSearchValue(searchQuery);
 
   const regionOptions = useMemo(() => {
@@ -350,7 +433,7 @@ export default function CompetitionsIndexPage() {
   }, [allCompetitions, normalizedSearchQuery, regionFilter, scopeFilter, typeFilter]);
 
   const filteredSeasonsCount = filteredCompetitions.reduce(
-    (total, competition) => total + listSeasonsForCompetition(competition).length,
+    (total, competition) => total + competition.seasonsCount,
     0,
   );
   const hasResults = filteredCompetitions.length > 0;
@@ -360,7 +443,11 @@ export default function CompetitionsIndexPage() {
     typeFilter !== "all" ||
     regionFilter !== "all";
 
-  const emptyStateDescription = hasActiveFilters
+  const emptyStateDescription = homeQuery.isLoading
+    ? "Carregando o catálogo publicado no Data Warehouse."
+    : homeQuery.isError
+      ? "Não foi possível carregar o catálogo de competições agora."
+      : hasActiveFilters
     ? "Nenhuma competição atende ao recorte atual. Limpe os filtros ou tente outro termo."
     : "Não há competições disponíveis para exibir agora.";
 
@@ -391,6 +478,7 @@ export default function CompetitionsIndexPage() {
             </p>
 
             <div className={styles.headerTags}>
+              <span className={styles.headerTag}>{formatWholeNumber(unifiedCompetitionsCount)} unificadas</span>
               <span className={styles.headerTag}>{formatWholeNumber(domestic.length)} nacionais</span>
               <span className={styles.headerTag}>
                 {formatWholeNumber(international.length)} intercontinentais

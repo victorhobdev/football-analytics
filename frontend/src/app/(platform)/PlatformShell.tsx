@@ -12,6 +12,7 @@ import { GlobalFilterBar } from "@/shared/components/filters/GlobalFilterBar";
 import { PLATFORM_SEARCH_OPEN_EVENT } from "@/shared/components/navigation/platform-search.events";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import {
+  buildAnalyticsPath,
   buildCoachesPath,
   buildHeadToHeadPath,
   buildMarketPath,
@@ -89,6 +90,10 @@ function isActiveNavLink(pathname: string, href: string): boolean {
 
   if (hrefPathname === "/matches") {
     return pathname === "/matches" || pathname.startsWith("/matches/");
+  }
+
+  if (hrefPathname === "/analytics") {
+    return pathname === "/analytics" || pathname.startsWith("/analytics/");
   }
 
   return pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
@@ -324,6 +329,12 @@ export function PlatformShell({ children }: PlatformShellProps) {
       icon: "match" as const,
       label: "Comparativos",
       summary: "Clubes, jogadores e edições",
+    },
+    {
+      href: buildAnalyticsPath(sharedFilters),
+      icon: "analytics" as const,
+      label: "Análises",
+      summary: "OLAP, tendências e comparativos",
     },
     {
       href: buildMarketPath(sharedFilters),

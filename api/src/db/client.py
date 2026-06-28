@@ -39,12 +39,13 @@ def _summarize_query(query: str) -> str:
 class DatabaseClient:
     def __init__(self) -> None:
         settings = get_settings()
+        pool_kwargs: dict[str, Any] = {"row_factory": dict_row, "connect_timeout": 10}
         self._pool = ConnectionPool(
             conninfo=settings.pg_dsn,
             min_size=settings.pg_pool_min_size,
             max_size=settings.pg_pool_max_size,
             timeout=settings.pg_pool_timeout_s,
-            kwargs={"row_factory": dict_row},
+            kwargs=pool_kwargs,
             open=True,
         )
         atexit.register(self.close)

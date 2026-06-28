@@ -233,7 +233,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
     );
   }
 
-  const { match, timeline, lineups, teamStats, playerStats, sectionCoverage } = matchCenterQuery.data;
+  const { match, timeline, lineups, teamStats, playerStats, depthProfile, sectionCoverage } = matchCenterQuery.data;
   const competitionContext = resolveCompetitionSeasonContext({
     competitionId: match.competitionId,
     seasonId: match.seasonId,
@@ -251,9 +251,14 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
   const lineupPlayers = lineups ?? [];
   const teamStatsRows = teamStats ?? [];
   const playerStatsRows = playerStats ?? [];
-  const incidentsPreview = timelineEvents.slice(0, 5);
-  const previewPlayers = resolvePreviewPlayers(playerStatsRows);
-  const startersCount = lineupPlayers.filter((player) => player.isStarter).length;
+  const canShowTimeline = Boolean(depthProfile?.hasEvents && timelineEvents.length > 0);
+  const canShowLineups = Boolean(depthProfile?.hasLineups && lineupPlayers.length > 0);
+  const canShowTeamStats = Boolean(depthProfile?.hasTeamStats && teamStatsRows.length > 0);
+  const canShowPlayerStats = Boolean(depthProfile?.hasPlayerStats && playerStatsRows.length > 0);
+  const summaryBlocksCount = [canShowTimeline, canShowLineups, canShowTeamStats, canShowPlayerStats].filter(Boolean).length;
+  const incidentsPreview = canShowTimeline ? timelineEvents.slice(0, 5) : [];
+  const previewPlayers = canShowPlayerStats ? resolvePreviewPlayers(playerStatsRows) : [];
+  const startersCount = canShowLineups ? lineupPlayers.filter((player) => player.isStarter).length : 0;
   const kickoffLabel = formatDate(match.kickoffAt);
   const seasonLabel = competitionContext?.seasonLabel ?? match.seasonId ?? "Temporada";
   const matchesHref = buildMatchesPath(sharedContextInput);
@@ -272,33 +277,50 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
     teamStats: resolveSectionCoverage(sectionCoverage?.teamStats, "Estatísticas dos times"),
     playerStats: resolveSectionCoverage(sectionCoverage?.playerStats, "Estatísticas dos jogadores"),
   };
-  const tabLinks = [
+  const tabLinks: Array<{ key: MatchCenterTab; label: string; badge: string }> = [
     {
-      key: "summary" as const,
+      key: "summary",
       label: "Resumo",
-      badge: "4 blocos",
+      badge: `${summaryBlocksCount || 1} blocos`,
     },
-    {
-      key: "timeline" as const,
-      label: "Linha do tempo",
-      badge: `${timelineEvents.length} eventos`,
-    },
-    {
-      key: "lineups" as const,
-      label: "Escalações",
-      badge: `${lineupPlayers.length} atletas`,
-    },
-    {
-      key: "team-stats" as const,
-      label: "Times",
-      badge: `${teamStatsRows.length} linhas`,
-    },
-    {
-      key: "player-stats" as const,
-      label: "Jogadores",
-      badge: `${playerStatsRows.length} linhas`,
-    },
+    ...(canShowTimeline
+      ? [
+          {
+            key: "timeline" as const,
+            label: "Linha do tempo",
+            badge: `${timelineEvents.length} eventos`,
+          },
+        ]
+      : []),
+    ...(canShowLineups
+      ? [
+          {
+            key: "lineups" as const,
+            label: "Escalações",
+            badge: `${lineupPlayers.length} atletas`,
+          },
+        ]
+      : []),
+    ...(canShowTeamStats
+      ? [
+          {
+            key: "team-stats" as const,
+            label: "Times",
+            badge: `${teamStatsRows.length} linhas`,
+          },
+        ]
+      : []),
+    ...(canShowPlayerStats
+      ? [
+          {
+            key: "player-stats" as const,
+            label: "Jogadores",
+            badge: `${playerStatsRows.length} linhas`,
+          },
+        ]
+      : []),
   ];
+  const selectedTab: MatchCenterTab = tabLinks.some((tabLink) => tabLink.key === activeTab) ? activeTab : "summary";
 
   return (
     <ProfileShell className="space-y-6">
@@ -377,8 +399,15 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
           <ProfileKpi hint={kickoffLabel} invert label="Placar" value={resolveScoreSummary(match.homeScore, match.awayScore)} />
           <ProfileKpi hint={kickoffLabel} invert label="Status" value={match.status?.trim() || "Sem status"} />
           <ProfileKpi hint={match.venueName?.trim() || "Local indisponível"} invert label="Local" value={match.venueName?.trim() || "Indisponível"} />
-          <ProfileKpi hint={sectionStates.timeline?.label} invert label="Eventos" value={timelineEvents.length} />
-          <ProfileKpi hint={sectionStates.playerStats?.label} invert label="Atletas" value={playerStatsRows.length} />
+          {canShowTimeline ? <ProfileKpi hint={sectionStates.timeline?.label} invert label="Eventos" value={timelineEvents.length} /> : null}
+          {canShowPlayerStats || canShowLineups ? (
+            <ProfileKpi
+              hint={canShowPlayerStats ? sectionStates.playerStats?.label : sectionStates.lineups?.label}
+              invert
+              label="Atletas"
+              value={canShowPlayerStats ? playerStatsRows.length : lineupPlayers.length}
+            />
+          ) : null}
         </div>
       </ProfilePanel>
 
@@ -402,7 +431,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
           key: tabLink.key,
           label: tabLink.label,
           href: buildMatchCenterTabHref(pathname, searchParams, tabLink.key),
-          isActive: activeTab === tabLink.key,
+          isActive: selectedTab === tabLink.key,
           badge: tabLink.badge,
         }))}
       />
@@ -413,18 +442,19 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
             Seção ativa
           </p>
           <h2 className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
-            {tabLinks.find((tabLink) => tabLink.key === activeTab)?.label ?? "Resumo"}
+            {tabLinks.find((tabLink) => tabLink.key === selectedTab)?.label ?? "Resumo"}
           </h2>
         </div>
         <p className="max-w-3xl text-sm leading-6 text-[#57657a]">
-          {resolveSectionDescription(activeTab)}
+          {resolveSectionDescription(selectedTab)}
         </p>
       </ProfilePanel>
 
-      {activeTab === "summary" ? (
+      {selectedTab === "summary" ? (
         <>
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-            <ProfilePanel className="space-y-5">
+            {canShowTimeline ? (
+              <ProfilePanel className="space-y-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
@@ -464,7 +494,8 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                   Nenhum incidente disponível para esta partida.
                 </div>
               )}
-            </ProfilePanel>
+              </ProfilePanel>
+            ) : null}
 
             <div className="grid gap-6">
               <ProfilePanel className="grid gap-4 md:grid-cols-2">
@@ -478,9 +509,9 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                   label="Status"
                   value={match.status?.trim() || "Sem status"}
                 />
-                <ProfileMetricTile label="Jogadores nas escalações" value={lineupPlayers.length} />
-                <ProfileMetricTile label="Titulares detectados" value={startersCount || "-"} />
-                <ProfileMetricTile label="Linhas de estatísticas" value={playerStatsRows.length} />
+                {canShowLineups ? <ProfileMetricTile label="Jogadores nas escalações" value={lineupPlayers.length} /> : null}
+                {canShowLineups ? <ProfileMetricTile label="Titulares detectados" value={startersCount || "-"} /> : null}
+                {canShowPlayerStats ? <ProfileMetricTile label="Linhas de estatísticas" value={playerStatsRows.length} /> : null}
                 <ProfileMetricTile label="Competição" value={match.competitionName?.trim() || "-"} />
               </ProfilePanel>
 
@@ -500,35 +531,44 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-4">
-                  <ProfileKpi
-                    hint={sectionStates.timeline?.label}
-                    invert
-                    label="Linha do tempo"
-                    value={timelineEvents.length}
-                  />
-                  <ProfileKpi
-                    hint={sectionStates.lineups?.label}
-                    invert
-                    label="Escalações"
-                    value={lineupPlayers.length}
-                  />
-                  <ProfileKpi
-                    hint={sectionStates.teamStats?.label}
-                    invert
-                    label="Times"
-                    value={teamStatsRows.length}
-                  />
-                  <ProfileKpi
-                    hint={sectionStates.playerStats?.label}
-                    invert
-                    label="Jogadores"
-                    value={playerStatsRows.length}
-                  />
+                  {canShowTimeline ? (
+                    <ProfileKpi
+                      hint={sectionStates.timeline?.label}
+                      invert
+                      label="Linha do tempo"
+                      value={timelineEvents.length}
+                    />
+                  ) : null}
+                  {canShowLineups ? (
+                    <ProfileKpi
+                      hint={sectionStates.lineups?.label}
+                      invert
+                      label="Escalações"
+                      value={lineupPlayers.length}
+                    />
+                  ) : null}
+                  {canShowTeamStats ? (
+                    <ProfileKpi
+                      hint={sectionStates.teamStats?.label}
+                      invert
+                      label="Times"
+                      value={teamStatsRows.length}
+                    />
+                  ) : null}
+                  {canShowPlayerStats ? (
+                    <ProfileKpi
+                      hint={sectionStates.playerStats?.label}
+                      invert
+                      label="Jogadores"
+                      value={playerStatsRows.length}
+                    />
+                  ) : null}
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/65">
-                    Destaques do jogo
+                {canShowPlayerStats ? (
+                  <div className="space-y-3">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/65">
+                      Destaques do jogo
                   </p>
                   {previewPlayers.length > 0 ? (
                     <div className="grid gap-3">
@@ -558,18 +598,16 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-sm leading-6 text-white/75">
-                      Nenhum destaque adicional disponível para esta partida.
-                    </p>
-                  )}
-                </div>
+                  ) : null}
+                  </div>
+                ) : null}
               </ProfilePanel>
             </div>
           </section>
 
           <section className="grid gap-4 xl:grid-cols-4">
-            <ProfilePanel className="space-y-4">
+            {canShowTimeline ? (
+              <ProfilePanel className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
@@ -590,13 +628,15 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
               >
                 Ver linha do tempo
               </Link>
-            </ProfilePanel>
+              </ProfilePanel>
+            ) : null}
 
-            <ProfilePanel className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                    Escalações
+            {canShowLineups ? (
+              <ProfilePanel className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+                      Escalações
                   </p>
                   <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
                     Titulares e banco
@@ -613,13 +653,15 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
               >
                 Ver escalações
               </Link>
-            </ProfilePanel>
+              </ProfilePanel>
+            ) : null}
 
-            <ProfilePanel className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                    Times
+            {canShowTeamStats ? (
+              <ProfilePanel className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+                      Times
                   </p>
                   <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
                     Comparativo dos times
@@ -636,13 +678,15 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
               >
                 Ver comparativo
               </Link>
-            </ProfilePanel>
+              </ProfilePanel>
+            ) : null}
 
-            <ProfilePanel className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
-                    Jogadores
+            {canShowPlayerStats ? (
+              <ProfilePanel className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
+                      Jogadores
                   </p>
                   <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold text-[#111c2d]">
                     Atuação individual
@@ -659,12 +703,13 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
               >
                 Ver jogadores
               </Link>
-            </ProfilePanel>
+              </ProfilePanel>
+            ) : null}
           </section>
         </>
       ) : null}
 
-      {activeTab === "timeline" ? (
+      {selectedTab === "timeline" ? (
         <MatchTimelinePlaceholder
           awayTeamId={match.awayTeamId}
           awayTeamName={match.awayTeamName}
@@ -677,7 +722,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
         />
       ) : null}
 
-      {activeTab === "lineups" ? (
+      {selectedTab === "lineups" ? (
         <MatchLineupsPlaceholder
           awayTeamId={match.awayTeamId}
           awayTeamName={match.awayTeamName}
@@ -690,7 +735,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
         />
       ) : null}
 
-      {activeTab === "player-stats" ? (
+      {selectedTab === "player-stats" ? (
         <MatchPlayerStatsPlaceholder
           competitionContext={competitionContext}
           contextInput={sharedContextInput}
@@ -699,7 +744,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
         />
       ) : null}
 
-      {activeTab === "team-stats" ? (
+      {selectedTab === "team-stats" ? (
         <MatchTeamStatsPlaceholder
           awayTeamId={match.awayTeamId}
           awayTeamName={match.awayTeamName}

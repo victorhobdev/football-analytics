@@ -149,6 +149,14 @@ function getTransferTypeLabel(typeId: number | null | undefined, typeName: strin
   return "Tipo desconhecido";
 }
 
+function getTransferSourceLabel(source: string | null | undefined): string {
+  if (source === "transfermarkt") {
+    return "Transfermarkt";
+  }
+
+  return "SportMonks";
+}
+
 function formatMovement(item: {
   fromTeamName?: string | null;
   toTeamName?: string | null;
@@ -194,7 +202,7 @@ export function MarketPageContent() {
   const [teamDirection, setTeamDirection] = useState<(typeof TEAM_DIRECTION_FILTERS)[number]["value"]>("all");
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("amountDesc");
+  const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("dateDesc");
   const [onlyValuedTransfers, setOnlyValuedTransfers] = useState(false);
   const deferredSearch = useDeferredValue(search);
   const deferredClubSearch = useDeferredValue(clubSearch);
@@ -546,6 +554,7 @@ export function MarketPageContent() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      <ProfileTag>{getTransferSourceLabel(item.source)}</ProfileTag>
                       <ProfileTag>{getTransferTypeLabel(item.typeId, item.typeName)}</ProfileTag>
                       {item.careerEnded ? <ProfileTag>Fim de carreira</ProfileTag> : null}
                     </div>

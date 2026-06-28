@@ -1145,6 +1145,92 @@ export function GlobalFilterBar() {
           {resetButtonLabel}
         </button>
       </div>
+
+      {/* Analytics-specific extra filters: round, venue, time window */}
+      {pathname === "/analytics" ? (
+        <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
+          <FilterField label="Rodada">
+            <input
+              className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+              onChange={(e) => {
+                const val = parseNullableText(e.target.value);
+                setRoundId(val);
+                replaceFiltersInUrl({ roundId: val });
+              }}
+              placeholder="Todas as rodadas"
+              type="number"
+              min={1}
+              value={roundId ?? ""}
+            />
+          </FilterField>
+
+          <FilterField label="Mando">
+            <StyledSelect
+              id="global-filter-venue"
+              label="Mando"
+              onChange={(nextValue) => {
+                const nextVenue = nextValue as VenueFilter;
+                setVenue(nextVenue);
+                replaceFiltersInUrl({ venue: nextVenue });
+              }}
+              options={[
+                { value: "all", label: "Todos" },
+                { value: "home", label: "Mandante" },
+                { value: "away", label: "Visitante" },
+              ]}
+              placeholder="Todos"
+              value={venue}
+            />
+          </FilterField>
+
+          {activeMode === "lastN" ? (
+            <FilterField label="Últimos jogos">
+              <input
+                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                min={1}
+                onChange={(e) => {
+                  const val = parseLastN(e.target.value);
+                  setTimeRange({ mode: "lastN", lastN: val });
+                  replaceFiltersInUrl({ lastN: val, dateRangeStart: null, dateRangeEnd: null });
+                }}
+                placeholder="Temporada inteira"
+                type="number"
+                value={lastN !== null ? String(lastN) : ""}
+              />
+            </FilterField>
+          ) : (
+            <FilterField label="Início do período">
+              <input
+                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                onChange={(e) => {
+                  const val = parseNullableText(e.target.value);
+                  const newEnd = val && !dateRangeEnd ? new Date().toISOString().slice(0, 10) : dateRangeEnd;
+                  setTimeRange({ mode: "dateRange", dateRangeStart: val, dateRangeEnd: newEnd });
+                  replaceFiltersInUrl({ dateRangeStart: val, dateRangeEnd: newEnd, lastN: null });
+                }}
+                type="date"
+                value={dateRangeStart ?? ""}
+              />
+            </FilterField>
+          )}
+
+          {activeMode === "dateRange" ? (
+            <FilterField label="Fim do período">
+              <input
+                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                onChange={(e) => {
+                  const val = parseNullableText(e.target.value);
+                  setTimeRange({ mode: "dateRange", dateRangeStart, dateRangeEnd: val });
+                  replaceFiltersInUrl({ dateRangeEnd: val, dateRangeStart, lastN: null });
+                }}
+                type="date"
+                value={dateRangeEnd ?? ""}
+              />
+            </FilterField>
+          ) : null}
+        </div>
+      ) : null}
+
       {compactStatusSummary ? (
         <p className={joinClasses(shouldUseCompactFilterBar ? "mt-2 text-[0.74rem]" : "mt-3 text-[0.8rem]", "font-semibold text-[#687790]")}>
           {compactStatusSummary}
