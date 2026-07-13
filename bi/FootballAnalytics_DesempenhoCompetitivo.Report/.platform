@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "FootballAnalytics_DesempenhoCompetitivo"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "266ac412-95d2-4dd6-b6ae-ccc9571f9302"
+  }
+}

@@ -13,6 +13,10 @@ config/local.yml
 config/*.local.yml
 .docs
 docs/
+!docs/
+docs/*
+!docs/bi/
+!docs/bi/**
 
 # =========================
 # PYTHON
@@ -148,3 +152,8 @@ start_mcp.ps1
 imagens.py
 
 .vercel
+
+# Power BI Desktop local cache/settings (PBIP definitions remain versioned)
+**/.pbi/
+!bi/data/
+!bi/data/manifest.json

@@ -1,0 +1,358 @@
+table Medidas
+	isHidden
+	lineageTag: 90000000-0000-0000-0000-000000000001
+
+	measure Partidas = DISTINCTCOUNT ( FactMatch[match_id] )
+		formatString: 0
+		displayFolder: Volume
+		lineageTag: 90000000-0000-0000-0000-000000000002
+
+	measure 'Jogos do Time' = COUNTROWS ( FactTeamMatch )
+		formatString: 0
+		displayFolder: Volume
+		lineageTag: 90000000-0000-0000-0000-000000000003
+
+	measure Times = DISTINCTCOUNT ( FactTeamMatch[team_sk] )
+		formatString: 0
+		displayFolder: Volume
+		lineageTag: 90000000-0000-0000-0000-000000000004
+
+	measure 'Gols Totais' = SUM ( FactMatch[total_goals] )
+		formatString: 0
+		displayFolder: Volume
+		lineageTag: 90000000-0000-0000-0000-000000000005
+
+	measure Vitórias = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Vitória" )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000006
+
+	measure Empates = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Empate" )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000007
+
+	measure Derrotas = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Derrota" )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000008
+
+	measure Pontos = SUM ( FactTeamMatch[points] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000009
+
+	measure PPG = DIVIDE ( [Pontos], [Jogos do Time] )
+		formatString: 0.00
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000010
+
+	measure 'Aproveitamento %' = DIVIDE ( [Pontos], 3 * [Jogos do Time] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000011
+
+	measure 'Gols Pró' = SUM ( FactTeamMatch[goals_for] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000012
+
+	measure 'Gols Contra' = SUM ( FactTeamMatch[goals_against] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000013
+
+	measure 'Saldo de Gols' = [Gols Pró] - [Gols Contra]
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000014
+
+	measure 'Taxa de Vitória %' = DIVIDE ( [Vitórias], [Jogos do Time] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000015
+
+	measure 'PPG Médio do Recorte' = CALCULATE ( [PPG], REMOVEFILTERS ( DimTeam ) )
+		formatString: 0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000048
+
+	measure 'Delta PPG vs Recorte' = [PPG] - [PPG Médio do Recorte]
+		formatString: +0.00;-0.00;0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000049
+
+	measure 'Percentil PPG' =
+			VAR Atual = [PPG]
+			VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), NOT ISBLANK ( CALCULATE ( [PPG] ) ) )
+			RETURN DIVIDE ( COUNTROWS ( FILTER ( TimesDoRecorte, CALCULATE ( [PPG] ) <= Atual ) ) - 1, COUNTROWS ( TimesDoRecorte ) - 1 )
+		formatString: 0%
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000050
+
+	measure 'PPG Últimos 5' =
+			VAR JogosRecentes = TOPN ( 5, SUMMARIZE ( FactTeamMatch, FactTeamMatch[match_id], FactTeamMatch[match_date] ), FactTeamMatch[match_date], DESC, FactTeamMatch[match_id], DESC )
+			RETURN CALCULATE ( [PPG], TREATAS ( SELECTCOLUMNS ( JogosRecentes, "match_id", FactTeamMatch[match_id] ), FactTeamMatch[match_id] ) )
+		formatString: 0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000051
+
+	measure 'Delta Forma 5 Jogos' = [PPG Últimos 5] - [PPG]
+		formatString: +0.00;-0.00;0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000052
+
+	measure 'Gols por Partida' = DIVIDE ( [Gols Totais], [Partidas] )
+		formatString: 0.00
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000016
+
+	measure 'Vitórias Mandante' = CALCULATE ( [Partidas], FactMatch[Resultado] = "Home Win" )
+		formatString: 0
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000017
+
+	measure 'Vitórias Visitante' = CALCULATE ( [Partidas], FactMatch[Resultado] = "Away Win" )
+		formatString: 0
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000018
+
+	measure 'Empates da Competição' = CALCULATE ( [Partidas], FactMatch[Resultado] = "Draw" )
+		formatString: 0
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000019
+
+	measure 'Taxa Vitória Mandante %' = DIVIDE ( [Vitórias Mandante], [Partidas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000020
+
+	measure 'Taxa Vitória Visitante %' = DIVIDE ( [Vitórias Visitante], [Partidas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000021
+
+	measure 'Taxa de Empates %' = DIVIDE ( [Empates da Competição], [Partidas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Competição
+		lineageTag: 90000000-0000-0000-0000-000000000022
+
+	measure 'PPG Casa' = CALCULATE ( [PPG], FactTeamMatch[venue] = "Casa" )
+		formatString: 0.00
+		displayFolder: Mando
+		lineageTag: 90000000-0000-0000-0000-000000000023
+
+	measure 'PPG Fora' = CALCULATE ( [PPG], FactTeamMatch[venue] = "Fora" )
+		formatString: 0.00
+		displayFolder: Mando
+		lineageTag: 90000000-0000-0000-0000-000000000024
+
+	measure 'Delta de Mando' = [PPG Casa] - [PPG Fora]
+		formatString: 0.00
+		displayFolder: Mando
+		lineageTag: 90000000-0000-0000-0000-000000000025
+
+	measure 'Delta de Mando (20+ jogos)' = IF ( [Jogos do Time] >= 20, [Delta de Mando] )
+		formatString: 0.00
+		displayFolder: Mando
+		lineageTag: 90000000-0000-0000-0000-000000000047
+
+	measure 'Posse Média %' = AVERAGE ( FactTeamMatch[ball_possession] ) / 100
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000038
+
+	measure 'Precisão de Passe %' = AVERAGE ( FactTeamMatch[passes_pct] ) / 100
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000039
+
+	measure 'Finalizações do Time' = SUM ( FactTeamMatch[total_shots] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000040
+
+	measure 'Finalizações no Alvo do Time' = SUM ( FactTeamMatch[shots_on_goal] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000053
+
+	measure 'Gols por Jogo do Time' = DIVIDE ( [Gols Pró], [Jogos do Time] )
+		formatString: 0.00
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000054
+
+	measure 'Gols em Jogos com Estatísticas' = SUMX ( FILTER ( FactTeamMatch, NOT ISBLANK ( FactTeamMatch[total_shots] ) ), FactTeamMatch[goals_for] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000068
+
+	measure 'Conversão de Finalizações %' =
+			VAR GolsCobertos = [Gols em Jogos com Estatísticas]
+			VAR Tentativas = [Finalizações do Time]
+			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= GolsCobertos, DIVIDE ( GolsCobertos, Tentativas ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000055
+
+	measure 'Precisão de Finalização %' =
+			VAR NoAlvo = [Finalizações no Alvo do Time]
+			VAR Tentativas = [Finalizações do Time]
+			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= NoAlvo, DIVIDE ( NoAlvo, Tentativas ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000056
+
+	measure 'Cobertura Estatísticas de Time %' = DIVIDE ( COUNT ( FactTeamMatch[ball_possession] ), [Jogos do Time] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000041
+
+	measure 'Pontos Acumulados' =
+			VAR CurrentDate = MAX ( DimDate[date_day] )
+			RETURN CALCULATE ( [Pontos], FILTER ( ALLSELECTED ( DimDate[date_day] ), DimDate[date_day] <= CurrentDate ) )
+		formatString: 0
+		displayFolder: Tempo
+		lineageTag: 90000000-0000-0000-0000-000000000026
+
+	measure 'Partidas sem Placar' = COUNTROWS ( FILTER ( FactMatch, NOT FactMatch[score_valid] ) )
+		formatString: 0
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000027
+
+	measure 'Cobertura de Placar %' = DIVIDE ( [Partidas] - [Partidas sem Placar], [Partidas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000028
+
+	measure 'Status do Recorte' = IF ( [Cobertura de Placar %] >= 0.95, "Cobertura adequada", "Cobertura insuficiente" )
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000029
+
+	measure Gols = SUM ( FactPlayerMatch[goals] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000030
+
+	measure Assistências = SUM ( FactPlayerMatch[assists] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000031
+
+	measure Minutos = SUM ( FactPlayerMatch[minutes_played] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000042
+
+	measure Finalizações = SUM ( FactPlayerMatch[shots_total] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000032
+
+	measure 'Finalizações no Alvo' = SUM ( FactPlayerMatch[shots_on_goal] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000043
+
+	measure 'Nota Média' = AVERAGE ( FactPlayerMatch[rating] )
+		formatString: 0.00
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000033
+
+	measure 'Cartões Amarelos' = SUM ( FactPlayerMatch[yellow_cards] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000034
+
+	measure 'Cartões Vermelhos' = SUM ( FactPlayerMatch[red_cards] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000035
+
+	measure 'Cartões Totais' = [Cartões Amarelos] + [Cartões Vermelhos]
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000044
+
+	measure 'Jogos do Jogador' = DISTINCTCOUNT ( FactPlayerMatch[match_id] )
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000045
+
+	measure 'Participações em Gol' = [Gols] + [Assistências]
+		formatString: 0
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000057
+
+	measure 'Gols por 90 (900+ min)' = IF ( [Minutos] >= 900, DIVIDE ( 90 * [Gols], [Minutos] ) )
+		formatString: 0.00
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000058
+
+	measure 'Participações por 90 (900+ min)' = IF ( [Minutos] >= 900, DIVIDE ( 90 * [Participações em Gol], [Minutos] ) )
+		formatString: 0.00
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000059
+
+	measure 'Precisão de Finalização do Jogador %' = DIVIDE ( [Finalizações no Alvo], [Finalizações] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000060
+
+	measure 'Participação nos Gols do Time %' = IF ( HASONEVALUE ( DimTeam[team_sk] ), DIVIDE ( [Gols], [Gols Pró] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Jogadores
+		lineageTag: 90000000-0000-0000-0000-000000000061
+
+	measure 'Cobertura de Minutos %' = DIVIDE ( COUNT ( FactPlayerMatch[minutes_played] ), COUNTROWS ( FactPlayerMatch ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000062
+
+	measure 'Cobertura de Nota %' = DIVIDE ( COUNT ( FactPlayerMatch[rating] ), COUNTROWS ( FactPlayerMatch ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000046
+
+	measure 'Última Atualização' = MAX ( FactMatch[updated_at] )
+		formatString: dd/MM/yyyy HH:mm
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000036
+
+	measure Escopos = DISTINCTCOUNT ( DimScope[scope_key] )
+		formatString: 0
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000063
+
+	measure 'Partidas Declaradas' = SUM ( DimScope[total_matches] )
+		formatString: 0
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000064
+
+	measure 'Cobertura de Placar Declarada %' = DIVIDE ( SUMX ( DimScope, DimScope[total_matches] * DimScope[score_pct] ), 100 * [Partidas Declaradas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000065
+
+	measure 'Cobertura de Jogadores Declarada %' = DIVIDE ( SUMX ( DimScope, DimScope[total_matches] * DimScope[player_stats_pct] ), 100 * [Partidas Declaradas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000066
+
+	measure 'Escopos com Ranking de Jogadores' = CALCULATE ( [Escopos], DimScope[player_ranking_eligible] = TRUE () )
+		formatString: 0
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000067
+
+	column Placeholder
+		dataType: string
+		isHidden
+		lineageTag: 90000000-0000-0000-0000-000000000037
+		summarizeBy: none
+		sourceColumn: Placeholder
+
+	partition Medidas = m
+		mode: import
+		source = #table(type table [Placeholder = text], {{"Medidas"}})
+
+	annotation PBI_ResultType = Table

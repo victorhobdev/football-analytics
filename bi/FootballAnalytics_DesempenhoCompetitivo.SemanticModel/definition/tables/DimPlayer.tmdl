@@ -1,0 +1,31 @@
+table DimPlayer
+	lineageTag: 80000000-0000-0000-0000-000000000001
+
+	column player_sk
+		dataType: string
+		lineageTag: 80000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: player_sk
+
+	column player_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 80000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: player_id
+
+	column Jogador
+		dataType: string
+		lineageTag: 80000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: player_name
+
+	partition DimPlayer = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\DimPlayer.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

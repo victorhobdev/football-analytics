@@ -12,7 +12,6 @@ import { GlobalFilterBar } from "@/shared/components/filters/GlobalFilterBar";
 import { PLATFORM_SEARCH_OPEN_EVENT } from "@/shared/components/navigation/platform-search.events";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import {
-  buildAnalyticsPath,
   buildCoachesPath,
   buildHeadToHeadPath,
   buildMarketPath,
@@ -278,7 +277,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const isCanonicalSeasonRoute =
     isCanonicalCompetitionSeasonRoute(pathname) || isWorldCupEditionRoute(pathname);
   const surfaceContentWidthClassName = isCanonicalSeasonRoute ? "max-w-[95rem]" : "max-w-7xl";
-  const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute;
+  const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute && pathname !== "/analises";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
@@ -313,7 +312,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
     { href: "/", icon: "analytics" as const, label: "Início" },
     { href: "/copa-do-mundo", icon: "worldCup" as const, label: "Copa do Mundo" },
     { href: "/competitions", icon: "competition" as const, label: "Competições" },
-    { href: buildRankingsHubPath(sharedFilters), icon: "analytics" as const, label: "Rankings" },
+    { href: buildRankingsHubPath(sharedFilters), icon: "analytics" as const, label: "Análises" },
     { href: buildPlayersPath(sharedFilters), icon: "player" as const, label: "Jogadores" },
     { href: buildTeamsPath(sharedFilters), icon: "team" as const, label: "Times" },
   ] as const;
@@ -321,7 +320,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const topNavLinks = [
     { href: "/copa-do-mundo", label: "Copa do Mundo" },
     { href: "/competitions", label: "Competições" },
-    { href: buildRankingsHubPath(sharedFilters), label: "Rankings" },
+    { href: buildRankingsHubPath(sharedFilters), label: "Análises" },
   ] as const;
   const secondaryPublicLinks = [
     {
@@ -329,12 +328,6 @@ export function PlatformShell({ children }: PlatformShellProps) {
       icon: "match" as const,
       label: "Comparativos",
       summary: "Clubes, jogadores e edições",
-    },
-    {
-      href: buildAnalyticsPath(sharedFilters),
-      icon: "analytics" as const,
-      label: "Análises",
-      summary: "OLAP, tendências e comparativos",
     },
     {
       href: buildMarketPath(sharedFilters),
@@ -667,7 +660,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
             }}
           >
             <ShellIcon icon="analytics" />
-            <span>Rankings</span>
+            <span>Análises</span>
           </Link>
         </div>
       </aside>

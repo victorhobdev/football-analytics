@@ -1,0 +1,111 @@
+table FactMatch
+	lineageTag: 20000000-0000-0000-0000-000000000001
+
+	column match_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: match_id
+
+	column scope_key
+		dataType: string
+		lineageTag: 20000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: scope_key
+
+	column provider
+		dataType: string
+		lineageTag: 20000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: provider
+
+	column competition_key
+		dataType: string
+		lineageTag: 20000000-0000-0000-0000-000000000005
+		summarizeBy: none
+		sourceColumn: competition_key
+
+	column season_label
+		dataType: string
+		lineageTag: 20000000-0000-0000-0000-000000000006
+		summarizeBy: none
+		sourceColumn: season_label
+
+	column match_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 20000000-0000-0000-0000-000000000007
+		summarizeBy: none
+		sourceColumn: match_date
+
+	column round_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000008
+		summarizeBy: none
+		sourceColumn: round_number
+
+	column home_team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000009
+		summarizeBy: none
+		sourceColumn: home_team_id
+
+	column away_team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000010
+		summarizeBy: none
+		sourceColumn: away_team_id
+
+	column home_goals
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000011
+		summarizeBy: sum
+		sourceColumn: home_goals
+
+	column away_goals
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000012
+		summarizeBy: sum
+		sourceColumn: away_goals
+
+	column total_goals
+		dataType: int64
+		formatString: 0
+		lineageTag: 20000000-0000-0000-0000-000000000013
+		summarizeBy: sum
+		sourceColumn: total_goals
+
+	column Resultado
+		dataType: string
+		lineageTag: 20000000-0000-0000-0000-000000000014
+		summarizeBy: none
+		sourceColumn: result
+
+	column score_valid
+		dataType: boolean
+		lineageTag: 20000000-0000-0000-0000-000000000015
+		summarizeBy: none
+		sourceColumn: score_valid
+
+	column updated_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 20000000-0000-0000-0000-000000000016
+		summarizeBy: none
+		sourceColumn: updated_at
+
+	partition FactMatch = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\FactMatch.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

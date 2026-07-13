@@ -390,15 +390,19 @@ export function buildMatchesPath(contextInput: SharedFilterQueryInput = {}): str
   return `/matches${buildFilterQueryString(contextInput)}`;
 }
 
+export function buildAnalysesPath(contextInput: SharedFilterQueryInput = {}): string {
+  return `/analises${buildFilterQueryString(contextInput)}`;
+}
+
 export function buildRankingsHubPath(contextInput: SharedFilterQueryInput = {}): string {
-  return `/rankings${buildFilterQueryString(contextInput)}`;
+  return buildAnalysesPath(contextInput);
 }
 
 export function buildRankingPath(
-  rankingType: string,
+  _rankingType: string,
   contextInput: SharedFilterQueryInput = {},
 ): string {
-  return `/rankings/${encodePathSegment(rankingType)}${buildFilterQueryString(contextInput)}`;
+  return buildAnalysesPath(contextInput);
 }
 
 export function buildHeadToHeadPath(
@@ -432,7 +436,7 @@ export function buildCoachesPath(contextInput: SharedFilterQueryInput = {}): str
 }
 
 export function buildAnalyticsPath(contextInput: SharedFilterQueryInput = {}): string {
-  return `/analytics${buildFilterQueryString(contextInput)}`;
+  return buildAnalysesPath(contextInput);
 }
 
 export function buildRetainedFilterQueryString(searchParams: Pick<URLSearchParams, "toString">): string {

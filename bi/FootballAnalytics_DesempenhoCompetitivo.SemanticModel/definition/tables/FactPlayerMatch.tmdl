@@ -1,0 +1,120 @@
+table FactPlayerMatch
+	lineageTag: 40000000-0000-0000-0000-000000000001
+
+	column player_match_id
+		dataType: string
+		lineageTag: 40000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: player_match_id
+
+	column match_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: match_id
+
+	column scope_key
+		dataType: string
+		lineageTag: 40000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: scope_key
+
+	column match_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 40000000-0000-0000-0000-000000000005
+		summarizeBy: none
+		sourceColumn: match_date
+
+	column team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000006
+		summarizeBy: none
+		sourceColumn: team_id
+
+	column team_sk
+		dataType: string
+		lineageTag: 40000000-0000-0000-0000-000000000016
+		summarizeBy: none
+		sourceColumn: team_sk
+
+	column player_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000007
+		summarizeBy: none
+		sourceColumn: player_id
+
+	column player_sk
+		dataType: string
+		lineageTag: 40000000-0000-0000-0000-000000000017
+		summarizeBy: none
+		sourceColumn: player_sk
+
+	column minutes_played
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000008
+		summarizeBy: sum
+		sourceColumn: minutes_played
+
+	column goals
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000009
+		summarizeBy: sum
+		sourceColumn: goals
+
+	column assists
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000010
+		summarizeBy: sum
+		sourceColumn: assists
+
+	column shots_total
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000011
+		summarizeBy: sum
+		sourceColumn: shots_total
+
+	column shots_on_goal
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000012
+		summarizeBy: sum
+		sourceColumn: shots_on_goal
+
+	column yellow_cards
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000013
+		summarizeBy: sum
+		sourceColumn: yellow_cards
+
+	column red_cards
+		dataType: double
+		formatString: 0
+		lineageTag: 40000000-0000-0000-0000-000000000014
+		summarizeBy: sum
+		sourceColumn: red_cards
+
+	column rating
+		dataType: double
+		formatString: 0.00
+		lineageTag: 40000000-0000-0000-0000-000000000015
+		summarizeBy: average
+		sourceColumn: rating
+
+	partition FactPlayerMatch = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\FactPlayerMatch.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

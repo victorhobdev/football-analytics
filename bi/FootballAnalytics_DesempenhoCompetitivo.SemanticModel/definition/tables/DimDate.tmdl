@@ -1,0 +1,40 @@
+table DimDate
+	lineageTag: 60000000-0000-0000-0000-000000000001
+	dataCategory: Time
+
+	column date_day
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 60000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: date_day
+
+	column Ano
+		dataType: int64
+		formatString: 0
+		lineageTag: 60000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: year
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 60000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: month
+
+	column month_name
+		dataType: string
+		lineageTag: 60000000-0000-0000-0000-000000000005
+		summarizeBy: none
+		sourceColumn: month_name
+
+	partition DimDate = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\DimDate.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

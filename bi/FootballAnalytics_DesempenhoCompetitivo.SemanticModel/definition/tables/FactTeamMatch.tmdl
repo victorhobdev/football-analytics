@@ -1,0 +1,133 @@
+table FactTeamMatch
+	lineageTag: 30000000-0000-0000-0000-000000000001
+
+	column match_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: match_id
+
+	column scope_key
+		dataType: string
+		lineageTag: 30000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: scope_key
+
+	column match_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 30000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: match_date
+
+	column round_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000005
+		summarizeBy: none
+		sourceColumn: round_number
+
+	column team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000006
+		summarizeBy: none
+		sourceColumn: team_id
+
+	column team_sk
+		dataType: string
+		lineageTag: 30000000-0000-0000-0000-000000000018
+		summarizeBy: none
+		sourceColumn: team_sk
+
+	column opponent_team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000007
+		summarizeBy: none
+		sourceColumn: opponent_team_id
+
+	column opponent_team_sk
+		dataType: string
+		lineageTag: 30000000-0000-0000-0000-000000000019
+		summarizeBy: none
+		sourceColumn: opponent_team_sk
+
+	column venue
+		dataType: string
+		lineageTag: 30000000-0000-0000-0000-000000000008
+		summarizeBy: none
+		sourceColumn: venue
+
+	column goals_for
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000009
+		summarizeBy: sum
+		sourceColumn: goals_for
+
+	column goals_against
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000010
+		summarizeBy: sum
+		sourceColumn: goals_against
+
+	column result
+		dataType: string
+		lineageTag: 30000000-0000-0000-0000-000000000011
+		summarizeBy: none
+		sourceColumn: result
+
+	column points
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000012
+		summarizeBy: sum
+		sourceColumn: points
+
+	column ball_possession
+		dataType: double
+		formatString: 0.0
+		lineageTag: 30000000-0000-0000-0000-000000000013
+		summarizeBy: average
+		sourceColumn: ball_possession
+
+	column passes_pct
+		dataType: double
+		formatString: 0.0
+		lineageTag: 30000000-0000-0000-0000-000000000014
+		summarizeBy: average
+		sourceColumn: passes_pct
+
+	column total_shots
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000015
+		summarizeBy: sum
+		sourceColumn: total_shots
+
+	column shots_on_goal
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000016
+		summarizeBy: sum
+		sourceColumn: shots_on_goal
+
+	column passes_accurate
+		dataType: int64
+		formatString: 0
+		lineageTag: 30000000-0000-0000-0000-000000000017
+		summarizeBy: sum
+		sourceColumn: passes_accurate
+
+	partition FactTeamMatch = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\FactTeamMatch.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

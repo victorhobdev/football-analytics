@@ -1,0 +1,109 @@
+// Espelho legível das medidas do modelo semântico.
+// A fonte executável está em SemanticModel/definition/tables/Medidas.tmdl.
+
+Partidas = DISTINCTCOUNT ( FactMatch[match_id] )
+Jogos do Time = COUNTROWS ( FactTeamMatch )
+Times = DISTINCTCOUNT ( FactTeamMatch[team_sk] )
+Gols Totais = SUM ( FactMatch[total_goals] )
+
+Vitórias = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Vitória" )
+Empates = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Empate" )
+Derrotas = CALCULATE ( [Jogos do Time], FactTeamMatch[result] = "Derrota" )
+Pontos = SUM ( FactTeamMatch[points] )
+PPG = DIVIDE ( [Pontos], [Jogos do Time] )
+Aproveitamento % = DIVIDE ( [Pontos], 3 * [Jogos do Time] )
+Gols Pró = SUM ( FactTeamMatch[goals_for] )
+Gols Contra = SUM ( FactTeamMatch[goals_against] )
+Saldo de Gols = [Gols Pró] - [Gols Contra]
+Taxa de Vitória % = DIVIDE ( [Vitórias], [Jogos do Time] )
+PPG Médio do Recorte = CALCULATE ( [PPG], REMOVEFILTERS ( DimTeam ) )
+Delta PPG vs Recorte = [PPG] - [PPG Médio do Recorte]
+Percentil PPG =
+VAR Atual = [PPG]
+VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), NOT ISBLANK ( CALCULATE ( [PPG] ) ) )
+RETURN DIVIDE ( COUNTROWS ( FILTER ( TimesDoRecorte, CALCULATE ( [PPG] ) <= Atual ) ) - 1, COUNTROWS ( TimesDoRecorte ) - 1 )
+PPG Últimos 5 =
+VAR JogosRecentes =
+    TOPN (
+        5,
+        SUMMARIZE ( FactTeamMatch, FactTeamMatch[match_id], FactTeamMatch[match_date] ),
+        FactTeamMatch[match_date], DESC,
+        FactTeamMatch[match_id], DESC
+    )
+RETURN
+    CALCULATE (
+        [PPG],
+        TREATAS ( SELECTCOLUMNS ( JogosRecentes, "match_id", FactTeamMatch[match_id] ), FactTeamMatch[match_id] )
+    )
+Delta Forma 5 Jogos = [PPG Últimos 5] - [PPG]
+
+Gols por Partida = DIVIDE ( [Gols Totais], [Partidas] )
+Vitórias Mandante = CALCULATE ( [Partidas], FactMatch[Resultado] = "Home Win" )
+Vitórias Visitante = CALCULATE ( [Partidas], FactMatch[Resultado] = "Away Win" )
+Empates da Competição = CALCULATE ( [Partidas], FactMatch[Resultado] = "Draw" )
+Taxa Vitória Mandante % = DIVIDE ( [Vitórias Mandante], [Partidas] )
+Taxa Vitória Visitante % = DIVIDE ( [Vitórias Visitante], [Partidas] )
+Taxa de Empates % = DIVIDE ( [Empates da Competição], [Partidas] )
+
+PPG Casa = CALCULATE ( [PPG], FactTeamMatch[venue] = "Casa" )
+PPG Fora = CALCULATE ( [PPG], FactTeamMatch[venue] = "Fora" )
+Delta de Mando = [PPG Casa] - [PPG Fora]
+Delta de Mando (20+ jogos) = IF ( [Jogos do Time] >= 20, [Delta de Mando] )
+
+Posse Média % = AVERAGE ( FactTeamMatch[ball_possession] ) / 100
+Precisão de Passe % = AVERAGE ( FactTeamMatch[passes_pct] ) / 100
+Finalizações do Time = SUM ( FactTeamMatch[total_shots] )
+Finalizações no Alvo do Time = SUM ( FactTeamMatch[shots_on_goal] )
+Gols por Jogo do Time = DIVIDE ( [Gols Pró], [Jogos do Time] )
+Gols em Jogos com Estatísticas =
+SUMX ( FILTER ( FactTeamMatch, NOT ISBLANK ( FactTeamMatch[total_shots] ) ), FactTeamMatch[goals_for] )
+Conversão de Finalizações % =
+VAR GolsCobertos = [Gols em Jogos com Estatísticas]
+VAR Tentativas = [Finalizações do Time]
+RETURN
+    IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= GolsCobertos, DIVIDE ( GolsCobertos, Tentativas ) )
+Precisão de Finalização % =
+VAR NoAlvo = [Finalizações no Alvo do Time]
+VAR Tentativas = [Finalizações do Time]
+RETURN
+    IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= NoAlvo, DIVIDE ( NoAlvo, Tentativas ) )
+Cobertura Estatísticas de Time % = DIVIDE ( COUNT ( FactTeamMatch[ball_possession] ), [Jogos do Time] )
+
+Pontos Acumulados =
+VAR CurrentDate = MAX ( DimDate[date_day] )
+RETURN
+    CALCULATE (
+        [Pontos],
+        FILTER ( ALLSELECTED ( DimDate[date_day] ), DimDate[date_day] <= CurrentDate )
+    )
+
+Partidas sem Placar = COUNTROWS ( FILTER ( FactMatch, NOT FactMatch[score_valid] ) )
+Cobertura de Placar % = DIVIDE ( [Partidas] - [Partidas sem Placar], [Partidas] )
+Status do Recorte = IF ( [Cobertura de Placar %] >= 0.95, "Cobertura adequada", "Cobertura insuficiente" )
+
+Gols = SUM ( FactPlayerMatch[goals] )
+Assistências = SUM ( FactPlayerMatch[assists] )
+Minutos = SUM ( FactPlayerMatch[minutes_played] )
+Finalizações = SUM ( FactPlayerMatch[shots_total] )
+Finalizações no Alvo = SUM ( FactPlayerMatch[shots_on_goal] )
+Nota Média = AVERAGE ( FactPlayerMatch[rating] )
+Cartões Amarelos = SUM ( FactPlayerMatch[yellow_cards] )
+Cartões Vermelhos = SUM ( FactPlayerMatch[red_cards] )
+Cartões Totais = [Cartões Amarelos] + [Cartões Vermelhos]
+Jogos do Jogador = DISTINCTCOUNT ( FactPlayerMatch[match_id] )
+Participações em Gol = [Gols] + [Assistências]
+Gols por 90 (900+ min) = IF ( [Minutos] >= 900, DIVIDE ( 90 * [Gols], [Minutos] ) )
+Participações por 90 (900+ min) = IF ( [Minutos] >= 900, DIVIDE ( 90 * [Participações em Gol], [Minutos] ) )
+Precisão de Finalização do Jogador % = DIVIDE ( [Finalizações no Alvo], [Finalizações] )
+Participação nos Gols do Time % = IF ( HASONEVALUE ( DimTeam[team_sk] ), DIVIDE ( [Gols], [Gols Pró] ) )
+Cobertura de Minutos % = DIVIDE ( COUNT ( FactPlayerMatch[minutes_played] ), COUNTROWS ( FactPlayerMatch ) )
+Cobertura de Nota % = DIVIDE ( COUNT ( FactPlayerMatch[rating] ), COUNTROWS ( FactPlayerMatch ) )
+Última Atualização = MAX ( FactMatch[updated_at] )
+Escopos = DISTINCTCOUNT ( DimScope[scope_key] )
+Partidas Declaradas = SUM ( DimScope[total_matches] )
+Cobertura de Placar Declarada % =
+DIVIDE ( SUMX ( DimScope, DimScope[total_matches] * DimScope[score_pct] ), 100 * [Partidas Declaradas] )
+Cobertura de Jogadores Declarada % =
+DIVIDE ( SUMX ( DimScope, DimScope[total_matches] * DimScope[player_stats_pct] ), 100 * [Partidas Declaradas] )
+Escopos com Ranking de Jogadores =
+CALCULATE ( [Escopos], DimScope[player_ranking_eligible] = TRUE () )

@@ -1,0 +1,31 @@
+table DimTeam
+	lineageTag: 70000000-0000-0000-0000-000000000001
+
+	column team_sk
+		dataType: string
+		lineageTag: 70000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: team_sk
+
+	column team_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 70000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: team_id
+
+	column Time
+		dataType: string
+		lineageTag: 70000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: team_name
+
+	partition DimTeam = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\DimTeam.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

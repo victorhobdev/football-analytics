@@ -1,0 +1,75 @@
+table DimScope
+	lineageTag: 50000000-0000-0000-0000-000000000001
+
+	column scope_key
+		dataType: string
+		lineageTag: 50000000-0000-0000-0000-000000000002
+		summarizeBy: none
+		sourceColumn: scope_key
+
+	column provider
+		dataType: string
+		lineageTag: 50000000-0000-0000-0000-000000000003
+		summarizeBy: none
+		sourceColumn: provider
+
+	column competition
+		dataType: string
+		lineageTag: 50000000-0000-0000-0000-000000000004
+		summarizeBy: none
+		sourceColumn: competition
+
+	column competition_key
+		dataType: string
+		lineageTag: 50000000-0000-0000-0000-000000000005
+		summarizeBy: none
+		sourceColumn: competition_key
+
+	column season_label
+		dataType: string
+		lineageTag: 50000000-0000-0000-0000-000000000006
+		summarizeBy: none
+		sourceColumn: season_label
+
+	column total_matches
+		dataType: int64
+		formatString: 0
+		lineageTag: 50000000-0000-0000-0000-000000000007
+		summarizeBy: sum
+		sourceColumn: total_matches
+
+	column score_pct
+		dataType: double
+		formatString: 0.00
+		lineageTag: 50000000-0000-0000-0000-000000000008
+		summarizeBy: average
+		sourceColumn: score_pct
+
+	column player_stats_pct
+		dataType: double
+		formatString: 0.00
+		lineageTag: 50000000-0000-0000-0000-000000000009
+		summarizeBy: average
+		sourceColumn: player_stats_pct
+
+	column team_ranking_eligible
+		dataType: boolean
+		lineageTag: 50000000-0000-0000-0000-000000000010
+		summarizeBy: none
+		sourceColumn: team_ranking_eligible
+
+	column player_ranking_eligible
+		dataType: boolean
+		lineageTag: 50000000-0000-0000-0000-000000000011
+		summarizeBy: none
+		sourceColumn: player_ranking_eligible
+
+	partition DimScope = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\DimScope.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table

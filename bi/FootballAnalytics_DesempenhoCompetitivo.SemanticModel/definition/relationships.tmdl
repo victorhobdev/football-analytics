@@ -1,0 +1,38 @@
+relationship 10000000-0000-0000-0000-000000000001
+	fromColumn: FactMatch.scope_key
+	toColumn: DimScope.scope_key
+
+relationship 10000000-0000-0000-0000-000000000002
+	fromColumn: FactTeamMatch.scope_key
+	toColumn: DimScope.scope_key
+
+relationship 10000000-0000-0000-0000-000000000003
+	fromColumn: FactPlayerMatch.scope_key
+	toColumn: DimScope.scope_key
+
+relationship 10000000-0000-0000-0000-000000000004
+	joinOnDateBehavior: datePartOnly
+	fromColumn: FactMatch.match_date
+	toColumn: DimDate.date_day
+
+relationship 10000000-0000-0000-0000-000000000005
+	joinOnDateBehavior: datePartOnly
+	fromColumn: FactTeamMatch.match_date
+	toColumn: DimDate.date_day
+
+relationship 10000000-0000-0000-0000-000000000006
+	joinOnDateBehavior: datePartOnly
+	fromColumn: FactPlayerMatch.match_date
+	toColumn: DimDate.date_day
+
+relationship 10000000-0000-0000-0000-000000000007
+	fromColumn: FactTeamMatch.team_sk
+	toColumn: DimTeam.team_sk
+
+relationship 10000000-0000-0000-0000-000000000008
+	fromColumn: FactPlayerMatch.team_sk
+	toColumn: DimTeam.team_sk
+
+relationship 10000000-0000-0000-0000-000000000009
+	fromColumn: FactPlayerMatch.player_sk
+	toColumn: DimPlayer.player_sk

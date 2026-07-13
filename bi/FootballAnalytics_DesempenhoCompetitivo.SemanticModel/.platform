@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "FootballAnalytics_DesempenhoCompetitivo"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "5179f98e-66a0-413b-9af6-94e54affcc08"
+  }
+}

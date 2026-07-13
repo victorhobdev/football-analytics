@@ -41,9 +41,9 @@ const PRODUCT_ENTRIES = [
     description: "Compare atletas, encontre destaques e identifique impacto real em campo.",
   },
   {
-    href: "/rankings",
-    title: "Rankings",
-    description: "Monitore líderes por métrica e descubra oportunidades com leitura objetiva.",
+    href: "/analises",
+    title: "Análises",
+    description: "Explore rankings, tendências e comparativos no relatório Power BI.",
   },
 ] as const;
 
