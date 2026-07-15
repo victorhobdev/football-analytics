@@ -38,6 +38,32 @@ jobs:
           python-version: "3.12"
       - name: Install dbt
         run: python -m pip install dbt-core==1.8.8 dbt-postgres==1.8.2
+      - name: Check tracked sensitive configuration
+        run: |
+          python - <<'PY'
+          import re
+          import subprocess
+          from pathlib import Path
+
+          tracked = subprocess.run(
+              ["git", "ls-files"], check=True, capture_output=True, text=True
+          ).stdout.splitlines()
+          sensitive = []
+          for path in tracked:
+              name = Path(path).name.lower()
+              if name in {".env", ".env.local", ".env.production", "credentials.json"}:
+                  sensitive.append(path)
+              if name.startswith(".env.") and name != ".env.example":
+                  sensitive.append(path)
+          if sensitive:
+              raise SystemExit("sensitive configuration is tracked: " + ", ".join(sorted(set(sensitive))))
+
+          profile = Path("platform/dbt/profiles.yml").read_text(encoding="utf-8")
+          for field in ("host", "port", "user", "pass", "dbname", "schema", "threads"):
+              pattern = r"^\s*" + re.escape(field) + r":\s*\{\{\s*env_var\("
+              if not re.search(pattern, profile, re.MULTILINE):
+                  raise SystemExit(f"dbt profile field is not env-backed: {field}")
+          PY
       - name: Parse dbt project
         run: dbt parse --project-dir platform/dbt --profiles-dir platform/dbt --no-partial-parse
 
@@ -67,3 +93,14 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Typecheck frontend
         run: pnpm typecheck
+      - name: Build frontend
+        run: pnpm build
+
+  bi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run BI structural tests
+        run: python -m unittest -v bi.scripts.test_validate_artifacts
+      - name: Validate BI artifacts
+        run: python bi/scripts/validate_artifacts.py bi
