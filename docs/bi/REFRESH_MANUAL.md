@@ -7,11 +7,11 @@
 5. Rode `fact_team_match_validation.sql`, `reconciliation_team_metrics.sql` e `reconciliation_player_metrics.sql` com os mesmos filtros do relatório.
 6. Abra `bi/FootballAnalytics_DesempenhoCompetitivo.pbip` no Power BI Desktop.
 7. Atualize sequencialmente: `DimScope`, `DimDate`, `DimTeam`, `DimPlayer`, `FactMatch`, `FactTeamMatch` e `FactPlayerMatch`. Salve após concluir. O refresh simultâneo produziu dependência cíclica no ambiente validado; a sequência individual foi concluída com sucesso.
-8. Valide `sportmonks|la_liga|2024_25` com `reconciliation_laliga_2024_25.sql` e compare SQL com os cards e matrizes DAX. No Desktop, confira o bookmark `Exemplo - La Liga 2024-25`, os layouts de telefone das seis páginas públicas, tooltips, ordem de tabulação, textos alternativos e o drill-through por `Time` e `Jogador` nas duas páginas de detalhe.
-9. Considere as cinco imagens em `bi/screenshots` como evidência parcial: elas cobrem `Panorama`, `Times`, `Evolução e mando`, `Jogadores` e `Cobertura`; a página `Resumo executivo` não tem screenshot versionado.
+8. Valide `sportmonks|la_liga|2024_25` com `reconciliation_laliga_2024_25.sql` e compare SQL com os cards e matrizes DAX. No Desktop, confira o bookmark `Exemplo - La Liga 2024-25`, os layouts de telefone das cinco páginas públicas, tooltips, ordem de tabulação, textos alternativos, o diagnóstico oculto e o drill-through por `Time` e `Jogador` nas duas páginas de detalhe.
+9. Considere as imagens em `bi/screenshots` somente como baseline do layout anterior até substituí-las por capturas das cinco páginas públicas reformuladas.
 10. Repita as medições do Performance Analyzer e do DAX Studio conforme [`PERFORMANCE_E_ARQUITETURA.md`](PERFORMANCE_E_ARQUITETURA.md). Só aplique otimização quando houver regressão medida.
 11. Salve o PBIP e exporte `bi/FootballAnalytics_DesempenhoCompetitivo.pbix`; use esse PBIX para upload/substituição no Power BI Service. O upload inicial foi concluído em `Meu workspace` em 2026-07-12.
 12. Autentique a conta proprietária no navegador, gere ou atualize **Publicar na Web**, abra a URL em janela anônima e confira o embed em `/analises`.
 13. Registre a data, URL pública e reconciliação nesta documentação.
 
-O refresh é manual neste MVP. Não configure gateway, DirectQuery, RLS ou credenciais do PostgreSQL no Power BI Service. **Estado atual:** PBIP e PBIX estão válidos; upload, iframe, integração no frontend e validação anônima foram concluídos.
+O refresh é manual neste MVP. Não configure gateway, DirectQuery, RLS ou credenciais do PostgreSQL no Power BI Service. **Estado atual em 2026-07-15:** PBIP, snapshots e validação estrutural estão verdes; o PBIX distribuído ainda representa a publicação anterior. Refresh visual, novo PBIX, upload e validação anônima aguardam autenticação da conta proprietária.

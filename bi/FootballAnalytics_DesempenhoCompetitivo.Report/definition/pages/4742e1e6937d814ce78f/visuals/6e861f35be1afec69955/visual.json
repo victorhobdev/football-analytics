@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "O que aconteceu · onde · por que importa · ação possível · confiança",
+                    "value": "Contexto, destaques e caminhos para aprofundar a análise",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -101,7 +101,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'O que aconteceu · onde · por que importa · ação possível · confiança'"
+                  "Value": "'Contexto, destaques e caminhos para aprofundar a análise'"
                 }
               }
             }

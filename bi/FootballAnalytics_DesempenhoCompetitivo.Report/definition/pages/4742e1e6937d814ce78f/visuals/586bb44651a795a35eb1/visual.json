@@ -1,34 +1,38 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "fdfce9b0beac549e3c5a",
+  "name": "586bb44651a795a35eb1",
   "position": {
-    "x": 20,
-    "y": 260,
-    "z": 40,
-    "height": 440,
-    "width": 790,
-    "tabOrder": 40
+    "x": 795,
+    "y": 364,
+    "z": 51,
+    "height": 336,
+    "width": 465,
+    "tabOrder": 51
   },
   "visual": {
-    "visualType": "tableEx",
+    "visualType": "clusteredColumnChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimTeam"
+                      "Entity": "FactMatch"
                     }
                   },
-                  "Property": "Time"
+                  "Property": "Resultado"
                 }
               },
-              "queryRef": "DimTeam.Time",
-              "nativeQueryRef": "Time"
-            },
+              "queryRef": "FactMatch.Resultado",
+              "nativeQueryRef": "Resultado"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
             {
               "field": {
                 "Measure": {
@@ -37,67 +41,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Jogos do Time"
+                  "Property": "Partidas"
                 }
               },
-              "queryRef": "Medidas.Jogos do Time",
-              "nativeQueryRef": "Jogos do Time"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Pontos"
-                }
-              },
-              "queryRef": "Medidas.Pontos",
-              "nativeQueryRef": "Pontos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "PPG"
-                }
-              },
-              "queryRef": "Medidas.PPG",
-              "nativeQueryRef": "PPG"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Gols por Jogo do Time"
-                }
-              },
-              "queryRef": "Medidas.Gols por Jogo do Time",
-              "nativeQueryRef": "Gols por Jogo do Time"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Aproveitamento %"
-                }
-              },
-              "queryRef": "Medidas.Aproveitamento %",
-              "nativeQueryRef": "Aproveitamento %"
+              "queryRef": "Medidas.Partidas",
+              "nativeQueryRef": "Partidas"
             }
           ]
         }
@@ -112,7 +60,7 @@
                     "Entity": "Medidas"
                   }
                 },
-                "Property": "Pontos"
+                "Property": "Partidas"
               }
             },
             "direction": "Descending"
@@ -122,59 +70,21 @@
       }
     },
     "objects": {
-      "columnHeaders": [
+      "categoryAxis": [
         {
           "properties": {
-            "columnAdjustment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'growToFit'"
-                }
-              }
-            },
-            "autoSizeColumnWidth": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "fontColor": {
+            "labelColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#003526'"
+                      "Value": "'#57657A'"
                     }
                   }
                 }
               }
             },
-            "backColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F4F8F5'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontFamily": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Segoe UI Semibold'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "values": [
-        {
-          "properties": {
-            "fontColorPrimary": {
+            "titleColor": {
               "solid": {
                 "color": {
                   "expr": {
@@ -185,35 +95,42 @@
                 }
               }
             },
-            "backColorPrimary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            },
-            "backColorSecondary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F8FBF9'"
-                    }
-                  }
+            "gridlineStyle": {
+              "expr": {
+                "Literal": {
+                  "Value": "'dotted'"
                 }
               }
             }
           }
         }
       ],
-      "grid": [
+      "valueAxis": [
         {
           "properties": {
-            "gridColor": {
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#57657A'"
+                    }
+                  }
+                }
+              }
+            },
+            "titleColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#111C2D'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineColor": {
               "solid": {
                 "color": {
                   "expr": {
@@ -224,36 +141,42 @@
                 }
               }
             },
-            "rowPadding": {
+            "gridlineStyle": {
               "expr": {
                 "Literal": {
-                  "Value": "7D"
+                  "Value": "'dotted'"
                 }
               }
             }
           }
         }
       ],
-      "total": [
+      "legend": [
         {
           "properties": {
-            "fontColor": {
+            "labelColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#003526'"
+                      "Value": "'#57657A'"
                     }
                   }
                 }
               }
-            },
-            "backColor": {
+            }
+          }
+        }
+      ],
+      "dataPoint": [
+        {
+          "properties": {
+            "defaultColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#EAF5EF'"
+                      "Value": "'#00513B'"
                     }
                   }
                 }
@@ -277,7 +200,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Ranking no recorte selecionado'"
+                  "Value": "'Como as partidas terminaram'"
                 }
               }
             },
@@ -431,7 +354,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Ranking no recorte selecionado'"
+                  "Value": "'Como as partidas terminaram'"
                 }
               }
             }

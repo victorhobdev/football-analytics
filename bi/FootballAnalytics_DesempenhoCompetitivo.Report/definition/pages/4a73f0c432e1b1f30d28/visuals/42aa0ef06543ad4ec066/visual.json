@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Projeto inteiro · filtre competição, temporada e período",
+                    "value": "Volume, resultados e evolução no recorte selecionado",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -101,7 +101,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Projeto inteiro · filtre competição, temporada e período'"
+                  "Value": "'Volume, resultados e evolução no recorte selecionado'"
                 }
               }
             }

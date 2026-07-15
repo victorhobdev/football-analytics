@@ -84,11 +84,46 @@ def _validate_pbip(bi_root: Path) -> list[str]:
     for json_path in sorted(report_definition_root.rglob("*.json")):
         _load_json(json_path)
 
+    public_pages = 0
+    diagnostic_pages = 0
+    for page_path in page_files:
+        page = _load_json(page_path)
+        if not isinstance(page, dict):
+            raise ValidationError(f"PBIR page root must be an object: {page_path}")
+        display_name = page.get("displayName")
+        hidden = page.get("visibility") == "HiddenInViewMode"
+        if display_name == "Diagnóstico de dados":
+            diagnostic_pages += 1
+            if not hidden:
+                raise ValidationError(f"diagnostic page must be hidden: {page_path}")
+        if hidden:
+            continue
+        public_pages += 1
+        page_visuals = sorted((page_path.parent / "visuals").glob("*/visual.json"))
+        if len(page_visuals) > 12:
+            raise ValidationError(f"public page exceeds 12 visuals: {page_path}")
+        if any('"Property": "provider"' in path.read_text(encoding="utf-8") for path in page_visuals):
+            raise ValidationError(f"public page exposes provider: {page_path}")
+        for visual_path in page_visuals:
+            visual = _load_json(visual_path)
+            if not isinstance(visual, dict):
+                raise ValidationError(f"PBIR visual root must be an object: {visual_path}")
+            if visual.get("position", {}).get("y") != 12 and not (visual_path.parent / "mobile.json").is_file():
+                raise ValidationError(f"public visual is missing its mobile layout: {visual_path}")
+
+    if diagnostic_pages != 1:
+        raise ValidationError("exactly one hidden diagnostic page is required")
+
+    dim_scope = (semantic_definition / "tables" / "DimScope.tmdl").read_text(encoding="utf-8")
+    if "column is_preferred_public_scope" not in dim_scope:
+        raise ValidationError("DimScope is missing the preferred public scope flag")
+
     return [
         "PBIP JSON valid",
         f"PBIR pages valid ({len(page_files)} pages)",
         f"PBIR visuals valid ({len(visual_files)} visuals)",
         f"TMDL structure valid ({len(table_files)} tables, {relationship_count} relationships)",
+        f"Public BI contract valid ({public_pages} public pages, provider hidden)",
     ]
 
 

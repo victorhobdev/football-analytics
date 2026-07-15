@@ -1,5 +1,18 @@
 # Registro de validação SQL x DAX
 
+## Exportação pública de 2026-07-15
+
+| Filtro | Verificação SQL/Parquet | Resultado | DAX |
+| --- | ---: | --- | --- |
+| escopos preferenciais | 861 | PASS | pendente de refresh autenticado |
+| projeto público | 245.603 partidas | PASS | pendente de refresh autenticado |
+| projeto público | 491.198 linhas `FactTeamMatch` | PASS | pendente de refresh autenticado |
+| projeto público | 607.096 linhas `FactPlayerMatch` | PASS | pendente de refresh autenticado |
+| `sportmonks|la_liga|2024_25` | 380 partidas | PASS | pendente de refresh autenticado |
+| `sportmonks|brasileirao_a|2025` | 380 partidas | PASS | pendente de refresh autenticado |
+
+O bloco abaixo preserva a última reconciliação SQL x DAX concluída no Desktop e não deve ser confundido com o snapshot público novo.
+
 Copie esta tabela a cada publicacao. A comparacao so e valida quando SQL e Power BI usam exatamente os mesmos filtros de `provider`, `competition_key`, `season_label`, data e time.
 
 | Data | Filtro | KPI | SQL | DAX | Diferença | Resultado |

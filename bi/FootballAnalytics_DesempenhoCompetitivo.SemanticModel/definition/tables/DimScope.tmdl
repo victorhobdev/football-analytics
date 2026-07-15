@@ -64,6 +64,13 @@ table DimScope
 		summarizeBy: none
 		sourceColumn: player_ranking_eligible
 
+	column is_preferred_public_scope
+		dataType: boolean
+		isHidden
+		lineageTag: 50000000-0000-0000-0000-000000000012
+		summarizeBy: none
+		sourceColumn: is_preferred_public_scope
+
 	partition DimScope = m
 		mode: import
 		source =

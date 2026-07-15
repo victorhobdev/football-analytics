@@ -7,18 +7,18 @@ Este diretório contém o relatório analítico público do projeto. O modelo co
 - Desenvolvimento versionável: abra `FootballAnalytics_DesempenhoCompetitivo.pbip` no Power BI Desktop.
 - Distribuição: abra `FootballAnalytics_DesempenhoCompetitivo.pbix` no Power BI Desktop.
 
-O relatório foi aberto novamente no Power BI Desktop 2.155.756.0 e consultado com o cache salvo. O modelo carregado retornou 259.872 partidas, 519.734 linhas time-partida e 607.096 linhas jogador-partida.
+O snapshot público exportado em 2026-07-15 contém 245.603 partidas, 491.198 linhas time-partida e 607.096 linhas jogador-partida. Ele escolhe um único provedor por competição e temporada; os 1.004 escopos brutos continuam disponíveis em `DimScope` para diagnóstico. O refresh visual no Desktop e a substituição no serviço ainda dependem da autenticação da conta proprietária.
 
 ## Conteúdo
 
-- `FootballAnalytics_DesempenhoCompetitivo.Report`: oito páginas em PBIR, sendo seis públicas, duas de drill-through e 94 visuais.
+- `FootballAnalytics_DesempenhoCompetitivo.Report`: oito páginas em PBIR, sendo cinco públicas, uma página interna de diagnóstico, duas de drill-through e 85 visuais.
 - `FootballAnalytics_DesempenhoCompetitivo.SemanticModel`: modelo TMDL com oito tabelas, nove relacionamentos e 73 medidas.
-- `screenshots`: cinco evidências renderizadas de seis páginas públicas (`Panorama`, `Times`, `Evolução e mando`, `Jogadores` e `Cobertura`); `Resumo executivo` não possui screenshot versionado.
+- `screenshots`: evidências do layout anterior, mantidas somente como baseline de comparação até a nova captura no Desktop.
 - `scripts/export_powerbi_snapshots.py`: exporta os marts para Parquet local.
 - `data/manifest.json`: contagens, tamanhos e hashes do snapshot validado.
 - `validation`: SQL de cobertura e reconciliação.
 
-As páginas cobrem resumo executivo, panorama, benchmark de times, forma recente e mando, eficiência de jogadores por 90 minutos e uma matriz explícita de cobertura. Times e jogadores possuem drill-through e os visuais relevantes têm layout móvel próprio. Conversão de finalizações só é exibida com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos. As evidências de Performance Analyzer, DAX Studio, acessibilidade e escolha entre Import, DirectQuery e Direct Lake estão em [`docs/bi/PERFORMANCE_E_ARQUITETURA.md`](../docs/bi/PERFORMANCE_E_ARQUITETURA.md).
+As páginas públicas cobrem resumo executivo, panorama, times, evolução/mando e jogadores. A matriz de cobertura foi renomeada para `Diagnóstico de dados` e ocultada da navegação pública. Times e jogadores possuem drill-through e os visuais relevantes têm layout móvel próprio. Conversão de finalizações só é exibida com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos. As evidências de Performance Analyzer, DAX Studio, acessibilidade e escolha entre Import, DirectQuery e Direct Lake estão em [`docs/bi/PERFORMANCE_E_ARQUITETURA.md`](../docs/bi/PERFORMANCE_E_ARQUITETURA.md).
 
 ## Atualizar
 

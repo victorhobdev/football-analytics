@@ -119,12 +119,11 @@ Resumo - O que aconteceu =
 VAR Nome = [Time de Referência]
 VAR PPGTime = CALCULATE ( [PPG], TREATAS ( { Nome }, DimTeam[Time] ) )
 VAR Jogos = CALCULATE ( [Jogos do Time], TREATAS ( { Nome }, DimTeam[Time] ) )
-RETURN IF ( ISBLANK ( Nome ), "Selecione uma fonte, competição e temporada.", Nome & " · " & FORMAT ( PPGTime, "0.00" ) & " PPG · " & FORMAT ( Jogos, "0" ) & " jogos." )
+RETURN IF ( ISBLANK ( Nome ), "Selecione competição, temporada e time para revelar o destaque.", Nome & " · " & FORMAT ( PPGTime, "0.00" ) & " PPG · " & FORMAT ( Jogos, "0" ) & " jogos." )
 
 Resumo - Onde =
-"Fonte: " & SELECTEDVALUE ( DimScope[provider], "múltiplas" )
-    & " · Competição: " & SELECTEDVALUE ( DimScope[competition], "múltiplas" )
-    & " · Temporada: " & SELECTEDVALUE ( DimScope[season_label], "múltiplas" )
+"Competição: " & SELECTEDVALUE ( DimScope[competition], "selecione uma" )
+& " · Temporada: " & SELECTEDVALUE ( DimScope[season_label], "selecione uma" )
 
 Resumo - Por que importa =
 VAR Nome = [Time de Referência]

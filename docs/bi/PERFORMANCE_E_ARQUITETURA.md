@@ -24,11 +24,11 @@ O caso SQL separado apresentou uma melhoria mensurável de 5.453,303 ms para 3.1
 
 ## Recursos profissionais implementados
 
-- página **Resumo executivo** com acontecimento, localização, relevância, ação possível e confiança;
+- página **Resumo executivo** com contexto, quatro KPIs, destaque narrativo e dois caminhos de aprofundamento;
 - bookmark `Exemplo - La Liga 2024-25` para uma narrativa reproduzível;
 - tooltips analíticos nos gráficos principais;
-- texto alternativo e ordem de tabulação em todos os 94 visuais;
-- layouts móveis próprios nas seis páginas públicas;
+- texto alternativo e ordem de tabulação nos 85 visuais;
+- layouts móveis próprios nas cinco páginas públicas;
 - drill-through de time e jogador em duas páginas ocultas;
 - dicionário versionado das 73 medidas;
 - regras de suficiência: time de referência exige 10 jogos; conversão exige 95% de cobertura; métricas por 90 exigem 900 minutos.

@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Clique com o botão direito em um jogador para abrir o detalhe · a cobertura varia conforme a fonte",
+                    "value": "Produção total e por 90 minutos no contexto selecionado",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -101,7 +101,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Clique com o botão direito em um jogador para abrir o detalhe · a cobertura varia conforme a fonte'"
+                  "Value": "'Produção total e por 90 minutos no contexto selecionado'"
                 }
               }
             }

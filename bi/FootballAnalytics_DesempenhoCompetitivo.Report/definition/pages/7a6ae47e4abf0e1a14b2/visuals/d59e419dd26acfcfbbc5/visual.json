@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Selecione um time para leitura individual · múltiplos times formam o recorte agregado",
+                    "value": "Comparação descritiva; selecione um time para uma leitura individual",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -101,7 +101,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Selecione um time para leitura individual · múltiplos times formam o recorte agregado'"
+                  "Value": "'Comparação descritiva; selecione um time para uma leitura individual'"
                 }
               }
             }

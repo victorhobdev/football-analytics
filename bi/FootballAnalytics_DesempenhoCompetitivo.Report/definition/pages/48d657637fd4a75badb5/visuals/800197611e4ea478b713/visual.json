@@ -65,39 +65,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Cobertura de Minutos %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura de Minutos %",
-              "nativeQueryRef": "Cobertura de Minutos %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
                   "Property": "Nota Média"
                 }
               },
               "queryRef": "Medidas.Nota Média",
               "nativeQueryRef": "Nota Média"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura de Nota %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura de Nota %",
-              "nativeQueryRef": "Cobertura de Nota %"
             }
           ]
         }
@@ -154,6 +126,13 @@
                   "Value": "'Segoe UI Semibold'"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "32D"
+                }
+              }
             }
           },
           "selector": {
@@ -164,6 +143,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -265,7 +251,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gols, Assistências, Participações em Gol, Cobertura de Minutos %, Nota Média, Cobertura de Nota %'"
+                  "Value": "'Gols, Assistências, Participações em Gol, Nota Média'"
                 }
               }
             }

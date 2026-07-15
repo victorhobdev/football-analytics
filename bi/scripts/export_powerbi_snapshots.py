@@ -14,20 +14,50 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SNAPSHOT_DIR = Path(r"C:\Users\Public\football-analytics-bi-data")
 SNAPSHOT_DIR_ENV = "BI_SNAPSHOT_DIR"
 
+PREFERRED_SCOPES_CTE = """
+        preferred_scopes as (
+            select distinct on (competition_key, season_label)
+                   provider, competition_key, season_label
+            from mart.fact_matches
+            order by competition_key, season_label,
+                     case provider
+                         when 'sportmonks' then 1
+                         when 'dataset_brasileirao' then 2
+                         when 'transfermarkt' then 3
+                         when 'eloratings' then 4
+                         else 5
+                     end,
+                     provider
+        )
+"""
+
 QUERIES = {
-    "FactMatch": """
+    "FactMatch": f"""
+        with {PREFERRED_SCOPES_CTE}
         select match_id, concat_ws('|', provider, competition_key, season_label) scope_key,
                provider, competition_key, season_label, date_day match_date, round_number,
                home_team_id, away_team_id, home_goals, away_goals, total_goals, result,
                (home_goals is not null and away_goals is not null) score_valid,
                updated_at::timestamp without time zone updated_at
-        from mart.fact_matches
+        from mart.fact_matches fm
+        where exists (
+            select 1 from preferred_scopes ps
+            where ps.provider = fm.provider
+              and ps.competition_key = fm.competition_key
+              and ps.season_label = fm.season_label
+        )
     """,
-    "FactTeamMatch": """
-        with valid as (
-            select * from mart.fact_matches
+    "FactTeamMatch": f"""
+        with {PREFERRED_SCOPES_CTE}, valid as (
+            select fm.* from mart.fact_matches fm
             where home_goals is not null and away_goals is not null
               and home_team_id is not null and away_team_id is not null
+              and exists (
+                  select 1 from preferred_scopes ps
+                  where ps.provider = fm.provider
+                    and ps.competition_key = fm.competition_key
+                    and ps.season_label = fm.season_label
+              )
         ), rows as (
             select provider, match_id, concat_ws('|',provider,competition_key,season_label) scope_key,
                    date_day match_date, round_number, home_team_sk team_sk, home_team_id team_id,
@@ -55,7 +85,8 @@ QUERIES = {
         left join mart.stg_match_statistics s
           on r.provider = 'sportmonks' and s.fixture_id = r.match_id and s.team_id = r.team_id
     """,
-    "FactPlayerMatch": """
+    "FactPlayerMatch": f"""
+        with {PREFERRED_SCOPES_CTE}
         select fps.fixture_player_stat_id player_match_id, fps.match_id,
                concat_ws('|',fm.provider,fm.competition_key,fm.season_label) scope_key,
                fm.date_day match_date, fps.team_sk, fps.team_id, fps.player_sk, fps.player_id,
@@ -69,9 +100,15 @@ QUERIES = {
         from mart.fact_fixture_player_stats fps
         join mart.fact_matches fm on fm.match_id=fps.match_id and fm.provider=fps.provider
         where fm.home_goals is not null and fm.away_goals is not null
+          and exists (
+              select 1 from preferred_scopes ps
+              where ps.provider = fm.provider
+                and ps.competition_key = fm.competition_key
+                and ps.season_label = fm.season_label
+          )
     """,
-    "DimScope": """
-        with player_matches as (
+    "DimScope": f"""
+        with {PREFERRED_SCOPES_CTE}, player_matches as (
             select distinct provider,match_id from mart.fact_fixture_player_stats
         ), scopes as (
             select fm.provider,fm.competition_key,fm.season_label,count(*) total_matches,
@@ -81,14 +118,18 @@ QUERIES = {
             left join player_matches pm on pm.provider=fm.provider and pm.match_id=fm.match_id
             group by 1,2,3
         )
-        select concat_ws('|',provider,competition_key,season_label) scope_key, provider,
-               initcap(replace(competition_key,'_',' ')) competition, competition_key, season_label,
+        select concat_ws('|',s.provider,s.competition_key,s.season_label) scope_key, s.provider,
+               coalesce(c.competition_name, initcap(replace(s.competition_key,'_',' '))) competition,
+               s.competition_key, s.season_label,
                total_matches::bigint,
                round(100.0*scored_matches/nullif(total_matches,0),2)::double precision score_pct,
                round(100.0*player_matches/nullif(total_matches,0),2)::double precision player_stats_pct,
                scored_matches*100.0/nullif(total_matches,0)>=95 team_ranking_eligible,
-               player_matches*100.0/nullif(total_matches,0)>=95 player_ranking_eligible
-        from scopes
+               player_matches*100.0/nullif(total_matches,0)>=95 player_ranking_eligible,
+               ps.provider is not null is_preferred_public_scope
+        from scopes s
+        left join preferred_scopes ps using (provider, competition_key, season_label)
+        left join control.competitions c on c.competition_key = s.competition_key
     """,
     "DimDate": "select date_day, year::bigint, month::bigint, to_char(date_day,'YYYY-MM') month_name from mart.dim_date",
     "DimTeam": "select team_sk, team_id, team_name from mart.dim_team",

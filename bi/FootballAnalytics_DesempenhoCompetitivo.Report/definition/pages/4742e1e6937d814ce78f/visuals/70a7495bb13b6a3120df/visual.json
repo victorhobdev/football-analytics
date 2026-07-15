@@ -23,11 +23,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Jogos do Time"
+                  "Property": "Partidas"
                 }
               },
-              "queryRef": "Medidas.Jogos do Time",
-              "nativeQueryRef": "Jogos do Time"
+              "queryRef": "Medidas.Partidas",
+              "nativeQueryRef": "Partidas"
             },
             {
               "field": {
@@ -37,11 +37,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Pontos"
+                  "Property": "Times"
                 }
               },
-              "queryRef": "Medidas.Pontos",
-              "nativeQueryRef": "Pontos"
+              "queryRef": "Medidas.Times",
+              "nativeQueryRef": "Times"
             },
             {
               "field": {
@@ -51,11 +51,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "PPG"
+                  "Property": "Gols Totais"
                 }
               },
-              "queryRef": "Medidas.PPG",
-              "nativeQueryRef": "PPG"
+              "queryRef": "Medidas.Gols Totais",
+              "nativeQueryRef": "Gols Totais"
             },
             {
               "field": {
@@ -65,53 +65,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "PPG Últimos 5"
+                  "Property": "Gols por Partida"
                 }
               },
-              "queryRef": "Medidas.PPG Últimos 5",
-              "nativeQueryRef": "PPG Últimos 5"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Delta Forma 5 Jogos"
-                }
-              },
-              "queryRef": "Medidas.Delta Forma 5 Jogos",
-              "nativeQueryRef": "Delta Forma 5 Jogos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Conversão de Finalizações %"
-                }
-              },
-              "queryRef": "Medidas.Conversão de Finalizações %",
-              "nativeQueryRef": "Conversão de Finalizações %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura Estatísticas de Time %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura Estatísticas de Time %",
-              "nativeQueryRef": "Cobertura Estatísticas de Time %"
+              "queryRef": "Medidas.Gols por Partida",
+              "nativeQueryRef": "Gols por Partida"
             }
           ]
         }
@@ -168,6 +126,13 @@
                   "Value": "'Segoe UI Semibold'"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "32D"
+                }
+              }
             }
           },
           "selector": {
@@ -178,6 +143,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -279,7 +251,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Jogos do Time, Pontos, PPG, PPG Últimos 5, Delta Forma 5 Jogos, Conversão de Finalizações %, Cobertura Estatísticas de Time %'"
+                  "Value": "'Partidas, Times, Gols Totais, Gols por Partida'"
                 }
               }
             }

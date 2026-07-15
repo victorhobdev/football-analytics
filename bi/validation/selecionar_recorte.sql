@@ -1,5 +1,5 @@
--- Cobertura de todo o conjunto público de mart.* para os segmentadores do Power BI.
--- O identificador de escopo é sempre provider + competition_key + season_label.
+-- Cobertura de todos os escopos do mart e indicação do escopo público preferencial.
+-- O identificador técnico continua sendo provider + competition_key + season_label.
 -- Execute: docker exec -i football_postgres psql -U football -d football_dw -f - < bi/validation/selecionar_recorte.sql
 with player_match_coverage as (
     select
@@ -31,12 +31,28 @@ scope_coverage as (
     from mart.fact_matches fm
     left join player_match_coverage pmc on pmc.match_id = fm.match_id
     group by fm.provider, fm.competition_key, fm.season_label
+),
+ranked_coverage as (
+    select
+        scope_coverage.*,
+        row_number() over (
+            partition by competition_key, season_label
+            order by case provider
+                when 'sportmonks' then 1
+                when 'dataset_brasileirao' then 2
+                when 'transfermarkt' then 3
+                when 'eloratings' then 4
+                else 5
+            end, provider
+        ) = 1 as is_preferred_public_scope
+    from scope_coverage
 )
 select
     concat_ws('|', provider, competition_key, season_label) as scope_key,
     provider,
     competition_key,
     season_label,
+    is_preferred_public_scope,
     total_matches,
     matches_with_score,
     round(100.0 * matches_with_score / nullif(total_matches, 0), 2) as score_pct,
@@ -59,5 +75,5 @@ select
     case when matches_with_player_stats * 100.0 / nullif(total_matches, 0) >= 95 then true else false end as player_ranking_eligible,
     first_match_date,
     last_match_date
-from scope_coverage
-order by provider, competition_key, season_label;
+from ranked_coverage
+order by is_preferred_public_scope desc, competition_key, season_label, provider;

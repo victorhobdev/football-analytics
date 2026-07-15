@@ -1,33 +1,69 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "16d3d7c440a034c408ed",
+  "name": "884ff98c9a97eda4c31a",
   "position": {
     "x": 20,
-    "y": 514,
-    "z": 50,
-    "height": 186,
-    "width": 1240,
-    "tabOrder": 50
+    "y": 364,
+    "z": 40,
+    "height": 336,
+    "width": 760,
+    "tabOrder": 40
   },
   "visual": {
-    "visualType": "tableEx",
+    "visualType": "lineChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimTeam"
+                      "Entity": "DimDate"
                     }
                   },
-                  "Property": "Time"
+                  "Property": "Ano"
                 }
               },
-              "queryRef": "DimTeam.Time",
-              "nativeQueryRef": "Time"
+              "queryRef": "DimDate.Ano",
+              "nativeQueryRef": "Ano"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Gols Totais"
+                }
+              },
+              "queryRef": "Medidas.Gols Totais",
+              "nativeQueryRef": "Gols Totais"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Partidas"
+                }
+              },
+              "queryRef": "Medidas.Partidas",
+              "nativeQueryRef": "Partidas"
             },
             {
               "field": {
@@ -37,95 +73,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Jogos do Time"
+                  "Property": "Gols por Partida"
                 }
               },
-              "queryRef": "Medidas.Jogos do Time",
-              "nativeQueryRef": "Jogos do Time"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Pontos"
-                }
-              },
-              "queryRef": "Medidas.Pontos",
-              "nativeQueryRef": "Pontos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "PPG (10+ jogos)"
-                }
-              },
-              "queryRef": "Medidas.PPG (10+ jogos)",
-              "nativeQueryRef": "PPG (10+ jogos)"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "PPG Últimos 5"
-                }
-              },
-              "queryRef": "Medidas.PPG Últimos 5",
-              "nativeQueryRef": "PPG Últimos 5"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Delta Forma 5 Jogos"
-                }
-              },
-              "queryRef": "Medidas.Delta Forma 5 Jogos",
-              "nativeQueryRef": "Delta Forma 5 Jogos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Conversão de Finalizações %"
-                }
-              },
-              "queryRef": "Medidas.Conversão de Finalizações %",
-              "nativeQueryRef": "Conversão de Finalizações %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura Estatísticas de Time %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura Estatísticas de Time %",
-              "nativeQueryRef": "Cobertura Estatísticas de Time %"
+              "queryRef": "Medidas.Gols por Partida",
+              "nativeQueryRef": "Gols por Partida"
             }
           ]
         }
@@ -140,7 +92,7 @@
                     "Entity": "Medidas"
                   }
                 },
-                "Property": "PPG (10+ jogos)"
+                "Property": "Gols Totais"
               }
             },
             "direction": "Descending"
@@ -150,59 +102,21 @@
       }
     },
     "objects": {
-      "columnHeaders": [
+      "categoryAxis": [
         {
           "properties": {
-            "columnAdjustment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'growToFit'"
-                }
-              }
-            },
-            "autoSizeColumnWidth": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "fontColor": {
+            "labelColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#003526'"
+                      "Value": "'#57657A'"
                     }
                   }
                 }
               }
             },
-            "backColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F4F8F5'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontFamily": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Segoe UI Semibold'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "values": [
-        {
-          "properties": {
-            "fontColorPrimary": {
+            "titleColor": {
               "solid": {
                 "color": {
                   "expr": {
@@ -213,35 +127,42 @@
                 }
               }
             },
-            "backColorPrimary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#FFFFFF'"
-                    }
-                  }
-                }
-              }
-            },
-            "backColorSecondary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F8FBF9'"
-                    }
-                  }
+            "gridlineStyle": {
+              "expr": {
+                "Literal": {
+                  "Value": "'dotted'"
                 }
               }
             }
           }
         }
       ],
-      "grid": [
+      "valueAxis": [
         {
           "properties": {
-            "gridColor": {
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#57657A'"
+                    }
+                  }
+                }
+              }
+            },
+            "titleColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#111C2D'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineColor": {
               "solid": {
                 "color": {
                   "expr": {
@@ -252,36 +173,42 @@
                 }
               }
             },
-            "rowPadding": {
+            "gridlineStyle": {
               "expr": {
                 "Literal": {
-                  "Value": "7D"
+                  "Value": "'dotted'"
                 }
               }
             }
           }
         }
       ],
-      "total": [
+      "legend": [
         {
           "properties": {
-            "fontColor": {
+            "labelColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#003526'"
+                      "Value": "'#57657A'"
                     }
                   }
                 }
               }
-            },
-            "backColor": {
+            }
+          }
+        }
+      ],
+      "dataPoint": [
+        {
+          "properties": {
+            "defaultColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#EAF5EF'"
+                      "Value": "'#00513B'"
                     }
                   }
                 }
@@ -305,7 +232,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Base da decisão — selecione um único escopo; mínimo de 10 jogos'"
+                  "Value": "'Evolução de gols por ano'"
                 }
               }
             },
@@ -459,7 +386,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Base da decisão — selecione um único escopo; mínimo de 10 jogos'"
+                  "Value": "'Evolução de gols por ano'"
                 }
               }
             }

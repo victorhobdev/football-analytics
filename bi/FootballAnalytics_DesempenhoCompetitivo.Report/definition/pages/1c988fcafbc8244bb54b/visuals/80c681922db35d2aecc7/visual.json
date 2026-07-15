@@ -78,20 +78,6 @@
               },
               "queryRef": "Medidas.Finalizações do Time",
               "nativeQueryRef": "Finalizações do Time"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura Estatísticas de Time %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura Estatísticas de Time %",
-              "nativeQueryRef": "Cobertura Estatísticas de Time %"
             }
           ]
         }
@@ -229,7 +215,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Eficiência de finalização (95%+ de cobertura e 50+ chutes)'"
+                  "Value": "'Eficiência de finalização · mínimo de 50 chutes'"
                 }
               }
             },
@@ -383,7 +369,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Eficiência de finalização (95%+ de cobertura e 50+ chutes)'"
+                  "Value": "'Eficiência de finalização · mínimo de 50 chutes'"
                 }
               }
             }

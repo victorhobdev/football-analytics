@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "0d7096f40319a1a20e30",
+  "name": "1f04d2fc6bbe13d80bc8",
   "position": {
     "x": 20,
-    "y": 385,
-    "z": 40,
-    "height": 315,
+    "y": 364,
+    "z": 50,
+    "height": 336,
     "width": 760,
-    "tabOrder": 40
+    "tabOrder": 50
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -246,7 +246,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Pontos por time no período'"
+                  "Value": "'Times em destaque'"
                 }
               }
             },
@@ -400,7 +400,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Pontos por time no período'"
+                  "Value": "'Times em destaque'"
                 }
               }
             }

@@ -121,62 +121,6 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Gols por 90 (900+ min)"
-                }
-              },
-              "queryRef": "Medidas.Gols por 90 (900+ min)",
-              "nativeQueryRef": "Gols por 90 (900+ min)"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Participações por 90 (900+ min)"
-                }
-              },
-              "queryRef": "Medidas.Participações por 90 (900+ min)",
-              "nativeQueryRef": "Participações por 90 (900+ min)"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Precisão de Finalização do Jogador %"
-                }
-              },
-              "queryRef": "Medidas.Precisão de Finalização do Jogador %",
-              "nativeQueryRef": "Precisão de Finalização do Jogador %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Participação nos Gols do Time %"
-                }
-              },
-              "queryRef": "Medidas.Participação nos Gols do Time %",
-              "nativeQueryRef": "Participação nos Gols do Time %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
                   "Property": "Nota Média"
                 }
               },
@@ -361,7 +305,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Produção e eficiência — métricas por 90 exigem 900+ minutos'"
+                  "Value": "'Destaques individuais'"
                 }
               }
             },
@@ -515,7 +459,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Produção e eficiência — métricas por 90 exigem 900+ minutos'"
+                  "Value": "'Destaques individuais'"
                 }
               }
             }

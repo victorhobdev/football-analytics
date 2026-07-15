@@ -5,7 +5,7 @@
     "x": 20,
     "y": 260,
     "z": 40,
-    "height": 100,
+    "height": 92,
     "width": 610,
     "tabOrder": 40
   },
@@ -72,7 +72,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#003526'"
+                      "Value": "'#C08A3E'"
                     }
                   }
                 }
@@ -101,6 +101,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {

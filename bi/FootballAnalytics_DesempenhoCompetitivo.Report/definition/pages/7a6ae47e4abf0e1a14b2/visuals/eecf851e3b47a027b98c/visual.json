@@ -23,20 +23,6 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Pontos"
-                }
-              },
-              "queryRef": "Medidas.Pontos",
-              "nativeQueryRef": "Pontos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
                   "Property": "PPG"
                 }
               },
@@ -65,20 +51,6 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Delta Forma 5 Jogos"
-                }
-              },
-              "queryRef": "Medidas.Delta Forma 5 Jogos",
-              "nativeQueryRef": "Delta Forma 5 Jogos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
                   "Property": "PPG Casa"
                 }
               },
@@ -98,20 +70,6 @@
               },
               "queryRef": "Medidas.PPG Fora",
               "nativeQueryRef": "PPG Fora"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Delta de Mando"
-                }
-              },
-              "queryRef": "Medidas.Delta de Mando",
-              "nativeQueryRef": "Delta de Mando"
             }
           ]
         }
@@ -168,6 +126,13 @@
                   "Value": "'Segoe UI Semibold'"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "32D"
+                }
+              }
             }
           },
           "selector": {
@@ -178,6 +143,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -279,7 +251,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Pontos, PPG, PPG Últimos 5, Delta Forma 5 Jogos, PPG Casa, PPG Fora, Delta de Mando'"
+                  "Value": "'PPG, PPG Últimos 5, PPG Casa, PPG Fora'"
                 }
               }
             }

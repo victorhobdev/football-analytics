@@ -3,9 +3,9 @@
   "name": "7ca0f43d15b8f7d234bb",
   "position": {
     "x": 20,
-    "y": 268,
+    "y": 260,
     "z": 31,
-    "height": 105,
+    "height": 92,
     "width": 1240,
     "tabOrder": 31
   },
@@ -15,48 +15,6 @@
       "queryState": {
         "Data": {
           "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Vitórias Mandante"
-                }
-              },
-              "queryRef": "Medidas.Vitórias Mandante",
-              "nativeQueryRef": "Vitórias Mandante"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Empates da Competição"
-                }
-              },
-              "queryRef": "Medidas.Empates da Competição",
-              "nativeQueryRef": "Empates da Competição"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Vitórias Visitante"
-                }
-              },
-              "queryRef": "Medidas.Vitórias Visitante",
-              "nativeQueryRef": "Vitórias Visitante"
-            },
             {
               "field": {
                 "Measure": {
@@ -154,6 +112,13 @@
                   "Value": "'Segoe UI Semibold'"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "28D"
+                }
+              }
             }
           },
           "selector": {
@@ -164,6 +129,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -265,7 +237,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Vitórias Mandante, Empates da Competição, Vitórias Visitante, Taxa Vitória Mandante %, Taxa de Empates %, Taxa Vitória Visitante %'"
+                  "Value": "'Taxa Vitória Mandante %, Taxa de Empates %, Taxa Vitória Visitante %'"
                 }
               }
             }

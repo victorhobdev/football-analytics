@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 
@@ -20,6 +21,7 @@ MINT = "#8BD6B6"
 SURFACE = "#F4F8F5"
 CARD = "#FFFFFF"
 BORDER = "#D8E3FB"
+GOLD = "#C08A3E"
 
 
 def object_id(value: str) -> str:
@@ -119,9 +121,9 @@ def slicer(page: str, key: str, label: str, table: str, field: str, x: int, widt
     return {"$schema": VISUAL_SCHEMA, "name": name, "position": position(x, 78, width, 66, order), "visual": visual}
 
 
-def card(page: str, key: str, measures: list[str], x: int, y: int, width: int, height: int, order: int, value_size: int | None = None) -> dict:
+def card(page: str, key: str, measures: list[str], x: int, y: int, width: int, height: int, order: int, value_size: int | None = None, value_color: str = PRIMARY) -> dict:
     name = object_id(f"{page}:{key}")
-    value_properties = {"fontColor": {"solid": {"color": literal(repr(PRIMARY))}}, "fontFamily": literal(repr("Segoe UI Semibold"))}
+    value_properties = {"fontColor": {"solid": {"color": literal(repr(value_color))}}, "fontFamily": literal(repr("Segoe UI Semibold"))}
     if value_size:
         value_properties["fontSize"] = literal(f"{value_size}D")
     return {
@@ -134,7 +136,7 @@ def card(page: str, key: str, measures: list[str], x: int, y: int, width: int, h
             "objects": {
                 "layout": [{"properties": {"backgroundShow": literal("true"), "paddingUniform": literal("10D"), "cellPadding": literal("8D")}, "selector": {"id": "default"}}],
                 "value": [{"properties": value_properties, "selector": {"id": "default"}}],
-                "label": [{"properties": {"fontColor": {"solid": {"color": literal(repr(MUTED))}}, "position": literal(repr("belowValue"))}, "selector": {"id": "default"}}],
+                "label": [{"properties": {"show": literal("false" if all(item.startswith("Resumo -") for item in measures) else "true"), "fontColor": {"solid": {"color": literal(repr(MUTED))}}, "position": literal(repr("belowValue"))}, "selector": {"id": "default"}}],
                 "shapeCustomRectangle": [{"properties": {"tileShape": literal(repr("rectangleRoundedByPixel")), "rectangleRoundedCurve": literal("12D")}, "selector": {"id": "default"}}],
                 "outline": [{"properties": {"lineColor": {"solid": {"color": literal(repr(BORDER))}}}, "selector": {"id": "default"}}],
             },
@@ -212,15 +214,24 @@ def table(page: str, key: str, title: str, fields: list[tuple[str, str] | str], 
 
 def common_slicers(page: str, include_team: bool) -> list[dict]:
     specs = [
-        ("provider", "Fonte", "DimScope", "provider", 20, 150),
-        ("competition", "Competição", "DimScope", "competition", 180, 280),
-        ("season", "Temporada", "DimScope", "season_label", 470, 180),
-        ("date", "Período", "DimDate", "date_day", 660, 250),
+        ("competition", "Competição", "DimScope", "competition", 20, 360),
+        ("season", "Temporada", "DimScope", "season_label", 390, 230),
+        ("date", "Período", "DimDate", "date_day", 630, 330),
     ]
     if include_team:
-        specs.append(("team", "Time", "DimTeam", "Time", 920, 340))
+        specs.append(("team", "Time", "DimTeam", "Time", 970, 290))
     else:
-        specs[-1] = ("date", "Período", "DimDate", "date_day", 660, 600)
+        specs[-1] = ("date", "Período", "DimDate", "date_day", 630, 630)
+    return [slicer(page, *spec, order=10 + index, mode="Between" if spec[0] == "date" else "Dropdown") for index, spec in enumerate(specs)]
+
+
+def diagnostic_slicers(page: str) -> list[dict]:
+    specs = [
+        ("provider", "Fonte", "DimScope", "provider", 20, 180),
+        ("competition", "Competição", "DimScope", "competition", 210, 320),
+        ("season", "Temporada", "DimScope", "season_label", 540, 220),
+        ("date", "Período", "DimDate", "date_day", 770, 490),
+    ]
     return [slicer(page, *spec, order=10 + index, mode="Between" if spec[0] == "date" else "Dropdown") for index, spec in enumerate(specs)]
 
 
@@ -257,9 +268,7 @@ def mobile_positions(visuals: list[dict]) -> dict[str, dict]:
 
         if visual_type == "cardVisual":
             projections = visual["visual"].get("query", {}).get("queryState", {}).get("Data", {}).get("projections", [])
-            if len(projections) > 1:
-                continue
-            height = 120
+            height = 120 if len(projections) == 1 else 180
         else:
             height = 390 if visual_type == "tableEx" else 280
         positions[visual["name"]] = {"x": 10, "y": y, "z": desktop["z"], "width": 300, "height": height, "tabOrder": desktop["tabOrder"]}
@@ -324,61 +333,59 @@ def build_pages() -> list[tuple[str, str, list[dict]]]:
     pages = [
         (executive, "1. Resumo executivo", [
             header_panel(executive),
-            textbox(executive, "title", "Resumo executivo orientado à decisão", 40, 18, 1000, 30, 1, 21, "#FFFFFF"),
-            textbox(executive, "subtitle", "O que aconteceu · onde · por que importa · ação possível · confiança", 40, 45, 1100, 18, 2, 11, MINT),
+            textbox(executive, "title", "Resumo executivo", 40, 18, 1000, 30, 1, 24, "#FFFFFF"),
+            textbox(executive, "subtitle", "Contexto, destaques e caminhos para aprofundar a análise", 40, 45, 1100, 18, 2, 11, MINT),
             *common_slicers(executive, True),
-            card(executive, "kpis", ["Jogos do Time", "Pontos", "PPG", "PPG Últimos 5", "Delta Forma 5 Jogos", "Conversão de Finalizações %", "Cobertura Estatísticas de Time %"], 20, 152, 1240, 96, 30),
-            card(executive, "what", ["Resumo - O que aconteceu"], 20, 260, 610, 100, 40, 12),
-            card(executive, "where", ["Resumo - Onde"], 645, 260, 615, 100, 41, 12),
-            card(executive, "why", ["Resumo - Por que importa"], 20, 372, 360, 130, 42, 11),
-            card(executive, "action", ["Resumo - Ação sugerida"], 395, 372, 420, 130, 43, 11),
-            card(executive, "confidence", ["Resumo - Confiança"], 830, 372, 430, 130, 44, 11),
-            table(executive, "decision_table", "Base da decisão — selecione um único escopo; mínimo de 10 jogos", [("DimTeam", "Time"), "Jogos do Time", "Pontos", "PPG (10+ jogos)", "PPG Últimos 5", "Delta Forma 5 Jogos", "Conversão de Finalizações %", "Cobertura Estatísticas de Time %"], 20, 514, 1240, 186, 50, "PPG (10+ jogos)"),
+            card(executive, "kpis", ["Partidas", "Times", "Gols Totais", "Gols por Partida"], 20, 152, 1240, 96, 30, 32),
+            card(executive, "what", ["Resumo - O que aconteceu"], 20, 260, 610, 92, 40, 12, GOLD),
+            card(executive, "where", ["Resumo - Onde"], 645, 260, 615, 92, 41, 12),
+            chart(executive, "team_points", "clusteredBarChart", "Times em destaque", ("DimTeam", "Time"), ["Pontos"], 20, 364, 760, 336, 50, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
+            chart(executive, "results_distribution", "clusteredColumnChart", "Como as partidas terminaram", ("FactMatch", "Resultado"), ["Partidas"], 795, 364, 465, 336, 51),
         ]),
         (panorama, "2. Panorama", [
             header_panel(panorama),
             textbox(panorama, "title", "Panorama das competições", 40, 18, 900, 30, 1, 21, "#FFFFFF"),
-            textbox(panorama, "subtitle", "Projeto inteiro · filtre competição, temporada e período", 40, 45, 1000, 18, 2, 11, MINT),
+            textbox(panorama, "subtitle", "Volume, resultados e evolução no recorte selecionado", 40, 45, 1000, 18, 2, 11, MINT),
             *common_slicers(panorama, False),
-            card(panorama, "volume", ["Partidas", "Times", "Gols Totais", "Gols por Partida", "Cobertura de Placar %", "Dados disponíveis até"], 20, 152, 1240, 105, 30),
-            card(panorama, "results", ["Vitórias Mandante", "Empates da Competição", "Vitórias Visitante", "Taxa Vitória Mandante %", "Taxa de Empates %", "Taxa Vitória Visitante %"], 20, 268, 1240, 105, 31),
-            chart(panorama, "team_points", "clusteredBarChart", "Pontos por time no período", ("DimTeam", "Time"), ["Pontos"], 20, 385, 760, 315, 40, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
-            chart(panorama, "results_distribution", "clusteredColumnChart", "Distribuição de resultados", ("FactMatch", "Resultado"), ["Partidas"], 795, 385, 465, 315, 41),
+            card(panorama, "volume", ["Partidas", "Times", "Gols Totais", "Gols por Partida"], 20, 152, 1240, 96, 30, 32),
+            card(panorama, "results", ["Taxa Vitória Mandante %", "Taxa de Empates %", "Taxa Vitória Visitante %"], 20, 260, 1240, 92, 31, 28),
+            chart(panorama, "goals_trend", "lineChart", "Evolução de gols por ano", ("DimDate", "Ano"), ["Gols Totais"], 20, 364, 760, 336, 40, tooltips=["Partidas", "Gols por Partida"]),
+            chart(panorama, "results_distribution", "clusteredColumnChart", "Distribuição de resultados", ("FactMatch", "Resultado"), ["Partidas"], 795, 364, 465, 336, 41),
         ]),
         (teams, "3. Times", [
             header_panel(teams),
             textbox(teams, "title", "Ranking e desempenho dos times", 40, 18, 900, 30, 1, 21, "#FFFFFF"),
             textbox(teams, "subtitle", "Clique com o botão direito em um time para abrir o detalhe · desempates oficiais não estão incluídos", 40, 45, 1150, 18, 2, 11, MINT),
             *common_slicers(teams, True),
-            card(teams, "kpis", ["Jogos do Time", "Pontos", "PPG", "PPG Médio do Recorte", "Delta PPG vs Recorte", "Aproveitamento %"], 20, 152, 1240, 96, 30),
-            table(teams, "ranking", "Ranking contextual: desempenho versus o recorte", [("DimTeam", "Time"), "Jogos do Time", "Pontos", "PPG", "PPG Médio do Recorte", "Delta PPG vs Recorte", "Percentil PPG", "Gols por Jogo do Time", "Conversão de Finalizações %", "Cobertura Estatísticas de Time %"], 20, 260, 790, 440, 40, "Pontos"),
+            card(teams, "kpis", ["Jogos do Time", "Pontos", "PPG", "Aproveitamento %"], 20, 152, 1240, 96, 30, 32),
+            table(teams, "ranking", "Ranking no recorte selecionado", [("DimTeam", "Time"), "Jogos do Time", "Pontos", "PPG", "Gols por Jogo do Time", "Aproveitamento %"], 20, 260, 790, 440, 40, "Pontos"),
             chart(teams, "points", "clusteredBarChart", "Pontos por time", ("DimTeam", "Time"), ["Pontos"], 825, 260, 435, 210, 41, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
-            chart(teams, "style", "clusteredBarChart", "Eficiência de finalização (95%+ de cobertura e 50+ chutes)", ("DimTeam", "Time"), ["Conversão de Finalizações %", "Precisão de Finalização %"], 825, 482, 435, 218, 42, tooltips=["Finalizações do Time", "Cobertura Estatísticas de Time %"]),
+            chart(teams, "style", "clusteredBarChart", "Eficiência de finalização · mínimo de 50 chutes", ("DimTeam", "Time"), ["Conversão de Finalizações %", "Precisão de Finalização %"], 825, 482, 435, 218, 42, tooltips=["Finalizações do Time"]),
         ]),
         (evolution, "4. Evolução e mando", [
             header_panel(evolution),
             textbox(evolution, "title", "Evolução e efeito observado de mando", 40, 18, 1000, 30, 1, 21, "#FFFFFF"),
-            textbox(evolution, "subtitle", "Selecione um time para leitura individual · múltiplos times formam o recorte agregado", 40, 45, 1100, 18, 2, 11, MINT),
+            textbox(evolution, "subtitle", "Comparação descritiva; selecione um time para uma leitura individual", 40, 45, 1100, 18, 2, 11, MINT),
             *common_slicers(evolution, True),
-            card(evolution, "kpis", ["Pontos", "PPG", "PPG Últimos 5", "Delta Forma 5 Jogos", "PPG Casa", "PPG Fora", "Delta de Mando"], 20, 152, 1240, 96, 30),
-            chart(evolution, "cumulative", "lineChart", "Pontos por ano no recorte", ("DimDate", "Ano"), ["Pontos"], 20, 260, 800, 440, 40, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
-            table(evolution, "venue", "Forma recente e efeito observado de mando", [("DimTeam", "Time"), "Jogos do Time", "PPG", "PPG Últimos 5", "Delta Forma 5 Jogos", "PPG Casa", "PPG Fora", "Delta de Mando (20+ jogos)"], 835, 260, 425, 440, 41, "Delta Forma 5 Jogos"),
+            card(evolution, "kpis", ["PPG", "PPG Últimos 5", "PPG Casa", "PPG Fora"], 20, 152, 1240, 96, 30, 32),
+            chart(evolution, "cumulative", "lineChart", "Evolução de pontos no período", ("DimDate", "Ano"), ["Pontos"], 20, 260, 800, 440, 40, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
+            table(evolution, "venue", "Mando observado · mínimo de 20 partidas", [("DimTeam", "Time"), "Jogos do Time", "PPG", "PPG Casa", "PPG Fora", "Delta de Mando (20+ jogos)"], 835, 260, 425, 440, 41, "PPG"),
         ]),
         (players, "5. Jogadores", [
             header_panel(players),
             textbox(players, "title", "Rankings de jogadores", 40, 18, 900, 30, 1, 21, "#FFFFFF"),
-            textbox(players, "subtitle", "Clique com o botão direito em um jogador para abrir o detalhe · a cobertura varia conforme a fonte", 40, 45, 1150, 18, 2, 11, MINT),
+            textbox(players, "subtitle", "Produção total e por 90 minutos no contexto selecionado", 40, 45, 1150, 18, 2, 11, MINT),
             *common_slicers(players, True),
-            card(players, "kpis", ["Gols", "Assistências", "Participações em Gol", "Cobertura de Minutos %", "Nota Média", "Cobertura de Nota %"], 20, 152, 1240, 96, 30),
-            table(players, "ranking", "Produção e eficiência — métricas por 90 exigem 900+ minutos", [("DimPlayer", "Jogador"), ("DimTeam", "Time"), "Jogos do Jogador", "Minutos", "Gols", "Assistências", "Participações em Gol", "Gols por 90 (900+ min)", "Participações por 90 (900+ min)", "Precisão de Finalização do Jogador %", "Participação nos Gols do Time %", "Nota Média"], 20, 260, 800, 440, 40, "Participações em Gol"),
-            chart(players, "goals_assists", "clusteredBarChart", "Participações em gol por 90 (mínimo de 900 minutos)", ("DimPlayer", "Jogador"), ["Participações por 90 (900+ min)"], 835, 260, 425, 440, 41, tooltips=["Minutos", "Jogos do Jogador", "Cobertura de Minutos %"]),
+            card(players, "kpis", ["Gols", "Assistências", "Participações em Gol", "Nota Média"], 20, 152, 1240, 96, 30, 32),
+            table(players, "ranking", "Destaques individuais", [("DimPlayer", "Jogador"), ("DimTeam", "Time"), "Jogos do Jogador", "Minutos", "Gols", "Assistências", "Participações em Gol", "Nota Média"], 20, 260, 800, 440, 40, "Participações em Gol"),
+            chart(players, "goals_assists", "clusteredBarChart", "Participações por 90 · mínimo de 900 minutos", ("DimPlayer", "Jogador"), ["Participações por 90 (900+ min)"], 835, 260, 425, 440, 41, tooltips=["Minutos", "Jogos do Jogador"]),
         ]),
-        (quality, "6. Cobertura", [
+        (quality, "Diagnóstico de dados", [
             header_panel(quality),
-            textbox(quality, "title", "Cobertura e confiabilidade do recorte", 40, 18, 1000, 30, 1, 21, "#FFFFFF"),
-            textbox(quality, "subtitle", "Use esta página antes de comparar fontes, competições ou temporadas", 40, 45, 1100, 18, 2, 11, MINT),
-            *common_slicers(quality, False),
-            card(quality, "kpis", ["Escopos", "Partidas Declaradas", "Cobertura de Placar Declarada %", "Cobertura Estatísticas de Time %", "Cobertura de Nota %", "Cobertura de Minutos %"], 20, 152, 1240, 96, 30),
+            textbox(quality, "title", "Diagnóstico de dados", 40, 18, 1000, 30, 1, 24, "#FFFFFF"),
+            textbox(quality, "subtitle", "Página interna para reconciliação de fontes e cobertura", 40, 45, 1100, 18, 2, 11, MINT),
+            *diagnostic_slicers(quality),
+            card(quality, "kpis", ["Escopos", "Partidas Declaradas", "Cobertura de Placar Declarada %", "Cobertura de Jogadores Declarada %"], 20, 152, 1240, 96, 30, 30),
             table(quality, "matrix", "Matriz de cobertura por fonte, competição e temporada", [("DimScope", "provider"), ("DimScope", "competition"), ("DimScope", "season_label"), "Partidas Declaradas", "Cobertura de Placar Declarada %", "Cobertura de Jogadores Declarada %", "Escopos com Ranking de Jogadores"], 20, 260, 800, 440, 40, "Partidas Declaradas"),
             chart(quality, "coverage", "clusteredBarChart", "Cobertura declarada por competição", ("DimScope", "competition"), ["Cobertura de Placar Declarada %", "Cobertura de Jogadores Declarada %"], 835, 260, 425, 440, 41),
         ]),
@@ -408,6 +415,7 @@ def build_pages() -> list[tuple[str, str, list[dict]]]:
 
 def main() -> None:
     pages = build_pages()
+    diagnostic_page = object_id("page:quality")
     drillthrough_pages = {
         object_id("page:team-detail"): drillthrough_binding("DrillthroughTime", "DimTeam", "Time"),
         object_id("page:player-detail"): drillthrough_binding("DrillthroughJogador", "DimPlayer", "Jogador"),
@@ -427,9 +435,17 @@ def main() -> None:
                 "outspace": [{"properties": {"color": {"solid": {"color": literal("'#E7EFEA'")}}}}],
             },
         }
+        if page_name == diagnostic_page:
+            page_definition["visibility"] = "HiddenInViewMode"
         page_definition.update(drillthrough_pages.get(page_name, {}))
         (page_dir / "page.json").write_text(json.dumps(page_definition, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         mobile = mobile_positions(visuals)
+        visuals_root = page_dir / "visuals"
+        visuals_root.mkdir(exist_ok=True)
+        expected_visuals = {visual["name"] for visual in visuals}
+        for stale_visual in visuals_root.iterdir():
+            if stale_visual.is_dir() and stale_visual.name not in expected_visuals:
+                shutil.rmtree(stale_visual)
         for visual in visuals:
             add_alt_text(visual, display_name)
             visual_dir = page_dir / "visuals" / visual["name"]

@@ -78,20 +78,6 @@
               },
               "queryRef": "Medidas.Jogos do Jogador",
               "nativeQueryRef": "Jogos do Jogador"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura de Minutos %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura de Minutos %",
-              "nativeQueryRef": "Cobertura de Minutos %"
             }
           ]
         }
@@ -246,7 +232,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Participações em gol por 90 (mínimo de 900 minutos)'"
+                  "Value": "'Participações por 90 · mínimo de 900 minutos'"
                 }
               }
             },
@@ -400,7 +386,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Participações em gol por 90 (mínimo de 900 minutos)'"
+                  "Value": "'Participações por 90 · mínimo de 900 minutos'"
                 }
               }
             }

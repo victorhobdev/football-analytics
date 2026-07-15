@@ -65,39 +65,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Cobertura Estatísticas de Time %"
+                  "Property": "Cobertura de Jogadores Declarada %"
                 }
               },
-              "queryRef": "Medidas.Cobertura Estatísticas de Time %",
-              "nativeQueryRef": "Cobertura Estatísticas de Time %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura de Nota %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura de Nota %",
-              "nativeQueryRef": "Cobertura de Nota %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Cobertura de Minutos %"
-                }
-              },
-              "queryRef": "Medidas.Cobertura de Minutos %",
-              "nativeQueryRef": "Cobertura de Minutos %"
+              "queryRef": "Medidas.Cobertura de Jogadores Declarada %",
+              "nativeQueryRef": "Cobertura de Jogadores Declarada %"
             }
           ]
         }
@@ -154,6 +126,13 @@
                   "Value": "'Segoe UI Semibold'"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "30D"
+                }
+              }
             }
           },
           "selector": {
@@ -164,6 +143,13 @@
       "label": [
         {
           "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -265,7 +251,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Escopos, Partidas Declaradas, Cobertura de Placar Declarada %, Cobertura Estatísticas de Time %, Cobertura de Nota %, Cobertura de Minutos %'"
+                  "Value": "'Escopos, Partidas Declaradas, Cobertura de Placar Declarada %, Cobertura de Jogadores Declarada %'"
                 }
               }
             }

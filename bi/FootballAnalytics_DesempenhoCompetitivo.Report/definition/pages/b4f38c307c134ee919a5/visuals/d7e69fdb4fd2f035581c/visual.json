@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Use esta página antes de comparar fontes, competições ou temporadas",
+                    "value": "Página interna para reconciliação de fontes e cobertura",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -101,7 +101,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Use esta página antes de comparar fontes, competições ou temporadas'"
+                  "Value": "'Página interna para reconciliação de fontes e cobertura'"
                 }
               }
             }

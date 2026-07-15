@@ -65,34 +65,6 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "PPG Últimos 5"
-                }
-              },
-              "queryRef": "Medidas.PPG Últimos 5",
-              "nativeQueryRef": "PPG Últimos 5"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Delta Forma 5 Jogos"
-                }
-              },
-              "queryRef": "Medidas.Delta Forma 5 Jogos",
-              "nativeQueryRef": "Delta Forma 5 Jogos"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
                   "Property": "PPG Casa"
                 }
               },
@@ -140,7 +112,7 @@
                     "Entity": "Medidas"
                   }
                 },
-                "Property": "Delta Forma 5 Jogos"
+                "Property": "PPG"
               }
             },
             "direction": "Descending"
@@ -305,7 +277,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Forma recente e efeito observado de mando'"
+                  "Value": "'Mando observado · mínimo de 20 partidas'"
                 }
               }
             },
@@ -459,7 +431,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Forma recente e efeito observado de mando'"
+                  "Value": "'Mando observado · mínimo de 20 partidas'"
                 }
               }
             }
