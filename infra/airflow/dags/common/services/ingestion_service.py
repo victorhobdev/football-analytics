@@ -296,11 +296,24 @@ def _read_sync_cursor(
         with engine.begin() as conn:
             row = conn.execute(sql, params).first()
     except Exception as exc:
-        print(
-            "[sync_state] provider_sync_state indisponivel; "
-            f"fallback para full-scan | provider={provider_name} entity_type={entity_type} scope={scope_key} erro={exc}"
+        log_event(
+            level="error",
+            service="airflow",
+            module="ingestion_service",
+            step="read_sync_state",
+            status="failed",
+            dataset=entity_type,
+            error_type=type(exc).__name__,
+            error_msg=str(exc),
+            message=(
+                "Falha ao ler provider_sync_state; a ingestao sera interrompida "
+                f"| provider={provider_name} entity_type={entity_type} scope={scope_key}"
+            ),
         )
-        return None
+        raise RuntimeError(
+            "Falha ao ler provider_sync_state "
+            f"| provider={provider_name} entity_type={entity_type} scope={scope_key} erro={exc}"
+        ) from exc
 
     if not row:
         return None
@@ -380,10 +393,24 @@ def _upsert_sync_state(
         with engine.begin() as conn:
             conn.execute(sql, params)
     except Exception as exc:
-        print(
-            "[sync_state] nao foi possivel persistir provider_sync_state; seguindo sem interromper "
-            f"| provider={provider_name} entity_type={entity_type} scope={scope_key} status={status} erro={exc}"
+        log_event(
+            level="error",
+            service="airflow",
+            module="ingestion_service",
+            step="write_sync_state",
+            status="failed",
+            dataset=entity_type,
+            error_type=type(exc).__name__,
+            error_msg=str(exc),
+            message=(
+                "Falha ao persistir provider_sync_state; a ingestao sera marcada como falha "
+                f"| provider={provider_name} entity_type={entity_type} scope={scope_key} status={status}"
+            ),
         )
+        raise RuntimeError(
+            "Falha ao persistir provider_sync_state "
+            f"| provider={provider_name} entity_type={entity_type} scope={scope_key} status={status} erro={exc}"
+        ) from exc
 
 
 def _resolve_pending_fixture_ids(
@@ -781,7 +808,7 @@ def ingest_statistics_raw():
         service="airflow",
         module="ingestion_service",
         step="summary",
-        status="success",
+        status=sync_status,
         context=context,
         dataset="statistics",
         rows_in=attempted,
@@ -1002,7 +1029,7 @@ def ingest_match_events_raw():
         service="airflow",
         module="ingestion_service",
         step="summary",
-        status="success",
+        status=sync_status,
         context=context,
         dataset="match_events",
         rows_in=attempted,
@@ -1291,8 +1318,9 @@ def _ingest_entity_by_numeric_ids(
         pending_ids = [item_id for item_id in sorted_ids if item_id not in ingested_ids]
         pending_strategy = f"full_scan_s3/{id_name}"
     elif current_cursor is None:
-        pending_ids = sorted_ids
-        pending_strategy = "full_scope"
+        ingested_ids = _list_ingested_numeric_ids(s3_client, prefix=f"{key_prefix}/", id_name=id_name)
+        pending_ids = [item_id for item_id in sorted_ids if item_id not in ingested_ids]
+        pending_strategy = f"full_scan_s3/{id_name}"
     else:
         pending_ids = [item_id for item_id in sorted_ids if item_id > current_cursor]
         pending_strategy = f"sync_state_cursor>{current_cursor}"
@@ -1408,7 +1436,7 @@ def _ingest_entity_by_numeric_ids(
         service="airflow",
         module="ingestion_service",
         step="summary",
-        status="success",
+        status=sync_status,
         context=context,
         dataset=entity_type,
         rows_in=attempted,

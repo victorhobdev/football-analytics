@@ -15,6 +15,7 @@ with DAG(
     dag_id="ingest_coaches_bronze",
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
+    max_active_runs=1,
     catchup=False,
     params={"league_id": DEFAULT_LEAGUE_ID, "season": 2024, "provider": DEFAULT_PROVIDER},
     render_template_as_native_obj=True,
