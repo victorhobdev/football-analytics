@@ -28,6 +28,14 @@ class SnapshotContractTests(unittest.TestCase):
         resolved = resolve_snapshot_dir(None, {"BI_SNAPSHOT_DIR": "bi/data/env-snapshots"}, root=ROOT)
         self.assertEqual(resolved, (ROOT / "bi" / "data" / "env-snapshots").resolve())
 
+    def test_dotenv_path_is_used_when_environment_is_absent(self) -> None:
+        resolved = resolve_snapshot_dir(None, {}, dotenv_value="bi/data/dotenv-snapshots", root=ROOT)
+        self.assertEqual(resolved, (ROOT / "bi" / "data" / "dotenv-snapshots").resolve())
+
+    def test_empty_configured_path_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            resolve_snapshot_dir(None, {"BI_SNAPSHOT_DIR": " "}, root=ROOT)
+
     def test_default_is_the_documented_shared_snapshot_directory(self) -> None:
         self.assertEqual(resolve_snapshot_dir(None, {}, root=ROOT), DEFAULT_SNAPSHOT_DIR.resolve())
 
@@ -64,7 +72,7 @@ class SnapshotContractTests(unittest.TestCase):
 
         for table in MODEL_TABLES.glob("*.tmdl"):
             text = table.read_text(encoding="utf-8")
-            if "partition " in text and " = m" in text:
+            if "File.Contents" in text:
                 self.assertIn("SnapshotRoot &", text, table.name)
                 self.assertNotIn("C:\\\\Users\\\\Public", text, table.name)
 

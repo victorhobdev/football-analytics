@@ -113,7 +113,7 @@ table FactPlayerMatch
 		mode: import
 		source =
 				let
-				    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\FactPlayerMatch.parquet"))
+				    Source = Parquet.Document(File.Contents(SnapshotRoot & "\\FactPlayerMatch.parquet"))
 				in
 				    Source
 

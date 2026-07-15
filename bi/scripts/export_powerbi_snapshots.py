@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
+import os
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-
-import pandas as pd
-import psycopg
-import pyarrow as pa
-import pyarrow.parquet as pq
-from dotenv import dotenv_values
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_ROOT = Path(r"C:\Users\Public\football-analytics-bi-data")
+DEFAULT_SNAPSHOT_DIR = Path(r"C:\Users\Public\football-analytics-bi-data")
+SNAPSHOT_DIR_ENV = "BI_SNAPSHOT_DIR"
 
 QUERIES = {
     "FactMatch": """
@@ -98,10 +96,45 @@ QUERIES = {
 }
 
 
-def main() -> None:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Exporta os sete snapshots Parquet do mart.")
+    parser.add_argument("--output-dir", dest="output_dir", help="Diretório dos snapshots; relativo à raiz do repositório.")
+    return parser.parse_args(argv)
+
+
+def resolve_snapshot_dir(
+    cli_value: str | Path | None = None,
+    environ: Mapping[str, str] | None = None,
+    *,
+    dotenv_value: str | None = None,
+    root: Path = ROOT,
+) -> Path:
+    values = environ if environ is not None else os.environ
+    raw_value = cli_value if cli_value is not None else values.get(SNAPSHOT_DIR_ENV, dotenv_value)
+    if raw_value is None:
+        raw_value = DEFAULT_SNAPSHOT_DIR
+    if not str(raw_value).strip():
+        raise ValueError(f"{SNAPSHOT_DIR_ENV} não pode ser vazio")
+    path = Path(raw_value).expanduser()
+    return (path if path.is_absolute() else root / path).resolve()
+
+
+def build_manifest(table_stats: dict[str, dict[str, int | str]]) -> dict[str, object]:
+    return {"source": "PostgreSQL mart", "tables": table_stats}
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    import pandas as pd
+    import psycopg
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from dotenv import dotenv_values
+
+    args = parse_args(argv)
     env = dotenv_values(ROOT / ".env")
-    DATA_ROOT.mkdir(parents=True, exist_ok=True)
-    manifest: dict[str, object] = {"source": "PostgreSQL mart", "tables": {}}
+    data_root = resolve_snapshot_dir(args.output_dir, dotenv_value=env.get(SNAPSHOT_DIR_ENV))
+    data_root.mkdir(parents=True, exist_ok=True)
+    manifest = build_manifest({})
     with psycopg.connect(
         host="127.0.0.1",
         port=5432,
@@ -111,7 +144,7 @@ def main() -> None:
     ) as connection:
         for name, query in QUERIES.items():
             frame = pd.read_sql_query(query, connection).convert_dtypes(dtype_backend="pyarrow")
-            path = DATA_ROOT / f"{name}.parquet"
+            path = data_root / f"{name}.parquet"
             pq.write_table(pa.Table.from_pandas(frame, preserve_index=False), path, compression="zstd")
             manifest["tables"][name] = {
                 "rows": len(frame),
@@ -123,7 +156,7 @@ def main() -> None:
     manifest_path = ROOT / "bi" / "data" / "manifest.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Snapshots: {DATA_ROOT}")
+    print(f"Snapshots: {data_root}")
 
 
 if __name__ == "__main__":

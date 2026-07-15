@@ -11,9 +11,9 @@ O relatório foi aberto novamente no Power BI Desktop 2.155.756.0 e consultado c
 
 ## Conteúdo
 
-- `FootballAnalytics_DesempenhoCompetitivo.Report`: seis páginas públicas, duas páginas ocultas de drill-through e 94 visuais em PBIR.
+- `FootballAnalytics_DesempenhoCompetitivo.Report`: oito páginas em PBIR, sendo seis públicas, duas de drill-through e 94 visuais.
 - `FootballAnalytics_DesempenhoCompetitivo.SemanticModel`: modelo TMDL com oito tabelas, nove relacionamentos e 73 medidas.
-- `screenshots`: evidências renderizadas das cinco páginas públicas.
+- `screenshots`: cinco evidências renderizadas de seis páginas públicas (`Panorama`, `Times`, `Evolução e mando`, `Jogadores` e `Cobertura`); `Resumo executivo` não possui screenshot versionado.
 - `scripts/export_powerbi_snapshots.py`: exporta os marts para Parquet local.
 - `data/manifest.json`: contagens, tamanhos e hashes do snapshot validado.
 - `validation`: SQL de cobertura e reconciliação.
@@ -22,11 +22,13 @@ As páginas cobrem resumo executivo, panorama, benchmark de times, forma recente
 
 ## Atualizar
 
-Execute o exportador na raiz do repositório. Ele lê a conexão do `.env` sem gravar credenciais e substitui os Parquets locais em `C:\Users\Public\football-analytics-bi-data`.
+Execute o exportador na raiz do repositório. Ele lê a conexão do `.env` sem gravar credenciais e substitui os Parquets no diretório técnico padrão `C:\Users\Public\football-analytics-bi-data`.
 
 ```powershell
 python bi/scripts/export_powerbi_snapshots.py
 ```
+
+O diretório pode ser alterado por `--output-dir` ou `BI_SNAPSHOT_DIR`; caminhos relativos são resolvidos a partir da raiz do repositório. O parâmetro M `SnapshotRoot` deve apontar para o mesmo diretório antes do refresh no Power BI Desktop.
 
 Depois abra o PBIP e atualize as tabelas sequencialmente na ordem documentada em [`docs/bi/REFRESH_MANUAL.md`](../docs/bi/REFRESH_MANUAL.md). O refresh automático no serviço não faz parte deste MVP.
 

@@ -1,4 +1,4 @@
 let
-    Source = Parquet.Document(File.Contents("C:\\Users\\Public\\football-analytics-bi-data\\DimPlayer.parquet"))
+    Source = Parquet.Document(File.Contents(SnapshotRoot & "\\DimPlayer.parquet"))
 in
     Source
