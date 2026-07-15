@@ -113,15 +113,19 @@ function buildCompetitionOrder(items: HomeCompetitionCard[]): HomeCompetitionCar
   );
 
   return [...items].sort((left, right) => {
-    const leftOrder = order.get(left.competitionKey) ?? 999;
-    const rightOrder = order.get(right.competitionKey) ?? 999;
+    const leftKey = getCompetitionById(left.competitionId)?.key ?? left.competitionKey;
+    const rightKey = getCompetitionById(right.competitionId)?.key ?? right.competitionKey;
+    const leftOrder = order.get(leftKey) ?? 999;
+    const rightOrder = order.get(rightKey) ?? 999;
 
     return leftOrder - rightOrder;
   });
 }
 
 function buildCompetitionCardHref(competition: HomeCompetitionCard): string {
-  return buildCompetitionHubPath(competition.competitionKey);
+  const competitionKey =
+    getCompetitionById(competition.competitionId)?.key ?? competition.competitionKey;
+  return buildCompetitionHubPath(competitionKey);
 }
 
 function buildCompetitionCtaLabel(_competition: HomeCompetitionCard): string {

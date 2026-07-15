@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 from functools import lru_cache
 from threading import Lock
 from typing import Any
@@ -705,12 +707,22 @@ def _fetch_editorial_highlights() -> list[dict[str, Any]]:
 @lru_cache(maxsize=1)
 def _load_home_page_data() -> tuple[dict[str, Any], dict[str, Any]]:
     # ponytail: this VM serves a static DB snapshot; restart after a manual data refresh.
-    competitions = _fetch_competitions()
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        competitions_future = executor.submit(copy_context().run, _fetch_competitions)
+        archive_summary_future = executor.submit(copy_context().run, _fetch_archive_summary)
+        editorial_highlights_future = executor.submit(
+            copy_context().run,
+            _fetch_editorial_highlights,
+        )
+
+        competitions = competitions_future.result()
+        archive_summary = archive_summary_future.result()
+        editorial_highlights = editorial_highlights_future.result()
+
     archive_summary = _normalize_archive_summary_from_competitions(
-        _fetch_archive_summary(),
+        archive_summary,
         competitions,
     )
-    editorial_highlights = _fetch_editorial_highlights()
 
     data = {
         "archiveSummary": archive_summary,

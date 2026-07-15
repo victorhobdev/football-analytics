@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import {
+  getCompetitionById,
   getCompetitionByKey,
   type CompetitionDef,
 } from "@/config/competitions.registry";
@@ -64,13 +65,14 @@ function coerceCompetitionType(value: HomeCompetitionCard["type"]): CatalogCompe
 }
 
 function buildCatalogCompetition(card: HomeCompetitionCard): CatalogCompetition {
-  const registryCompetition = getCompetitionByKey(card.competitionKey);
+  const registryCompetition =
+    getCompetitionById(card.competitionId) ?? getCompetitionByKey(card.competitionKey);
   const scope = coerceCompetitionScope(card.scope ?? registryCompetition?.scope);
   const type = coerceCompetitionType(card.type ?? registryCompetition?.type);
 
   return {
     id: card.competitionId,
-    key: card.competitionKey,
+    key: registryCompetition?.key ?? card.competitionKey,
     name: card.competitionName,
     shortName: registryCompetition?.shortName ?? card.competitionName,
     source: card.source ?? "published",
