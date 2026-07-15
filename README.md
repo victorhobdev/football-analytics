@@ -2,8 +2,6 @@
 
 Projeto de análise de dados aplicado a futebol: ingestão e transformação de dados públicos, modelo dimensional, reconciliação SQL × DAX, Power BI versionável e uma aplicação web para exploração do domínio.
 
-[Acessar a plataforma](https://football-analytics-victor-hugos-projects-f5572824.vercel.app) · [Abrir o case na aplicação](https://football-analytics-victor-hugos-projects-f5572824.vercel.app/landing)
-
 ![Football Analytics - página inicial](frontend/public/readme/home.jpg)
 
 ## Pergunta do projeto
@@ -63,8 +61,8 @@ As consultas que sustentam esses valores estão em [`bi/validation`](bi/validati
 
 ## Cases de Python e SQL
 
-- [A vantagem de jogar em casa diminuiu?](docs/analysis/HOME_ADVANTAGE.md): pandas, exploração, intervalos de confiança, Welch, Hedges g e controle por competição sobre 207.770 partidas.
-- [Forma recente e posição relativa em SQL](docs/analysis/TEAM_FORM_SQL.md): `LAG`, `LEAD`, janelas, percentis, `RANK`, `EXPLAIN ANALYZE` e benchmark antes/depois.
+- [A vantagem de jogar em casa diminuiu?](analysis/home_advantage.py): pandas, exploração, intervalos de confiança, Welch, Hedges g e controle por competição sobre 207.770 partidas.
+- [Forma recente e posição relativa em SQL](analysis/sql/team_form_performance.sql): `LAG`, `LEAD`, janelas, percentis, `RANK`, `EXPLAIN ANALYZE` e benchmark antes/depois.
 - [Performance e arquitetura do Power BI](docs/bi/PERFORMANCE_E_ARQUITETURA.md): evidências do Performance Analyzer e DAX Studio, acessibilidade e decisão entre Import, DirectQuery e Direct Lake.
 
 ## Limitações declaradas
@@ -86,6 +84,15 @@ Snapshots Parquet → Power Query → modelo TMDL / DAX → Power BI
       ↓
 FastAPI / BFF → Next.js para catálogo, partidas e perfis
 ```
+
+## Fluxo e dependências externas
+
+1. As DAGs de ingestão consultam provedores configurados e gravam dados brutos; esse estágio exige rede, credenciais dos provedores e PostgreSQL/MinIO.
+2. dbt transforma os dados em `mart.*`; a API FastAPI/BFF lê as tabelas de serving e o Next.js apresenta catálogo, partidas e perfis.
+3. O exportador de snapshots lê `mart.*` e grava Parquet; o Power BI Desktop atualiza o PBIP na ordem descrita em [`docs/bi/REFRESH_MANUAL.md`](docs/bi/REFRESH_MANUAL.md).
+4. A publicação no serviço do Power BI e a URL pública dependem de conta autorizada, navegador e rede; não fazem parte da verificação offline.
+
+O `start-local.ps1` exige Docker, `.env`, as imagens/serviços do Compose e os artefatos locais `artifacts/football_serving_20260426.dump` e `artifacts/wc_delta_20260426.tgz`. Ele restaura o serving, executa materializações locais e sobe PostgreSQL, MinIO, Metabase, Airflow, API e frontend; esses artefatos não são versionados.
 
 ## Stack
 
@@ -112,15 +119,32 @@ Power BI integrado: `http://localhost:3001/analises`
 
 O `start-local.ps1` exige o `.env` local e snapshots de serving/deltas em `artifacts/`. Esses artefatos não são versionados; portanto, esse caminho ainda não é um clone limpo completo.
 
-## Validação rápida
+## Verificação reproduzível offline
+
+Os comandos abaixo reutilizam os mesmos gates da CI, não chamam APIs de provedores nem exigem API paga. Eles validam os reprodutores Python de primeira carga, segunda execução sem duplicação, falha, retry e reprocessamento; parse do dbt; configuração do Compose; estrutura do BI; e typecheck/build do frontend:
+
+Defina o mesmo caminho de importação usado pela CI antes do primeiro comando:
 
 ```powershell
-pnpm --dir frontend exec tsc --noEmit
-python bi/scripts/build_pbir_report.py
-python -m zipfile -t bi/FootballAnalytics_DesempenhoCompetitivo.pbix
+$env:PYTHONPATH = ".;api;infra/airflow/dags"
 ```
 
-O mesmo conjunto de verificações é executado pelo [CI](.github/workflows/ci.yml).
+Em shells POSIX, use `export PYTHONPATH=.:api:infra/airflow/dags`.
+
+```text
+python -m pytest -q -p no:cacheprovider api/tests tests
+dbt parse --project-dir platform/dbt --profiles-dir platform/dbt --no-partial-parse
+docker compose --env-file .env.example config --quiet
+python -m unittest -v bi.scripts.test_validate_artifacts
+python bi/scripts/validate_artifacts.py bi
+pnpm --dir frontend install --frozen-lockfile
+pnpm --dir frontend run typecheck
+pnpm --dir frontend run build
+```
+
+O primeiro comando usa mocks/stubs e não precisa do PostgreSQL nem de credenciais de provedor. `dbt`, Docker Compose e `pnpm` precisam estar instalados; a instalação do frontend usa apenas o lockfile versionado. A exportação de snapshots, o refresh do Power BI e a execução do ambiente local completo dependem dos serviços descritos em [Fluxo e dependências externas](#fluxo-e-dependências-externas).
+
+O detalhamento dos jobs está no [CI](.github/workflows/ci.yml). Em um clone limpo, o caminho de execução local ainda exige `.env`, imagens Docker e snapshots de serving/deltas em `artifacts/`.
 
 Para atualizar dados e republicar, siga [`docs/bi/REFRESH_MANUAL.md`](docs/bi/REFRESH_MANUAL.md).
 

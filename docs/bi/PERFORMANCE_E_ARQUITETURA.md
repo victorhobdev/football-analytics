@@ -20,7 +20,7 @@ Nenhum visual ultrapassou 300 ms e a consulta analítica terminou em 27 ms. Por 
 - [`DAX_SERVER_TIMINGS.json`](DAX_SERVER_TIMINGS.json)
 - [`DICIONARIO_MEDIDAS.md`](DICIONARIO_MEDIDAS.md)
 
-O caso SQL separado apresentou uma melhoria mensurável de 5.453,303 ms para 3.199,425 ms (-41,33%) após materialização temporária e índice. Veja [`TEAM_FORM_SQL.md`](../analysis/TEAM_FORM_SQL.md).
+O caso SQL separado apresentou uma melhoria mensurável de 5.453,303 ms para 3.199,425 ms (-41,33%) após materialização temporária e índice. Veja [`team_form_performance.sql`](../../analysis/sql/team_form_performance.sql).
 
 ## Recursos profissionais implementados
 

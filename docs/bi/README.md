@@ -17,8 +17,8 @@ O modelo cobre todo o conjunto publicado em `mart.*`. Nenhuma consulta fixa uma 
 - [Validação SQL x DAX](VALIDACAO_SQL_DAX.md)
 - [Performance, acessibilidade e arquitetura](PERFORMANCE_E_ARQUITETURA.md)
 - [Dicionário das medidas](DICIONARIO_MEDIDAS.md)
-- [Estudo estatístico sobre mando](../analysis/HOME_ADVANTAGE.md)
-- [Caso SQL avançado e performance](../analysis/TEAM_FORM_SQL.md)
+- [Estudo estatístico sobre mando](../../analysis/home_advantage.py)
+- [Caso SQL avançado e performance](../../analysis/sql/team_form_performance.sql)
 - `../../bi/validation`: consultas executaveis de cobertura e reconciliacao.
 - `../../bi/README.md`: abertura, estrutura e estado de publicação dos artefatos.
 
