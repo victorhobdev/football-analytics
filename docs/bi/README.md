@@ -1,6 +1,6 @@
 # Power BI — Football Analytics
 
-O Power BI é a camada analítica pública do portfólio. O site preserva a exploração de competições, partidas, classificações oficiais, times e jogadores; rankings analíticos, comparações, tendências e cobertura ficam no relatório incorporado em `/analises`.
+O Power BI é a camada analítica pública do projeto. O site preserva a exploração de competições, partidas, classificações oficiais, times e jogadores; rankings analíticos, comparações, tendências e cobertura ficam no relatório incorporado em `/analises`.
 
 ## Escopo
 

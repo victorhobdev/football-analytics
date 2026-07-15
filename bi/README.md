@@ -1,6 +1,6 @@
 # Power BI — Football Analytics
 
-Este diretório contém o relatório analítico público do portfólio. O modelo cobre todo o projeto; `sportmonks|la_liga|2024_25` é apenas o recorte fixo usado para reconciliar SQL e DAX.
+Este diretório contém o relatório analítico público do projeto. O modelo cobre todo o projeto; `sportmonks|la_liga|2024_25` é apenas o recorte fixo usado para reconciliar SQL e DAX.
 
 ## Abrir
 

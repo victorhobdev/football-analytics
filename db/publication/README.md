@@ -135,7 +135,7 @@ Resultado esperado:
 - `player_stat_orphans = 0`
 - `fdw_source_server_leftover = 0`
 - `foreign_source_schemas_leftover = 0`
-- contagem por competicao/temporada compativel com o portfolio publicado
+- contagem por competicao/temporada compativel com a publicação
 
 5. Gerar dump enxuto.
 

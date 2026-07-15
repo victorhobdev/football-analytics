@@ -39,7 +39,7 @@ As cores de texto verificadas contra fundo branco atendem WCAG AA para texto nor
 
 O relatório usa **Import** a partir de snapshots Parquet locais. Essa opção foi mantida porque torna a demonstração portátil, rápida, reproduzível e independente da disponibilidade do PostgreSQL durante o acesso público. O custo é um refresh manual e dados não instantâneos.
 
-**DirectQuery** seria indicado se a atualização próxima do tempo real justificasse gateway, disponibilidade do banco, controle de concorrência e latência de cada interação. Não foi escolhido porque adicionaria operação e exposição de infraestrutura sem benefício para este portfólio.
+**DirectQuery** seria indicado se a atualização próxima do tempo real justificasse gateway, disponibilidade do banco, controle de concorrência e latência de cada interação. Não foi escolhido porque adicionaria operação e exposição de infraestrutura sem benefício para este projeto.
 
 **Direct Lake** passa a fazer sentido com adoção de Microsoft Fabric/OneLake, volume ou frequência de atualização maiores e capacidade contratada. No estado atual, introduzir Fabric apenas para demonstrar a tecnologia aumentaria custo e complexidade sem resolver um problema observado.
 

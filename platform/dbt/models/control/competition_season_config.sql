@@ -4,15 +4,15 @@ with source as (
     select *
     from (
         values
-            ('copa_do_brasil', '2021', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'pilot_portfolio'),
-            ('copa_do_brasil', '2022', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'pilot_portfolio'),
-            ('copa_do_brasil', '2023', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'pilot_portfolio'),
+            ('copa_do_brasil', '2021', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'validated_pilot'),
+            ('copa_do_brasil', '2022', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'validated_pilot'),
+            ('copa_do_brasil', '2023', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'validated_pilot'),
             ('copa_do_brasil', '2024', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'pilot_proof_season'),
             ('copa_do_brasil', '2025', 'knockout', 'cdb_knockout_progressive_entry_v1', 'club', 'not_applicable', 'cdb_stage_governed_tie_rules_v1', 'pilot_proof_season'),
             ('supercopa_do_brasil', '2025', 'knockout', 'supercopa_single_final_v1', 'club', 'not_applicable', 'single_leg_extra_time_penalties_v1', 'modern_era_closed_scope'),
-            ('libertadores', '2021', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_portfolio'),
-            ('libertadores', '2022', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_portfolio'),
-            ('libertadores', '2023', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_portfolio'),
+            ('libertadores', '2021', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'validated_pilot'),
+            ('libertadores', '2022', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'validated_pilot'),
+            ('libertadores', '2023', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'validated_pilot'),
             ('libertadores', '2024', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_proof_season'),
             ('libertadores', '2025', 'hybrid', 'lib_qualification_group_knockout_v1', 'club', 'conmebol_group_standard_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_proof_season'),
             ('sudamericana', '2024', 'hybrid', 'sud_qualification_group_playoff_knockout_v1', 'club', 'conmebol_sudamericana_group_progression_v1', 'conmebol_stage_governed_tie_rules_v1', 'pilot_proof_season'),

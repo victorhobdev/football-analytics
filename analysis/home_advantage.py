@@ -1,4 +1,4 @@
-"""Reproduce the portfolio study: has home advantage declined since 2000?"""
+"""Reproduce the published study: has home advantage declined since 2000?"""
 
 from __future__ import annotations
 

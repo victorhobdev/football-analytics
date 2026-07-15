@@ -1,6 +1,6 @@
 # Football Analytics
 
-Portfólio de análise de dados aplicado a futebol: ingestão e transformação de dados públicos, modelo dimensional, reconciliação SQL × DAX, Power BI versionável e uma aplicação web para exploração do domínio.
+Projeto de análise de dados aplicado a futebol: ingestão e transformação de dados públicos, modelo dimensional, reconciliação SQL × DAX, Power BI versionável e uma aplicação web para exploração do domínio.
 
 [Acessar a plataforma](https://football-analytics-victor-hugos-projects-f5572824.vercel.app) · [Abrir o case na aplicação](https://football-analytics-victor-hugos-projects-f5572824.vercel.app/landing)
 

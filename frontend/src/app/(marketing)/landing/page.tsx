@@ -33,7 +33,7 @@ export default function MarketingLandingPage() {
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[rgba(17,28,45,0.08)] pb-5 sm:items-center sm:pb-6">
           <div>
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#57657a]">
-              Case de portfólio · Análise de dados
+              Case de análise · Análise de dados
             </p>
             <h1 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.04em] text-[#003526]">
               Football Analytics

@@ -31,7 +31,7 @@ Cup** como uma tabela paralela de eventos, porque isso duplicaria o mesmo fato
 em outro local do warehouse.
 
 Tambem ha risco de duplicacao contra o core SportMonks das competicoes normais.
-O DW ja possui partidas, times, jogadores e eventos SportMonks para o portfolio
+O DW ja possui partidas, times, jogadores e eventos SportMonks para o projeto
 principal em `mart.fact_matches`, `mart.dim_team`, `mart.dim_player` e
 `mart.fact_match_events`. Quando uma partida StatsBomb pertencer a uma
 competicao/temporada ja coberta pelo SportMonks, ela deve ser tratada como
