@@ -1,12 +1,42 @@
 from __future__ import annotations
 
 import unittest
+from threading import Barrier
 from unittest.mock import patch
 
 from api.src.routers.home import _fetch_archive_summary, _fetch_competitions, _load_home_page_data
 
 
 class HomeRouteTests(unittest.TestCase):
+    def test_home_page_data_loads_independent_sections_concurrently(self) -> None:
+        barrier = Barrier(3, timeout=0.2)
+        competitions = [{"competitionKey": "champions_league", "matchesCount": 1, "seasonsCount": 1}]
+        archive_summary = {"competitions": 0, "seasons": 0, "matches": 0, "players": 3}
+        highlights = [{"id": "highlight-1"}]
+
+        def fetch_competitions() -> list[dict[str, object]]:
+            barrier.wait()
+            return competitions
+
+        def fetch_archive_summary() -> dict[str, int]:
+            barrier.wait()
+            return archive_summary
+
+        def fetch_editorial_highlights() -> list[dict[str, str]]:
+            barrier.wait()
+            return highlights
+
+        _load_home_page_data.cache_clear()
+        try:
+            with (
+                patch("api.src.routers.home._fetch_competitions", side_effect=fetch_competitions),
+                patch("api.src.routers.home._fetch_archive_summary", side_effect=fetch_archive_summary),
+                patch("api.src.routers.home._fetch_editorial_highlights", side_effect=fetch_editorial_highlights),
+            ):
+                _load_home_page_data()
+        finally:
+            _load_home_page_data.cache_clear()
+
     def test_home_page_data_is_loaded_once_for_the_static_snapshot(self) -> None:
         competitions = [{"competitionKey": "champions_league"}]
         archive_summary = {"competitions": 0, "seasons": 0, "matches": 0, "players": 3}
