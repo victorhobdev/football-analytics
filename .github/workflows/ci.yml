@@ -60,7 +60,7 @@ jobs:
 
           profile = Path("platform/dbt/profiles.yml").read_text(encoding="utf-8")
           for field in ("host", "port", "user", "pass", "dbname", "schema", "threads"):
-              pattern = r"^\s*" + re.escape(field) + r":\s*\{\{\s*env_var\("
+              pattern = r"^\s*" + re.escape(field) + r":\s*[\"']?\{\{\s*env_var\("
               if not re.search(pattern, profile, re.MULTILINE):
                   raise SystemExit(f"dbt profile field is not env-backed: {field}")
           PY
