@@ -1,17 +1,13 @@
 "use client";
 
 import type { TeamProfileStats } from "@/features/teams/types";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
-  ProfileCoveragePill,
   ProfileMetricTile,
   ProfilePanel,
 } from "@/shared/components/profile/ProfilePrimitives";
-import type { CoverageState } from "@/shared/types/coverage.types";
 
 type TeamStatsSectionProps = {
-  coverage: CoverageState;
   stats: TeamProfileStats | null | undefined;
 };
 
@@ -31,7 +27,7 @@ function formatPercentage(value: number | null | undefined): string {
   return `${Math.round(value)}%`;
 }
 
-export function TeamStatsSection({ coverage, stats }: TeamStatsSectionProps) {
+export function TeamStatsSection({ stats }: TeamStatsSectionProps) {
   const trend = stats?.trend ?? [];
   const hasStats =
     stats &&
@@ -44,7 +40,6 @@ export function TeamStatsSection({ coverage, stats }: TeamStatsSectionProps) {
   if (!hasStats) {
     return (
       <div className="space-y-4">
-        {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
           title="Estatísticas indisponíveis"
           description="As métricas agregadas do time ainda não estão disponíveis neste contexto."
@@ -55,8 +50,6 @@ export function TeamStatsSection({ coverage, stats }: TeamStatsSectionProps) {
 
   return (
     <div className="space-y-5">
-      {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
-
       <ProfilePanel className="space-y-4" tone="soft">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
@@ -70,7 +63,6 @@ export function TeamStatsSection({ coverage, stats }: TeamStatsSectionProps) {
               A seção resume produção por jogo e a evolução mensal da campanha.
             </p>
           </div>
-          <ProfileCoveragePill coverage={coverage} />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">

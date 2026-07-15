@@ -223,6 +223,7 @@ def get_teams(
         left join mart.dim_team home_team
           on home_team.team_id = fm.home_team_id
         where {competition_scope_sql}
+          and (%s::text is null or home_team.team_name ilike %s)
     """
     away_branch = f"""
         select
@@ -236,16 +237,24 @@ def get_teams(
         left join mart.dim_team away_team
           on away_team.team_id = fm.away_team_id
         where {competition_scope_sql}
+          and (%s::text is null or away_team.team_name ilike %s)
     """
     if global_filters.venue == VenueFilter.home:
         team_rows_sql = home_branch
-        team_rows_params = [*competition_scope_params]
+        team_rows_params = [*competition_scope_params, search_pattern, search_pattern]
     elif global_filters.venue == VenueFilter.away:
         team_rows_sql = away_branch
-        team_rows_params = [*competition_scope_params]
+        team_rows_params = [*competition_scope_params, search_pattern, search_pattern]
     else:
         team_rows_sql = f"{home_branch} union all {away_branch}"
-        team_rows_params = [*competition_scope_params, *competition_scope_params]
+        team_rows_params = [
+            *competition_scope_params,
+            search_pattern,
+            search_pattern,
+            *competition_scope_params,
+            search_pattern,
+            search_pattern,
+        ]
 
     query = f"""
         with team_rows as (
@@ -294,7 +303,6 @@ def get_teams(
                 )::int as position,
                 count(*) over()::int as total_teams
             from aggregated a
-            where (%s::text is null or a.team_name ilike %s)
         )
         select
             r.*,
@@ -309,8 +317,6 @@ def get_teams(
             *team_rows_params,
             global_filters.last_n,
             global_filters.last_n,
-            search_pattern,
-            search_pattern,
             pageSize,
             offset,
         ],

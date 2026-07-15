@@ -11,17 +11,10 @@ type AnalisesPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function firstValue(value: string | string[] | undefined): string | null {
-  const resolved = Array.isArray(value) ? value[0] : value;
-  return resolved?.trim() || null;
-}
-
 export default async function AnalisesPage({ searchParams }: AnalisesPageProps) {
   const params = (await searchParams) ?? {};
   const context = resolveCompetitionSeasonContextFromSearchParams(params);
-  const provider = firstValue(params.provider);
   const requestedFilters = [
-    provider ? { label: "Fonte", value: provider } : null,
     context ? { label: "Competição", value: context.competitionName } : null,
     context ? { label: "Temporada", value: context.seasonLabel } : null,
   ].filter((item): item is { label: string; value: string } => item !== null);

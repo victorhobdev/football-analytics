@@ -1,24 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { useHomePage } from "@/features/home/hooks/useHomePage";
-import { PlayerComparisonPanel } from "@/features/players/components/PlayerComparisonPanel";
-import { GlobalSearchOverlay } from "@/features/search/components/GlobalSearchOverlay";
 import { GlobalErrorBoundary } from "@/shared/components/feedback/GlobalErrorBoundary";
 import { GlobalFilterBar } from "@/shared/components/filters/GlobalFilterBar";
 import { PLATFORM_SEARCH_OPEN_EVENT } from "@/shared/components/navigation/platform-search.events";
+import { useHomePage } from "@/features/home/hooks/useHomePage";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import {
-  buildCoachesPath,
   buildHeadToHeadPath,
   buildMarketPath,
   buildPlayersPath,
   buildRankingsHubPath,
   buildTeamsPath,
 } from "@/shared/utils/context-routing";
+
+const PlayerComparisonPanel = dynamic(
+  () => import("@/features/players/components/PlayerComparisonPanel").then((module) => module.PlayerComparisonPanel),
+  { ssr: false },
+);
+const GlobalSearchOverlay = dynamic(
+  () => import("@/features/search/components/GlobalSearchOverlay").then((module) => module.GlobalSearchOverlay),
+  { ssr: false },
+);
 
 type PlatformShellProps = {
   children: ReactNode;
@@ -392,12 +399,6 @@ export function PlatformShell({ children }: PlatformShellProps) {
       icon: "analytics" as const,
       label: "Mercado",
       summary: "Transferências de jogadores",
-    },
-    {
-      href: buildCoachesPath(sharedFilters),
-      icon: "player" as const,
-      label: "Técnicos",
-      summary: "Perfis e desempenho",
     },
     {
       href: "/landing",

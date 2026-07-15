@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import {
   getCompetitionById,
   getCompetitionByKey,
+  getCompetitionVisualAssetId,
   type CompetitionDef,
 } from "@/config/competitions.registry";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
@@ -82,27 +83,13 @@ function buildCatalogCompetition(card: HomeCompetitionCard): CatalogCompetition 
     region: card.region ?? registryCompetition?.region ?? "Não informado",
     type,
     scope,
-    visualAssetId: card.assetId ?? registryCompetition?.visualAssetId,
+    visualAssetId: registryCompetition
+      ? getCompetitionVisualAssetId(registryCompetition) ?? undefined
+      : card.assetId ?? undefined,
     matchesCount: card.matchesCount,
     seasonsCount: card.seasonsCount,
     latestSeasonLabel: card.latestContext?.seasonLabel ?? card.range.toSeasonLabel,
   };
-}
-
-function getCompetitionSourceLabel(competition: CatalogCompetition): string {
-  if (competition.source === "multi" || competition.additionalSources.length > 0) {
-    return "Multi-fonte";
-  }
-
-  if (competition.dominantSource === "transfermarkt") {
-    return "Transfermarkt";
-  }
-
-  if (competition.dominantSource === "eloratings") {
-    return "Elo+Matches";
-  }
-
-  return "Publicado";
 }
 
 function describeCompetitionTypeLabel(competition: CatalogCompetition): string {
@@ -279,6 +266,8 @@ function TableAction({ competition }: { competition: CatalogCompetition }) {
 }
 
 function CompetitionMatrixRow({ competition }: { competition: CatalogCompetition }) {
+  const href = buildCompetitionCardHref(competition);
+
   return (
     <tr className={styles.matrixRow}>
       <td className={styles.matrixCell}>
@@ -294,10 +283,10 @@ function CompetitionMatrixRow({ competition }: { competition: CatalogCompetition
           />
 
           <div className={styles.competitionLead}>
-            <p className={styles.competitionName}>{competition.name}</p>
-            <p className={styles.competitionScope}>
-              {describeCompetitionScopeLabel(competition)} · {getCompetitionSourceLabel(competition)}
-            </p>
+            <Link className={styles.competitionName} href={href} prefetch={false}>
+              {competition.name}
+            </Link>
+            <p className={styles.competitionScope}>{describeCompetitionScopeLabel(competition)}</p>
           </div>
         </div>
       </td>
@@ -334,9 +323,7 @@ function CompetitionMobileCard({ competition }: { competition: CatalogCompetitio
 
           <div className={styles.competitionLead}>
             <p className={styles.competitionName}>{competition.name}</p>
-            <p className={styles.competitionScope}>
-              {describeCompetitionScopeLabel(competition)} · {getCompetitionSourceLabel(competition)}
-            </p>
+            <p className={styles.competitionScope}>{describeCompetitionScopeLabel(competition)}</p>
           </div>
         </div>
 
@@ -481,7 +468,7 @@ export default function CompetitionsIndexPage() {
             </p>
 
             <div className={styles.headerTags}>
-              <span className={styles.headerTag}>{formatWholeNumber(unifiedCompetitionsCount)} unificadas</span>
+              <span className={styles.headerTag}>{formatWholeNumber(unifiedCompetitionsCount)} competições</span>
               <span className={styles.headerTag}>{formatWholeNumber(domestic.length)} nacionais</span>
               <span className={styles.headerTag}>
                 {formatWholeNumber(international.length)} intercontinentais

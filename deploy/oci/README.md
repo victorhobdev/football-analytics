@@ -60,10 +60,23 @@ Não repita a restauração sobre um banco preenchido sem criar backup.
 
 Crie no Cloudflare um registro `A` para o domínio configurado em `APP_HOST`, apontando para o IPv4 público da VM. Durante a primeira emissão do certificado, use `Somente DNS`.
 
+Copie `data/visual_assets` para a VM antes de subir os containers. O Compose falha de propósito quando o diretório não existe. Confirme ao menos os manifests e os assets de smoke:
+
+```bash
+test -r data/visual_assets/manifests/clubs.json
+test -r data/visual_assets/manifests/competitions.json
+test -r data/visual_assets/clubs/53.png
+test -r data/visual_assets/clubs/503.png
+test -r data/visual_assets/clubs/1024.png
+test -r data/visual_assets/competitions/648.png
+```
+
 ```bash
 docker compose --env-file deploy/oci/.env -f deploy/oci/compose.yml up -d --build
 docker compose --env-file deploy/oci/.env -f deploy/oci/compose.yml ps
 curl -fsS "https://$(grep '^APP_HOST=' deploy/oci/.env | cut -d= -f2)/api/health"
+curl -fsS -o /dev/null "https://$(grep '^APP_HOST=' deploy/oci/.env | cut -d= -f2)/visual-assets/clubs/53.png"
+curl -fsS -o /dev/null "https://$(grep '^APP_HOST=' deploy/oci/.env | cut -d= -f2)/visual-assets/competitions/648.png"
 ```
 
 Os serviços internos não publicam portas no host. O Caddy é o único ponto de entrada e renova o certificado HTTPS automaticamente.

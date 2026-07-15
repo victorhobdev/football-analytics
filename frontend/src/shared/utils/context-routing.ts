@@ -438,10 +438,6 @@ export function buildMarketPath(contextInput: SharedFilterQueryInput = {}): stri
   return `/market${buildFilterQueryString(contextInput)}`;
 }
 
-export function buildCoachesPath(contextInput: SharedFilterQueryInput = {}): string {
-  return `/coaches${buildFilterQueryString(contextInput)}`;
-}
-
 export function buildAnalyticsPath(contextInput: SharedFilterQueryInput = {}): string {
   return buildAnalysesPath(contextInput);
 }

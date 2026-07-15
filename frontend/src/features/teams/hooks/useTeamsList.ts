@@ -57,7 +57,7 @@ export function useTeamsList(
 
   return useQueryWithCoverage<TeamsListData>({
     queryKey: teamsQueryKeys.list(mergedFilters),
-    queryFn: () => fetchTeamsList(mergedFilters),
+    queryFn: ({ signal }) => fetchTeamsList(mergedFilters, signal),
     placeholderData: keepPreviousData,
     staleTime: TEAMS_LIST_STALE_TIME_MS,
     gcTime: TEAMS_LIST_GC_TIME_MS,

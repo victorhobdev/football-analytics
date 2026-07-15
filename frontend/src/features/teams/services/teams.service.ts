@@ -40,10 +40,12 @@ function toQueryParams<TFilters extends object>(filters: TFilters): QueryParams 
 
 export async function fetchTeamsList(
   filters: TeamsListFilters = {},
+  signal?: AbortSignal,
 ): Promise<ApiResponse<TeamsListData>> {
   return apiRequest<ApiResponse<TeamsListData>>(TEAMS_ENDPOINTS.list, {
     method: "GET",
     params: toQueryParams(filters),
+    signal,
   });
 }
 

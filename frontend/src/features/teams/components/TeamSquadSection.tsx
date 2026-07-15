@@ -3,22 +3,17 @@
 import Link from "next/link";
 
 import type { TeamSquadPlayer } from "@/features/teams/types";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import {
-  ProfileAlert,
-  ProfileCoveragePill,
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
-import type { CoverageState } from "@/shared/types/coverage.types";
 import { buildCanonicalPlayerPath, buildFilterQueryString } from "@/shared/utils/context-routing";
 import { formatDate } from "@/shared/utils/formatters";
 
 type TeamSquadSectionProps = {
   competitionContext: CompetitionSeasonContext;
-  coverage: CoverageState;
   filters: {
     competitionId?: string | null;
     seasonId?: string | null;
@@ -33,7 +28,6 @@ type TeamSquadSectionProps = {
 
 export function TeamSquadSection({
   competitionContext,
-  coverage,
   filters,
   squad,
 }: TeamSquadSectionProps) {
@@ -43,7 +37,6 @@ export function TeamSquadSection({
   if (items.length === 0) {
     return (
       <div className="space-y-4">
-        {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
         <EmptyState
           title="Elenco indisponível"
           description="Ainda não há jogadores identificados para este time no contexto atual."
@@ -54,8 +47,6 @@ export function TeamSquadSection({
 
   return (
     <div className="space-y-5">
-      {coverage.status === "partial" ? <PartialDataBanner coverage={coverage} /> : null}
-
       <ProfilePanel className="space-y-4" tone="soft">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
@@ -70,15 +61,8 @@ export function TeamSquadSection({
               certo dentro do elenco.
             </p>
           </div>
-          <ProfileCoveragePill coverage={coverage} />
         </div>
       </ProfilePanel>
-
-      <ProfileAlert title="Disponibilidade do elenco" tone="info">
-        Os dados disponíveis ainda não trazem afastamentos com
-        consistência suficiente. Por enquanto, a leitura pública fica concentrada em participação,
-        minutos e última aparição.
-      </ProfileAlert>
 
       <section className="space-y-3">
         {items.map((player) => {

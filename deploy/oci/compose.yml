@@ -63,7 +63,12 @@ services:
       FOOTBALL_VISUAL_ASSETS_ROOT: /data/visual_assets
       NEXT_PUBLIC_BFF_BASE_URL: /bff
     volumes:
-      - ../../data/visual_assets:/data/visual_assets:ro
+      - type: bind
+        source: ../../data/visual_assets
+        target: /data/visual_assets
+        read_only: true
+        bind:
+          create_host_path: false
     depends_on:
       api:
         condition: service_healthy
@@ -84,7 +89,12 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ../../data/visual_assets:/srv/visual-assets:ro
+      - type: bind
+        source: ../../data/visual_assets
+        target: /srv/visual-assets
+        read_only: true
+        bind:
+          create_host_path: false
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

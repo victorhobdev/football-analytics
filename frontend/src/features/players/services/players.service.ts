@@ -33,10 +33,14 @@ function toQueryParams<TFilters extends object>(filters: TFilters): QueryParams 
   return queryParams;
 }
 
-export async function fetchPlayersList(filters: PlayersListFilters = {}): Promise<ApiResponse<PlayersListData>> {
+export async function fetchPlayersList(
+  filters: PlayersListFilters = {},
+  signal?: AbortSignal,
+): Promise<ApiResponse<PlayersListData>> {
   return apiRequest<ApiResponse<PlayersListData>>(PLAYERS_ENDPOINTS.list, {
     method: "GET",
     params: toQueryParams(filters),
+    signal,
   });
 }
 

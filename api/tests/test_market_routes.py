@@ -56,8 +56,19 @@ class MarketTransfersApiTests(unittest.TestCase):
         self.assertIn("transfermarkt_transfers", query)
         self.assertNotIn("Unknown Player #", query)
         self.assertNotIn("Team #", query)
+        self.assertIn("null::bigint as rn_recent", query)
         self.assertEqual(params.count(219), 2)
         self.assertIn(PRODUCT_DATA_CUTOFF, params)
+
+    @patch("api.src.routers.market.db_client.fetch_all")
+    def test_market_transfers_only_ranks_recent_rows_when_last_n_is_requested(self, fetch_all_mock) -> None:
+        fetch_all_mock.return_value = []
+
+        response = self.client.get("/api/v1/market/transfers?lastN=5")
+
+        self.assertEqual(response.status_code, 200)
+        query = fetch_all_mock.call_args.args[0]
+        self.assertIn("row_number() over (order by et.transfer_date", query)
 
     @patch("api.src.routers.market.db_client.fetch_all")
     def test_market_transfers_returns_unknown_type_fallback(self, fetch_all_mock) -> None:

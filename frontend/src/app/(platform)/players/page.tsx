@@ -1,25 +1,19 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
-import { useQueryClient } from "@tanstack/react-query";
 
 import { getCompetitionById } from "@/config/competitions.registry";
 import { formatMetricValue } from "@/config/metrics.registry";
 import { getSeasonById } from "@/config/seasons.registry";
 import { usePlayersList } from "@/features/players/hooks";
-import { playersQueryKeys } from "@/features/players/queryKeys";
-import { fetchPlayerProfile } from "@/features/players/services/players.service";
 import type {
   PlayerListItem,
-  PlayerProfileFilters,
   PlayersSortBy,
   PlayersSortDirection,
 } from "@/features/players/types";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
 import {
@@ -29,6 +23,7 @@ import {
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
 import { useTimeRange } from "@/shared/hooks/useTimeRange";
@@ -244,26 +239,6 @@ function resolveSortDirectionLabel(sortDirection: PlayersSortDirection): string 
   return sortDirection === "asc" ? "Menor para maior" : "Maior para menor";
 }
 
-function shouldShowCoverageNotice(status: string, percentage?: number): boolean {
-  if (status !== "partial") {
-    return false;
-  }
-
-  if (typeof percentage === "number") {
-    return percentage < 95;
-  }
-
-  return true;
-}
-
-function resolveCoverageMessage(percentage?: number): string {
-  if (typeof percentage === "number") {
-    return `Dados parciais neste recorte (${percentage.toFixed(0)}% coberto).`;
-  }
-
-  return "Dados parciais neste recorte.";
-}
-
 function formatMinutesCell(value: number | null | undefined): string {
   return formatInteger(value);
 }
@@ -454,11 +429,9 @@ export default function PlayersPage() {
   const [sortBy, setSortBy] = useState<PlayersSortBy>("goals");
   const [sortDirection, setSortDirection] = useState<PlayersSortDirection>("desc");
 
-  const deferredSearch = useDeferredValue(search);
+  const debouncedSearch = useDebouncedValue(search);
   const normalizedMinMinutes = useMemo(() => parseMinMinutes(minMinutesInput), [minMinutesInput]);
 
-  const queryClient = useQueryClient();
-  const prefetchedPlayerIdsRef = useRef<Set<string>>(new Set());
   const { competitionId, seasonId, venue } = useGlobalFiltersState();
   const resolvedContext = useResolvedCompetitionContext();
   const { params: timeRangeParams } = useTimeRange();
@@ -473,7 +446,7 @@ export default function PlayersPage() {
   }, [
     competitionId,
     seasonId,
-    deferredSearch,
+    debouncedSearch,
     normalizedMinMinutes,
     pageSize,
     selectedStageFormat,
@@ -493,7 +466,7 @@ export default function PlayersPage() {
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   const playersQuery = usePlayersList({
-    search: deferredSearch,
+    search: debouncedSearch,
     minMinutes: normalizedMinMinutes,
     stageId: selectedStageId,
     stageFormat: selectedStageFormat,
@@ -511,58 +484,6 @@ export default function PlayersPage() {
   const resolvedPageSize = pagination?.pageSize ?? pageSize;
   const currentRangeStart = totalCount === 0 ? 0 : (currentPage - 1) * resolvedPageSize + 1;
   const currentRangeEnd = totalCount === 0 ? 0 : currentRangeStart + rows.length - 1;
-
-  const detailPrefetchFilters = useMemo<PlayerProfileFilters>(
-    () => ({
-      competitionId,
-      seasonId,
-      roundId: timeRangeParams.roundId,
-      venue,
-      lastN: timeRangeParams.lastN,
-      dateRangeStart: timeRangeParams.dateRangeStart,
-      dateRangeEnd: timeRangeParams.dateRangeEnd,
-      stageId: selectedStageId,
-      stageFormat: selectedStageFormat,
-      includeRecentMatches: true,
-    }),
-    [
-      competitionId,
-      seasonId,
-      selectedStageFormat,
-      selectedStageId,
-      timeRangeParams.dateRangeEnd,
-      timeRangeParams.dateRangeStart,
-      timeRangeParams.lastN,
-      timeRangeParams.roundId,
-      venue,
-    ],
-  );
-
-  const prefetchPlayerDetail = useCallback(
-    (playerId: string) => {
-      const normalizedPlayerId = playerId.trim();
-
-      if (
-        normalizedPlayerId.length === 0 ||
-        prefetchedPlayerIdsRef.current.has(normalizedPlayerId)
-      ) {
-        return;
-      }
-
-      prefetchedPlayerIdsRef.current.add(normalizedPlayerId);
-
-      void queryClient.prefetchQuery({
-        queryKey: playersQueryKeys.profile(normalizedPlayerId, detailPrefetchFilters),
-        queryFn: () => fetchPlayerProfile(normalizedPlayerId, detailPrefetchFilters),
-        staleTime: 5 * 60 * 1000,
-      });
-    },
-    [detailPrefetchFilters, queryClient],
-  );
-
-  useEffect(() => {
-    prefetchedPlayerIdsRef.current.clear();
-  }, [detailPrefetchFilters]);
 
   const getPlayerHref = useCallback(
     (playerId: string) =>
@@ -815,6 +736,11 @@ export default function PlayersPage() {
 
   return (
     <ProfileShell className="space-y-5">
+      {playersQuery.isFetching && playersQuery.data ? (
+        <p className="text-sm font-semibold text-[#57657a]" role="status">
+          Atualizando jogadores…
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
         <Link className="transition-colors hover:text-[#003526]" href="/competitions">
           Competições
@@ -845,8 +771,8 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="players" />
                 Jogadores
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl md:text-6xl">
-                Mapa rápido do elenco disponível
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-4xl">
+                Jogadores
               </h1>
             </div>
 
@@ -887,14 +813,8 @@ export default function PlayersPage() {
           <aside className="grid min-w-0 content-start gap-3 xl:pt-14">
             {featuredPlayer && featuredPlayerMetric ? (
               <Link
-                className="group flex min-h-[12rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/16"
+                className="group flex min-h-[9rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/16"
                 href={getPlayerHref(featuredPlayer.playerId)}
-                onFocus={() => {
-                  prefetchPlayerDetail(featuredPlayer.playerId);
-                }}
-                onMouseEnter={() => {
-                  prefetchPlayerDetail(featuredPlayer.playerId);
-                }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -959,12 +879,6 @@ export default function PlayersPage() {
                       className="flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/8 px-3 py-3 text-white transition-colors hover:bg-white/14"
                       href={getPlayerHref(player.playerId)}
                       key={player.playerId}
-                      onFocus={() => {
-                        prefetchPlayerDetail(player.playerId);
-                      }}
-                      onMouseEnter={() => {
-                        prefetchPlayerDetail(player.playerId);
-                      }}
                     >
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/12 text-xs font-bold text-white/72">
                         {index + 2}
@@ -1004,13 +918,6 @@ export default function PlayersPage() {
         <ProfileAlert title="Dados carregados com alerta" tone="warning">
           <p>{playersQuery.error?.message}</p>
         </ProfileAlert>
-      ) : null}
-
-      {shouldShowCoverageNotice(playersQuery.coverage.status, playersQuery.coverage.percentage) ? (
-        <PartialDataBanner
-          coverage={playersQuery.coverage}
-          message={resolveCoverageMessage(playersQuery.coverage.percentage)}
-        />
       ) : null}
 
       <ProfilePanel className="space-y-4 border-white/80 bg-white/84">
@@ -1132,7 +1039,7 @@ export default function PlayersPage() {
             <p className="mt-2 text-sm/6 text-[#57657a]">
               Mostrando {formatInteger(currentRangeStart)}-{formatInteger(currentRangeEnd)} de{" "}
               {formatInteger(totalCount)} jogadores.
-              {deferredSearch.trim().length > 0 ? ` Busca: "${deferredSearch.trim()}".` : ""}
+              {debouncedSearch.trim().length > 0 ? ` Busca: "${debouncedSearch.trim()}".` : ""}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1145,8 +1052,8 @@ export default function PlayersPage() {
         {rows.length === 0 ? (
           <EmptyState
             description={
-              deferredSearch.trim().length > 0
-                ? `Nenhum jogador encontrado para "${deferredSearch.trim()}" no recorte atual.`
+              debouncedSearch.trim().length > 0
+                ? `Nenhum jogador encontrado para "${debouncedSearch.trim()}" no recorte atual.`
                 : "Não há jogadores suficientes para os filtros atuais."
             }
             title="Lista vazia"
@@ -1185,8 +1092,6 @@ export default function PlayersPage() {
                         <Link
                           className="inline-flex min-h-11 items-center break-words font-semibold text-[#111c2d]"
                           href={getPlayerHref(player.playerId)}
-                          onFocus={() => prefetchPlayerDetail(player.playerId)}
-                          onMouseEnter={() => prefetchPlayerDetail(player.playerId)}
                         >
                           {player.playerName}
                         </Link>
@@ -1319,12 +1224,6 @@ export default function PlayersPage() {
                               <Link
                                 className="block truncate font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
                                 href={getPlayerHref(player.playerId)}
-                                onFocus={() => {
-                                  prefetchPlayerDetail(player.playerId);
-                                }}
-                                onMouseEnter={() => {
-                                  prefetchPlayerDetail(player.playerId);
-                                }}
                               >
                                 {player.playerName}
                               </Link>
@@ -1454,7 +1353,7 @@ export default function PlayersPage() {
 
                 <button
                   className="min-h-11 flex-1 rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                  disabled={currentPage <= 1}
+                  disabled={playersQuery.isFetching || currentPage <= 1}
                   onClick={() => {
                     setPage((currentValue) => Math.max(currentValue - 1, 1));
                   }}
@@ -1464,7 +1363,7 @@ export default function PlayersPage() {
                 </button>
                 <button
                   className="min-h-11 flex-1 rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                  disabled={currentPage >= totalPages}
+                  disabled={playersQuery.isFetching || currentPage >= totalPages}
                   onClick={() => {
                     setPage((currentValue) => Math.min(currentValue + 1, totalPages));
                   }}

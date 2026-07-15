@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -26,14 +26,6 @@ type ProfileMediaProps = {
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
-}
-
-function appendRetryQueryParam(url: string, attempt: number): string {
-  if (attempt <= 0) {
-    return url;
-  }
-
-  return `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}`;
 }
 
 function encodePathSegment(value: string): string {
@@ -113,13 +105,8 @@ export function ProfileMedia({
   tone = "base",
 }: ProfileMediaProps) {
   const [hasError, setHasError] = useState(false);
-  const [retryAttempt, setRetryAttempt] = useState(0);
   const assetUrl = buildVisualAssetUrl(category, assetId);
   const isPlayerAvatar = category === "players";
-  const resolvedAssetUrl = useMemo(
-    () => (assetUrl ? appendRetryQueryParam(assetUrl, retryAttempt) : null),
-    [assetUrl, retryAttempt],
-  );
   const resolvedHref = linkBehavior === "none"
     ? null
     : href !== undefined
@@ -128,22 +115,7 @@ export function ProfileMedia({
 
   useEffect(() => {
     setHasError(false);
-    setRetryAttempt(0);
   }, [assetUrl]);
-
-  const handleError = () => {
-    if (!assetUrl) {
-      setHasError(true);
-      return;
-    }
-
-    if (retryAttempt === 0) {
-      setRetryAttempt(1);
-      return;
-    }
-
-    setHasError(true);
-  };
 
   const mediaNode = (
     <div
@@ -156,7 +128,7 @@ export function ProfileMedia({
         className,
       )}
     >
-      {resolvedAssetUrl && !hasError ? (
+      {assetUrl && !hasError ? (
         <Image
           alt={alt}
           className={
@@ -165,10 +137,10 @@ export function ProfileMedia({
               : joinClasses("object-contain p-2", imageClassName)
           }
           fill
-          key={resolvedAssetUrl}
-          onError={handleError}
+          key={assetUrl}
+          onError={() => setHasError(true)}
           sizes="96px"
-          src={resolvedAssetUrl}
+          src={assetUrl}
         />
       ) : (
         <span

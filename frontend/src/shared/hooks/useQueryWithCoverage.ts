@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useQuery, type QueryKey, type UseQueryOptions } from "@tanstack/react-query";
+import { useQuery, type QueryKey, type UseQueryOptions, type UseQueryResult } from "@tanstack/react-query";
 
 import type { ApiResponse, ApiResponseMeta } from "@/shared/types/api-response.types";
 import type { CoverageState } from "@/shared/types/coverage.types";
@@ -20,11 +20,14 @@ export type QueryWithCoverageResult<TData> = {
   data: TData | undefined;
   meta: ApiResponseMeta | undefined;
   isLoading: boolean;
+  isFetching: boolean;
+  isPlaceholderData: boolean;
   isError: boolean;
   error: ApiError | null;
   isEmpty: boolean;
   isPartial: boolean;
   coverage: CoverageState;
+  refetch: UseQueryResult<ApiResponse<TData>, ApiError>["refetch"];
 };
 
 function isEmptyData(value: unknown): boolean {
@@ -73,11 +76,23 @@ export function useQueryWithCoverage<TData, TQueryKey extends QueryKey = QueryKe
       data,
       meta: query.data?.meta,
       isLoading: query.isLoading,
+      isFetching: query.isFetching,
+      isPlaceholderData: query.isPlaceholderData,
       isError: query.isError,
       error: normalizeError(query.error),
       isEmpty: emptyByCoverage || emptyByData,
       isPartial: coverage.status === "partial",
       coverage,
+      refetch: query.refetch,
     };
-  }, [isDataEmpty, query.data, query.error, query.isError, query.isLoading]);
+  }, [
+    isDataEmpty,
+    query.data,
+    query.error,
+    query.isError,
+    query.isFetching,
+    query.isLoading,
+    query.isPlaceholderData,
+    query.refetch,
+  ]);
 }

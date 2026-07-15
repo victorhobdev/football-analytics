@@ -5,7 +5,6 @@ import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
 import {
   ProfileAlert,
-  ProfileCoveragePill,
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
@@ -105,9 +104,6 @@ export function TeamJourneySection({
               A linha do tempo abaixo combina fases de tabela e mata-mata sob o mesmo contrato estrutural da competição.
             </p>
           </div>
-          {teamJourneyQuery.coverage.status !== "complete" ? (
-            <ProfileCoveragePill coverage={teamJourneyQuery.coverage} />
-          ) : null}
         </div>
 
         {latestSeason ? (

@@ -94,10 +94,41 @@ class HomeRouteTests(unittest.TestCase):
 
         query = db_client.fetch_all.call_args.args[0]
         self.assertIn("mart.competition_serving_summary", query)
+        self.assertIn("preferred_seasons", query)
+        self.assertIn("when 'sportmonks' then 1", query)
         self.assertIn("distinct on (lc.competition_key)", query.lower())
         self.assertNotIn("mart.fact_match_events", query)
         self.assertEqual(result[0]["competitionKey"], "champions_league")
         self.assertEqual(result[0]["matchesCount"], 10)
+
+    def test_competitions_prefer_public_name_from_control_catalog(self) -> None:
+        serving_row = {
+            "competition_id": "999",
+            "competition_key": "custom_league",
+            "competition_name": "custom_league",
+            "matches_count": 1,
+            "seasons_count": 1,
+            "min_season_label": "2025",
+            "max_season_label": "2025",
+        }
+
+        with (
+            patch("api.src.routers.home.db_client") as db_client,
+            patch(
+                "api.src.routers.home._fetch_control_competition_catalog",
+                return_value={
+                    "custom_league": {
+                        "competition_name": "Liga Personalizada",
+                        "competition_type": "domestic_league",
+                    }
+                },
+            ),
+            patch("api.src.routers.home._fetch_external_competition_depth_by_key", return_value={}),
+        ):
+            db_client.fetch_all.return_value = [serving_row]
+            result = _fetch_competitions()
+
+        self.assertEqual(result[0]["competitionName"], "Liga Personalizada")
 
 
 if __name__ == "__main__":

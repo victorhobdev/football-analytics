@@ -8,11 +8,14 @@ from typing import Any
 from fastapi import APIRouter, Request
 
 from ..core.context_registry import get_canonical_competition_by_key
+from ..core.config import get_settings
 from ..core.contracts import build_api_response, build_coverage_from_counts
 from ..core.errors import AppError
 from ..db.client import db_client
 
 router = APIRouter(tags=["competition-hub"])
+
+PRODUCT_DATA_CUTOFF = get_settings().product_data_cutoff
 
 COMPETITION_KEY_ALIASES = {
     "serie_a_italy": "serie_a_it",
@@ -1604,6 +1607,185 @@ def _build_historical_stats_coverage(data: dict[str, Any]) -> dict[str, Any]:
     if total_rows <= 0:
         return {"status": "empty", "percentage": 0, "label": "Historical stats coverage"}
     return build_coverage_from_counts(total_rows, total_rows, "Dados Históricos")
+
+
+def _fetch_competition_editions(competition_key: str) -> list[dict[str, Any]]:
+    return db_client.fetch_all(
+        """
+        with provider_editions as (
+            select
+                competition_key,
+                season_label,
+                provider,
+                max(season) as season,
+                count(*)::int as match_count
+            from mart.fact_matches
+            where competition_key = %s
+              and date_day <= %s
+            group by competition_key, season_label, provider
+        ),
+        editions as (
+            select competition_key, season_label, season, match_count
+            from (
+                select
+                    pe.*,
+                    row_number() over (
+                        partition by competition_key, season_label
+                        order by
+                            case provider
+                                when 'sportmonks' then 1
+                                when 'dataset_brasileirao' then 2
+                                when 'transfermarkt' then 3
+                                when 'eloratings' then 4
+                                else 5
+                            end,
+                            match_count desc
+                    ) as provider_rank
+                from provider_editions pe
+            ) ranked
+            where provider_rank = 1
+        ),
+        latest_standings as (
+            select distinct on (fs.season_label, fs.position)
+                fs.season_label,
+                fs.position,
+                fs.team_id,
+                coalesce(dt.team_name, fs.team_id::text) as team_name
+            from mart.fact_standings_snapshots fs
+            left join mart.dim_team dt on dt.team_id = fs.team_id
+            where fs.competition_key = %s
+              and fs.group_id is null
+              and fs.position in (1, 2)
+            order by
+                fs.season_label,
+                fs.position,
+                fs.round_key desc nulls last,
+                fs.games_played desc nulls last,
+                fs.updated_at desc nulls last
+        ),
+        final_ties as (
+            select distinct on (tr.season_label)
+                tr.season_label,
+                tr.winner_team_id,
+                case
+                    when tr.winner_team_id = tr.home_side_team_id then tr.home_side_team_name
+                    else tr.away_side_team_name
+                end as winner_team_name,
+                case
+                    when tr.winner_team_id = tr.home_side_team_id then tr.away_side_team_id
+                    else tr.home_side_team_id
+                end as runner_up_team_id,
+                case
+                    when tr.winner_team_id = tr.home_side_team_id then tr.away_side_team_name
+                    else tr.home_side_team_name
+                end as runner_up_team_name
+            from mart.fact_tie_results tr
+            where tr.competition_key = %s
+              and tr.winner_team_id is not null
+              and tr.next_stage_id is null
+            order by tr.season_label, tr.last_leg_at desc nulls last, tr.tie_order desc nulls last
+        ),
+        player_scopes as (
+            select distinct competition_sk, season, season_label
+            from mart.fact_matches
+            where competition_key = %s
+        ),
+        scorer_totals as (
+            select
+                ps.season_label,
+                pss.player_id,
+                max(pss.player_name) as player_name,
+                sum(coalesce(pss.goals, 0))::int as goals
+            from player_scopes ps
+            join mart.player_season_summary pss
+              on pss.competition_sk = ps.competition_sk
+             and pss.season = ps.season
+            group by ps.season_label, pss.player_id
+        ),
+        scorers as (
+            select *
+            from (
+                select
+                    st.*,
+                    row_number() over (
+                        partition by st.season_label
+                        order by st.goals desc, st.player_name asc, st.player_id asc
+                    ) as rank
+                from scorer_totals st
+            ) ranked
+            where rank = 1
+        )
+        select
+            e.season_label,
+            e.season,
+            e.match_count,
+            coalesce(ft.winner_team_id, champion.team_id) as champion_team_id,
+            coalesce(ft.winner_team_name, champion.team_name) as champion_team_name,
+            coalesce(ft.runner_up_team_id, runner_up.team_id) as runner_up_team_id,
+            coalesce(ft.runner_up_team_name, runner_up.team_name) as runner_up_team_name,
+            scorers.player_id as top_scorer_player_id,
+            scorers.player_name as top_scorer_player_name,
+            scorers.goals as top_scorer_goals
+        from editions e
+        left join latest_standings champion
+          on champion.season_label = e.season_label and champion.position = 1
+        left join latest_standings runner_up
+          on runner_up.season_label = e.season_label and runner_up.position = 2
+        left join final_ties ft on ft.season_label = e.season_label
+        left join scorers on scorers.season_label = e.season_label
+        order by e.season desc nulls last, e.season_label desc;
+        """,
+        [competition_key, PRODUCT_DATA_CUTOFF, competition_key, competition_key, competition_key],
+    )
+
+
+def _serialize_competition_edition(row: dict[str, Any]) -> dict[str, Any]:
+    def entity(id_key: str, name_key: str) -> dict[str, Any] | None:
+        if row.get(id_key) is None and not row.get(name_key):
+            return None
+        return {
+            "id": str(row[id_key]) if row.get(id_key) is not None else None,
+            "name": row.get(name_key) or "Não disponível",
+        }
+
+    scorer = entity("top_scorer_player_id", "top_scorer_player_name")
+    if scorer is not None:
+        scorer["goals"] = int(row.get("top_scorer_goals") or 0)
+
+    return {
+        "seasonLabel": _format_season_label(row.get("season_label")),
+        "matchCount": int(row.get("match_count") or 0),
+        "champion": entity("champion_team_id", "champion_team_name"),
+        "runnerUp": entity("runner_up_team_id", "runner_up_team_name"),
+        "topScorer": scorer,
+    }
+
+
+@router.get("/api/v1/competition-editions")
+def get_competition_editions(
+    request: Request,
+    competitionKey: str | None = None,
+) -> dict[str, Any]:
+    normalized_competition_key = _normalize_competition_key(competitionKey)
+    if normalized_competition_key is None:
+        raise AppError(
+            message="'competitionKey' is required.",
+            code="INVALID_QUERY_PARAM",
+            status=400,
+            details={"missing": ["competitionKey"]},
+        )
+
+    editions = [_serialize_competition_edition(row) for row in _fetch_competition_editions(normalized_competition_key)]
+    data = {
+        "competitionKey": _public_competition_key(normalized_competition_key),
+        "editions": editions,
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
+    }
+    return build_api_response(
+        data,
+        request_id=_request_id(request),
+        coverage=build_coverage_from_counts(len(editions), len(editions), "Edições"),
+    )
 
 
 @router.get("/api/v1/competition-historical-stats")

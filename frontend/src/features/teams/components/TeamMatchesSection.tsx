@@ -7,12 +7,10 @@ import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
 import {
   ProfileAlert,
-  ProfileCoveragePill,
   ProfilePanel,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
-import type { CoverageState } from "@/shared/types/coverage.types";
 import {
   buildCanonicalTeamPath,
   buildMatchCenterPath,
@@ -53,7 +51,6 @@ function formatScore(match: TeamMatchListItem): string {
 
 type TeamMatchesSectionProps = {
   competitionContext: CompetitionSeasonContext;
-  coverage: CoverageState;
   filters: {
     competitionId?: string | null;
     seasonId?: string | null;
@@ -72,7 +69,6 @@ type TeamMatchesSectionProps = {
 
 export function TeamMatchesSection({
   competitionContext,
-  coverage,
   filters,
   isError,
   isLoading,
@@ -99,7 +95,6 @@ export function TeamMatchesSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <ProfileCoveragePill coverage={coverage} />
           <Link
             className="button-pill button-pill-primary"
             href={buildMatchesPath({

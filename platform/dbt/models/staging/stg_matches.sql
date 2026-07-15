@@ -5,6 +5,14 @@ statsbomb_matches as (
     select * from {{ source('postgres_raw', 'statsbomb_matches') }}
     where identity_status = 'new_external_match'
       and match_date is not null
+),
+statsbomb_team_identity as (
+    select
+        source_name as identity_source_name,
+        source_team_id,
+        identity_status,
+        local_team_id
+    from {{ source('postgres_mart', 'stg_statsbomb_team_identity') }}
 )
 select
     fixture_id,
@@ -141,9 +149,17 @@ select
     cast(null as text) as weather_description,
     cast(null as numeric) as weather_temperature_c,
     cast(null as numeric) as weather_wind_kph,
-    910000000000 + home_team_id as home_team_id,
+    case
+        when home_identity.identity_status = 'linked_to_sportmonks'
+         and home_identity.local_team_id is not null then home_identity.local_team_id
+        else 910000000000 + home_team_id
+    end as home_team_id,
     home_team_name,
-    910000000000 + away_team_id as away_team_id,
+    case
+        when away_identity.identity_status = 'linked_to_sportmonks'
+         and away_identity.local_team_id is not null then away_identity.local_team_id
+        else 910000000000 + away_team_id
+    end as away_team_id,
     away_team_name,
     home_score as home_goals,
     away_score as away_goals,
@@ -159,4 +175,15 @@ select
     ) as ingested_run,
     'statsbomb_open_data' as source_run_id,
     updated_at as ingested_at
-from statsbomb_matches
+from statsbomb_matches m
+left join statsbomb_team_identity home_identity
+  on home_identity.identity_source_name = m.source_name
+ and home_identity.source_team_id = m.home_team_id
+left join statsbomb_team_identity away_identity
+  on away_identity.identity_source_name = m.source_name
+ and away_identity.source_team_id = m.away_team_id
+
+union all
+
+select *
+from {{ ref('stg_external_matches') }}

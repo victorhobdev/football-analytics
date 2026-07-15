@@ -61,7 +61,7 @@ export function usePlayersList(localFilters: PlayersListLocalFilters = {}) {
 
   return useQueryWithCoverage<PlayersListData>({
     queryKey: playersQueryKeys.list(mergedFilters),
-    queryFn: () => fetchPlayersList(mergedFilters),
+    queryFn: ({ signal }) => fetchPlayersList(mergedFilters, signal),
     placeholderData: keepPreviousData,
     staleTime: PLAYERS_LIST_STALE_TIME_MS,
     gcTime: PLAYERS_LIST_GC_TIME_MS,
