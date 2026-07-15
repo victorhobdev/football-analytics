@@ -25,7 +25,18 @@ def _install_airflow_import_stub() -> None:
     sys.modules.setdefault("airflow.operators.python", python_operator)
 
 
+def _install_runtime_import_stubs() -> None:
+    boto3 = ModuleType("boto3")
+    boto3.client = lambda *args, **kwargs: None
+    sqlalchemy = ModuleType("sqlalchemy")
+    sqlalchemy.create_engine = lambda *args, **kwargs: None
+    sqlalchemy.text = lambda statement: statement
+    sys.modules.setdefault("boto3", boto3)
+    sys.modules.setdefault("sqlalchemy", sqlalchemy)
+
+
 _install_airflow_import_stub()
+_install_runtime_import_stubs()
 
 from common.services import ingestion_service
 
