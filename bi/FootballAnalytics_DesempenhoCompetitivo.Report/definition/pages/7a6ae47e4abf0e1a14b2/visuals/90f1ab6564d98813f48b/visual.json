@@ -48,6 +48,52 @@
               "nativeQueryRef": "Pontos"
             }
           ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Jogos do Time"
+                }
+              },
+              "queryRef": "Medidas.Jogos do Time",
+              "nativeQueryRef": "Jogos do Time"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "PPG"
+                }
+              },
+              "queryRef": "Medidas.PPG",
+              "nativeQueryRef": "PPG"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "PPG Últimos 5"
+                }
+              },
+              "queryRef": "Medidas.PPG Últimos 5",
+              "nativeQueryRef": "PPG Últimos 5"
+            }
+          ]
         }
       },
       "sortDefinition": {
@@ -342,6 +388,19 @@
               "expr": {
                 "Literal": {
                   "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Pontos por ano no recorte'"
                 }
               }
             }

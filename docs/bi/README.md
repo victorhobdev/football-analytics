@@ -1,6 +1,6 @@
 # Power BI — Football Analytics
 
-O Power BI e a camada analitica publica do portfolio. O site preserva a exploracao de competicoes, partidas, times e jogadores; rankings, classificacao, comparacoes, tendencias e cobertura ficam no relatorio incorporado em `/analises`.
+O Power BI é a camada analítica pública do portfólio. O site preserva a exploração de competições, partidas, classificações oficiais, times e jogadores; rankings analíticos, comparações, tendências e cobertura ficam no relatório incorporado em `/analises`.
 
 ## Escopo
 
@@ -15,6 +15,10 @@ O modelo cobre todo o conjunto publicado em `mart.*`. Nenhuma consulta fixa uma 
 - [Qualidade e limitacoes](QUALIDADE_E_LIMITACOES.md)
 - [Atualizacao manual](REFRESH_MANUAL.md)
 - [Validação SQL x DAX](VALIDACAO_SQL_DAX.md)
+- [Performance, acessibilidade e arquitetura](PERFORMANCE_E_ARQUITETURA.md)
+- [Dicionário das medidas](DICIONARIO_MEDIDAS.md)
+- [Estudo estatístico sobre mando](../analysis/HOME_ADVANTAGE.md)
+- [Caso SQL avançado e performance](../analysis/TEAM_FORM_SQL.md)
 - `../../bi/validation`: consultas executaveis de cobertura e reconciliacao.
 - `../../bi/README.md`: abertura, estrutura e estado de publicação dos artefatos.
 
@@ -31,3 +35,5 @@ Get-Content -Raw bi/validation/reconciliation_laliga_2024_25.sql |
 ```
 
 Não publique credenciais, conexões locais, nem dados que não estejam no schema `mart` curado. O [iframe público](https://app.powerbi.com/view?r=eyJrIjoiZjI0MzhlOTMtMzE0Mi00NmY2LWJlNmMtMDRiZTc2YmNmZjBhIiwidCI6IjE0MDAyMTc4LWEwZDAtNGYxNC1iZGQ2LTJiMjNiYTJiNThkYyJ9) foi publicado e validado anonimamente em 2026-07-12.
+
+`Publicar na Web` não aceita filtros por URL. A aplicação mantém competição e temporada visíveis como contexto solicitado, mas a seleção precisa ser repetida nos segmentadores do relatório. Pré-filtro automático exige incorporação segura ou Power BI Embedded.

@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Rankings de jogadores'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

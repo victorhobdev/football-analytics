@@ -119,6 +119,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'5. Jogadores: elemento visual'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

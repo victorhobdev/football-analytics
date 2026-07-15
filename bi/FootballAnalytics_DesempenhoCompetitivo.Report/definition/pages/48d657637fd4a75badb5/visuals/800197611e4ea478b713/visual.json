@@ -258,6 +258,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Gols, Assistências, Participações em Gol, Cobertura de Minutos %, Nota Média, Cobertura de Nota %'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

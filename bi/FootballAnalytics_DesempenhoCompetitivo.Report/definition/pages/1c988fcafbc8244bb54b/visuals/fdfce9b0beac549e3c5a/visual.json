@@ -480,6 +480,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Ranking contextual: desempenho versus o recorte'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

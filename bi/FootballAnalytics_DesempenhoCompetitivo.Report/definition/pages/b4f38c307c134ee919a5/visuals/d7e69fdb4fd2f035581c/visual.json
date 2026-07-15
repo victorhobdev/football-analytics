@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Use esta página antes de comparar fontes, competições ou temporadas'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

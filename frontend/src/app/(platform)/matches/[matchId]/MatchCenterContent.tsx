@@ -362,14 +362,14 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                 <ProfileTag className="bg-white/12 text-white/82">{seasonLabel}</ProfileTag>
               ) : null}
             </div>
-            <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+            <h1 className="break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
               {match.homeTeamName ?? "Mandante"} x {match.awayTeamName ?? "Visitante"}
             </h1>
             <p className="max-w-3xl text-sm leading-6 text-white/74">
               Placar, principais lances, escalações e números do jogo em uma leitura única.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
             <Link
               className="button-pill button-pill-on-dark"
               href={matchesHref}
@@ -395,7 +395,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <ProfileKpi hint={kickoffLabel} invert label="Placar" value={resolveScoreSummary(match.homeScore, match.awayScore)} />
           <ProfileKpi hint={kickoffLabel} invert label="Status" value={match.status?.trim() || "Sem status"} />
           <ProfileKpi hint={match.venueName?.trim() || "Local indisponível"} invert label="Local" value={match.venueName?.trim() || "Indisponível"} />
@@ -498,7 +498,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
             ) : null}
 
             <div className="grid gap-6">
-              <ProfilePanel className="grid gap-4 md:grid-cols-2">
+              <ProfilePanel className="grid grid-cols-2 gap-4">
                 <ProfileKpi
                   hint={kickoffLabel}
                   label="Placar atual"
@@ -530,7 +530,7 @@ export function MatchCenterContent({ matchId }: MatchCenterContentProps) {
                   ) : null}
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {canShowTimeline ? (
                     <ProfileKpi
                       hint={sectionStates.timeline?.label}

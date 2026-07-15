@@ -6,7 +6,7 @@
     "y": 45,
     "z": 2,
     "height": 18,
-    "width": 1000,
+    "width": 1150,
     "tabOrder": 2
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Produção, volume e nota · a cobertura varia conforme a fonte",
+                    "value": "Clique com o botão direito em um jogador para abrir o detalhe · a cobertura varia conforme a fonte",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -89,6 +89,19 @@
               "expr": {
                 "Literal": {
                   "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Clique com o botão direito em um jogador para abrir o detalhe · a cobertura varia conforme a fonte'"
                 }
               }
             }

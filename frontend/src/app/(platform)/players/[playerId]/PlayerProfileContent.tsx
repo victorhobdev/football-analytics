@@ -446,7 +446,7 @@ function PlayerProfileLinkButton({
 }) {
   return (
     <Link
-      className="group inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18"
+      className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18 sm:w-auto"
       href={href}
     >
       <PlayerProfileIcon className="h-4 w-4 transition-transform group-hover:scale-110" icon={icon} />
@@ -735,7 +735,7 @@ export function PlayerProfileContent({
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-white/10" />
         <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
 
-        <div className="relative grid gap-6 p-5 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.42fr)] xl:items-stretch">
+        <div className="relative grid gap-5 p-4 sm:p-5 md:gap-6 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.42fr)] xl:items-stretch">
           <div className="flex min-h-full flex-col gap-5">
             <div className="flex flex-wrap items-center gap-2">
               {hasHistoricalStats ? (
@@ -748,12 +748,12 @@ export function PlayerProfileContent({
               ))}
             </div>
 
-            <div className="flex min-w-0 flex-col items-start gap-5 sm:flex-row">
+            <div className="flex min-w-0 items-start gap-3 sm:gap-5">
               <ProfileMedia
                 alt={player.playerName}
                 assetId={profileImageAssetId}
                 category="players"
-                className="h-24 w-24 shrink-0 border border-white/18 bg-white/12"
+                className="h-16 w-16 shrink-0 border border-white/18 bg-white/12 sm:h-24 sm:w-24"
                 fallback={getPlayerMonogram(player.playerName)}
                 fallbackClassName="text-xl tracking-[0.08em] text-white"
                 href={pathname}
@@ -766,7 +766,7 @@ export function PlayerProfileContent({
                   <PlayerProfileIcon className="h-4 w-4" icon="player" />
                   Perfil do jogador
                 </p>
-                <h1 className="mt-3 max-w-3xl break-words font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
+                <h1 className="mt-2 max-w-3xl break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.96] tracking-[-0.045em] text-white sm:mt-3 sm:text-5xl sm:leading-[0.92] sm:tracking-[-0.055em] md:text-6xl">
                   {player.playerName}
                 </h1>
                 <p className="mt-4 max-w-3xl text-sm leading-6 text-white/70">
@@ -775,7 +775,7 @@ export function PlayerProfileContent({
               </div>
             </div>
 
-            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-4">
               {hasHistoricalStats ? (
                 <>
                   <PlayerProfileMetric
@@ -857,7 +857,7 @@ export function PlayerProfileContent({
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:flex sm:flex-wrap">
               <PlayerProfileLinkButton href={playersHref} icon="player" label="Lista de jogadores" />
               {teamHref && hasHistoricalStats ? (
                 <PlayerProfileLinkButton href={teamHref} icon="shield" label="Time" />

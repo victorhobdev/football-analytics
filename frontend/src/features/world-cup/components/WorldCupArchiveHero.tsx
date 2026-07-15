@@ -34,7 +34,7 @@ export function WorldCupArchiveHero({
 
   return (
     <ProfilePanel
-      className="world-cup-hero relative flex min-h-[28rem] flex-col overflow-hidden md:min-h-[29rem] xl:min-h-[30rem]"
+      className="world-cup-hero relative flex min-h-[22rem] flex-col overflow-hidden sm:min-h-[28rem] md:min-h-[29rem] xl:min-h-[30rem]"
       tone="accent"
     >
       {heroBackgroundUrl ? (
@@ -67,7 +67,7 @@ export function WorldCupArchiveHero({
                 {kicker ? (
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/72">{kicker}</p>
                 ) : null}
-                <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.95rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-white md:text-[3.7rem]">
+                <h1 className="max-w-4xl break-words font-[family:var(--font-profile-headline)] text-[2.2rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-white sm:text-[2.95rem] md:text-[3.7rem]">
                   {title}
                 </h1>
               </div>

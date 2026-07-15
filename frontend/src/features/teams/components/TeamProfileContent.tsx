@@ -309,7 +309,7 @@ function TeamProfileLinkButton({
 }) {
   return (
     <Link
-      className="group inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18"
+      className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18 sm:w-auto"
       href={href}
     >
       <TeamProfileIcon className="h-4 w-4 transition-transform group-hover:scale-110" icon={icon} />
@@ -488,7 +488,7 @@ export function TeamProfileContent({
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-white/10" />
         <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
 
-        <div className="relative grid gap-6 p-5 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(390px,0.42fr)] xl:items-stretch">
+        <div className="relative grid gap-5 p-4 sm:p-5 md:gap-6 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(390px,0.42fr)] xl:items-stretch">
           <div className="flex min-h-full flex-col gap-5">
             <div className="flex flex-wrap items-center gap-2">
               <ProfileTag className="bg-white/10 text-white/82">
@@ -504,12 +504,12 @@ export function TeamProfileContent({
               </ProfileTag>
             </div>
 
-            <div className="flex min-w-0 flex-col items-start gap-5 sm:flex-row">
+            <div className="flex min-w-0 items-start gap-3 sm:gap-5">
               <ProfileMedia
                 alt={`Escudo de ${team.teamName}`}
                 assetId={team.teamId}
                 category="clubs"
-                className="h-24 w-24 shrink-0 border border-white/18 bg-white/12"
+                className="h-16 w-16 shrink-0 border border-white/18 bg-white/12 sm:h-24 sm:w-24"
                 fallback={getTeamMonogram(team.teamName)}
                 imageClassName="p-3"
                 tone="contrast"
@@ -519,13 +519,13 @@ export function TeamProfileContent({
                   <TeamProfileIcon className="h-4 w-4" icon="shield" />
                   Perfil do clube
                 </p>
-                <h1 className="mt-3 max-w-2xl break-words font-[family:var(--font-profile-headline)] text-4xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-5xl">
+                <h1 className="mt-2 max-w-2xl break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.96] tracking-[-0.045em] text-white sm:mt-3 sm:text-4xl sm:leading-[0.92] sm:tracking-[-0.055em] md:text-5xl">
                   {team.teamName}
                 </h1>
               </div>
             </div>
 
-            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-4">
               <TeamProfileMetric
                 hint={`${formatInteger(summary.matchesPlayed)} jogos`}
                 icon="shield"
@@ -552,7 +552,7 @@ export function TeamProfileContent({
               />
             </div>
 
-            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-4">
               <TeamProfileMetric
                 hint={`${formatInteger(summary.goalsFor)} pró / ${formatInteger(summary.goalsAgainst)} contra`}
                 icon="shield"

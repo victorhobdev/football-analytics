@@ -1,5 +1,7 @@
-import { WorldCupRankingsContent } from "@/features/world-cup/components/WorldCupRankingsContent";
+import { redirect } from "next/navigation";
+
+import { buildAnalysesPath } from "@/shared/utils/context-routing";
 
 export default function WorldCupRankingsPage() {
-  return <WorldCupRankingsContent />;
+  redirect(buildAnalysesPath({ competitionKey: "fifa_world_cup_mens" }));
 }

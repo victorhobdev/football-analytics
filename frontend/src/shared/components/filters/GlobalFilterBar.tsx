@@ -267,6 +267,32 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+function CollapsibleFilterContent({
+  children,
+  summary,
+}: {
+  children: ReactNode;
+  summary: string;
+}) {
+  return (
+    <details className="group">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-[0.9rem] bg-white/80 px-3 py-2.5 text-left text-sm font-semibold text-[#223146] [&::-webkit-details-marker]:hidden md:hidden">
+        <span className="min-w-0">
+          <span className="block text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#69778d]">
+            Filtros
+          </span>
+          <span className="mt-0.5 block truncate">{summary}</span>
+        </span>
+        <span
+          aria-hidden="true"
+          className="h-2.5 w-2.5 shrink-0 rotate-45 border-b-2 border-r-2 border-[#69778d] transition-transform group-open:rotate-[225deg]"
+        />
+      </summary>
+      <div className="hidden pt-3 group-open:block md:block md:pt-0">{children}</div>
+    </details>
+  );
+}
+
 function FieldHeader({
   badge,
   compact = false,
@@ -371,8 +397,8 @@ function StyledSelect({
         className={joinClasses(
           "flex w-full items-center justify-between gap-3 bg-white/95 text-left font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99]",
           compact
-            ? "min-h-[2.35rem] rounded-[0.78rem] px-3 py-2 text-[0.84rem]"
-            : "min-h-[2.9rem] rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-[0.92rem]",
+            ? "min-h-11 rounded-[0.78rem] px-3 py-2 text-base md:min-h-[2.35rem] md:text-[0.84rem]"
+            : "min-h-11 rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-base md:min-h-[2.9rem] md:text-[0.92rem]",
           disabled
             ? "cursor-not-allowed bg-[rgba(222,228,237,0.72)] text-[#93a0b4]"
             : "hover:bg-white",
@@ -406,7 +432,7 @@ function StyledSelect({
               <button
                 aria-selected={isSelected}
                 className={joinClasses(
-                  "flex min-h-9 w-full items-center rounded-[0.7rem] px-3 py-2 text-left text-[0.9rem] font-semibold transition-[background-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                  "flex min-h-11 w-full items-center rounded-[0.7rem] px-3 py-2 text-left text-base font-semibold transition-[background-color,color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] md:min-h-9 md:text-[0.9rem]",
                   isSelected
                     ? "bg-[#003526] text-white"
                     : "text-[#162235] hover:bg-[rgba(216,227,251,0.62)]",
@@ -451,8 +477,8 @@ function StaticField({
         className={joinClasses(
           "flex items-center bg-white/95 font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)]",
           compact
-            ? "min-h-[2.35rem] rounded-[0.78rem] px-3 py-2 text-[0.84rem]"
-            : "min-h-[2.9rem] rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-[0.92rem]",
+            ? "min-h-11 rounded-[0.78rem] px-3 py-2 text-base md:min-h-[2.35rem] md:text-[0.84rem]"
+            : "min-h-11 rounded-[0.95rem] px-[0.85rem] py-[0.7rem] text-base md:min-h-[2.9rem] md:text-[0.92rem]",
         )}
       >
         <span className="truncate">{value}</span>
@@ -599,14 +625,21 @@ export function GlobalFilterBar() {
   ]
     .filter(Boolean)
     .join(" · ");
+  const mobileContextSummary = [
+    selectedCompetitionLabel,
+    selectedSeasonLabel,
+    compactStatusSummary || null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const controlBarClasses = joinClasses(
     isWorldCupPath
       ? "border border-[rgba(138,109,24,0.14)] bg-[linear-gradient(180deg,rgba(255,251,241,0.92),rgba(255,255,255,0.96))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_16px_34px_-32px_rgba(95,67,10,0.16)]"
       : "bg-[linear-gradient(180deg,rgba(240,243,255,0.82),rgba(248,251,255,0.92))] shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_16px_36px_-34px_rgba(17,28,45,0.18)]",
-    isWorldCupPath ? "rounded-[1rem] p-2.5 md:p-3" : "rounded-[1.35rem] p-4",
+    isWorldCupPath ? "rounded-[1rem] p-2.5 md:p-3" : "rounded-[1.35rem] p-3 md:p-4",
   );
   const resetButtonClasses = joinClasses(
-    "button-pill w-full self-end lg:w-auto lg:self-end lg:whitespace-nowrap",
+    "button-pill min-h-11 w-full self-end md:min-h-[var(--button-pill-standard-min-height)] lg:w-auto lg:self-end lg:whitespace-nowrap",
     hasResettableFilters ? "button-pill-primary" : "button-pill-secondary border-[rgba(191,201,195,0.36)] bg-white/65 text-[#93a0b4]",
   );
 
@@ -900,7 +933,8 @@ export function GlobalFilterBar() {
         data-url-hydrated={isUrlHydrated ? "true" : "false"}
         className={controlBarClasses}
       >
-        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end">
+        <CollapsibleFilterContent summary={mobileContextSummary}>
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end">
           <FilterField label="Competição">
             <StyledSelect
               id="global-filter-competition-id"
@@ -978,10 +1012,11 @@ export function GlobalFilterBar() {
           >
             {resetButtonLabel}
           </button>
-        </div>
-        {compactStatusSummary ? (
-          <p className="mt-3 text-[0.8rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
-        ) : null}
+          </div>
+          {compactStatusSummary ? (
+            <p className="mt-3 text-[0.8rem] font-semibold text-[#687790]">{compactStatusSummary}</p>
+          ) : null}
+        </CollapsibleFilterContent>
       </section>
     );
   }
@@ -992,14 +1027,15 @@ export function GlobalFilterBar() {
       data-url-hydrated={isUrlHydrated ? "true" : "false"}
       className={controlBarClasses}
     >
-      <div
-        className={joinClasses(
-          "grid",
-          shouldUseCompactFilterBar
-            ? "gap-2 md:grid-cols-[minmax(0,1fr)_200px] lg:grid-cols-[minmax(0,1fr)_200px_auto] lg:items-center"
-            : "gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end",
-        )}
-      >
+      <CollapsibleFilterContent summary={mobileContextSummary}>
+        <div
+          className={joinClasses(
+            "grid",
+            shouldUseCompactFilterBar
+              ? "gap-2 md:grid-cols-[minmax(0,1fr)_200px] lg:grid-cols-[minmax(0,1fr)_200px_auto] lg:items-center"
+              : "gap-3 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-end",
+          )}
+        >
         {isCompetitionContextLocked ? (
           <StaticField
             compact={shouldUseCompactFilterBar}
@@ -1144,14 +1180,14 @@ export function GlobalFilterBar() {
         >
           {resetButtonLabel}
         </button>
-      </div>
+        </div>
 
       {/* Analytics-specific extra filters: round, venue, time window */}
       {pathname === "/analytics" ? (
         <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
           <FilterField label="Rodada">
             <input
-              className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+              className="min-h-11 rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-base font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal md:min-h-[2.9rem] md:text-[0.92rem]"
               onChange={(e) => {
                 const val = parseNullableText(e.target.value);
                 setRoundId(val);
@@ -1186,7 +1222,7 @@ export function GlobalFilterBar() {
           {activeMode === "lastN" ? (
             <FilterField label="Últimos jogos">
               <input
-                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                className="min-h-11 rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-base font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal md:min-h-[2.9rem] md:text-[0.92rem]"
                 min={1}
                 onChange={(e) => {
                   const val = parseLastN(e.target.value);
@@ -1201,7 +1237,7 @@ export function GlobalFilterBar() {
           ) : (
             <FilterField label="Início do período">
               <input
-                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                className="min-h-11 rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-base font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal md:min-h-[2.9rem] md:text-[0.92rem]"
                 onChange={(e) => {
                   const val = parseNullableText(e.target.value);
                   const newEnd = val && !dateRangeEnd ? new Date().toISOString().slice(0, 10) : dateRangeEnd;
@@ -1217,7 +1253,7 @@ export function GlobalFilterBar() {
           {activeMode === "dateRange" ? (
             <FilterField label="Fim do período">
               <input
-                className="min-h-[2.9rem] rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-[0.92rem] font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal"
+                className="min-h-11 rounded-[0.95rem] border border-[rgba(191,201,195,0.55)] bg-white/95 px-[0.85rem] py-[0.7rem] text-base font-semibold text-[#162235] shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] outline-none transition-[box-shadow,background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,53,38,0.14),inset_0_1px_0_rgba(255,255,255,0.88),0_14px_32px_-30px_rgba(17,28,45,0.2)] active:scale-[0.99] placeholder:text-[#93a0b4] placeholder:font-normal md:min-h-[2.9rem] md:text-[0.92rem]"
                 onChange={(e) => {
                   const val = parseNullableText(e.target.value);
                   setTimeRange({ mode: "dateRange", dateRangeStart, dateRangeEnd: val });
@@ -1236,6 +1272,7 @@ export function GlobalFilterBar() {
           {compactStatusSummary}
         </p>
       ) : null}
+      </CollapsibleFilterContent>
     </section>
   );
 }

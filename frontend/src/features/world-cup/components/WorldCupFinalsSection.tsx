@@ -206,7 +206,7 @@ function FinalTeamCard({
       <div className={joinClasses("min-w-0 space-y-1", teamTone === "inverse" ? "lg:text-right" : "")}>
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#6c7b71]">{roleLabel}</p>
         <TeamLink
-          className="block truncate font-[family:var(--font-profile-headline)] text-[1.4rem] font-extrabold tracking-[-0.04em]"
+          className="block break-words font-[family:var(--font-profile-headline)] text-[1.4rem] font-extrabold tracking-[-0.04em] sm:truncate"
           teamId={team?.teamId}
           teamName={team?.teamName}
         />
@@ -291,7 +291,7 @@ export function WorldCupFinalsSection({
                   team={item.homeTeam}
                 />
 
-                <div className="flex min-w-[10.5rem] flex-col items-center justify-center rounded-[1.3rem] border border-[rgba(198,173,111,0.3)] bg-[radial-gradient(circle_at_top,rgba(255,250,238,0.98),rgba(247,243,232,0.94))] px-4 py-4 text-center shadow-[0_20px_48px_-36px_rgba(106,90,58,0.42)]">
+                <div className="flex w-full flex-col items-center justify-center rounded-[1.3rem] border border-[rgba(198,173,111,0.3)] bg-[radial-gradient(circle_at_top,rgba(255,250,238,0.98),rgba(247,243,232,0.94))] px-4 py-4 text-center shadow-[0_20px_48px_-36px_rgba(106,90,58,0.42)] xl:w-auto xl:min-w-[10.5rem]">
                   <span className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(198,173,111,0.3)] bg-white/92 text-[#8a6d18]">
                     <FinalsGlyph className="h-4 w-4" icon="trophy" />
                   </span>

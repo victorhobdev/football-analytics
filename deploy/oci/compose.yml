@@ -1,0 +1,102 @@
+name: football-analytics
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-football_dw}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_USER: ${POSTGRES_USER:-football}
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../../api
+      dockerfile: Dockerfile
+    environment:
+      BFF_CORS_ALLOW_ORIGINS: https://${APP_HOST}
+      BFF_EXPOSE_API_DOCS: "false"
+      BFF_RATE_LIMIT_ENABLED: "true"
+      BFF_RATE_LIMIT_TRUST_PROXY_HEADERS: "true"
+      ENVIRONMENT: production
+      FOOTBALL_PG_POOL_MAX_SIZE: "4"
+      POSTGRES_DB: ${POSTGRES_DB:-football_dw}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-football}
+      PRODUCT_DATA_CUTOFF: ${PRODUCT_DATA_CUTOFF:-2026-06-01}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        export POSTGRES_PASSWORD="$$(cat /run/secrets/postgres_password)";
+        exec python -m uvicorn src.main:app --host 0.0.0.0 --port 8010 --proxy-headers --forwarded-allow-ips='*'
+    secrets:
+      - postgres_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=5)"]
+      interval: 10s
+      timeout: 8s
+      retries: 12
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BFF_BASE_URL: /bff
+    environment:
+      FOOTBALL_BFF_ORIGIN: http://api:8010
+      FOOTBALL_VISUAL_ASSETS_PUBLIC_BASE_URL: http://caddy/visual-assets/
+      FOOTBALL_VISUAL_ASSETS_ROOT: /data/visual_assets
+      NEXT_PUBLIC_BFF_BASE_URL: /bff
+    volumes:
+      - ../../data/visual_assets:/data/visual_assets:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 8s
+      retries: 18
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      APP_HOST: ${APP_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../data/visual_assets:/srv/visual-assets:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_config:
+  caddy_data:
+  postgres_data:
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password

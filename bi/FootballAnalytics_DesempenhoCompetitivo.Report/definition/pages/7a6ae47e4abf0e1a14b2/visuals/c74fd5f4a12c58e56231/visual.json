@@ -452,6 +452,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Forma recente e efeito observado de mando'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

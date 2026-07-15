@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from functools import lru_cache
+from threading import Lock
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -15,6 +17,7 @@ from ..db.client import db_client
 router = APIRouter(prefix="/api/v1/home", tags=["home"])
 
 _HOME_SECTION_COUNT = 3
+_HOME_CACHE_LOCK = Lock()
 
 
 def _request_id(request: Request) -> str | None:
@@ -245,51 +248,7 @@ def _build_home_coverage(
 
 def _fetch_archive_summary() -> dict[str, Any]:
     row = db_client.fetch_one(
-        """
-        with world_cup_presence as (
-            select
-                exists (
-                    select 1
-                    from raw.fixtures
-                    where competition_key = 'fifa_world_cup_mens'
-                    limit 1
-                ) as has_world_cup,
-                exists (
-                    select 1
-                    from mart.fact_matches
-                    where competition_key = 'fifa_world_cup_mens'
-                    limit 1
-                ) as has_world_cup_in_fact
-        )
-        select
-            (select count(distinct competition_key) from mart.fact_matches where competition_key is not null)
-                + case
-                    when wp.has_world_cup and not wp.has_world_cup_in_fact then 1
-                    else 0
-                  end as competitions,
-            (select count(distinct (competition_key, season)) from mart.fact_matches where competition_key is not null)
-                + case
-                    when wp.has_world_cup and not wp.has_world_cup_in_fact
-                        then (
-                            select count(distinct season_label)
-                            from raw.fixtures
-                            where competition_key = 'fifa_world_cup_mens'
-                        )
-                    else 0
-                  end as seasons,
-            (select count(*) from mart.fact_matches)
-                + case
-                    when wp.has_world_cup and not wp.has_world_cup_in_fact
-                        then (
-                            select count(*)
-                            from raw.fixtures
-                            where competition_key = 'fifa_world_cup_mens'
-                        )
-                    else 0
-                  end as matches,
-            (select count(distinct player_id) from mart.dim_player) as players
-        from world_cup_presence wp;
-        """
+        "select count(distinct player_id)::int as players from mart.dim_player;"
     ) or {}
 
     return {
@@ -336,94 +295,47 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
 def _fetch_competitions() -> list[dict[str, Any]]:
     rows = db_client.fetch_all(
         """
-        with match_scope as (
-            select
-                fm.match_id,
-                fm.league_id,
-                fm.competition_key,
-                fm.season_label,
-                fm.date_day,
-                dc.league_name
-            from mart.fact_matches fm
-            left join mart.dim_competition dc
-              on dc.competition_sk = fm.competition_sk
-            where fm.competition_key is not null
+        with latest_context as (
+            select distinct on (league_id)
+                league_id,
+                competition_key
+            from mart.fact_matches
+            where league_id is not null
+            order by league_id, date_day desc nulls last, match_id desc
         ),
-        match_totals as (
-            select
-                competition_key,
-                min(league_id)::text as competition_id,
-                max(league_name) as competition_name,
-                count(distinct match_id)::int as matches_count,
-                count(distinct season_label)::int as seasons_count
-            from match_scope
-            group by competition_key
-        ),
-        first_season as (
-            select distinct on (competition_key)
-                competition_key,
-                season_label as min_season_label
-            from match_scope
-            order by competition_key, date_day asc nulls last, season_label asc
-        ),
-        latest_season as (
-            select distinct on (competition_key)
-                competition_key,
-                season_label as max_season_label
-            from match_scope
-            order by competition_key, date_day desc nulls last, season_label desc
-        ),
-        match_statistics as (
-            select
-                fm.competition_key,
-                count(distinct fps.match_id)::int as available_count
-            from mart.fact_fixture_player_stats fps
-            inner join mart.fact_matches fm
-              on fm.match_id = fps.match_id
-            group by fm.competition_key
-        ),
-        fixture_lineups as (
-            select
-                fm.competition_key,
-                count(distinct fl.match_id)::int as available_count
-            from mart.fact_fixture_lineups fl
-            inner join mart.fact_matches fm
-              on fm.match_id = fl.match_id
-            group by fm.competition_key
-        ),
-        match_events as (
-            select
-                fm.competition_key,
-                count(distinct me.match_id)::int as available_count
-            from mart.fact_match_events me
-            inner join mart.fact_matches fm
-              on fm.match_id = me.match_id
-            group by fm.competition_key
+        ranked_competitions as (
+            select distinct on (lc.competition_key)
+                cs.league_id::text as competition_id,
+                lc.competition_key,
+                cs.league_name as competition_name,
+                cs.matches_count,
+                cs.seasons_count,
+                cs.min_season::text as min_season_label,
+                cs.max_season::text as max_season_label,
+                cs.match_statistics_count,
+                cs.lineups_count,
+                cs.events_count,
+                cs.player_statistics_count
+            from mart.competition_serving_summary cs
+            inner join latest_context lc
+              on lc.league_id = cs.league_id
+            where lc.competition_key is not null
+            order by lc.competition_key, cs.matches_count desc, cs.seasons_count desc, cs.league_id
         )
         select
-            mt.competition_id,
-            mt.competition_key,
-            mt.competition_name,
-            mt.matches_count,
-            mt.seasons_count,
-            fs.min_season_label,
-            ls.max_season_label,
-            coalesce(ms.available_count, 0) as match_statistics_count,
-            coalesce(fl.available_count, 0) as lineups_count,
-            coalesce(me.available_count, 0) as events_count,
-            coalesce(ms.available_count, 0) as player_statistics_count
-        from match_totals mt
-        left join first_season fs
-          on fs.competition_key = mt.competition_key
-        left join latest_season ls
-          on ls.competition_key = mt.competition_key
-        left join match_statistics ms
-          on ms.competition_key = mt.competition_key
-        left join fixture_lineups fl
-          on fl.competition_key = mt.competition_key
-        left join match_events me
-          on me.competition_key = mt.competition_key
-        order by mt.competition_name asc;
+            competition_id,
+            competition_key,
+            competition_name,
+            matches_count,
+            seasons_count,
+            min_season_label,
+            max_season_label,
+            match_statistics_count,
+            lineups_count,
+            events_count,
+            player_statistics_count
+        from ranked_competitions
+        order by competition_name asc;
         """
     )
 
@@ -790,8 +702,9 @@ def _fetch_editorial_highlights() -> list[dict[str, Any]]:
     return highlights
 
 
-@router.get("")
-def get_home_page(request: Request) -> dict[str, Any]:
+@lru_cache(maxsize=1)
+def _load_home_page_data() -> tuple[dict[str, Any], dict[str, Any]]:
+    # ponytail: this VM serves a static DB snapshot; restart after a manual data refresh.
     competitions = _fetch_competitions()
     archive_summary = _normalize_archive_summary_from_competitions(
         _fetch_archive_summary(),
@@ -799,16 +712,26 @@ def get_home_page(request: Request) -> dict[str, Any]:
     )
     editorial_highlights = _fetch_editorial_highlights()
 
-    return build_api_response(
-        {
-            "archiveSummary": archive_summary,
-            "competitions": competitions,
-            "editorialHighlights": editorial_highlights,
-        },
-        request_id=_request_id(request),
-        coverage=_build_home_coverage(
+    data = {
+        "archiveSummary": archive_summary,
+        "competitions": competitions,
+        "editorialHighlights": editorial_highlights,
+    }
+    coverage = _build_home_coverage(
             archive_summary=archive_summary,
             competitions=competitions,
             editorial_highlights=editorial_highlights,
-        ),
+        )
+    return data, coverage
+
+
+@router.get("")
+def get_home_page(request: Request) -> dict[str, Any]:
+    # Evita que várias rotas preencham o mesmo cache frio em paralelo na VM pequena.
+    with _HOME_CACHE_LOCK:
+        data, coverage = _load_home_page_data()
+    return build_api_response(
+        data,
+        request_id=_request_id(request),
+        coverage=coverage,
     )

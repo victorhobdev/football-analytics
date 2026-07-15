@@ -272,6 +272,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Pontos, PPG, PPG Últimos 5, Delta Forma 5 Jogos, PPG Casa, PPG Fora, Delta de Mando'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

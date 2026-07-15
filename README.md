@@ -1,191 +1,127 @@
-<div align="center">
-
 # Football Analytics
 
-**Uma plataforma para transformar dados de futebol em leitura competitiva: competições, temporadas, partidas, rankings, jogadores, times, mercado e Copa do Mundo em uma navegação única.**
+Portfólio de análise de dados aplicado a futebol: ingestão e transformação de dados públicos, modelo dimensional, reconciliação SQL × DAX, Power BI versionável e uma aplicação web para exploração do domínio.
 
-[![Acessar Football Analytics](https://img.shields.io/badge/Acessar%20a%20plataforma-Football%20Analytics-00513B?style=for-the-badge)](https://football-analytics-victor-hugos-projects-f5572824.vercel.app)
-
-[Football Analytics](https://football-analytics-victor-hugos-projects-f5572824.vercel.app) · [Repositório](https://github.com/victorhob1981/football-analytics)
-
-</div>
+[Acessar a plataforma](https://football-analytics-victor-hugos-projects-f5572824.vercel.app) · [Abrir o case na aplicação](https://football-analytics-victor-hugos-projects-f5572824.vercel.app/landing)
 
 ![Football Analytics - página inicial](frontend/public/readme/home.jpg)
 
-## O Produto
+## Pergunta do projeto
 
-Football Analytics é uma experiência de análise para quem precisa entender futebol com contexto, velocidade e profundidade. A plataforma conecta competições, temporadas, partidas, times e jogadores em um fluxo contínuo: você começa em uma liga, abre uma edição, compara rankings, entra na central da partida e segue para perfis individuais sem perder os filtros de análise.
+Como transformar fontes heterogêneas de resultados e estatísticas de futebol em análises comparáveis sem ocultar ausência de dados, misturar provedores ou apresentar agregações como classificações oficiais?
 
-A proposta é simples: sair da leitura fragmentada e entregar uma interface em que scouting, performance, conteúdo e inteligência de mercado conseguem navegar pelo mesmo universo de dados.
+## Entrega analítica
 
-## Para Quem
+- Modelo estrela com fatos de partidas, times por partida e jogadores por partida.
+- Dimensões conformadas de data, escopo, time e jogador.
+- Snapshots Parquet gerados apenas a partir da camada `mart.*` curada.
+- Consultas SQL independentes para cobertura e reconciliação.
+- Modelo TMDL com 73 medidas DAX e limites explícitos de amostra.
+- Relatório PBIR com seis páginas públicas, duas páginas ocultas de drill-through e layout móvel.
+- Estudo estatístico reproduzível em Python e caso de performance com SQL avançado.
+- Power BI público integrado em `/analises`.
+- Catálogos, partidas, classificações oficiais e perfis preservados na aplicação Next.js.
 
-- Analistas de desempenho que precisam comparar times, jogadores e partidas com rapidez.
-- Profissionais de scouting que querem encontrar destaques e validar contexto competitivo.
-- Conteúdo e mídia esportiva que precisam transformar números em histórias claras.
-- Gestão esportiva que acompanha elenco, mercado, campanhas e histórico competitivo.
-- Times de produto e dados que precisam de uma base visual pronta para exploração futebolística.
+## Snapshot validado
 
-## O Que Você Consegue Fazer
-
-- Explorar competições nacionais, continentais e globais com temporadas organizadas.
-- Entrar em partidas e navegar por placar, escalações, eventos e estatísticas disponíveis.
-- Comparar rankings de jogadores e times por gols, assistências, finalizações, nota, cartões, posse e passe.
-- Abrir perfis de times e jogadores mantendo competição e temporada selecionadas.
-- Analisar confrontos diretos entre equipes dentro do mesmo contexto competitivo.
-- Acompanhar movimentações de mercado com filtros por clube, direção e tipo de transferência.
-- Explorar uma vertical dedicada da Copa do Mundo com edições, seleções, finais e recordes históricos.
-- Investigar tendências, superlativos, comparações e recortes OLAP na área de Analytics.
-
-## Galeria do Produto
-
-<table>
-  <tr>
-    <td width="33%"><strong>Competições</strong><br /><img src="frontend/public/readme/competitions.jpg" alt="Catálogo de competições" /></td>
-    <td width="33%"><strong>Copa do Mundo</strong><br /><img src="frontend/public/readme/world-cup.jpg" alt="Hub da Copa do Mundo" /></td>
-    <td width="33%"><strong>Rankings</strong><br /><img src="frontend/public/readme/rankings.jpg" alt="Hub de rankings" /></td>
-  </tr>
-  <tr>
-    <td width="33%"><strong>Partidas</strong><br /><img src="frontend/public/readme/matches.jpg" alt="Lista de partidas" /></td>
-    <td width="33%"><strong>Times</strong><br /><img src="frontend/public/readme/teams.jpg" alt="Lista de times" /></td>
-    <td width="33%"><strong>Jogadores</strong><br /><img src="frontend/public/readme/players.jpg" alt="Lista de jogadores" /></td>
-  </tr>
-  <tr>
-    <td width="33%"><strong>Comparativos</strong><br /><img src="frontend/public/readme/head-to-head.jpg" alt="Confronto direto entre times" /></td>
-    <td width="33%"><strong>Mercado</strong><br /><img src="frontend/public/readme/market.jpg" alt="Área de mercado e transferências" /></td>
-    <td width="33%"><strong>Início</strong><br /><img src="frontend/public/readme/home.jpg" alt="Página inicial do Football Analytics" /></td>
-  </tr>
-</table>
-
-## Áreas Principais
-
-### Competições e Temporadas
-
-O catálogo organiza campeonatos por país, região, tipo e temporada. Cada competição abre uma jornada própria: histórico, edições disponíveis, calendário, estrutura, rankings e caminhos para times, jogadores e partidas.
-
-### Central da Partida
-
-A partida deixa de ser apenas placar. A central reúne contexto competitivo, escalações, estatísticas de equipe, eventos e destaques individuais quando os dados estão disponíveis.
-
-### Rankings
-
-O hub de rankings serve como ponto de entrada para descobrir líderes e outliers. A experiência permite alternar entre leituras individuais e coletivas, preservando competição, temporada e filtros ativos.
-
-### Times e Jogadores
-
-Perfis conectam desempenho, participação, histórico, partidas e rankings. A navegação foi desenhada para responder rápido: quem se destacou, em qual contexto e contra qual nível de oposição.
-
-### Analytics
-
-A área de Analytics reúne visão geral, tendências, superlativos, comparações, cobertura e recortes OLAP. Ela transforma as agregações do data warehouse em leitura exploratória para encontrar padrões por competição, temporada, time, jogador e período.
-
-### Comparativos
-
-O confronto direto ajuda a colocar dois times lado a lado, com leitura de força relativa, histórico recente e atalhos para partidas e perfis relacionados.
-
-### Mercado
-
-A área de mercado consolida transferências de jogadores com filtros por clube, direção e tipo de movimentação. É um ponto de apoio para acompanhar construção de elenco e movimentações relevantes.
-
-### Copa do Mundo
-
-A Copa do Mundo tem uma área própria, com linha do tempo de edições, seleções, finais e recordes históricos. É uma experiência separada das competições de clubes para preservar o contexto do torneio.
-
-## Números da Plataforma
-
-| Métrica | Cobertura atual |
+| Evidência | Valor |
 | --- | ---: |
-| Competições publicadas | 31 |
-| Recortes de competição/temporada | 80+ |
-| Partidas navegáveis | 17.9k+ |
-| Jogadores catalogados | 22k+ |
-| Eventos promovidos para análise | 962k+ |
-| Rankings disponíveis | 8 |
-| Áreas de navegação | 10 |
+| Partidas | 259.872 |
+| Linhas time–partida | 519.734 |
+| Linhas jogador–partida | 607.096 |
+| Escopos fonte–competição–temporada | 1.004 |
+| Cobertura de placar | 99,998% |
+| Cobertura de estatísticas de times | 5,43% |
+| Cobertura de notas de jogadores | 67,63% |
+| Cobertura de minutos | 71,62% |
 
-## Por Que Ele Se Destaca
+Os percentuais são evidências do snapshot de 2026-07-12, não promessas para atualizações futuras.
 
-- **Contexto preservado:** filtros acompanham a navegação entre competições, partidas, rankings, times e jogadores.
-- **Leitura multidimensional:** a mesma temporada pode ser vista por calendário, tabela, elenco, ranking, partida ou perfil.
-- **Produto pronto para demonstração:** interface visual, dados conectados e caminhos de navegação consistentes.
-- **Arquitetura preparada para evoluir:** frontend, API, banco, orquestração e BI trabalham como uma base única de produto.
-- **Foco em decisão:** cada tela foi desenhada para reduzir ruído e acelerar a leitura do futebol.
+## Power BI
+
+As seis páginas visíveis cobrem:
+
+1. Resumo executivo orientado a decisão.
+2. Panorama do acervo.
+3. Benchmark e eficiência de times.
+4. Forma recente e mando observado.
+5. Produção e eficiência de jogadores.
+6. Cobertura e confiabilidade.
+
+Times e jogadores possuem páginas de drill-through. Conversão de finalizações só aparece com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos.
+
+Abra o projeto versionável em [`bi/FootballAnalytics_DesempenhoCompetitivo.pbip`](bi/FootballAnalytics_DesempenhoCompetitivo.pbip) ou consulte a [documentação do BI](docs/bi/README.md).
+
+## Exemplo reconciliado — La Liga 2024/25
+
+- Barcelona: 88 pontos em 38 jogos, 2,3158 PPG.
+- Real Madrid: 84 pontos em 38 jogos, 2,2105 PPG.
+- Barcelona: 102 gols em 677 finalizações, conversão de 15,07% no recorte coberto.
+- Alexander Sørloth: 20 gols em 1.559 minutos, 1,1546 gol por 90.
+
+As consultas que sustentam esses valores estão em [`bi/validation`](bi/validation).
+
+## Cases de Python e SQL
+
+- [A vantagem de jogar em casa diminuiu?](docs/analysis/HOME_ADVANTAGE.md): pandas, exploração, intervalos de confiança, Welch, Hedges g e controle por competição sobre 207.770 partidas.
+- [Forma recente e posição relativa em SQL](docs/analysis/TEAM_FORM_SQL.md): `LAG`, `LEAD`, janelas, percentis, `RANK`, `EXPLAIN ANALYZE` e benchmark antes/depois.
+- [Performance e arquitetura do Power BI](docs/bi/PERFORMANCE_E_ARQUITETURA.md): evidências do Performance Analyzer e DAX Studio, acessibilidade e decisão entre Import, DirectQuery e Direct Lake.
+
+## Limitações declaradas
+
+- Não há xG; conversão de finalizações não representa qualidade da chance.
+- A classificação DAX não implementa desempates oficiais, deduções ou regulamentos eliminatórios.
+- Notas de provedores diferentes não são tratadas como uma escala única.
+- Publicar na Web não aceita pré-filtros por URL. A aplicação preserva o contexto solicitado e orienta a seleção manual no relatório público.
+- O refresh do Power BI é manual nesta fase.
+
+## Arquitetura
+
+```text
+Fontes públicas
+      ↓
+PostgreSQL → dbt / camada mart → validações SQL
+      ↓
+Snapshots Parquet → Power Query → modelo TMDL / DAX → Power BI
+      ↓
+FastAPI / BFF → Next.js para catálogo, partidas e perfis
+```
 
 ## Stack
 
-![Next.js](https://img.shields.io/badge/Next.js-15-0f172a?logo=nextdotjs)
-![React](https://img.shields.io/badge/React-19-0f172a?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-UI-1d4ed8?logo=typescript)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-065f46?logo=fastapi)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Data-1d4ed8?logo=postgresql)
-![Airflow](https://img.shields.io/badge/Airflow-Orquestração-b91c1c?logo=apacheairflow)
-![dbt](https://img.shields.io/badge/dbt-Modelagem-f97316?logo=dbt)
-![Metabase](https://img.shields.io/badge/Metabase-BI-2563eb?logo=metabase)
+Next.js 15 · React 19 · TypeScript · FastAPI · PostgreSQL · Airflow · dbt · Power BI · Power Query · DAX · PBIP/PBIR
 
-## Experiência Técnica
+## Executar localmente
 
-A interface é construída em Next.js e React, com uma API em FastAPI servindo dados prontos para consumo. A base analítica roda sobre PostgreSQL, com orquestração, transformação e validações para manter as páginas consistentes.
-
-```text
-Dados de futebol -> Transformação -> API de produto -> Interface web -> BI
-```
-
-## Rodando Localmente
-
-<details>
-<summary>Ver instruções para desenvolvimento</summary>
-
-### 1. Infraestrutura base
+Para validar a configuração sem expor credenciais:
 
 ```powershell
-docker compose up -d postgres dbmate minio airflow-init airflow-webserver airflow-scheduler metabase
+Copy-Item .env.example .env
+docker compose --env-file .env.example config --quiet
 ```
 
-### 2. API
+Para subir o ambiente local completo no Windows:
 
 ```powershell
-python -m pip install -r api/requirements.txt
-uvicorn api.src.main:app --reload
+.\start-local.ps1
 ```
 
-### 3. Frontend
+Aplicação: `http://localhost:3001`
+
+Power BI integrado: `http://localhost:3001/analises`
+
+O `start-local.ps1` exige o `.env` local e snapshots de serving/deltas em `artifacts/`. Esses artefatos não são versionados; portanto, esse caminho ainda não é um clone limpo completo.
+
+## Validação rápida
 
 ```powershell
-cd frontend
-pnpm install
-pnpm dev -- --port 3001
+pnpm --dir frontend exec tsc --noEmit
+python bi/scripts/build_pbir_report.py
+python -m zipfile -t bi/FootballAnalytics_DesempenhoCompetitivo.pbix
 ```
 
-### 4. Endereços locais
+O mesmo conjunto de verificações é executado pelo [CI](.github/workflows/ci.yml).
 
-| Serviço | URL |
-| --- | --- |
-| App | `http://localhost:3001` |
-| API docs | `http://127.0.0.1:8000/docs` |
-| Health | `http://127.0.0.1:8000/health` |
-| Airflow | `http://localhost:8080` |
-| Metabase | `http://localhost:3000` |
+Para atualizar dados e republicar, siga [`docs/bi/REFRESH_MANUAL.md`](docs/bi/REFRESH_MANUAL.md).
 
-</details>
-
-## Validação
-
-```powershell
-cd frontend
-pnpm typecheck
-```
-
-```powershell
-python tools/frontend_release_gate.py
-python tools/backend_data_readiness_gate.py
-```
-
-## Próximo Passo
-
-A forma mais rápida de entender o produto é abrir a versão web e navegar por uma competição completa.
-
-<div align="center">
-
-[**Acessar Football Analytics**](https://football-analytics-victor-hugos-projects-f5572824.vercel.app)
-
-</div>
+Para hospedar a aplicação em uma VM OCI Always Free, siga [`deploy/oci/README.md`](deploy/oci/README.md).

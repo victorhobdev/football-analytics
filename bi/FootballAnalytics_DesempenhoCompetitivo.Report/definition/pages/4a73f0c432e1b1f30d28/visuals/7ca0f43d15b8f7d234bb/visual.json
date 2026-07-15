@@ -258,6 +258,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Vitórias Mandante, Empates da Competição, Vitórias Visitante, Taxa Vitória Mandante %, Taxa de Empates %, Taxa Vitória Visitante %'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

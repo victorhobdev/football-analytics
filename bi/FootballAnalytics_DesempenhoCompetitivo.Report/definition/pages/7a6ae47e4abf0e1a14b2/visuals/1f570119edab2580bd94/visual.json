@@ -119,6 +119,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'4. Evolução e mando: elemento visual'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

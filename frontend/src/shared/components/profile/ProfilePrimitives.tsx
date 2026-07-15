@@ -93,7 +93,7 @@ export function ProfilePanel({
   return (
     <section
       className={joinClasses(
-        "rounded-[1.75rem] p-5 backdrop-blur-xl md:p-6",
+        "rounded-[1.75rem] p-4 backdrop-blur-xl md:p-6",
         toneClasses,
         className,
       )}
@@ -142,14 +142,18 @@ export function ProfileTabs({
       <nav
         aria-label={ariaLabel}
         className={joinClasses(
-          "flex flex-wrap items-center",
+          "flex snap-x snap-mandatory flex-nowrap items-center overflow-x-auto md:flex-wrap md:overflow-visible",
           isCompact ? "gap-1.5" : "gap-2",
           navClassName,
         )}
       >
         {items.map((item) => {
           if (item.customComponent) {
-            return <div key={item.key}>{item.customComponent}</div>;
+            return (
+              <div className="shrink-0 snap-start md:snap-none" key={item.key}>
+                {item.customComponent}
+              </div>
+            );
           }
 
           return (
@@ -157,7 +161,7 @@ export function ProfileTabs({
               aria-current={item.isActive ? "page" : undefined}
               aria-label={typeof item.label === "string" ? item.label : undefined}
               className={joinClasses(
-                "button-pill gap-2",
+                "button-pill min-h-11 shrink-0 snap-start gap-2 md:min-h-[var(--button-pill-standard-min-height)] md:snap-none",
                 item.isActive ? "button-pill-primary" : "button-pill-secondary hover:border-[#8bd6b6] hover:bg-[#f0faf6]",
               )}
               href={item.href}
@@ -283,7 +287,7 @@ export function ProfileMetricTile({
           : "border-white/70 bg-[rgba(255,255,255,0.78)]",
       )}
     >
-      <p className="whitespace-nowrap text-[0.68rem] uppercase tracking-[0.12em] text-[#57657a]">{label}</p>
+      <p className="w-full break-words text-[0.68rem] uppercase tracking-[0.12em] text-[#57657a]">{label}</p>
       <p className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold text-[#111c2d]">
         {value}
       </p>

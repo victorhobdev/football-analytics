@@ -84,7 +84,7 @@ export function PlatformStateSurface({
                 {loading ? "Preparando" : STATE_BADGE_LABELS[tone]}
               </span>
             </div>
-            <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-[-0.04em] text-white md:text-5xl">
+            <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-4xl md:text-5xl">
               {title}
             </h1>
             <p className="max-w-3xl text-sm/6 text-white/78 md:text-[0.95rem]/7">{description}</p>
@@ -143,7 +143,7 @@ export function PlatformStateSurface({
       )}
 
       {!loading && (actionHref || secondaryAction) ? (
-        <ProfilePanel className="flex flex-wrap items-center gap-3" tone="soft">
+        <ProfilePanel className="flex flex-col gap-3 [&>*]:w-full sm:flex-row sm:flex-wrap sm:items-center sm:[&>*]:w-auto" tone="soft">
           {actionHref && actionLabel ? (
             <Link
               className="button-pill button-pill-primary"

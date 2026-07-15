@@ -14,7 +14,7 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   const classes = [
-    "rounded-[1.45rem] border border-dashed border-[rgba(191,201,195,0.62)] bg-[rgba(255,255,255,0.72)] p-6 text-center shadow-[0_22px_60px_-50px_rgba(17,28,45,0.18)]",
+    "rounded-[1.25rem] border border-dashed border-[rgba(191,201,195,0.62)] bg-[rgba(255,255,255,0.72)] p-4 text-center shadow-[0_22px_60px_-50px_rgba(17,28,45,0.18)] sm:rounded-[1.45rem] sm:p-6",
     className,
   ]
     .filter(Boolean)
@@ -28,7 +28,7 @@ export function EmptyState({
       <p className="mt-2 text-sm leading-6 text-[#57657a]">{description}</p>
       {actionLabel && onAction ? (
         <button
-          className="button-pill button-pill-secondary mt-4"
+          className="button-pill button-pill-secondary mt-4 w-full sm:w-auto"
           onClick={onAction}
           type="button"
         >

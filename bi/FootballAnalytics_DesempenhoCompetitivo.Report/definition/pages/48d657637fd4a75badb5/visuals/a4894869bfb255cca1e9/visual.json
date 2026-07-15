@@ -508,6 +508,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Produção e eficiência — métricas por 90 exigem 900+ minutos'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

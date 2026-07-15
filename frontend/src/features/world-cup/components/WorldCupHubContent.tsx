@@ -247,7 +247,7 @@ function TimelineEditionCard({
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
                   Campeão
                 </p>
-                <p className="mt-1 truncate font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
+                <p className="mt-1 break-words font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d] sm:truncate">
                   {championName}
                 </p>
               </div>
@@ -270,7 +270,7 @@ function TimelineEditionCard({
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
                   País-sede
                 </p>
-                <p className="mt-1 truncate font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d]">
+                <p className="mt-1 break-words font-[family:var(--font-profile-headline)] text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#111c2d] sm:truncate">
                   {hostCountryName}
                 </p>
               </div>
@@ -441,7 +441,7 @@ export function WorldCupHubContent() {
                   tone="contrast"
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold tracking-[-0.04em] text-white">
+                  <p className="break-words font-[family:var(--font-profile-headline)] text-[1.35rem] font-extrabold tracking-[-0.04em] text-white sm:truncate">
                     {describeTopScorer(summary.topScorer)}
                   </p>
                   <p className="mt-1 text-[0.72rem] uppercase tracking-[0.14em] text-white/68">

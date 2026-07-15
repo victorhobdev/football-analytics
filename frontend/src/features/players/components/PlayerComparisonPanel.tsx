@@ -496,6 +496,7 @@ function PlayerCard({ displayName, profile, side }: PlayerCardProps) {
   const teamName = player?.teamName?.trim() || "Clube não informado";
   const nationality = player?.nationality?.trim() || "Nacionalidade não informada";
   const sideLabel = side === "left" ? "Esquerda" : "Direita";
+  const mobileSideLabel = side === "left" ? "Lado A" : "Lado B";
 
   return (
     <article
@@ -519,8 +520,11 @@ function PlayerCard({ displayName, profile, side }: PlayerCardProps) {
         />
 
         <div className="min-w-0 flex-1">
-          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/56">{sideLabel}</p>
-          <h3 className="mt-1 truncate font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.03em]">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/56">
+            <span className="sm:hidden">{mobileSideLabel}</span>
+            <span className="hidden sm:inline">{sideLabel}</span>
+          </p>
+          <h3 className="mt-1 truncate font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.03em] sm:text-2xl">
             {displayName}
           </h3>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -548,7 +552,7 @@ function PlayerCard({ displayName, profile, side }: PlayerCardProps) {
         </div>
       </div>
 
-      <dl className="mt-5 grid grid-cols-3 gap-2">
+      <dl className="mt-5 grid gap-2 sm:grid-cols-3">
         <div className="rounded-[1rem] bg-white/10 px-3 py-3">
           <dt className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-white/52">Jogos</dt>
           <dd className="mt-1 font-[family:var(--font-profile-headline)] text-xl font-extrabold">
@@ -581,10 +585,10 @@ type MetricValueProps = {
 
 function MetricValue({ formatter, isLeader, side, value }: MetricValueProps) {
   return (
-    <div className={joinClasses("flex min-w-[5.5rem] items-center gap-2", side === "left" ? "justify-start md:justify-end" : "justify-start")}>
+    <div className={joinClasses("flex min-w-0 items-center gap-2 md:min-w-[5.5rem]", side === "left" ? "justify-start md:justify-end" : "justify-start")}>
       <span
         className={joinClasses(
-          "inline-flex min-w-[4.4rem] justify-center rounded-full px-2.5 py-1 text-sm font-bold tabular-nums",
+          "inline-flex min-h-11 w-full items-center justify-center rounded-full px-2.5 py-1 text-sm font-bold tabular-nums sm:min-h-0 sm:w-auto sm:min-w-[4.4rem]",
           value === null
             ? "bg-[rgba(240,243,255,0.7)] text-[#8190a3]"
             : isLeader
@@ -638,9 +642,11 @@ function MetricComparisonRow({
   return (
     <li className="rounded-[1.15rem] border border-[rgba(216,227,251,0.64)] bg-[rgba(248,250,255,0.72)] p-3">
       <div className="grid gap-3 md:grid-cols-[minmax(7rem,0.85fr)_minmax(14rem,1.6fr)_minmax(7rem,0.85fr)] md:items-center">
-        <MetricValue formatter={metric.format} isLeader={leader === "left"} side="left" value={leftValue} />
+        <div className="order-2 min-w-0 md:order-none">
+          <MetricValue formatter={metric.format} isLeader={leader === "left"} side="left" value={leftValue} />
+        </div>
 
-        <div className="min-w-0">
+        <div className="order-1 min-w-0 md:order-none">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-[#1f2d40]">{metric.label}</p>
             <span className="text-[0.68rem] font-medium text-[#748198]">
@@ -673,7 +679,9 @@ function MetricComparisonRow({
           </div>
         </div>
 
-        <MetricValue formatter={metric.format} isLeader={leader === "right"} side="right" value={rightValue} />
+        <div className="order-3 min-w-0 md:order-none">
+          <MetricValue formatter={metric.format} isLeader={leader === "right"} side="right" value={rightValue} />
+        </div>
       </div>
     </li>
   );
@@ -788,7 +796,7 @@ export function PlayerComparisonPanel() {
   );
 
   return (
-    <aside className="mt-6 overflow-hidden rounded-[1.9rem] border border-white/60 bg-[linear-gradient(180deg,rgba(243,247,241,0.96)_0%,rgba(248,250,255,0.98)_48%,rgba(245,249,245,0.96)_100%)] p-4 text-[#111c2d] shadow-[0_30px_84px_-58px_rgba(9,25,20,0.34)] md:p-5">
+    <aside className="mt-6 max-w-full overflow-hidden rounded-[1.9rem] border border-white/60 bg-[linear-gradient(180deg,rgba(243,247,241,0.96)_0%,rgba(248,250,255,0.98)_48%,rgba(245,249,245,0.96)_100%)] p-4 pb-5 text-[#111c2d] shadow-[0_30px_84px_-58px_rgba(9,25,20,0.34)] sm:pb-4 md:p-5">
       <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -799,7 +807,7 @@ export function PlayerComparisonPanel() {
               <ProfileCoveragePill coverage={combinedCoverage} />
             ) : null}
           </div>
-          <h2 className="font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-[#111c2d] md:text-3xl">
+          <h2 className="font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.035em] text-[#111c2d] sm:text-2xl md:text-3xl">
             {canRenderComparison ? `${leftDisplayName} x ${rightDisplayName}` : "Escolha dois jogadores"}
           </h2>
           <p className="max-w-3xl text-sm/6 text-[#57657a]">
@@ -813,13 +821,13 @@ export function PlayerComparisonPanel() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          <div className="inline-flex rounded-full border border-[rgba(191,201,195,0.55)] bg-white/82 p-[2px]">
+        <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end">
+          <div className="grid grid-cols-2 rounded-full border border-[rgba(191,201,195,0.55)] bg-white/82 p-[2px] sm:inline-flex">
             {(["totals", "per90"] as const).map((mode) => (
               <button
                 aria-pressed={metricMode === mode}
                 className={joinClasses(
-                  "button-pill",
+                  "button-pill min-h-11 w-full sm:min-h-[var(--button-pill-standard-min-height)] sm:w-auto",
                   metricMode === mode ? "button-pill-primary" : "button-pill-ghost border-transparent bg-transparent",
                 )}
                 key={mode}
@@ -833,7 +841,7 @@ export function PlayerComparisonPanel() {
             ))}
           </div>
           <button
-            className="button-pill button-pill-ghost"
+            className="button-pill button-pill-ghost min-h-11 w-full sm:min-h-[var(--button-pill-standard-min-height)] sm:w-auto"
             onClick={() => {
               clearSelection();
             }}
@@ -881,6 +889,10 @@ export function PlayerComparisonPanel() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <PlayerCard displayName={leftDisplayName} profile={leftProfile} side="left" />
+            <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#57657a] sm:hidden">
+              <span aria-hidden="true" className="text-lg text-[#00513b]">↓</span>
+              Lado B
+            </div>
             <PlayerCard displayName={rightDisplayName} profile={rightProfile} side="right" />
           </div>
 

@@ -241,6 +241,13 @@ export function buildSeasonHubTabPath(
   tab: SeasonHubTab,
   filterInput: SharedFilterQueryInput = {},
 ): string {
+  const competitionKey = normalizeText(input.competitionKey);
+  const seasonLabel = normalizeText(input.seasonLabel);
+
+  if (tab === "rankings" && competitionKey && seasonLabel) {
+    return buildAnalysesPath({ ...filterInput, competitionKey, seasonLabel });
+  }
+
   const basePath = buildSeasonHubPath(input);
   const searchParams = new URLSearchParams(
     buildFilterQueryString(filterInput, CONTEXT_QUERY_KEYS)

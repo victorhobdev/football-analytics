@@ -48,6 +48,52 @@
               "nativeQueryRef": "Participações por 90 (900+ min)"
             }
           ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Minutos"
+                }
+              },
+              "queryRef": "Medidas.Minutos",
+              "nativeQueryRef": "Minutos"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Jogos do Jogador"
+                }
+              },
+              "queryRef": "Medidas.Jogos do Jogador",
+              "nativeQueryRef": "Jogos do Jogador"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Cobertura de Minutos %"
+                }
+              },
+              "queryRef": "Medidas.Cobertura de Minutos %",
+              "nativeQueryRef": "Cobertura de Minutos %"
+            }
+          ]
         }
       },
       "sortDefinition": {
@@ -342,6 +388,19 @@
               "expr": {
                 "Literal": {
                   "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Participações em gol por 90 (mínimo de 900 minutos)'"
                 }
               }
             }

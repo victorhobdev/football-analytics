@@ -265,13 +265,64 @@ function ShellIcon({ className, icon }: { className?: string; icon: ShellIconNam
   );
 }
 
+function SidebarArchiveSummary({ onNavigate }: { onNavigate: () => void }) {
+  const homeQuery = useHomePage();
+  const archiveSummary = homeQuery.data?.archiveSummary;
+
+  return (
+    <div className="border-t border-white/10 bg-white/3 px-6 py-8">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
+            Competições
+          </p>
+          <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
+            {formatArchiveValue(archiveSummary?.competitions)}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
+            Temporadas
+          </p>
+          <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
+            {formatArchiveValue(archiveSummary?.seasons)}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
+            Partidas
+          </p>
+          <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
+            {formatArchiveValue(archiveSummary?.matches)}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
+            Jogadores
+          </p>
+          <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
+            {formatArchiveValue(archiveSummary?.players)}
+          </p>
+        </div>
+      </div>
+
+      <Link
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] px-4 py-3 text-[0.78rem] font-bold uppercase tracking-[0.16em] text-white transition-transform hover:-translate-y-0.5"
+        href="/competitions"
+        onClick={onNavigate}
+        prefetch={false}
+      >
+        Abrir catálogo
+      </Link>
+    </div>
+  );
+}
+
 export function PlatformShell({ children }: PlatformShellProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
-  const homeQuery = useHomePage();
-  const archiveSummary = homeQuery.data?.archiveSummary;
   const isHomeRoute = pathname === "/";
   const isCompetitionsIndexRoute = pathname === "/competitions";
   const isCanonicalSeasonRoute =
@@ -280,15 +331,16 @@ export function PlatformShell({ children }: PlatformShellProps) {
   const shouldRenderSurfaceChrome = !isHomeRoute && !isCompetitionsIndexRoute && pathname !== "/analises";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobileSidebarMode, setIsMobileSidebarMode] = useState(false);
+  const [isMobileSidebarMode, setIsMobileSidebarMode] = useState<boolean | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const sidebarPanelRef = useRef<HTMLElement | null>(null);
   const sidebarCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const shouldRestoreSidebarFocusRef = useRef(false);
-  const shouldTreatSidebarAsDialog = isMobileSidebarMode && isSidebarOpen;
-  const shouldHideMobileSidebar = isMobileSidebarMode && !isSidebarOpen;
+  const shouldTreatSidebarAsDialog = isMobileSidebarMode === true && isSidebarOpen;
+  const shouldHideMobileSidebar = isMobileSidebarMode === true && !isSidebarOpen;
 
-  const openSidebar = useCallback(() => {
+  const openSidebar = useCallback((trigger: HTMLButtonElement) => {
+    menuButtonRef.current = trigger;
     shouldRestoreSidebarFocusRef.current = true;
     setIsSidebarOpen(true);
   }, []);
@@ -321,6 +373,12 @@ export function PlatformShell({ children }: PlatformShellProps) {
     { href: "/copa-do-mundo", label: "Copa do Mundo" },
     { href: "/competitions", label: "Competições" },
     { href: buildRankingsHubPath(sharedFilters), label: "Análises" },
+  ] as const;
+  const mobileNavLinks = [
+    { href: "/", icon: "analytics" as const, label: "Início" },
+    { href: "/copa-do-mundo", icon: "worldCup" as const, label: "Copa" },
+    { href: "/competitions", icon: "competition" as const, label: "Competições" },
+    { href: buildRankingsHubPath(sharedFilters), icon: "analytics" as const, label: "Análises" },
   ] as const;
   const secondaryPublicLinks = [
     {
@@ -518,7 +576,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
         aria-label={shouldTreatSidebarAsDialog ? "Navegação principal" : undefined}
         aria-modal={shouldTreatSidebarAsDialog ? true : undefined}
         className={joinClasses(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/8 bg-[#081612] text-white transition-transform duration-300 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col overflow-y-auto overscroll-contain border-r border-white/8 bg-[#081612] text-white transition-transform duration-300 lg:translate-x-0 lg:overflow-visible",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
         id={SIDEBAR_PANEL_ID}
@@ -534,6 +592,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
             onClick={() => {
               closeSidebar({ restoreFocus: false });
             }}
+            prefetch={false}
           >
             <span className="block font-[family:var(--font-app-headline)] text-xl font-extrabold tracking-[-0.04em] text-emerald-50 lg:text-[1.9rem]">
               Football Analytics
@@ -545,7 +604,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
 
           <button
             aria-label="Fechar navegação"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-slate-200 transition-colors hover:border-emerald-300/40 hover:text-white lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-slate-200 transition-colors hover:border-emerald-300/40 hover:text-white lg:hidden"
             onClick={() => {
               closeSidebar();
             }}
@@ -578,6 +637,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
                   onClick={() => {
                     closeSidebar({ restoreFocus: false });
                   }}
+                  prefetch={false}
                   aria-current={isActive ? "page" : undefined}
                 >
                   <ShellIcon icon={item.icon} />
@@ -593,56 +653,17 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </div>
         </nav>
 
-        <div className="border-t border-white/10 bg-white/3 px-6 py-8">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Competições
-              </p>
-              <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(archiveSummary?.competitions)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Temporadas
-              </p>
-              <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(archiveSummary?.seasons)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Partidas
-              </p>
-              <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(archiveSummary?.matches)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-slate-500">
-                Jogadores
-              </p>
-              <p className="mt-1 font-[family:var(--font-app-headline)] text-xl font-extrabold text-emerald-50">
-                {formatArchiveValue(archiveSummary?.players)}
-              </p>
-            </div>
-          </div>
-
-          <Link
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#003526_0%,#004e39_100%)] px-4 py-3 text-[0.78rem] font-bold uppercase tracking-[0.16em] text-white transition-transform hover:-translate-y-0.5"
-            href="/competitions"
-            onClick={() => {
+        {isMobileSidebarMode === false || isSidebarOpen ? (
+          <SidebarArchiveSummary
+            onNavigate={() => {
               closeSidebar({ restoreFocus: false });
             }}
-          >
-            Abrir catálogo
-          </Link>
-        </div>
+          />
+        ) : null}
 
         <div className="border-t border-white/10 p-3">
           <button
-            className="flex w-full items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
+            className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
             onClick={() => {
               setIsSearchOpen(true);
               closeSidebar({ restoreFocus: false });
@@ -653,11 +674,12 @@ export function PlatformShell({ children }: PlatformShellProps) {
             <span>Busca global</span>
           </button>
           <Link
-            className="flex items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
+            className="flex min-h-11 items-center gap-3 px-4 py-2 text-[0.82rem] text-slate-400 transition-colors hover:text-emerald-100"
             href={buildRankingsHubPath(sharedFilters)}
             onClick={() => {
               closeSidebar({ restoreFocus: false });
             }}
+            prefetch={false}
           >
             <ShellIcon icon="analytics" />
             <span>Análises</span>
@@ -665,29 +687,15 @@ export function PlatformShell({ children }: PlatformShellProps) {
         </div>
       </aside>
 
-      <div className="lg:pl-64">
+      <div className="platform-mobile-safe-content lg:pl-64">
         <header className="fixed left-0 right-0 top-0 z-30 h-16 border-b border-[rgba(225,230,240,0.92)] bg-white/95 shadow-[0_16px_36px_-32px_rgba(15,23,42,0.45)] backdrop-blur-xl lg:left-64 lg:h-24">
           <div className="flex h-full items-center gap-4 px-4 md:px-8 lg:gap-8 lg:px-10 xl:gap-12 xl:px-12">
-            <button
-              aria-controls={SIDEBAR_PANEL_ID}
-              aria-expanded={isSidebarOpen}
-              aria-label="Abrir navegação"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 text-[#1f2d40] transition-colors hover:border-[#8bd6b6] hover:text-[#003526] lg:hidden"
-              onClick={() => {
-                openSidebar();
-              }}
-              ref={menuButtonRef}
-              type="button"
-            >
-              <ShellIcon icon="menu" />
-            </button>
-
             <button
               aria-label="Busca global: buscar competições, partidas, times ou jogadores"
               aria-controls="global-search-dialog"
               aria-expanded={isSearchOpen}
               aria-haspopup="dialog"
-              className="group inline-flex min-w-0 flex-1 items-center justify-between gap-4 rounded-[1rem] bg-[#eef3ff] px-4 py-2.5 text-left transition-colors hover:bg-[#e3ebff] md:max-w-[520px] lg:flex-none lg:min-w-[29rem] lg:max-w-[32rem] lg:rounded-[1.15rem] lg:px-5 lg:py-4"
+              className="group inline-flex min-h-11 min-w-0 flex-1 items-center justify-between gap-4 rounded-[1rem] bg-[#eef3ff] px-4 py-2.5 text-left transition-colors hover:bg-[#e3ebff] md:max-w-[520px] lg:flex-none lg:min-w-[29rem] lg:max-w-[32rem] lg:rounded-[1.15rem] lg:px-5 lg:py-4"
               onClick={() => {
                 setIsSearchOpen(true);
               }}
@@ -719,6 +727,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
                     href={item.href}
                     key={item.href}
                     aria-current={isActive ? "page" : undefined}
+                    prefetch={false}
                   >
                     <span>{item.label}</span>
                     {"badge" in item && item.badge ? (
@@ -746,7 +755,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
             >
               <div
                 className={joinClasses(
-                  "mx-auto w-full px-6 md:px-8",
+                  "mx-auto w-full px-4 sm:px-6 md:px-8",
                   isCanonicalSeasonRoute ? "py-2" : "py-4",
                   surfaceContentWidthClassName,
                 )}
@@ -768,7 +777,7 @@ export function PlatformShell({ children }: PlatformShellProps) {
             className={
               isHomeRoute
                 ? ""
-                : joinClasses("px-6 md:px-8", isCanonicalSeasonRoute ? "py-4" : "py-8")
+                : joinClasses("px-4 sm:px-6 md:px-8", isCanonicalSeasonRoute ? "py-4" : "py-8")
             }
           >
             <GlobalErrorBoundary>
@@ -788,6 +797,46 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </div>
         </div>
       </div>
+
+      <nav
+        aria-label="Navegação móvel"
+        className="platform-mobile-bottom-nav fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[rgba(191,201,195,0.42)] bg-white/96 shadow-[0_-18px_44px_-34px_rgba(17,28,45,0.5)] backdrop-blur-xl lg:hidden"
+      >
+        {mobileNavLinks.map((item) => {
+          const isActive = isActiveNavLink(pathname, item.href);
+
+          return (
+            <Link
+              aria-current={isActive ? "page" : undefined}
+              className={joinClasses(
+                "flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 px-1 text-[0.62rem] font-semibold",
+                isActive ? "text-[#00513b]" : "text-[#687790]",
+              )}
+              href={item.href}
+              key={item.href}
+              prefetch={false}
+            >
+              <ShellIcon className="h-5 w-5" icon={item.icon} />
+              <span className="max-w-full truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+        <button
+          aria-controls={SIDEBAR_PANEL_ID}
+          aria-expanded={isSidebarOpen}
+          className={joinClasses(
+            "flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 px-1 text-[0.62rem] font-semibold",
+            isSidebarOpen ? "text-[#00513b]" : "text-[#687790]",
+          )}
+          onClick={(event) => {
+            openSidebar(event.currentTarget);
+          }}
+          type="button"
+        >
+          <ShellIcon className="h-5 w-5" icon="menu" />
+          <span>Mais</span>
+        </button>
+      </nav>
 
       <GlobalSearchOverlay
         isOpen={isSearchOpen}

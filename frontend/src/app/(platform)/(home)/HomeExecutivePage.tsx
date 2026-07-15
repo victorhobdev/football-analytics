@@ -168,7 +168,11 @@ function buildHomeCompetitionMeta(competition: HomeCompetitionCard): HomeCompeti
     getCompetitionByKey(competition.competitionKey);
 
   if (registryMeta) {
-    return registryMeta;
+    return {
+      ...registryMeta,
+      visualAssetId:
+        registryMeta.visualAssetId ?? competition.assetId ?? competition.competitionId,
+    };
   }
 
   return {
@@ -396,13 +400,14 @@ function CompetitionCard({
   const [hasCompetitionLogoError, setHasCompetitionLogoError] = useState(false);
   const assetUrl = buildVisualAssetUrl(
     "competitions",
-    meta.visualAssetId ?? competition.assetId,
+    meta.visualAssetId ?? null,
   );
 
   return (
     <Link
       className={joinClasses(styles.competitionCard, styles.interactiveCard)}
       href={buildCompetitionCardHref(competition)}
+      prefetch={false}
     >
       <div className={styles.competitionCardContent}>
         <div className={styles.competitionCardHeader}>
@@ -552,7 +557,7 @@ export function HomeExecutivePage() {
 
   return (
     <div className={joinClasses(styles.homeRoot, "bg-[var(--app-surface)] text-[var(--app-text)]")}>
-      <section className="px-6 pb-12 pt-8 md:px-10 md:pb-14 md:pt-10 xl:px-12">
+      <section className="px-4 pb-8 pt-5 sm:px-6 md:px-10 md:pb-14 md:pt-10 xl:px-12">
         <div className="mx-auto max-w-6xl">
           {homeQuery.isPartial ? (
             <div className="mb-8">
@@ -627,7 +632,7 @@ export function HomeExecutivePage() {
         </div>
       </section>
 
-      <section className="px-6 pb-12 md:px-10 md:pb-14 xl:px-12">
+      <section className="px-4 pb-10 sm:px-6 md:px-10 md:pb-14 xl:px-12">
         <div className="mx-auto max-w-6xl space-y-8">
           <div className={styles.sectionPanel}>
             <SectionHeader
@@ -639,7 +644,7 @@ export function HomeExecutivePage() {
             />
 
             {competitionGroups.domestic.length > 0 ? (
-              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+              <div className={styles.competitionGrid}>
                 {competitionGroups.domestic.map((competition) => (
                   <CompetitionCard
                     competition={competition}
@@ -666,7 +671,7 @@ export function HomeExecutivePage() {
             />
 
             {competitionGroups.continental.length > 0 ? (
-              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+              <div className={styles.competitionGrid}>
                 {competitionGroups.continental.map((competition) => (
                   <CompetitionCard
                     competition={competition}
@@ -691,7 +696,7 @@ export function HomeExecutivePage() {
             />
 
             {competitionGroups.world.length > 0 ? (
-              <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+              <div className={styles.competitionGrid}>
                 {competitionGroups.world.map((competition) => (
                   <CompetitionCard
                     competition={competition}

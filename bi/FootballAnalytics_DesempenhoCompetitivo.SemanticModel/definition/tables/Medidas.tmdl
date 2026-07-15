@@ -72,36 +72,6 @@ table Medidas
 		displayFolder: Times
 		lineageTag: 90000000-0000-0000-0000-000000000015
 
-	measure 'PPG Médio do Recorte' = CALCULATE ( [PPG], REMOVEFILTERS ( DimTeam ) )
-		formatString: 0.00
-		displayFolder: Benchmark
-		lineageTag: 90000000-0000-0000-0000-000000000048
-
-	measure 'Delta PPG vs Recorte' = [PPG] - [PPG Médio do Recorte]
-		formatString: +0.00;-0.00;0.00
-		displayFolder: Benchmark
-		lineageTag: 90000000-0000-0000-0000-000000000049
-
-	measure 'Percentil PPG' =
-			VAR Atual = [PPG]
-			VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), NOT ISBLANK ( CALCULATE ( [PPG] ) ) )
-			RETURN DIVIDE ( COUNTROWS ( FILTER ( TimesDoRecorte, CALCULATE ( [PPG] ) <= Atual ) ) - 1, COUNTROWS ( TimesDoRecorte ) - 1 )
-		formatString: 0%
-		displayFolder: Benchmark
-		lineageTag: 90000000-0000-0000-0000-000000000050
-
-	measure 'PPG Últimos 5' =
-			VAR JogosRecentes = TOPN ( 5, SUMMARIZE ( FactTeamMatch, FactTeamMatch[match_id], FactTeamMatch[match_date] ), FactTeamMatch[match_date], DESC, FactTeamMatch[match_id], DESC )
-			RETURN CALCULATE ( [PPG], TREATAS ( SELECTCOLUMNS ( JogosRecentes, "match_id", FactTeamMatch[match_id] ), FactTeamMatch[match_id] ) )
-		formatString: 0.00
-		displayFolder: Benchmark
-		lineageTag: 90000000-0000-0000-0000-000000000051
-
-	measure 'Delta Forma 5 Jogos' = [PPG Últimos 5] - [PPG]
-		formatString: +0.00;-0.00;0.00
-		displayFolder: Benchmark
-		lineageTag: 90000000-0000-0000-0000-000000000052
-
 	measure 'Gols por Partida' = DIVIDE ( [Gols Totais], [Partidas] )
 		formatString: 0.00
 		displayFolder: Competição
@@ -171,37 +141,6 @@ table Medidas
 		formatString: 0
 		displayFolder: Times
 		lineageTag: 90000000-0000-0000-0000-000000000040
-
-	measure 'Finalizações no Alvo do Time' = SUM ( FactTeamMatch[shots_on_goal] )
-		formatString: 0
-		displayFolder: Times
-		lineageTag: 90000000-0000-0000-0000-000000000053
-
-	measure 'Gols por Jogo do Time' = DIVIDE ( [Gols Pró], [Jogos do Time] )
-		formatString: 0.00
-		displayFolder: Times
-		lineageTag: 90000000-0000-0000-0000-000000000054
-
-	measure 'Gols em Jogos com Estatísticas' = SUMX ( FILTER ( FactTeamMatch, NOT ISBLANK ( FactTeamMatch[total_shots] ) ), FactTeamMatch[goals_for] )
-		formatString: 0
-		displayFolder: Times
-		lineageTag: 90000000-0000-0000-0000-000000000068
-
-	measure 'Conversão de Finalizações %' =
-			VAR GolsCobertos = [Gols em Jogos com Estatísticas]
-			VAR Tentativas = [Finalizações do Time]
-			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= GolsCobertos, DIVIDE ( GolsCobertos, Tentativas ) )
-		formatString: 0.0%;-0.0%;0.0%
-		displayFolder: Times
-		lineageTag: 90000000-0000-0000-0000-000000000055
-
-	measure 'Precisão de Finalização %' =
-			VAR NoAlvo = [Finalizações no Alvo do Time]
-			VAR Tentativas = [Finalizações do Time]
-			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= NoAlvo, DIVIDE ( NoAlvo, Tentativas ) )
-		formatString: 0.0%;-0.0%;0.0%
-		displayFolder: Times
-		lineageTag: 90000000-0000-0000-0000-000000000056
 
 	measure 'Cobertura Estatísticas de Time %' = DIVIDE ( COUNT ( FactTeamMatch[ball_possession] ), [Jogos do Time] )
 		formatString: 0.0%;-0.0%;0.0%
@@ -279,6 +218,77 @@ table Medidas
 		displayFolder: Jogadores
 		lineageTag: 90000000-0000-0000-0000-000000000045
 
+	measure 'Cobertura de Nota %' = DIVIDE ( COUNT ( FactPlayerMatch[rating] ), COUNTROWS ( FactPlayerMatch ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000046
+
+	measure 'Dados disponíveis até' = MAX ( FactMatch[updated_at] )
+		formatString: dd/MM/yyyy HH:mm
+		displayFolder: Qualidade
+		lineageTag: 90000000-0000-0000-0000-000000000036
+
+	measure 'PPG Médio do Recorte' = CALCULATE ( [PPG], REMOVEFILTERS ( DimTeam ) )
+		formatString: 0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000048
+
+	measure 'Delta PPG vs Recorte' = [PPG] - [PPG Médio do Recorte]
+		formatString: +0.00;-0.00;0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000049
+
+	measure 'Percentil PPG' =
+			VAR Atual = [PPG]
+			VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), NOT ISBLANK ( CALCULATE ( [PPG] ) ) )
+			RETURN DIVIDE ( COUNTROWS ( FILTER ( TimesDoRecorte, CALCULATE ( [PPG] ) <= Atual ) ) - 1, COUNTROWS ( TimesDoRecorte ) - 1 )
+		formatString: 0%
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000050
+
+	measure 'PPG Últimos 5' =
+			VAR JogosRecentes = TOPN ( 5, SUMMARIZE ( FactTeamMatch, FactTeamMatch[match_id], FactTeamMatch[match_date] ), FactTeamMatch[match_date], DESC, FactTeamMatch[match_id], DESC )
+			RETURN CALCULATE ( [PPG], TREATAS ( SELECTCOLUMNS ( JogosRecentes, "match_id", FactTeamMatch[match_id] ), FactTeamMatch[match_id] ) )
+		formatString: 0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000051
+
+	measure 'Delta Forma 5 Jogos' = [PPG Últimos 5] - [PPG]
+		formatString: +0.00;-0.00;0.00
+		displayFolder: Benchmark
+		lineageTag: 90000000-0000-0000-0000-000000000052
+
+	measure 'Finalizações no Alvo do Time' = SUM ( FactTeamMatch[shots_on_goal] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000053
+
+	measure 'Gols por Jogo do Time' = DIVIDE ( [Gols Pró], [Jogos do Time] )
+		formatString: 0.00
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000054
+
+	measure 'Gols em Jogos com Estatísticas' = SUMX ( FILTER ( FactTeamMatch, NOT ISBLANK ( FactTeamMatch[total_shots] ) ), FactTeamMatch[goals_for] )
+		formatString: 0
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000068
+
+	measure 'Conversão de Finalizações %' =
+			VAR GolsCobertos = [Gols em Jogos com Estatísticas]
+			VAR Tentativas = [Finalizações do Time]
+			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= GolsCobertos, DIVIDE ( GolsCobertos, Tentativas ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000055
+
+	measure 'Precisão de Finalização %' =
+			VAR NoAlvo = [Finalizações no Alvo do Time]
+			VAR Tentativas = [Finalizações do Time]
+			RETURN IF ( [Cobertura Estatísticas de Time %] >= 0.95 && Tentativas >= 50 && Tentativas >= NoAlvo, DIVIDE ( NoAlvo, Tentativas ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Times
+		lineageTag: 90000000-0000-0000-0000-000000000056
+
 	measure 'Participações em Gol' = [Gols] + [Assistências]
 		formatString: 0
 		displayFolder: Jogadores
@@ -309,16 +319,6 @@ table Medidas
 		displayFolder: Qualidade
 		lineageTag: 90000000-0000-0000-0000-000000000062
 
-	measure 'Cobertura de Nota %' = DIVIDE ( COUNT ( FactPlayerMatch[rating] ), COUNTROWS ( FactPlayerMatch ) )
-		formatString: 0.0%;-0.0%;0.0%
-		displayFolder: Qualidade
-		lineageTag: 90000000-0000-0000-0000-000000000046
-
-	measure 'Última Atualização' = MAX ( FactMatch[updated_at] )
-		formatString: dd/MM/yyyy HH:mm
-		displayFolder: Qualidade
-		lineageTag: 90000000-0000-0000-0000-000000000036
-
 	measure Escopos = DISTINCTCOUNT ( DimScope[scope_key] )
 		formatString: 0
 		displayFolder: Qualidade
@@ -343,6 +343,53 @@ table Medidas
 		formatString: 0
 		displayFolder: Qualidade
 		lineageTag: 90000000-0000-0000-0000-000000000067
+
+	measure 'Time de Referência' =
+			VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), CALCULATE ( [Jogos do Time] ) >= 10 )
+			VAR Destaque = TOPN ( 1, TimesDoRecorte, [PPG], DESC, DimTeam[Time], ASC )
+			RETURN IF ( HASONEVALUE ( DimScope[scope_key] ), MAXX ( Destaque, DimTeam[Time] ) )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000069
+
+	measure 'PPG (10+ jogos)' = IF ( [Jogos do Time] >= 10, [PPG] )
+		formatString: 0.00
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000075
+
+	measure 'Resumo - O que aconteceu' =
+			VAR Nome = [Time de Referência]
+			VAR PPGTime = CALCULATE ( [PPG], TREATAS ( { Nome }, DimTeam[Time] ) )
+			VAR Jogos = CALCULATE ( [Jogos do Time], TREATAS ( { Nome }, DimTeam[Time] ) )
+			RETURN IF ( ISBLANK ( Nome ), "Selecione uma fonte, competição e temporada.", Nome & " · " & FORMAT ( PPGTime, "0.00" ) & " PPG · " & FORMAT ( Jogos, "0" ) & " jogos." )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000070
+
+	measure 'Resumo - Onde' = "Fonte: " & SELECTEDVALUE ( DimScope[provider], "múltiplas" ) & " · Competição: " & SELECTEDVALUE ( DimScope[competition], "múltiplas" ) & " · Temporada: " & SELECTEDVALUE ( DimScope[season_label], "múltiplas" )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000071
+
+	measure 'Resumo - Por que importa' =
+			VAR Nome = [Time de Referência]
+			VAR Delta = CALCULATE ( [Delta PPG vs Recorte], TREATAS ( { Nome }, DimTeam[Time] ) )
+			VAR Forma = CALCULATE ( [Delta Forma 5 Jogos], TREATAS ( { Nome }, DimTeam[Time] ) )
+			RETURN IF ( ISBLANK ( Nome ), "Sem comparação: defina um único escopo.", Nome & ": " & FORMAT ( Delta, "+0.00;-0.00;0.00" ) & " PPG vs recorte · " & FORMAT ( Forma, "+0.00;-0.00;0.00" ) & " nos últimos 5." )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000072
+
+	measure 'Resumo - Ação sugerida' =
+			VAR Nome = [Time de Referência]
+			VAR Cobertura = CALCULATE ( [Cobertura Estatísticas de Time %], TREATAS ( { Nome }, DimTeam[Time] ) )
+			RETURN IF ( ISBLANK ( Nome ), "Defina competição e temporada antes de agir.", IF ( Cobertura < 0.95, "Evite conversão: cobertura de estatísticas do time abaixo de 95%.", "Investigue volume e conversão; sem xG, não atribua causa tática." ) )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000073
+
+	measure 'Resumo - Confiança' =
+			VAR Nome = [Time de Referência]
+			VAR Placar = [Cobertura de Placar %]
+			VAR Estatisticas = CALCULATE ( [Cobertura Estatísticas de Time %], TREATAS ( { Nome }, DimTeam[Time] ) )
+			RETURN IF ( ISBLANK ( Nome ), "Confiança depende de um único escopo.", "Placar " & FORMAT ( Placar, "0.0%" ) & " · Stats " & FORMAT ( Estatisticas, "0.0%" ) & " · ausências ≠ zero." )
+		displayFolder: Resumo executivo
+		lineageTag: 90000000-0000-0000-0000-000000000074
 
 	column Placeholder
 		dataType: string

@@ -115,12 +115,6 @@ type KnockoutStageQueryState = {
   ties: StageTie[];
 };
 
-type ChampionLeadRoundsSummary = {
-  count: number | null;
-  isError: boolean;
-  isLoading: boolean;
-};
-
 type BracketSide = "left" | "right";
 
 type BracketSnapshotColumn = {
@@ -373,66 +367,6 @@ function useSeasonFinalStandings(context: CompetitionSeasonContext, stageId?: st
     gcTime: 20 * 60 * 1000,
     isDataEmpty: (data) => data.rows.length === 0,
   });
-}
-
-function useSeasonChampionLeadRounds(
-  context: CompetitionSeasonContext,
-  championTeamId: string | null | undefined,
-  rounds: StandingsRound[],
-): ChampionLeadRoundsSummary {
-  const queries = useQueries({
-    queries: rounds.map((round) => ({
-      queryKey: standingsQueryKeys.table({
-        competitionId: context.competitionId,
-        seasonId: context.seasonId,
-        roundId: round.roundId,
-      }),
-      queryFn: () =>
-        fetchStandings({
-          competitionId: context.competitionId,
-          seasonId: context.seasonId,
-          roundId: round.roundId,
-        }),
-      enabled: Boolean(context.competitionId && context.seasonId && championTeamId && round.roundId),
-      staleTime: 5 * 60 * 1000,
-      gcTime: 20 * 60 * 1000,
-    })),
-  });
-
-  return useMemo(() => {
-    if (!championTeamId || rounds.length === 0) {
-      return {
-        count: null,
-        isError: false,
-        isLoading: false,
-      };
-    }
-
-    if (queries.some((query) => query.isLoading)) {
-      return {
-        count: null,
-        isError: false,
-        isLoading: true,
-      };
-    }
-
-    if (queries.some((query) => query.isError || !query.data?.data)) {
-      return {
-        count: null,
-        isError: true,
-        isLoading: false,
-      };
-    }
-
-    return {
-      count: queries.reduce((sum, query) => {
-        const leader = resolveChampionFromStandings(query.data?.data.rows ?? []);
-        return leader?.teamId === championTeamId ? sum + 1 : sum;
-      }, 0),
-      isError: false,
-      isLoading: false,
-    };
-  }, [championTeamId, queries, rounds.length]);
 }
 
 function useSeasonClosingMatches(context: CompetitionSeasonContext, pageSize = 6) {
@@ -1038,6 +972,7 @@ function SeasonHeroBlock({
   tags?: string[];
   title: string;
 }) {
+  const [hasCompetitionLogoError, setHasCompetitionLogoError] = useState(false);
   const competitionLogoSrc = context.competitionId
     ? `/api/visual-assets/competitions/${encodeURIComponent(context.competitionId)}`
     : null;
@@ -1069,10 +1004,11 @@ function SeasonHeroBlock({
 
         <div className="grid gap-6 xl:grid-cols-[auto_minmax(0,1fr)_minmax(260px,0.75fr)] xl:items-end">
           <div className="flex h-20 w-20 items-center justify-center rounded-[1.3rem] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.12)] p-4 shadow-[0_18px_40px_-28px_rgba(17,28,45,0.75)]">
-            {competitionLogoSrc ? (
+            {competitionLogoSrc && !hasCompetitionLogoError ? (
               <img
                 alt={`Logo da competição ${context.competitionName}`}
                 className="h-full w-full object-contain"
+                onError={() => setHasCompetitionLogoError(true)}
                 src={competitionLogoSrc}
               />
             ) : (
@@ -1583,16 +1519,6 @@ function formatAverageGoals(value: number | null | undefined) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
-}
-
-function formatRoundCount(roundCount: number | null | undefined) {
-  if (typeof roundCount !== "number" || !Number.isFinite(roundCount)) {
-    return "-";
-  }
-
-  const formattedRoundCount = formatHistoricalMatchCount(roundCount);
-
-  return roundCount === 1 ? `${formattedRoundCount} Rodada` : `${formattedRoundCount} Rodadas`;
 }
 
 function resolveLeagueGoalsFromStandings(rows: StandingsTableRow[]): number | null {
@@ -2332,12 +2258,52 @@ function LeagueStandingsTable({
   const total = rows.length;
 
   return (
-    <div className="overflow-hidden overflow-x-auto rounded-xl bg-white shadow-sm">
+    <>
+      <div className="grid gap-2 md:hidden">
+        {rows.map((row) => {
+          const borderColor = resolveZoneBorderColor(row.position, total);
+          return (
+            <article
+              className={`rounded-xl border-l-4 bg-white p-3 shadow-sm ${borderColor}`}
+              key={`mobile-${row.teamId ?? row.teamName}`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f0f3ff] text-sm font-bold tabular-nums text-[#003526]">
+                  {row.position}
+                </span>
+                <Link
+                  className="flex min-h-11 min-w-0 flex-1 items-center gap-3 font-semibold text-[#111c2d]"
+                  href={buildCanonicalTeamPath(context, row.teamId)}
+                >
+                  <TeamBadge size={28} teamId={row.teamId} teamName={row.teamName ?? row.teamId ?? ""} />
+                  <span className="break-words">{row.teamName ?? row.teamId}</span>
+                </Link>
+                <strong className="text-lg tabular-nums text-[#003526]">{row.points} pts</strong>
+              </div>
+              <dl className="mt-3 grid grid-cols-5 gap-1 text-center">
+                {[
+                  ["J", row.matchesPlayed],
+                  ["V", row.wins],
+                  ["E", row.draws],
+                  ["D", row.losses],
+                  ["SG", row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff],
+                ].map(([label, value]) => (
+                  <div className="rounded-lg bg-[#f7f9ff] px-1 py-2" key={label}>
+                    <dt className="text-[0.64rem] font-bold uppercase text-[#657186]">{label}</dt>
+                    <dd className="mt-1 text-sm font-bold tabular-nums text-[#111c2d]">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </article>
+          );
+        })}
+      </div>
+      <div className="hidden max-w-full overflow-hidden overflow-x-auto rounded-xl bg-white shadow-sm md:block">
       <table className="w-full min-w-[640px] border-collapse text-left">
         <thead>
           <tr className="bg-[#f0f3ff]">
-            <th className="w-12 py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Pos</th>
-            <th className="min-w-[180px] py-3.5 px-4 text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Clube</th>
+            <th className="sticky left-0 z-20 w-12 bg-[#f0f3ff] py-3.5 px-4 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Pos</th>
+            <th className="sticky left-12 z-20 min-w-[180px] bg-[#f0f3ff] py-3.5 px-4 text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">Clube</th>
             <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Partidas jogadas">PJ</th>
             <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Vitórias">V</th>
             <th className="py-3.5 px-3 text-center text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]" title="Empates">E</th>
@@ -2356,10 +2322,10 @@ function LeagueStandingsTable({
                 className="align-middle transition-colors hover:bg-[#f0f3ff]"
                 key={row.teamId ?? row.teamName}
               >
-                <td className={`border-l-4 py-3.5 px-4 text-center text-sm font-bold tabular-nums ${borderColor}`}>
+                <td className={`sticky left-0 z-10 border-l-4 bg-white py-3.5 px-4 text-center text-sm font-bold tabular-nums ${borderColor}`}>
                   {row.position}
                 </td>
-                <td className="py-3.5 px-4">
+                <td className="sticky left-12 z-10 bg-white py-3.5 px-4">
                   <Link
                     className="flex items-center gap-3 font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
                     href={buildCanonicalTeamPath(context, row.teamId)}
@@ -2387,7 +2353,8 @@ function LeagueStandingsTable({
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -2766,7 +2733,54 @@ function KnockoutBracketPanel({
             title="Sem chaveamento"
           />
         ) : (
-          <div className="overflow-x-auto pb-1">
+          <>
+          <div className="space-y-4 sm:hidden">
+            {snapshotState.snapshotColumns.map((column) => renderSnapshotStageColumn(column, "left"))}
+            <div className="flex flex-col justify-center">
+              <div className="mx-auto w-full max-w-[280px] rounded-[1.45rem] border border-[rgba(8,48,35,0.32)] bg-[radial-gradient(circle_at_top,rgba(32,108,79,0.24),transparent_48%),linear-gradient(180deg,#042d21_0%,#06533c_54%,#073d2d_100%)] px-4 py-5 text-white shadow-[0_28px_72px_-44px_rgba(0,53,38,0.62)]">
+                <p className="text-center text-[0.66rem] font-semibold uppercase tracking-[0.2em] text-[#bfe6d6]">
+                  {localizeSeasonStageName(snapshotState.finalStage?.stage.stageName)}
+                </p>
+                {snapshotState.finalStage?.isLoading ? <LoadingSkeleton height={180} /> : null}
+                {snapshotState.finalStage?.isError ? (
+                  <ProfileAlert title="Final indisponível" tone="warning">
+                    Não foi possível carregar o confronto decisivo.
+                  </ProfileAlert>
+                ) : null}
+                {!snapshotState.finalStage?.isLoading && !snapshotState.finalStage?.isError && (snapshotState.finalStage?.ties.length ?? 0) === 0 ? (
+                  <EmptyState
+                    className="mt-4 rounded-[1.2rem] border-white/10 bg-white/8 text-white"
+                    description="Sem confronto consolidado para a decisão."
+                    title="Final indisponível"
+                  />
+                ) : null}
+                {!snapshotState.finalStage?.isLoading && !snapshotState.finalStage?.isError && (snapshotState.finalStage?.ties.length ?? 0) > 0 ? (
+                  (() => {
+                    const tie = snapshotState.finalStage?.ties[0];
+                    if (!tie) return null;
+                    const dateLabel = formatDateWindow(tie.firstLegAt, tie.lastLegAt);
+                    return (
+                      <div className="mt-4 space-y-3">
+                        {dateLabel ? <p className="text-center text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">{dateLabel}</p> : null}
+                        {renderSnapshotTieCard(tie, "left")}
+                        <div className="rounded-[1rem] border border-[rgba(166,242,209,0.16)] bg-[rgba(255,255,255,0.06)] px-3 py-3">
+                          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#bfe6d6]">Campeão</p>
+                          <p className="mt-1.5 font-[family:var(--font-profile-headline)] text-[1.52rem] font-extrabold text-white">
+                            {tie.winnerTeamName ?? "Campeão"}
+                          </p>
+                          <p className="mt-1.5 text-[0.8rem] text-[#d7efe4]">
+                            {formatTieResolutionLabel(tie) ?? "Decisão da edição"} • {formatTieMatchCountLabel(tie.matchCount)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : null}
+              </div>
+            </div>
+            {[...snapshotState.snapshotColumns].reverse().map((column) => renderSnapshotStageColumn(column, "right"))}
+          </div>
+          <div className="hidden max-w-full overflow-x-auto pb-1 sm:block">
             <div
               className="grid items-center gap-2.5 xl:gap-3"
               style={{
@@ -2892,6 +2906,7 @@ function KnockoutBracketPanel({
                 )}
             </div>
           </div>
+          </>
         )}
 
         {snapshotState.supportingStages.length > 0 ? (
@@ -3136,7 +3151,7 @@ function RankingPreviewPanel({
                   <p className="text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
                     #{row.rank ?? "-"}
                   </p>
-                  <p className="mt-2 truncate font-semibold text-[#111c2d]">
+                  <p className="mt-2 break-words font-semibold text-[#111c2d] sm:truncate">
                     {row.entityName ?? row.entityId}
                   </p>
                   <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#57657a]">
@@ -3239,11 +3254,6 @@ function LeagueEditionSummaryStrip({
     seasonLabel: context.seasonLabel,
   });
   const champion = resolveChampionFromStandings(standingsQuery.data?.rows ?? []);
-  const championLeadRounds = useSeasonChampionLeadRounds(
-    context,
-    champion?.teamId,
-    standingsQuery.data?.rounds ?? [],
-  );
   const totalGoals = resolveLeagueGoalsFromStandings(standingsQuery.data?.rows ?? []);
   const averageGoals = analyticsQuery.data?.seasonSummary.averageGoals;
 
@@ -3264,13 +3274,8 @@ function LeagueEditionSummaryStrip({
       value: analyticsQuery.isLoading ? "..." : formatAverageGoals(averageGoals),
     },
     {
-      label: "Liderança do campeão",
-      value:
-        standingsQuery.isLoading || championLeadRounds.isLoading
-          ? "..."
-          : (championLeadRounds.isError
-              ? "-"
-              : formatRoundCount(championLeadRounds.count)),
+      label: "Pontos do campeão",
+      value: standingsQuery.isLoading ? "..." : (champion ? `${champion.points} pts` : "-"),
     },
   ];
 
@@ -3435,111 +3440,6 @@ function CompactTravelRow({
   }
 
   return <div>{content}</div>;
-}
-
-function TopScorerSupportMetric({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-[1.15rem] border border-white/10 bg-white/8 px-3.5 py-3 backdrop-blur-sm">
-      <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-white/62">{label}</p>
-      <p className="mt-2 font-[family:var(--font-profile-headline)] text-[1.18rem] font-extrabold tracking-[-0.03em] text-white">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function TopScorerRailCard({ context }: { context: CompetitionSeasonContext }) {
-  const scorerQuery = useEditionTopScorer(context);
-  const scorer = scorerQuery.data?.scorer ?? null;
-  const scorerHref = scorer ? buildCanonicalPlayerPath(context, scorer.entityId) : null;
-  const goalCadence = resolveGoalCadenceMinutes(scorer?.goals, scorer?.minutesPlayed);
-
-  return (
-    <ProfilePanel className="relative overflow-hidden p-5 md:p-5" tone="accent">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,224,130,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(166,242,209,0.18),transparent_34%)]" />
-      <div className="relative space-y-5">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#bfe6d6]">
-            Artilheiro
-          </p>
-          {scorerQuery.coverage.status !== "complete" ? <ProfileCoveragePill coverage={scorerQuery.coverage} /> : null}
-        </div>
-
-        {scorerQuery.isLoading ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="h-24 w-24 animate-pulse rounded-full bg-white/10" />
-              <div className="flex-1 space-y-2">
-                <div className="h-8 w-40 animate-pulse rounded bg-white/10" />
-                <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
-              </div>
-            </div>
-            <div className="h-24 w-28 animate-pulse rounded bg-white/10" />
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="h-20 animate-pulse rounded-[1.15rem] bg-white/10" />
-              <div className="h-20 animate-pulse rounded-[1.15rem] bg-white/10" />
-            </div>
-          </div>
-        ) : scorer ? (
-          <>
-            <div className="flex items-start gap-4">
-              <PlayerPhoto playerId={scorer.entityId} playerName={scorer.entityName} size={96} />
-
-              <div className="min-w-0 flex-1 pt-1">
-                {scorerHref ? (
-                  <Link
-                    className="block font-[family:var(--font-profile-headline)] text-[2.1rem] font-extrabold leading-[0.94] tracking-[-0.05em] text-white transition-opacity hover:opacity-80"
-                    href={scorerHref}
-                  >
-                    {scorer.entityName}
-                  </Link>
-                ) : (
-                  <p className="font-[family:var(--font-profile-headline)] text-[2.1rem] font-extrabold leading-[0.94] tracking-[-0.05em] text-white">
-                    {scorer.entityName}
-                  </p>
-                )}
-
-                {scorer.teamName ? (
-                  <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#d7efe4]">
-                    <TeamBadge size={28} teamId={scorer.teamId} teamName={scorer.teamName} />
-                    <span>{scorer.teamName}</span>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/58">Gols</p>
-              <p className="mt-2 font-[family:var(--font-profile-headline)] text-[5rem] font-extrabold leading-none tracking-[-0.08em] text-white">
-                {formatHistoricalMatchCount(scorer.goals)}
-              </p>
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <TopScorerSupportMetric
-                label="Jogos"
-                value={formatHistoricalMatchCount(scorer.matchesPlayed)}
-              />
-              <TopScorerSupportMetric
-                label="1 gol a cada"
-                value={formatMinutesLabel(goalCadence)}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="rounded-[1.2rem] border border-white/10 bg-white/6 px-4 py-4 text-sm text-white/72">
-            Artilharia indisponível no recorte atual.
-          </div>
-        )}
-      </div>
-    </ProfilePanel>
-  );
 }
 
 function EditionSuperlativesRailCard({ context }: { context: CompetitionSeasonContext }) {
@@ -3838,7 +3738,7 @@ function CupHistoricalHero({
             </div>
 
             <div className="space-y-3">
-              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.65rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-[#111c2d] md:text-[3.25rem]">
+              <h1 className="max-w-4xl break-words font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-[#111c2d] sm:text-[2.65rem] md:text-[3.25rem]">
                 {context.competitionName} {context.seasonLabel}
               </h1>
             </div>
@@ -3876,7 +3776,7 @@ function CupHistoricalHero({
           </div>
         </div>
 
-        <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)]">
+        <div className="relative min-h-[280px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)] sm:min-h-[360px]">
           {heroImageSrc && !isHeroPhotoUnavailable ? (
             <Image
               alt={`Celebração do campeão da ${context.competitionName}`}
@@ -3963,14 +3863,6 @@ function CupStructureStrip({
   );
 }
 
-function LeagueEditionRail({ context }: { context: CompetitionSeasonContext }) {
-  return (
-    <>
-      <TopScorerRailCard context={context} />
-      <EditionRailInsightsCards context={context} />
-    </>
-  );
-}
 function LeagueStructureSection({ context }: { context: CompetitionSeasonContext }) {
   const finalStandingsQuery = useSeasonFinalStandings(context);
   const filteredStandingsQuery = useStandingsTable();
@@ -4254,7 +4146,7 @@ function HybridHistoricalHero({
             </div>
 
             <div className="space-y-3">
-              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.65rem] font-extrabold leading-[0.95] tracking-[-0.06em] text-[#111c2d] md:text-[3.25rem]">
+              <h1 className="max-w-4xl break-words font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-[#111c2d] sm:text-[2.65rem] md:text-[3.25rem]">
                 {context.competitionName} {context.seasonLabel}
               </h1>
             </div>
@@ -4292,7 +4184,7 @@ function HybridHistoricalHero({
           </div>
         </div>
 
-        <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)]">
+        <div className="relative min-h-[280px] overflow-hidden rounded-[1.6rem] border border-[rgba(8,48,35,0.18)] bg-[#0a3528] shadow-[0_36px_80px_-48px_rgba(0,53,38,0.7)] sm:min-h-[360px]">
           {heroImageSrc && !isHeroPhotoUnavailable ? (
             <Image
               alt={`Celebração do campeão da ${context.competitionName}`}
@@ -4802,7 +4694,7 @@ function LeaguePageHeader({
         </div>
 
         <div className="min-w-0">
-          <h1 className="truncate py-0.5 font-[family:var(--font-profile-headline)] text-2xl font-extrabold leading-[1.12] tracking-[-0.04em] text-[#111c2d] md:text-3xl">
+          <h1 className="break-words py-0.5 font-[family:var(--font-profile-headline)] text-2xl font-extrabold leading-[1.12] tracking-[-0.04em] text-[#111c2d] sm:truncate md:text-3xl">
             {context.competitionName}
           </h1>
           <p className="mt-0.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[#515f74]">
@@ -4834,9 +4726,9 @@ function RoundPickerDropdown({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative inline-block">
+    <div className="relative w-full sm:inline-block sm:w-auto">
       <button 
-        className="button-pill button-pill-primary gap-2"
+        className="button-pill button-pill-primary min-h-11 w-full justify-center gap-2 sm:w-auto"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
@@ -4863,19 +4755,19 @@ function RoundPickerDropdown({
               <span className="text-[0.68rem] font-bold uppercase tracking-widest text-[#515f74]">
                 Selecione a rodada
               </span>
-              <button aria-label="Fechar seleção de rodada" className="text-[#515f74] hover:text-black" onClick={() => setIsOpen(false)} type="button">
+              <button aria-label="Fechar seleção de rodada" className="flex h-11 w-11 items-center justify-center text-[#515f74] hover:text-black" onClick={() => setIsOpen(false)} type="button">
                 <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-6 gap-1.5">
+            <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-6">
               {rounds.map((round) => {
                 const isActive = round.roundId === (activeRoundId ?? selectedRound?.roundId);
                 const shortLabel = round.label.replace(/rodada\s*/i, "").trim();
                 return (
                   <button
-                    className={`flex h-9 w-9 items-center justify-center rounded-md text-[0.78rem] font-bold tabular-nums transition-colors ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-md text-[0.78rem] font-bold tabular-nums transition-colors ${
                       isActive
                         ? "bg-[#003526] text-white shadow-md"
                         : "border border-[#dce3f9] bg-[#f0f3ff] text-[#515f74] hover:bg-[#e1e7fa]"
@@ -4911,7 +4803,7 @@ function RoundsSection({ context }: { context: CompetitionSeasonContext }) {
     <div className="space-y-5">
       {/* Round picker dropdown */}
       {rounds.length > 1 ? (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <RoundPickerDropdown 
             activeRoundId={activeRoundId} 
             rounds={rounds} 
@@ -5004,8 +4896,9 @@ function LeagueSeasonSurface({
   const navigation = (
     <ProfileTabs
       ariaLabel="Navegacao da edição"
-      className="rounded-[1.1rem] !p-2 md:!p-2 lg:justify-end"
+      className="overflow-hidden rounded-[1.1rem] !p-2 [&_a]:min-h-11 [&_a]:shrink-0 md:!p-2 lg:justify-end"
       items={navItems}
+      navClassName="w-full flex-nowrap overflow-x-auto pb-1"
     />
   );
 
@@ -5023,7 +4916,7 @@ function LeagueSeasonSurface({
         </>
       }
       navItems={[]}
-      secondaryRail={<LeagueEditionRail context={context} />}
+      secondaryRail={null}
       showLocalBreadcrumbs={false}
     />
   );
@@ -5188,11 +5081,15 @@ export function CompetitionSeasonSurface({
   initialTab,
 }: CompetitionSeasonSurfaceProps) {
   const competitionDefinition = getCompetitionByKey(context.competitionKey);
+  const needsStructure = competitionDefinition?.type !== "domestic_league";
   const requestedSection = resolveCompetitionSeasonSurfaceSection(initialTab);
-  const structureQuery = useCompetitionStructure({
-    competitionKey: context.competitionKey,
-    seasonLabel: context.seasonLabel,
-  });
+  const structureQuery = useCompetitionStructure(
+    {
+      competitionKey: context.competitionKey,
+      seasonLabel: context.seasonLabel,
+    },
+    { enabled: needsStructure },
+  );
   const resolution = useMemo(
     () =>
       resolveCompetitionSeasonSurface({
@@ -5206,7 +5103,6 @@ export function CompetitionSeasonSurface({
   // Bloco 7: guard de loading para tipos que dependem de estrutura antes de resolver o canvas.
   // Liga (domestic_league) pode renderizar imediatamente sem estrutura.
   // Copa e hibrido precisam da estrutura para determinar o canvas correto.
-  const needsStructure = competitionDefinition?.type !== "domestic_league";
   if (needsStructure && structureQuery.isLoading) {
     return (
       <CompetitionSeasonSurfaceShell

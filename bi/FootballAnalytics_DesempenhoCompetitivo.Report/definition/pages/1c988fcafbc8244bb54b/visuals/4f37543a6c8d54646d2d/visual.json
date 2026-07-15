@@ -6,7 +6,7 @@
     "y": 45,
     "z": 2,
     "height": 18,
-    "width": 1000,
+    "width": 1150,
     "tabOrder": 2
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Leitura analítica · critérios oficiais de desempate não estão incluídos",
+                    "value": "Clique com o botão direito em um time para abrir o detalhe · desempates oficiais não estão incluídos",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "11px",
@@ -89,6 +89,19 @@
               "expr": {
                 "Literal": {
                   "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Clique com o botão direito em um time para abrir o detalhe · desempates oficiais não estão incluídos'"
                 }
               }
             }

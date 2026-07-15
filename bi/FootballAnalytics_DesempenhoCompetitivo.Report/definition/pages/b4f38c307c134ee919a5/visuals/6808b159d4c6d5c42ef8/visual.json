@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Cobertura e confiabilidade do recorte'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

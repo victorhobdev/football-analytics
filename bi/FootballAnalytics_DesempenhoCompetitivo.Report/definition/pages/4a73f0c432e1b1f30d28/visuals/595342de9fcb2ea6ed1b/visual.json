@@ -119,6 +119,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'2. Panorama: elemento visual'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

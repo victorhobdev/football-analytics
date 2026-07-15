@@ -98,7 +98,7 @@ Precisão de Finalização do Jogador % = DIVIDE ( [Finalizações no Alvo], [Fi
 Participação nos Gols do Time % = IF ( HASONEVALUE ( DimTeam[team_sk] ), DIVIDE ( [Gols], [Gols Pró] ) )
 Cobertura de Minutos % = DIVIDE ( COUNT ( FactPlayerMatch[minutes_played] ), COUNTROWS ( FactPlayerMatch ) )
 Cobertura de Nota % = DIVIDE ( COUNT ( FactPlayerMatch[rating] ), COUNTROWS ( FactPlayerMatch ) )
-Última Atualização = MAX ( FactMatch[updated_at] )
+Dados disponíveis até = MAX ( FactMatch[updated_at] )
 Escopos = DISTINCTCOUNT ( DimScope[scope_key] )
 Partidas Declaradas = SUM ( DimScope[total_matches] )
 Cobertura de Placar Declarada % =
@@ -107,3 +107,47 @@ Cobertura de Jogadores Declarada % =
 DIVIDE ( SUMX ( DimScope, DimScope[total_matches] * DimScope[player_stats_pct] ), 100 * [Partidas Declaradas] )
 Escopos com Ranking de Jogadores =
 CALCULATE ( [Escopos], DimScope[player_ranking_eligible] = TRUE () )
+
+Time de Referência =
+VAR TimesDoRecorte = FILTER ( ALLSELECTED ( DimTeam[Time] ), CALCULATE ( [Jogos do Time] ) >= 10 )
+VAR Destaque = TOPN ( 1, TimesDoRecorte, [PPG], DESC, DimTeam[Time], ASC )
+RETURN IF ( HASONEVALUE ( DimScope[scope_key] ), MAXX ( Destaque, DimTeam[Time] ) )
+
+PPG (10+ jogos) = IF ( [Jogos do Time] >= 10, [PPG] )
+
+Resumo - O que aconteceu =
+VAR Nome = [Time de Referência]
+VAR PPGTime = CALCULATE ( [PPG], TREATAS ( { Nome }, DimTeam[Time] ) )
+VAR Jogos = CALCULATE ( [Jogos do Time], TREATAS ( { Nome }, DimTeam[Time] ) )
+RETURN IF ( ISBLANK ( Nome ), "Selecione uma fonte, competição e temporada.", Nome & " · " & FORMAT ( PPGTime, "0.00" ) & " PPG · " & FORMAT ( Jogos, "0" ) & " jogos." )
+
+Resumo - Onde =
+"Fonte: " & SELECTEDVALUE ( DimScope[provider], "múltiplas" )
+    & " · Competição: " & SELECTEDVALUE ( DimScope[competition], "múltiplas" )
+    & " · Temporada: " & SELECTEDVALUE ( DimScope[season_label], "múltiplas" )
+
+Resumo - Por que importa =
+VAR Nome = [Time de Referência]
+VAR Delta = CALCULATE ( [Delta PPG vs Recorte], TREATAS ( { Nome }, DimTeam[Time] ) )
+VAR Forma = CALCULATE ( [Delta Forma 5 Jogos], TREATAS ( { Nome }, DimTeam[Time] ) )
+RETURN IF ( ISBLANK ( Nome ), "Sem comparação: defina um único escopo.", Nome & ": " & FORMAT ( Delta, "+0.00;-0.00;0.00" ) & " PPG vs recorte · " & FORMAT ( Forma, "+0.00;-0.00;0.00" ) & " nos últimos 5." )
+
+Resumo - Ação sugerida =
+VAR Nome = [Time de Referência]
+VAR Cobertura = CALCULATE ( [Cobertura Estatísticas de Time %], TREATAS ( { Nome }, DimTeam[Time] ) )
+RETURN
+    IF (
+        ISBLANK ( Nome ),
+        "Defina competição e temporada antes de agir.",
+        IF (
+            Cobertura < 0.95,
+            "Evite conversão: cobertura de estatísticas do time abaixo de 95%.",
+            "Investigue volume e conversão; sem xG, não atribua causa tática."
+        )
+    )
+
+Resumo - Confiança =
+VAR Nome = [Time de Referência]
+VAR Placar = [Cobertura de Placar %]
+VAR Estatisticas = CALCULATE ( [Cobertura Estatísticas de Time %], TREATAS ( { Nome }, DimTeam[Time] ) )
+RETURN IF ( ISBLANK ( Nome ), "Confiança depende de um único escopo.", "Placar " & FORMAT ( Placar, "0.0%" ) & " · Stats " & FORMAT ( Estatisticas, "0.0%" ) & " · ausências ≠ zero." )

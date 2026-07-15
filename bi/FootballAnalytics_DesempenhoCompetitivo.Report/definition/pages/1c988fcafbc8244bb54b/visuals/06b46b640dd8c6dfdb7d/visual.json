@@ -258,6 +258,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Jogos do Time, Pontos, PPG, PPG Médio do Recorte, Delta PPG vs Recorte, Aproveitamento %'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

@@ -236,7 +236,7 @@ function FilterSelect<TValue extends string | number>({
     <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#57657a]">
       {label}
       <select
-        className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-sm font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+        className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:text-sm"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       >
@@ -437,8 +437,8 @@ export function CoachesPageContent() {
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white/58">
                 Técnicos
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
-                Ranking limpo de comando técnico
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl md:text-6xl">
+                Ranking limpo de comando técnico.
               </h1>
   
             </div>
@@ -456,13 +456,13 @@ export function CoachesPageContent() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Link className="button-pill button-pill-on-dark" href={seasonHubHref}>
+              <Link className="button-pill button-pill-on-dark min-h-11 w-full justify-center sm:w-auto" href={seasonHubHref}>
                 Temporada
               </Link>
-              <Link className="button-pill button-pill-on-dark" href={matchesHref}>
+              <Link className="button-pill button-pill-on-dark min-h-11 w-full justify-center sm:w-auto" href={matchesHref}>
                 Partidas
               </Link>
-              <Link className="button-pill button-pill-on-dark" href={playersHref}>
+              <Link className="button-pill button-pill-on-dark min-h-11 w-full justify-center sm:w-auto" href={playersHref}>
                 Jogadores
               </Link>
             </div>
@@ -572,7 +572,7 @@ export function CoachesPageContent() {
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#57657a]">
             Busca
             <input
-              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#707974]"
+              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] placeholder:text-[#707974] sm:text-sm"
               onChange={(event) => {
                 setSearch(event.target.value);
                 setPage(1);
@@ -642,7 +642,7 @@ export function CoachesPageContent() {
           </label>
 
           <button
-            className={hasLocalFilters ? "button-pill button-pill-primary" : "button-pill button-pill-secondary"}
+            className={`${hasLocalFilters ? "button-pill button-pill-primary" : "button-pill button-pill-secondary"} min-h-11 w-full justify-center lg:w-auto`}
             disabled={!hasLocalFilters}
             onClick={resetLocalFilters}
             type="button"
@@ -712,12 +712,12 @@ export function CoachesPageContent() {
                           </div>
                         </div>
 
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <Link className="button-pill button-pill-primary" href={coachHref}>
+                        <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
+                          <Link className="button-pill button-pill-primary min-h-11 justify-center" href={coachHref}>
                             Abrir perfil
                           </Link>
                           {teamHref ? (
-                            <Link className="button-pill button-pill-secondary" href={teamHref}>
+                            <Link className="button-pill button-pill-secondary min-h-11 justify-center" href={teamHref}>
                               Abrir clube
                             </Link>
                           ) : null}
@@ -750,9 +750,9 @@ export function CoachesPageContent() {
         <p className="text-sm font-medium text-[#57657a]">
           Mostrando {formatInteger(currentRangeStart)}-{formatInteger(currentRangeEnd)} de {formatInteger(totalCount)} técnicos
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
           <button
-            className="button-pill disabled:cursor-not-allowed disabled:opacity-45"
+            className="button-pill min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
             disabled={currentPage <= 1}
             onClick={() => setPage((value) => Math.max(value - 1, 1))}
             type="button"
@@ -760,7 +760,7 @@ export function CoachesPageContent() {
             Anterior
           </button>
           <button
-            className="button-pill button-pill-primary disabled:cursor-not-allowed disabled:opacity-45"
+            className="button-pill button-pill-primary min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
             disabled={currentPage >= totalPages}
             onClick={() => setPage((value) => Math.min(value + 1, totalPages))}
             type="button"

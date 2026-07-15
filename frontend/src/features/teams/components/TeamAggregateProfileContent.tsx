@@ -296,19 +296,19 @@ export function TeamAggregateProfileContent({
       </div>
 
       <ProfilePanel className="profile-hero-clean overflow-hidden p-0" tone="accent">
-        <div className="grid gap-6 p-5 md:p-6 xl:grid-cols-[minmax(0,1fr)_11.5rem] xl:items-stretch">
+        <div className="grid gap-5 p-4 sm:p-5 md:gap-6 md:p-6 xl:grid-cols-[minmax(0,1fr)_11.5rem] xl:items-stretch">
           <div className="flex min-h-full flex-col gap-5 xl:justify-between">
             <div className="flex flex-wrap gap-2">
               <ProfileTag>{resolveScopeLabel(competitionId, seasonId)}</ProfileTag>
               <ProfileTag>Arquivo histórico</ProfileTag>
             </div>
 
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3 sm:items-center sm:gap-5">
               <ProfileMedia
                 alt={`Escudo de ${aggregateTeam.teamName}`}
                 assetId={aggregateTeam.teamId}
                 category="clubs"
-                className="h-24 w-24 shrink-0 border border-white/18 bg-white/12"
+                className="h-16 w-16 shrink-0 border border-white/18 bg-white/12 sm:h-24 sm:w-24"
                 fallback={getTeamMonogram(aggregateTeam.teamName)}
                 imageClassName="p-3"
                 tone="contrast"
@@ -317,7 +317,7 @@ export function TeamAggregateProfileContent({
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white/58">
                   Perfil agregado do clube
                 </p>
-                <h1 className="mt-2 max-w-2xl break-words font-[family:var(--font-profile-headline)] text-4xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-5xl">
+                <h1 className="mt-2 max-w-2xl break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.96] tracking-[-0.045em] text-white sm:text-4xl sm:leading-[0.92] sm:tracking-[-0.055em] md:text-5xl">
                   {aggregateTeam.teamName}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/62">
@@ -326,7 +326,7 @@ export function TeamAggregateProfileContent({
               </div>
             </div>
 
-            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-4">
               <AggregateHeroKpi
                 label="Posição"
                 value={aggregateTeam.position ? `${aggregateTeam.position}º` : "-"}
@@ -354,7 +354,7 @@ export function TeamAggregateProfileContent({
               />
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:flex sm:flex-wrap">
               {defaultContextHref ? (
                 <Link className="button-pill button-pill-primary" href={defaultContextHref}>
                   Abrir temporada principal
@@ -371,7 +371,7 @@ export function TeamAggregateProfileContent({
             {honorsPreview ? <TeamHonorsSection honors={honorsPreview} /> : null}
           </div>
 
-          <aside className="grid auto-rows-fr content-start gap-3 xl:pt-14">
+          <aside className="grid auto-rows-fr grid-cols-2 content-start gap-3 xl:grid-cols-1 xl:pt-14">
             <AggregateMetricTile icon="grid" label="Competições" value={competitionCount || "-"} />
             <AggregateMetricTile icon="calendar" label="Temporadas" value={seasonCount || "-"} />
             <AggregateMetricTile icon="goal" label="Gols pró" value={formatInteger(aggregateTeam.goalsFor)} />

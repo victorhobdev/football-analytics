@@ -182,6 +182,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'season_label'"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "syncGroup": {

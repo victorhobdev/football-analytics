@@ -462,17 +462,17 @@
 
 .mobileMatrix {
   display: grid;
-  gap: 0.85rem;
-  padding: 0 1rem 1rem;
+  gap: 0.65rem;
+  padding: 0 0.75rem 0.75rem;
 }
 
 .mobileCard {
   display: flex;
   flex-direction: column;
-  gap: 0.95rem;
+  gap: 0.75rem;
   border-radius: 1.2rem;
   background: rgba(245, 248, 252, 0.92);
-  padding: 1rem;
+  padding: 0.9rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
 }
 
@@ -628,11 +628,11 @@
   }
 
   .metricsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .mobileMetaGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

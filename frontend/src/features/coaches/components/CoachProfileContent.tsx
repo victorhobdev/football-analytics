@@ -254,7 +254,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             {coach.temporary ? <ProfileTag className="bg-white/12 text-white/82">Interino</ProfileTag> : null}
           </div>
 
-          <div className="flex items-start gap-5">
+          <div className="flex items-start gap-3 sm:gap-5">
             <CoachAvatar
               coachName={coach.coachName}
               photoUrl={coach.photoUrl}
@@ -266,7 +266,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
               <p className="text-[0.72rem] uppercase tracking-[0.18em] text-white/62">
                 Perfil do técnico
               </p>
-              <h1 className="font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-[-0.04em] text-white md:text-5xl">
+              <h1 className="break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-4xl md:text-5xl">
                 {displayCoachName}
               </h1>
               {coachNameIsPending ? <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">ID {coach.coachId}</p> : null}
@@ -278,7 +278,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <ProfileKpi hint="Campanha agregada" invert label="Jogos" value={formatInteger(summary.matches)} />
             <ProfileKpi
               hint="Pontos/jogo ponderado por amostra"
@@ -356,7 +356,7 @@ export function CoachProfileContent({ coachId }: CoachProfileContentProps) {
             <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[#57657a]">
               Atalhos
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:flex sm:flex-wrap">
               {seasonHubHref ? (
                 <Link
                   className="button-pill button-pill-primary"

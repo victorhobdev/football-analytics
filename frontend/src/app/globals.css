@@ -247,6 +247,26 @@ body :is(.button-pill, [class*="rounded-full"], [class*="rounded-["]):focus-visi
   transform: none;
 }
 
+.platform-mobile-safe-content {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+.platform-mobile-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --button-pill-standard-min-height: 2.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .platform-mobile-safe-content {
+    padding-bottom: 0;
+  }
+}
+
 .profile-hero-clean {
   border-color: rgba(255, 255, 255, 0.82) !important;
   background:

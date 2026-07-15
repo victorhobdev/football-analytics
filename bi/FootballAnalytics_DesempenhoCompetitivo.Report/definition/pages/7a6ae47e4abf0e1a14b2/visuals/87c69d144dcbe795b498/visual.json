@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Evolução e efeito observado de mando'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

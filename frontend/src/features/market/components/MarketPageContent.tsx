@@ -336,7 +336,7 @@ export function MarketPageContent() {
     <ProfileShell className="space-y-6">
       <section className="space-y-4">
         <ProfilePanel className="p-0" tone="accent">
-          <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.9fr)] lg:items-center">
+          <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.9fr)] lg:items-center">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <ProfileCoveragePill coverage={marketQuery.coverage} className="bg-white/16 text-white" />
@@ -354,7 +354,7 @@ export function MarketPageContent() {
                 <p className="text-[0.72rem] uppercase tracking-[0.18em] text-white/62">
                   Mercado
                 </p>
-                <h1 className="mt-1 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-tight text-white md:text-4xl">
+                <h1 className="mt-1 break-words font-[family:var(--font-profile-headline)] text-2xl font-extrabold leading-tight text-white sm:text-3xl md:text-4xl">
                   {resolvedContext
                     ? `${resolvedContext.competitionName} ${resolvedContext.seasonLabel}`
                     : "Transferências por valor, jogador e clube"}
@@ -401,7 +401,7 @@ export function MarketPageContent() {
                 Jogador ou valor
               </span>
               <input
-                className="w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
+                className="min-h-11 w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-base text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12 sm:text-sm"
                 onChange={(event) => {
                   setPage(1);
                   setSearch(event.target.value);
@@ -416,7 +416,7 @@ export function MarketPageContent() {
                 Clube
               </span>
               <input
-                className="w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-sm text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
+                className="min-h-11 w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-base text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12 sm:text-sm"
                 onChange={(event) => {
                   setPage(1);
                   setClubSearch(event.target.value);
@@ -431,7 +431,7 @@ export function MarketPageContent() {
                 Ordenar
               </span>
               <select
-                className="w-full rounded-lg border border-[rgba(112,121,116,0.24)] bg-white px-3.5 py-2.5 text-sm font-medium text-[#1f2d40] outline-none focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12"
+                className="min-h-11 w-full rounded-lg border border-[rgba(112,121,116,0.24)] bg-white px-3.5 py-2.5 text-base font-medium text-[#1f2d40] outline-none focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12 sm:text-sm"
                 onChange={(event) => {
                   setPage(1);
                   setSortKey(event.target.value as (typeof MARKET_SORT_OPTIONS)[number]["key"]);
@@ -446,7 +446,7 @@ export function MarketPageContent() {
               </select>
             </label>
 
-            <label className="flex min-h-[42px] items-center gap-3 rounded-lg border border-[rgba(112,121,116,0.22)] bg-[#f8faf8] px-3.5 py-2.5 text-sm font-semibold text-[#1f2d40]">
+            <label className="flex min-h-11 items-center gap-3 rounded-lg border border-[rgba(112,121,116,0.22)] bg-[#f8faf8] px-3.5 py-2.5 text-sm font-semibold text-[#1f2d40]">
               <input
                 checked={onlyValuedTransfers}
                 className="h-4 w-4 accent-[#003526]"
@@ -471,7 +471,7 @@ export function MarketPageContent() {
                 return (
                   <button
                     aria-pressed={isActive}
-                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
+                    className={`min-h-11 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
                       isActive
                         ? "border-[#003526] bg-[#003526] text-white"
                         : "border-[rgba(112,121,116,0.24)] bg-white text-[#1f2d40] hover:border-[#00885f]"
@@ -499,7 +499,7 @@ export function MarketPageContent() {
                 return (
                   <button
                     aria-pressed={isActive}
-                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
+                    className={`min-h-11 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
                       isActive
                         ? "border-[#003526] bg-[#003526] text-white"
                         : "border-[rgba(112,121,116,0.24)] bg-white text-[#1f2d40] hover:border-[#00885f]"
@@ -540,7 +540,7 @@ export function MarketPageContent() {
               className="overflow-hidden rounded-xl border border-[rgba(191,201,195,0.58)] bg-white shadow-[0_22px_55px_-42px_rgba(17,28,45,0.34)]"
               key={item.transferId}
             >
-              <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
                 <div className="flex min-w-0 gap-4">
                   <ProfileMedia
                     alt={item.playerName}
@@ -558,7 +558,7 @@ export function MarketPageContent() {
                       <ProfileTag>{getTransferTypeLabel(item.typeId, item.typeName)}</ProfileTag>
                       {item.careerEnded ? <ProfileTag>Fim de carreira</ProfileTag> : null}
                     </div>
-                    <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-tight text-[#111c2d]">
+                    <h2 className="mt-2 break-words font-[family:var(--font-profile-headline)] text-2xl font-extrabold leading-tight text-[#111c2d] sm:text-3xl">
                       {item.playerName}
                     </h2>
                     <p className="mt-2 text-sm/6 text-[#57657a]">
@@ -597,7 +597,7 @@ export function MarketPageContent() {
                       href={fromTeamHref}
                       shape="rounded"
                     />
-                    <p className="truncate text-sm font-extrabold text-[#111c2d]">
+                    <p className="break-words text-sm font-extrabold text-[#111c2d] sm:truncate">
                       {item.fromTeamName ?? "Não informada"}
                     </p>
                   </div>
@@ -616,7 +616,7 @@ export function MarketPageContent() {
                       href={toTeamHref}
                       shape="rounded"
                     />
-                    <p className="truncate text-sm font-extrabold text-[#111c2d]">
+                    <p className="break-words text-sm font-extrabold text-[#111c2d] sm:truncate">
                       {item.careerEnded ? "Fim de carreira" : item.toTeamName ?? "Não informado"}
                     </p>
                   </div>
@@ -631,10 +631,10 @@ export function MarketPageContent() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 px-5 py-4">
+              <div className="grid grid-cols-1 gap-2 px-4 py-4 sm:flex sm:flex-wrap sm:px-5">
                 {playerHref ? (
                   <Link
-                    className="button-pill button-pill-primary"
+                    className="button-pill button-pill-primary min-h-11 justify-center"
                     href={playerHref}
                   >
                     Abrir jogador
@@ -642,7 +642,7 @@ export function MarketPageContent() {
                 ) : null}
                 {fromTeamHref ? (
                   <Link
-                    className="button-pill button-pill-secondary"
+                    className="button-pill button-pill-secondary min-h-11 justify-center"
                     href={fromTeamHref}
                   >
                     Time de origem
@@ -650,7 +650,7 @@ export function MarketPageContent() {
                 ) : null}
                 {toTeamHref ? (
                   <Link
-                    className="button-pill button-pill-secondary"
+                    className="button-pill button-pill-secondary min-h-11 justify-center"
                     href={toTeamHref}
                   >
                     Time de destino
@@ -669,9 +669,9 @@ export function MarketPageContent() {
             {formatInteger(totalCount)} transferências. Página {formatInteger(currentPage)} de{" "}
             {formatInteger(totalPages)}.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
-              className="button-pill disabled:cursor-not-allowed disabled:opacity-45"
+              className="button-pill min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
               disabled={!hasPreviousPage}
               onClick={() => setPage((value) => Math.max(value - 1, 1))}
               type="button"
@@ -679,7 +679,7 @@ export function MarketPageContent() {
               Anterior
             </button>
             <button
-              className="button-pill button-pill-primary disabled:cursor-not-allowed disabled:opacity-45"
+              className="button-pill button-pill-primary min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
               disabled={!hasNextPage}
               onClick={() => setPage((value) => Math.min(value + 1, totalPages))}
               type="button"

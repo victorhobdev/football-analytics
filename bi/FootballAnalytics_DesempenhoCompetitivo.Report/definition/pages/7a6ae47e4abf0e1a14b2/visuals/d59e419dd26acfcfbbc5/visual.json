@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Selecione um time para leitura individual · múltiplos times formam o recorte agregado'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

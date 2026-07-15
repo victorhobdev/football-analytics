@@ -360,7 +360,7 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
     <div
       aria-label="Busca global"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(7,16,12,0.58)] px-4 pb-8 pt-24 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-[rgba(7,16,12,0.58)] p-0 backdrop-blur-md sm:items-start sm:px-4 sm:pb-8 sm:pt-24"
       id="global-search-dialog"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
@@ -371,8 +371,8 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
       role="dialog"
       tabIndex={-1}
     >
-      <div className="w-full max-w-4xl overflow-hidden rounded-[1.9rem] border border-[rgba(191,201,195,0.45)] bg-[rgba(245,248,241,0.96)] shadow-[0_40px_120px_rgba(7,16,12,0.35)]">
-        <div className="border-b border-[rgba(191,201,195,0.45)] px-5 py-5 md:px-6">
+      <div className="flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden border border-[rgba(191,201,195,0.45)] bg-[rgba(245,248,241,0.98)] shadow-[0_40px_120px_rgba(7,16,12,0.35)] sm:h-auto sm:max-h-[calc(100dvh-8rem)] sm:rounded-[1.9rem]">
+        <div className="border-b border-[rgba(191,201,195,0.45)] px-4 py-4 sm:px-5 sm:py-5 md:px-6">
           <div className="relative">
             <input
               className="w-full rounded-[1.6rem] border border-[rgba(112,121,116,0.22)] bg-white/92 px-5 py-4 pr-24 text-base font-medium text-[#111c2d] outline-none transition-colors focus:border-[#003526] focus:ring-2 focus:ring-[#003526]"
@@ -386,7 +386,7 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
             />
             <button
               aria-label="Fechar busca global"
-              className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center rounded-full bg-[rgba(216,227,251,0.82)] px-3 py-1.5 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#1f2d40] transition-colors hover:bg-[rgba(216,227,251,0.98)]"
+              className="absolute right-2 top-1/2 inline-flex min-h-11 -translate-y-1/2 items-center rounded-full bg-[rgba(216,227,251,0.82)] px-3 py-1.5 text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#1f2d40] transition-colors hover:bg-[rgba(216,227,251,0.98)] sm:right-3 sm:min-h-0"
               onClick={onClose}
               type="button"
             >
@@ -403,7 +403,7 @@ export function GlobalSearchOverlay({ isOpen, onClose }: GlobalSearchOverlayProp
           </div>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-5 md:px-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:max-h-[70vh] sm:px-5 sm:py-5 md:px-6">
           {!hasQuery ? (
             <EmptyState
               className="rounded-[1.45rem] border-[rgba(191,201,195,0.55)] bg-white/80"

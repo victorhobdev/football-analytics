@@ -11,14 +11,14 @@ O relatório foi aberto novamente no Power BI Desktop 2.155.756.0 e consultado c
 
 ## Conteúdo
 
-- `FootballAnalytics_DesempenhoCompetitivo.Report`: cinco páginas e 55 visuais em PBIR.
-- `FootballAnalytics_DesempenhoCompetitivo.SemanticModel`: modelo TMDL com oito tabelas, nove relacionamentos e 66 medidas.
-- `screenshots`: evidências renderizadas das páginas Panorama, Times, Evolução e mando e Jogadores.
+- `FootballAnalytics_DesempenhoCompetitivo.Report`: seis páginas públicas, duas páginas ocultas de drill-through e 94 visuais em PBIR.
+- `FootballAnalytics_DesempenhoCompetitivo.SemanticModel`: modelo TMDL com oito tabelas, nove relacionamentos e 73 medidas.
+- `screenshots`: evidências renderizadas das cinco páginas públicas.
 - `scripts/export_powerbi_snapshots.py`: exporta os marts para Parquet local.
 - `data/manifest.json`: contagens, tamanhos e hashes do snapshot validado.
 - `validation`: SQL de cobertura e reconciliação.
 
-As páginas cobrem panorama, benchmark de times, forma recente e mando, eficiência de jogadores por 90 minutos e uma matriz explícita de cobertura. Conversão de finalizações só é exibida com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos.
+As páginas cobrem resumo executivo, panorama, benchmark de times, forma recente e mando, eficiência de jogadores por 90 minutos e uma matriz explícita de cobertura. Times e jogadores possuem drill-through e os visuais relevantes têm layout móvel próprio. Conversão de finalizações só é exibida com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos. As evidências de Performance Analyzer, DAX Studio, acessibilidade e escolha entre Import, DirectQuery e Direct Lake estão em [`docs/bi/PERFORMANCE_E_ARQUITETURA.md`](../docs/bi/PERFORMANCE_E_ARQUITETURA.md).
 
 ## Atualizar
 
@@ -33,3 +33,5 @@ Depois abra o PBIP e atualize as tabelas sequencialmente na ordem documentada em
 ## Publicação
 
 O relatório base foi publicado em `Meu workspace` e por **Publicar na Web**. A [URL pública](https://app.powerbi.com/view?r=eyJrIjoiZjI0MzhlOTMtMzE0Mi00NmY2LWJlNmMtMDRiZTc2YmNmZjBhIiwidCI6IjE0MDAyMTc4LWEwZDAtNGYxNC1iZGQ2LTJiMjNiYTJiNThkYyJ9) está integrada em `/analises`; a substituição pública deve ser validada novamente após cada evolução do PBIX. `NEXT_PUBLIC_POWER_BI_EMBED_URL` pode sobrescrever a URL por ambiente.
+
+Filtros por URL não funcionam com **Publicar na Web**. A aplicação expõe o contexto solicitado e orienta a seleção manual; incorporação segura ou Power BI Embedded é necessária para pré-filtragem automática.

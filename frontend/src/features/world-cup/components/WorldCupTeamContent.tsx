@@ -193,7 +193,7 @@ function ParticipationCard({
               />
               <div className="min-w-0">
                 <p className="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">Artilheiro</p>
-                <p className="mt-1 truncate font-semibold text-[#111c2d]">{topScorerName}</p>
+                <p className="mt-1 break-words font-semibold text-[#111c2d] sm:truncate">{topScorerName}</p>
                 <p className="mt-1 text-sm/6 text-[#57657a]">{topScorerGoalsLabel}</p>
               </div>
             </div>
@@ -202,7 +202,7 @@ function ParticipationCard({
 
         <div className="flex items-center xl:justify-end">
           <Link
-            className="button-pill button-pill-secondary"
+            className="button-pill button-pill-secondary min-h-11 w-full justify-center sm:w-auto"
             href={buildWorldCupEditionPath(participation.seasonLabel)}
             onFocus={() => {
               onPrefetch?.(participation.seasonLabel);
@@ -416,7 +416,7 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
             Nenhum jogador atingiu 3 gols no recorte disponível.
           </ProfileAlert>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="max-w-full overflow-x-auto">
             <table className="min-w-full divide-y divide-[rgba(191,201,195,0.34)] text-sm">
               <thead className="bg-[rgba(246,248,252,0.9)] text-[0.68rem] uppercase tracking-[0.14em] text-[#57657a]">
                 <tr>
@@ -429,7 +429,7 @@ export function WorldCupTeamContent({ teamId }: { teamId: string }) {
                 {historicalScorers.map((scorer) => (
                   <tr className="align-middle bg-white/72" key={`${scorer.rank}-${scorer.playerId ?? scorer.playerName ?? "scorer"}`}>
                     <td className="px-3 py-2 font-semibold text-[#111c2d]">{scorer.rank}</td>
-                    <td className="px-3 py-2 font-semibold text-[#111c2d]">{scorer.playerName ?? "Não identificado"}</td>
+                    <td className="break-words px-3 py-2 font-semibold text-[#111c2d]">{scorer.playerName ?? "Não identificado"}</td>
                     <td className="px-3 py-2 text-right font-semibold text-[#111c2d]">{scorer.goals}</td>
                   </tr>
                 ))}

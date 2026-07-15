@@ -1,0 +1,17 @@
+{$APP_HOST} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	handle_path /visual-assets/* {
+		root * /srv/visual-assets
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+	reverse_proxy frontend:3001
+}

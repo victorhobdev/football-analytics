@@ -363,11 +363,11 @@ function MatchDiscoveryCard({
 
   return (
     <article
-      className={`overflow-hidden rounded-[1.55rem] border p-5 transition-colors hover:bg-white ${statusMeta.cardClassName}`}
+      className={`overflow-hidden rounded-[1.55rem] border p-4 transition-colors hover:bg-white sm:p-5 ${statusMeta.cardClassName}`}
     >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-[1.2rem] bg-[rgba(240,243,255,0.96)] text-center">
+        <div className="flex min-w-0 flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+          <div className="flex min-h-11 w-full shrink-0 items-center justify-between rounded-[1.2rem] bg-[rgba(240,243,255,0.96)] px-4 text-center sm:h-16 sm:w-16 sm:flex-col sm:justify-center sm:px-0">
             <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">
               {formatDateChip(match.kickoffAt)}
             </span>
@@ -442,7 +442,7 @@ function MatchDiscoveryCard({
         <div className="flex shrink-0 flex-col gap-3 lg:items-end">
           <Link
             aria-label={`Abrir central da partida de ${homeTeamName} x ${awayTeamName}`}
-            className={`button-pill ${hasDepth && !isScheduled ? "button-pill-primary" : "button-pill-soft"}`}
+            className={`button-pill min-h-11 w-full justify-center lg:w-auto ${hasDepth && !isScheduled ? "button-pill-primary" : "button-pill-soft"}`}
             href={href}
             onFocus={() => {
               onPrefetch(match.matchId);
@@ -754,7 +754,7 @@ export default function MatchesPage() {
               <p className="text-[0.72rem] uppercase tracking-[0.18em] text-white/62">
                 Lista de partidas
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-4xl font-extrabold tracking-[-0.04em] md:text-5xl">
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold tracking-[-0.04em] sm:text-4xl md:text-5xl">
                 Partidas
               </h1>
               <p className="mt-3 max-w-2xl text-sm/6 text-white/74">
@@ -762,7 +762,7 @@ export default function MatchesPage() {
                 jogo.
               </p>
               <Link
-                className="mt-5 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/16"
+                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/16 sm:w-auto"
                 href={seasonHubHref}
               >
                 ← Temporada {seasonLabel ?? "selecionada"}
@@ -900,7 +900,7 @@ export default function MatchesPage() {
                 Q
               </span>
               <input
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none placeholder:text-[#707974]"
+                className="w-full border-0 bg-transparent text-base text-[#111c2d] outline-none placeholder:text-[#707974] sm:text-sm"
                 onChange={(event) => {
                   setSearch(event.target.value);
                 }}
@@ -918,7 +918,7 @@ export default function MatchesPage() {
                 Ord
               </span>
               <select
-                className="w-full border-0 bg-transparent text-sm text-[#111c2d] outline-none"
+                className="w-full border-0 bg-transparent text-base text-[#111c2d] outline-none sm:text-sm"
                 onChange={(event) => {
                   setSortMode(event.target.value as MatchSortMode);
                 }}
@@ -952,7 +952,7 @@ export default function MatchesPage() {
 
         <div className="mt-4 flex flex-wrap gap-2">
           <button
-            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+            className={`inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
               contentSection === null
                 ? "bg-[#003526] text-white"
                 : "border border-[rgba(191,201,195,0.55)] bg-white text-[#1f2d40] hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526]"
@@ -972,7 +972,7 @@ export default function MatchesPage() {
 
             return (
               <button
-                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+                className={`inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
                   contentSection === section.key
                     ? "bg-[#003526] text-white"
                     : "border border-[rgba(191,201,195,0.55)] bg-white text-[#1f2d40] hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526]"
@@ -1053,9 +1053,9 @@ export default function MatchesPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
                   <button
-                    className="inline-flex items-center rounded-full border border-[rgba(191,201,195,0.55)] bg-white px-3.5 py-2 text-sm font-semibold text-[#1f2d40] transition-colors hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526] disabled:cursor-not-allowed disabled:opacity-45"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-[rgba(191,201,195,0.55)] bg-white px-3.5 py-2 text-sm font-semibold text-[#1f2d40] transition-colors hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526] disabled:cursor-not-allowed disabled:opacity-45"
                     disabled={page === 1}
                     onClick={() => {
                       setPage((currentPage) => Math.max(1, currentPage - 1));
@@ -1068,7 +1068,7 @@ export default function MatchesPage() {
                   {visiblePageNumbers.map((pageNumber) => (
                     <button
                       aria-current={pageNumber === page ? "page" : undefined}
-                      className={`inline-flex h-10 min-w-10 items-center justify-center rounded-full px-3 text-sm font-semibold transition-colors ${
+                      className={`inline-flex h-11 min-w-11 items-center justify-center rounded-full px-3 text-sm font-semibold transition-colors ${
                         pageNumber === page
                           ? "bg-[#003526] text-white"
                           : "border border-[rgba(191,201,195,0.55)] bg-white text-[#1f2d40] hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526]"
@@ -1084,7 +1084,7 @@ export default function MatchesPage() {
                   ))}
 
                   <button
-                    className="inline-flex items-center rounded-full border border-[rgba(191,201,195,0.55)] bg-white px-3.5 py-2 text-sm font-semibold text-[#1f2d40] transition-colors hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526] disabled:cursor-not-allowed disabled:opacity-45"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-[rgba(191,201,195,0.55)] bg-white px-3.5 py-2 text-sm font-semibold text-[#1f2d40] transition-colors hover:border-[rgba(0,53,38,0.24)] hover:text-[#003526] disabled:cursor-not-allowed disabled:opacity-45"
                     disabled={page === totalPages}
                     onClick={() => {
                       setPage((currentPage) => Math.min(totalPages, currentPage + 1));

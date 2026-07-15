@@ -268,6 +268,7 @@ function TableAction({ competition }: { competition: CatalogCompetition }) {
       aria-label={buildCompetitionCtaLabel(competition)}
       className={styles.tableAction}
       href={href}
+      prefetch={false}
       title={buildCompetitionCtaLabel(competition)}
     >
       <ArrowRightIcon />
@@ -367,7 +368,7 @@ function CompetitionMobileCard({ competition }: { competition: CatalogCompetitio
   );
 
   return (
-    <Link className={styles.mobileCard} href={href}>
+    <Link className={styles.mobileCard} href={href} prefetch={false}>
       {content}
     </Link>
   );

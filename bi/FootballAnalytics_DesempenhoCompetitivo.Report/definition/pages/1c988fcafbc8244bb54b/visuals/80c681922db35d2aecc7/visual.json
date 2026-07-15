@@ -62,6 +62,38 @@
               "nativeQueryRef": "Precisão de Finalização %"
             }
           ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Finalizações do Time"
+                }
+              },
+              "queryRef": "Medidas.Finalizações do Time",
+              "nativeQueryRef": "Finalizações do Time"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Cobertura Estatísticas de Time %"
+                }
+              },
+              "queryRef": "Medidas.Cobertura Estatísticas de Time %",
+              "nativeQueryRef": "Cobertura Estatísticas de Time %"
+            }
+          ]
         }
       },
       "sortDefinition": {
@@ -339,6 +371,19 @@
               "expr": {
                 "Literal": {
                   "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Eficiência de finalização (95%+ de cobertura e 50+ chutes)'"
                 }
               }
             }

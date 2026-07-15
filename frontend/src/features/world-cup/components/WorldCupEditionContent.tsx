@@ -705,7 +705,7 @@ function WorldCupEditionHero({
 
             <div className="space-y-2">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#8a6d18]">Página da edição</p>
-              <h1 className="max-w-4xl font-[family:var(--font-profile-headline)] text-[2.65rem] font-extrabold leading-[0.94] tracking-[-0.06em] text-[#1d160c] md:text-[3.35rem]">
+              <h1 className="max-w-4xl break-words font-[family:var(--font-profile-headline)] text-[2.15rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-[#1d160c] sm:text-[2.65rem] md:text-[3.35rem]">
                 Copa do Mundo {edition.year}
               </h1>
               <p className="max-w-3xl text-sm/6 text-[#6d5c3f] md:text-[0.95rem]">
@@ -756,7 +756,7 @@ function WorldCupEditionHero({
                 }
                 value={
                   <TeamPageLink
-                    className="truncate font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-none tracking-[-0.05em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
+                    className="break-words font-[family:var(--font-profile-headline)] text-[1.45rem] font-extrabold leading-none tracking-[-0.05em] text-[#1d160c] transition-colors hover:text-[#5f430a] sm:truncate"
                     team={edition.champion}
                   />
                 }
@@ -777,7 +777,7 @@ function WorldCupEditionHero({
                 }
                 value={
                   <TeamPageLink
-                    className="truncate font-[family:var(--font-profile-headline)] text-[1.2rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1d160c] transition-colors hover:text-[#5f430a]"
+                    className="break-words font-[family:var(--font-profile-headline)] text-[1.2rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1d160c] transition-colors hover:text-[#5f430a] sm:truncate"
                     team={edition.runnerUp}
                   />
                 }
@@ -825,7 +825,7 @@ function WorldCupEditionHero({
           </div>
         </div>
 
-        <aside className="relative min-h-[320px] overflow-hidden rounded-[1.7rem] border border-[rgba(95,67,10,0.18)] bg-[linear-gradient(135deg,#2b1d0b_0%,#5a3f0f_56%,#8a6d18_100%)] shadow-[0_34px_84px_-56px_rgba(68,43,4,0.55)]">
+        <aside className="relative min-h-[260px] overflow-hidden rounded-[1.7rem] border border-[rgba(95,67,10,0.18)] bg-[linear-gradient(135deg,#2b1d0b_0%,#5a3f0f_56%,#8a6d18_100%)] shadow-[0_34px_84px_-56px_rgba(68,43,4,0.55)] sm:min-h-[320px]">
           {hasHeroPhoto ? (
             <img
               alt={`Celebração do campeão da Copa do Mundo ${edition.year}`}
@@ -845,7 +845,7 @@ function WorldCupEditionHero({
               </div>
             </div>
           ) : null}
-          <div className="relative flex h-full min-h-[320px] flex-col justify-between p-5 md:p-6">
+          <div className="relative flex h-full min-h-[260px] flex-col justify-between p-4 sm:min-h-[320px] sm:p-5 md:p-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/88">
                 Campeão da edição
@@ -878,7 +878,7 @@ function WorldCupEditionHero({
                     tone="contrast"
                   />
                   <div className="min-w-0">
-                    <p className="truncate font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold tracking-[-0.04em] text-white">
+                    <p className="break-words font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold tracking-[-0.04em] text-white sm:truncate">
                       {championName}
                     </p>
                     <p className="mt-1 text-sm text-[#f8efd8]">{edition.finalVenue ?? "Local da final indisponível"}</p>
@@ -920,13 +920,13 @@ function WorldCupGroupStandingCard({ row }: { row: WorldCupEditionStandingRow })
         />
         {row.teamId ? (
           <Link
-            className="truncate text-sm font-semibold text-[#111c2d] transition-colors hover:text-[#003526]"
+            className="break-words text-sm font-semibold text-[#111c2d] transition-colors hover:text-[#003526] sm:truncate"
             href={buildWorldCupTeamPath(row.teamId)}
           >
             {teamName}
           </Link>
         ) : (
-          <span className="truncate text-sm font-semibold text-[#111c2d]">{teamName}</span>
+          <span className="break-words text-sm font-semibold text-[#111c2d] sm:truncate">{teamName}</span>
         )}
       </div>
 
@@ -1145,7 +1145,7 @@ function WorldCupFinalSnapshotCard({ finalRound }: { finalRound: WorldCupKnockou
                     <div className="flex items-center justify-between gap-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <WorldCupTeamBadge className="h-11 w-11 border-white/12 bg-white/12 text-white" team={team} />
-                        <span className={isWinner ? "truncate text-[1rem] font-extrabold text-white" : "truncate text-[1rem] font-semibold text-white/88"}>
+                        <span className={isWinner ? "break-words text-[1rem] font-extrabold text-white sm:truncate" : "break-words text-[1rem] font-semibold text-white/88 sm:truncate"}>
                           {teamName}
                         </span>
                       </div>
@@ -1204,7 +1204,17 @@ function WorldCupKnockoutSection({
       {knockoutRounds.length === 0 ? (
         renderEmptyBracketState(data)
       ) : (
-        <div className="overflow-x-auto pb-1">
+        <>
+        <div className="space-y-4 sm:hidden">
+          {snapshotColumns.map((column) => (
+            <WorldCupSnapshotStageColumn column={column} key={`mobile-left-${column.round.roundKey}`} side="left" />
+          ))}
+          <WorldCupFinalSnapshotCard finalRound={finalRound} />
+          {[...snapshotColumns].reverse().map((column) => (
+            <WorldCupSnapshotStageColumn column={column} key={`mobile-right-${column.round.roundKey}`} side="right" />
+          ))}
+        </div>
+        <div className="hidden max-w-full overflow-x-auto pb-1 sm:block">
           <div
             className="grid items-center gap-2.5 xl:gap-3"
             style={{
@@ -1238,6 +1248,7 @@ function WorldCupKnockoutSection({
             )}
           </div>
         </div>
+        </>
       )}
     </ProfilePanel>
   );
@@ -1342,7 +1353,7 @@ function WorldCupEditionRankingSection({
             </h2>
           </div>
           <Link
-            className="button-pill button-pill-secondary"
+            className="button-pill button-pill-secondary min-h-11 justify-center"
             href={buildWorldCupRankingsPath()}
           >
             Ver ranking histórico

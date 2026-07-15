@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Panorama das competições'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

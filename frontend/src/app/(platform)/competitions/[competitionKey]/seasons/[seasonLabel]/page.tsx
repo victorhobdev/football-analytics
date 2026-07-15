@@ -1,5 +1,10 @@
+import { redirect } from "next/navigation";
+
 import { ProfileAlert, ProfileShell } from "@/shared/components/profile/ProfilePrimitives";
-import { resolveCompetitionSeasonContext } from "@/shared/utils/context-routing";
+import {
+  buildAnalysesPath,
+  resolveCompetitionSeasonContext,
+} from "@/shared/utils/context-routing";
 
 import { SeasonHubContent } from "./SeasonHubContent";
 
@@ -33,6 +38,17 @@ export default async function SeasonHubPage({
           opção.
         </ProfileAlert>
       </ProfileShell>
+    );
+  }
+
+  if (tabParam === "rankings") {
+    redirect(
+      buildAnalysesPath({
+        competitionId: context.competitionId,
+        competitionKey: context.competitionKey,
+        seasonId: context.seasonId,
+        seasonLabel: context.seasonLabel,
+      }),
     );
   }
 

@@ -94,6 +94,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Projeto inteiro · filtre competição, temporada e período'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

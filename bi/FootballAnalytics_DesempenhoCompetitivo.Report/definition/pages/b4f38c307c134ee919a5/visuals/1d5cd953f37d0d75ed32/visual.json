@@ -119,6 +119,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'6. Cobertura: elemento visual'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

@@ -119,6 +119,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'3. Times: elemento visual'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

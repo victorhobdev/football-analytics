@@ -382,7 +382,7 @@ function PlayersLinkButton({
 }) {
   return (
     <Link
-      className="group inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18"
+      className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18 sm:w-auto"
       href={href}
     >
       <PlayersPageIcon className="h-4 w-4 transition-transform group-hover:scale-110" icon={icon} />
@@ -829,7 +829,7 @@ export default function PlayersPage() {
         <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-white/5 blur-3xl" />
 
         <div className="relative grid gap-6 p-5 md:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.42fr)] xl:items-stretch">
-          <div className="flex min-h-full flex-col gap-5 xl:justify-between">
+          <div className="flex min-h-full min-w-0 flex-col gap-5 xl:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <ProfileTag className="bg-white/10 text-white/82">
                 {competitionName ?? "Todas as competições"}
@@ -845,7 +845,7 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="players" />
                 Jogadores
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl md:text-6xl">
                 Mapa rápido do elenco disponível
               </h1>
             </div>
@@ -884,7 +884,7 @@ export default function PlayersPage() {
             </div>
           </div>
 
-          <aside className="grid content-start gap-3 xl:pt-14">
+          <aside className="grid min-w-0 content-start gap-3 xl:pt-14">
             {featuredPlayer && featuredPlayerMetric ? (
               <Link
                 className="group flex min-h-[12rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/16"
@@ -1047,7 +1047,7 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="search" />
               </span>
               <input
-                className="w-full border-0 bg-transparent text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974]"
+                className="w-full border-0 bg-transparent text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974] sm:text-sm"
                 onChange={(event) => {
                   setSearch(event.target.value);
                 }}
@@ -1065,7 +1065,7 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="ranking" />
               </span>
               <select
-                className="w-full border-0 bg-transparent text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none ring-0"
+                className="w-full border-0 bg-transparent text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none ring-0 sm:text-sm"
                 onChange={(event) => {
                   setSortBy(event.target.value as PlayersSortBy);
                 }}
@@ -1087,7 +1087,7 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="assist" />
               </span>
               <select
-                className="w-full border-0 bg-transparent text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none ring-0"
+                className="w-full border-0 bg-transparent text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none ring-0 sm:text-sm"
                 onChange={(event) => {
                   setSortDirection(event.target.value as PlayersSortDirection);
                 }}
@@ -1106,7 +1106,7 @@ export default function PlayersPage() {
                 <PlayersPageIcon className="h-4 w-4" icon="star" />
               </span>
               <input
-                className="w-full border-0 bg-transparent text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974]"
+                className="w-full border-0 bg-transparent text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974] sm:text-sm"
                 min={0}
                 onChange={(event) => {
                   setMinMinutesInput(event.target.value);
@@ -1153,7 +1153,120 @@ export default function PlayersPage() {
           />
         ) : (
           <div className="overflow-hidden rounded-[1.4rem] border border-[rgba(191,201,195,0.52)] bg-white/92">
-            <div className="overflow-x-auto">
+            <div className="divide-y divide-[rgba(191,201,195,0.38)] sm:hidden">
+              {rows.map((player, index) => {
+                const teamHref = getTeamHref(player);
+                const teamSummary = player.teamName ?? player.teamContextLabel ?? "Sem time";
+                const recentTeams =
+                  player.recentTeams && player.recentTeams.length > 0
+                    ? player.recentTeams.slice(0, 3)
+                    : player.teamId
+                      ? [{ teamId: player.teamId, teamName: player.teamName ?? null }]
+                      : [];
+                const isSelected = selectedIdsSet.has(player.playerId);
+                const isDisabled = !isSelected && selectedIds.length >= 2;
+
+                return (
+                  <article className="space-y-4 p-4" key={`mobile-${player.playerId}`}>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-[rgba(216,227,251,0.72)] px-3 py-1 text-xs font-semibold text-[#003526]">
+                        {formatInteger(currentRangeStart + index)}
+                      </span>
+                      <ProfileMedia
+                        alt={player.playerName}
+                        assetId={player.playerId}
+                        category="players"
+                        className="h-12 w-12 border-0 bg-[rgba(216,227,251,0.82)]"
+                        fallback={getInitials(player.playerName)}
+                        imageClassName="p-1.5"
+                        shape="circle"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          className="inline-flex min-h-11 items-center break-words font-semibold text-[#111c2d]"
+                          href={getPlayerHref(player.playerId)}
+                          onFocus={() => prefetchPlayerDetail(player.playerId)}
+                          onMouseEnter={() => prefetchPlayerDetail(player.playerId)}
+                        >
+                          {player.playerName}
+                        </Link>
+                        <p className="mt-1 text-xs text-[#57657a]">
+                          {player.nationality ?? "Nacionalidade não informada"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex min-w-0 items-center gap-2 rounded-xl bg-[rgba(240,243,255,0.72)] p-3">
+                      {recentTeams.length > 0 ? (
+                        <div className="flex shrink-0 items-center pl-2">
+                          {recentTeams.map((team, teamIndex) => {
+                            const teamHrefForAsset = getTeamAssetHref(team.teamId);
+                            const asset = (
+                              <ProfileMedia
+                                alt={team.teamName ?? "Time"}
+                                assetId={team.teamId}
+                                category="clubs"
+                                className={`h-8 w-8 border border-white bg-white ${teamIndex > 0 ? "-ml-2" : ""}`}
+                                fallback={getInitials(team.teamName ?? "Time")}
+                                fallbackClassName="text-[0.64rem]"
+                                imageClassName="p-1"
+                                linkBehavior="none"
+                                shape="circle"
+                              />
+                            );
+
+                            return teamHrefForAsset ? (
+                              <Link className="inline-flex min-h-11 min-w-11 items-center justify-center" href={teamHrefForAsset} key={team.teamId}>{asset}</Link>
+                            ) : (
+                              <div key={team.teamId}>{asset}</div>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                      {teamHref ? (
+                        <Link className="inline-flex min-h-11 min-w-0 items-center break-words text-sm font-semibold text-[#1f2d40]" href={teamHref}>
+                          {teamSummary}
+                        </Link>
+                      ) : (
+                        <p className="min-w-0 break-words text-sm font-semibold text-[#1f2d40]">{teamSummary}</p>
+                      )}
+                    </div>
+
+                    <dl className="grid grid-cols-2 gap-2 text-sm">
+                      {[
+                        ["Posição", formatPosition(player.position)],
+                        ["Jogos", formatInteger(player.matchesPlayed)],
+                        ["Minutos", formatMinutesCell(player.minutesPlayed)],
+                        ["Gols", formatMetricValue("goals", player.goals)],
+                        ["Assists", formatMetricValue("assists", player.assists)],
+                        ["Nota", formatMetricValue("player_rating", player.rating)],
+                      ].map(([label, value]) => (
+                        <div className="rounded-xl bg-white px-3 py-3" key={label}>
+                          <dt className="text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-[#57657a]">{label}</dt>
+                          <dd className="mt-1 break-words font-semibold tabular-nums text-[#111c2d]">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+
+                    <button
+                      aria-pressed={isSelected}
+                      className={`min-h-11 w-full rounded-full px-4 py-2 text-sm font-semibold ${
+                        isSelected
+                          ? "bg-[#003526] text-white"
+                          : "border border-[rgba(112,121,116,0.28)] bg-white text-[#1f2d40]"
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                      disabled={isDisabled}
+                      onClick={() => handleCompareAction(player.playerId)}
+                      type="button"
+                    >
+                      {isSelected ? "Remover da comparação" : "Adicionar à comparação"}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto sm:block">
               <table className="w-full min-w-[920px] table-fixed border-collapse text-left text-sm text-[#1f2d40]">
                 <thead className="bg-[rgba(240,243,255,0.82)] text-[0.68rem] uppercase tracking-[0.16em] text-[#57657a]">
                   <tr>
@@ -1325,7 +1438,7 @@ export default function PlayersPage() {
                 <label className="flex items-center gap-2 text-sm text-[#57657a]">
                   Linhas
                   <select
-                    className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 px-3 py-1.5 text-[#1f2d40]"
+                    className="min-h-11 rounded-full border border-[rgba(112,121,116,0.22)] bg-white/88 px-3 py-1.5 text-base text-[#1f2d40] sm:min-h-0 sm:text-sm"
                     onChange={(event) => {
                       setPageSize(Number(event.target.value));
                     }}
@@ -1340,7 +1453,7 @@ export default function PlayersPage() {
                 </label>
 
                 <button
-                  className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="min-h-11 flex-1 rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                   disabled={currentPage <= 1}
                   onClick={() => {
                     setPage((currentValue) => Math.max(currentValue - 1, 1));
@@ -1350,7 +1463,7 @@ export default function PlayersPage() {
                   Anterior
                 </button>
                 <button
-                  className="rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="min-h-11 flex-1 rounded-full border border-[rgba(112,121,116,0.22)] bg-white/92 px-3 py-1.5 font-medium text-[#1f2d40] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                   disabled={currentPage >= totalPages}
                   onClick={() => {
                     setPage((currentValue) => Math.min(currentValue + 1, totalPages));

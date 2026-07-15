@@ -258,6 +258,19 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Escopos, Partidas Declaradas, Cobertura de Placar Declarada %, Cobertura Estatísticas de Time %, Cobertura de Nota %, Cobertura de Minutos %'"
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

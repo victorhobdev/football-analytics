@@ -448,6 +448,40 @@ def _fetch_standings_rows(
     stage: StandingsStage,
     selected_round: StandingsRound,
 ) -> list[dict[str, Any]]:
+    snapshot_rows = db_client.fetch_all(
+        """
+        select
+            fss.position,
+            fss.team_id::text as team_id,
+            coalesce(dt.team_name, fss.team_id::text) as team_name,
+            fss.games_played as matches_played,
+            fss.won as wins,
+            fss.draw as draws,
+            fss.lost as losses,
+            fss.goals_for,
+            fss.goals_against,
+            fss.goal_diff,
+            fss.points
+        from mart.fact_standings_snapshots fss
+        left join mart.dim_team dt
+          on dt.team_sk = fss.team_sk
+        where fss.competition_key = %s
+          and fss.season_label = %s
+          and fss.stage_id = %s
+          and fss.round_id = %s
+          and fss.group_id is null
+        order by fss.position asc, dt.team_name asc nulls last, fss.team_id asc;
+        """,
+        [
+            scope.competition_key,
+            scope.season_label,
+            stage.stage_id,
+            selected_round.round_id,
+        ],
+    )
+    if snapshot_rows:
+        return snapshot_rows
+
     return db_client.fetch_all(
         """
         with stage_rounds as (

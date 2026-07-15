@@ -15,6 +15,8 @@ Copie esta tabela a cada publicacao. A comparacao so e valida quando SQL e Power
 | 2026-07-12 | Osasuna no recorte | J-V-E-D / pontos | 38-12-16-10 / 52 | 38-12-16-10 / 52 | 0 | PASS |
 | 2026-07-12 | Osasuna no recorte | PPG / GF / GC / saldo | 1,368421 / 48 / 52 / -4 | 1,368421 / 48 / 52 / -4 | 0 | PASS |
 | 2026-07-12 | Osasuna no recorte | PPG casa / fora / delta | 1,894737 / 0,842105 / 1,052632 | 1,894737 / 0,842105 / 1,052632 | 0 | PASS |
+| 2026-07-12 | Barcelona no recorte | Jogos / pontos / PPG / PPG últimos 5 | 38 / 88 / 2,3158 / 2,4 | 38 / 88 / 2,32 / 2,40 | arredondamento | PASS |
+| 2026-07-12 | Real Madrid no recorte | Jogos / pontos / PPG / PPG últimos 5 | 38 / 84 / 2,2105 / 2,4 | 38 / 84 / 2,21 / 2,40 | arredondamento | PASS |
 
 O ranking de artilheiros também coincidiu ao usar a identidade canônica da `DimPlayer`: Kylian Mbappé Lottin 31 gols/3 assistências, Robert Lewandowski 27/2, Ante Budimir 21/4, Alexander Sørloth 20/2 e Ayoze Pérez 19/2. Agrupar apenas pelo nome cru subcontava Mbappé; esse método não é válido para reconciliação.
 

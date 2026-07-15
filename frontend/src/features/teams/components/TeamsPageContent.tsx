@@ -227,7 +227,7 @@ function TeamsLinkButton({
 }) {
   return (
     <Link
-      className="group inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18"
+      className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/14 bg-white/10 px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/86 transition-colors hover:border-white/28 hover:bg-white/18 sm:w-auto"
       href={href}
     >
       <TeamsPageIcon className="h-4 w-4 transition-transform group-hover:scale-110" icon={icon} />
@@ -500,7 +500,7 @@ export function TeamsPageContent() {
                 <TeamsPageIcon className="h-4 w-4" icon="shield" />
                 Times
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-white md:text-6xl">
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl md:text-6xl">
                 Resumo rápido dos clubes
               </h1>
             </div>
@@ -692,7 +692,7 @@ export function TeamsPageContent() {
                 <TeamsPageIcon className="h-4 w-4" icon="search" />
               </span>
               <input
-                className="w-full border-0 bg-transparent text-sm font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974]"
+                className="w-full border-0 bg-transparent text-base font-medium normal-case tracking-normal text-[#111c2d] outline-none placeholder:text-[#707974] sm:text-sm"
                 onChange={(event) => {
                   setSearch(event.target.value);
                   setPage(1);
@@ -707,7 +707,7 @@ export function TeamsPageContent() {
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#57657a]">
             Ordenar
             <select
-              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-sm font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:text-sm"
               onChange={(event) => {
                 setSortBy(event.target.value as TeamsListSortBy);
                 setPage(1);
@@ -725,7 +725,7 @@ export function TeamsPageContent() {
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#57657a]">
             Direção
             <select
-              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-sm font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:text-sm"
               onChange={(event) => {
                 setSortDirection(event.target.value as TeamsListSortDirection);
                 setPage(1);
@@ -740,7 +740,7 @@ export function TeamsPageContent() {
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#57657a]">
             Linhas
             <select
-              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-sm font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+              className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:text-sm"
               onChange={(event) => {
                 const nextPageSize =
                   event.target.value === "all"
@@ -796,7 +796,7 @@ export function TeamsPageContent() {
                     </div>
                   </div>
                   <Link
-                    className="button-pill button-pill-primary gap-2"
+                    className="button-pill button-pill-primary min-h-11 w-full justify-center gap-2 sm:w-auto"
                     href={profileHref}
                   >
                     <span>Abrir perfil</span>
@@ -804,7 +804,7 @@ export function TeamsPageContent() {
                   </Link>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <ProfileMetricTile label="Jogos" value={team.matchesPlayed ?? "-"} />
                   <ProfileMetricTile label="Vitórias" value={team.wins ?? "-"} />
                   <ProfileMetricTile label="Saldo" value={formatGoalDiff(team.goalDiff)} tone="soft" />
@@ -840,9 +840,9 @@ export function TeamsPageContent() {
           )}
         </p>
         {!isAllRowsMode ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
-              className="button-pill disabled:cursor-not-allowed disabled:opacity-45"
+              className="button-pill min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
               disabled={currentPage <= 1}
               onClick={() => setPage((value) => Math.max(value - 1, 1))}
               type="button"
@@ -850,7 +850,7 @@ export function TeamsPageContent() {
               Anterior
             </button>
             <button
-              className="button-pill button-pill-primary disabled:cursor-not-allowed disabled:opacity-45"
+              className="button-pill button-pill-primary min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
               disabled={currentPage >= totalPages}
               onClick={() => setPage((value) => Math.min(value + 1, totalPages))}
               type="button"

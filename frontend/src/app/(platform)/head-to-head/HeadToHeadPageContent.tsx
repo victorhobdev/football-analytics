@@ -870,7 +870,7 @@ function SideConfigurator({
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#57657a]">
             {sideLabel}
           </p>
-          <h2 className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.035em] text-[#111c2d]">
+          <h2 className="mt-1 font-[family:var(--font-profile-headline)] text-xl font-extrabold tracking-[-0.035em] text-[#111c2d] sm:text-2xl">
             {sideContext.competition.shortName} {sideContext.season.label}
           </h2>
         </div>
@@ -1002,7 +1002,7 @@ function IdentityCard({
   return (
     <Link
       className={joinClasses(
-        "group relative flex min-h-[12rem] w-full flex-col items-start gap-4 overflow-hidden rounded-[1.65rem] border p-5 pr-12 text-white shadow-[0_30px_78px_-54px_rgba(0,53,38,0.7)] transition-transform hover:-translate-y-0.5 sm:flex-row",
+        "group relative flex min-h-[9.5rem] w-full flex-col items-start gap-3 overflow-hidden rounded-[1.65rem] border p-4 pr-10 text-white shadow-[0_30px_78px_-54px_rgba(0,53,38,0.7)] transition-transform hover:-translate-y-0.5 sm:min-h-[12rem] sm:flex-row sm:gap-4 sm:p-5 sm:pr-12",
         side === "left"
           ? "border-emerald-200/14 bg-[radial-gradient(circle_at_top_left,rgba(139,214,182,0.28),transparent_44%),linear-gradient(135deg,#06271d_0%,#0b3c2d_56%,#0f513c_100%)]"
           : "border-sky-200/14 bg-[radial-gradient(circle_at_top_right,rgba(175,210,255,0.22),transparent_44%),linear-gradient(135deg,#0d1f34_0%,#14395d_58%,#1f557a_100%)]",
@@ -1014,7 +1014,7 @@ function IdentityCard({
         alt={identity.title}
         assetId={identity.assetId}
         category={identity.category}
-        className="relative h-20 w-20 border-white/18 bg-white/12"
+        className="relative h-16 w-16 border-white/18 bg-white/12 sm:h-20 sm:w-20"
         fallback={identity.fallback}
         fallbackClassName="text-white"
         imageClassName="p-2"
@@ -1026,7 +1026,7 @@ function IdentityCard({
         <p className="text-[0.64rem] font-bold uppercase tracking-[0.2em] text-white/58">
           {label}
         </p>
-        <h3 className="mt-2 line-clamp-2 font-[family:var(--font-profile-headline)] text-[1.65rem] font-extrabold leading-tight tracking-[-0.04em] text-white">
+        <h3 className="mt-2 line-clamp-2 font-[family:var(--font-profile-headline)] text-xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-[1.65rem]">
           {identity.title}
         </h3>
         <p className="mt-3 inline-flex rounded-full bg-white/12 px-3 py-1 text-xs font-semibold text-white/78">
@@ -1187,7 +1187,7 @@ function MetricValuePill({
   return (
     <span
       className={joinClasses(
-        "inline-flex min-w-[4.75rem] justify-center rounded-full px-3 py-1.5 text-sm font-extrabold tabular-nums",
+        "inline-flex min-h-11 w-full items-center justify-center rounded-full px-3 py-1.5 text-sm font-extrabold tabular-nums sm:min-h-0 sm:w-auto sm:min-w-[4.75rem]",
         !hasValue
           ? "bg-[rgba(240,243,255,0.78)] text-[#8190a3]"
           : isLeader
@@ -1219,7 +1219,7 @@ function MetricComparisonCard({
   return (
     <article className="rounded-[1.15rem] border border-[rgba(216,227,251,0.64)] bg-[rgba(248,250,255,0.72)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
       <div className="grid gap-3 md:grid-cols-[minmax(6rem,0.85fr)_minmax(14rem,1.6fr)_minmax(6rem,0.85fr)] md:items-center">
-        <div className="flex items-center justify-start gap-2 md:justify-end">
+        <div className="order-2 flex min-w-0 items-center justify-start gap-2 md:order-none md:justify-end">
           <MetricValuePill
             format={format}
             isLeader={leader === "left"}
@@ -1228,7 +1228,7 @@ function MetricComparisonCard({
           />
         </div>
 
-        <div className="min-w-0">
+        <div className="order-1 min-w-0 md:order-none">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-[#1f2d40]">{metric.label}</p>
             {leader && leader !== "tie" ? (
@@ -1263,7 +1263,7 @@ function MetricComparisonCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-start gap-2">
+        <div className="order-3 flex min-w-0 items-center justify-start gap-2 md:order-none">
           <MetricValuePill
             format={format}
             isLeader={leader === "right"}
@@ -1305,7 +1305,7 @@ function ComparisonMetricsTable({
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#57657a]">
             Métricas lado a lado
           </p>
-          <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-[2rem] font-extrabold tracking-[-0.05em] text-[#111c2d]">
+          <h2 className="mt-2 font-[family:var(--font-profile-headline)] text-2xl font-extrabold tracking-[-0.05em] text-[#111c2d] sm:text-[2rem]">
             Comparativo consolidado
           </h2>
         </div>
@@ -1560,7 +1560,7 @@ export function HeadToHeadPageContent() {
                 <ComparisonIcon className="h-4 w-4" mode={mode} />
                 Head-to-head
               </p>
-              <h1 className="mt-3 break-words font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[1] text-[#111c2d] sm:text-4xl md:text-[2.85rem]">
+              <h1 className="mt-3 break-words font-[family:var(--font-profile-headline)] text-[1.8rem] font-extrabold leading-[1] text-[#111c2d] sm:text-4xl md:text-[2.85rem]">
                 Compare clubes, jogadores e edições
               </h1>
             </div>
@@ -1570,7 +1570,7 @@ export function HeadToHeadPageContent() {
                 Tipo de comparativo
               </p>
               <div
-                className="grid gap-2 sm:grid-cols-3"
+                className="grid grid-cols-3 gap-2"
                 role="tablist"
                 aria-label="Tipo de comparativo"
               >
@@ -1581,7 +1581,7 @@ export function HeadToHeadPageContent() {
                     <button
                       aria-selected={isActive}
                       className={joinClasses(
-                        "flex min-h-[4.35rem] min-w-0 items-center gap-3 rounded-[1rem] border px-3.5 py-3 text-left transition duration-200",
+                        "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1.5 rounded-[1rem] border px-2 py-2 text-center transition duration-200 sm:min-h-[4.35rem] sm:flex-row sm:justify-start sm:gap-3 sm:px-3.5 sm:py-3 sm:text-left",
                         isActive
                           ? "border-[rgba(0,81,59,0.2)] bg-white/90 text-[#003526] shadow-[0_14px_34px_-24px_rgba(17,28,45,0.58)]"
                           : "border-transparent bg-transparent text-[#45536a] hover:border-white/78 hover:bg-white/58 hover:text-[#00513b]",
@@ -1597,7 +1597,7 @@ export function HeadToHeadPageContent() {
                     >
                       <span
                         className={joinClasses(
-                          "grid h-9 w-9 shrink-0 place-items-center rounded-full border",
+                          "grid h-8 w-8 shrink-0 place-items-center rounded-full border sm:h-9 sm:w-9",
                           isActive
                             ? "border-[rgba(0,81,59,0.14)] bg-[rgba(0,81,59,0.07)] text-[#00513b]"
                             : "border-[rgba(87,101,122,0.14)] bg-[rgba(216,227,251,0.44)] text-[#57657a]",
@@ -1609,7 +1609,7 @@ export function HeadToHeadPageContent() {
                         <span className="block text-[0.76rem] font-black uppercase tracking-[0.14em]">
                           {option.label}
                         </span>
-                        <span className="mt-1 block text-xs font-semibold leading-snug text-[#68778c]">
+                        <span className="mt-1 hidden text-xs font-semibold leading-snug text-[#68778c] sm:block">
                           {option.summary}
                         </span>
                       </span>
@@ -1626,7 +1626,7 @@ export function HeadToHeadPageContent() {
               label="Base"
               value={metrics.length}
             />
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid gap-2 sm:grid-cols-3">
               <ProfileMetricTile label="A" value={advantage.left} />
               <ProfileMetricTile label="Iguais" value={advantage.tie} tone="soft" />
               <ProfileMetricTile label="B" value={advantage.right} />
@@ -1659,6 +1659,10 @@ export function HeadToHeadPageContent() {
           sideLabel={leftLabel}
           teamOptions={leftTeamOptions}
         />
+        <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#57657a] sm:hidden">
+          <span aria-hidden="true" className="text-lg text-[#00513b]">↓</span>
+          Agora escolha o lado B
+        </div>
         <SideConfigurator
           mode={mode}
           onChange={(patch) => updateSide("right", patch)}
@@ -1688,7 +1692,8 @@ export function HeadToHeadPageContent() {
         <IdentityCard identity={leftIdentity} label={leftLabel} side="left" />
         <div className="flex items-center justify-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(191,201,195,0.55)] bg-white/84 font-[family:var(--font-profile-headline)] text-lg font-extrabold text-[#003526] shadow-[0_18px_42px_-34px_rgba(17,28,45,0.28)]">
-            VS
+            <span className="sm:hidden" aria-hidden="true">↓</span>
+            <span className="hidden sm:inline">VS</span>
           </span>
         </div>
         <IdentityCard identity={rightIdentity} label={rightLabel} side="right" />

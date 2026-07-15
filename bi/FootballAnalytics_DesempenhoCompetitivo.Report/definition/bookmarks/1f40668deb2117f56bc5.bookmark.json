@@ -1,0 +1,854 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Exemplo - La Liga 2024-25",
+  "name": "1f40668deb2117f56bc5",
+  "options": {
+    "targetVisualNames": [
+      "16d3d7c440a034c408ed",
+      "39c2806473154bbb101c",
+      "4636a88e61e4dc13b406",
+      "473939fa6d5d6092b1cb",
+      "497a0d55d07071fbcf5b",
+      "55f8376a82eac90df47f",
+      "5e902cf6b43ddb99acbf",
+      "6e861f35be1afec69955",
+      "70a7495bb13b6a3120df",
+      "713a94671be05ef67392",
+      "8bbbac55f3ee966b4a49",
+      "923ad704e33b2a9ed30c",
+      "9ddf4b0737289de89ad9",
+      "e5942f4e97fdb618d1da",
+      "ef5f925103aa4c7f71c8"
+    ]
+  },
+  "explorationState": {
+    "version": "1.3",
+    "activeSection": "4742e1e6937d814ce78f",
+    "sections": {
+      "4742e1e6937d814ce78f": {
+        "visualContainers": {
+          "16d3d7c440a034c408ed": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "3ba1b6cc07486b9e6e11",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimTeam"
+                        }
+                      },
+                      "Property": "Time"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "8449124a9ed03f10eb66",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Jogos do Time"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "6041fa4bcb849dfa9bd0",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Pontos"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "885980ad80160f24d110",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "PPG (10+ jogos)"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "ea9bd9819eb5e2eaf4e0",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "PPG Últimos 5"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "8abdef2770a6a7c10291",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Delta Forma 5 Jogos"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "cd1f7094d5b0d0d343b8",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Conversão de Finalizações %"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "08f81b4ccafe9d026cdf",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Cobertura Estatísticas de Time %"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "tableEx",
+              "objects": {},
+              "orderBy": [
+                {
+                  "Direction": 2,
+                  "Expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "PPG (10+ jogos)"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "39c2806473154bbb101c": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "cb5fd5a16aa4e69ed9da",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "competition"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "general": [
+                    {
+                      "properties": {
+                        "filter": {
+                          "filter": {
+                            "Version": 2,
+                            "From": [
+                              {
+                                "Name": "d",
+                                "Entity": "DimScope",
+                                "Type": 0
+                              }
+                            ],
+                            "Where": [
+                              {
+                                "Condition": {
+                                  "In": {
+                                    "Expressions": [
+                                      {
+                                        "Column": {
+                                          "Expression": {
+                                            "SourceRef": {
+                                              "Source": "d"
+                                            }
+                                          },
+                                          "Property": "competition"
+                                        }
+                                      }
+                                    ],
+                                    "Values": [
+                                      [
+                                        {
+                                          "Literal": {
+                                            "Value": "'La Liga'"
+                                          }
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "data": [
+                    {
+                      "properties": {
+                        "mode": {
+                          "expr": {
+                            "Literal": {
+                              "Value": "'Dropdown'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "activeProjections": {
+                "Values": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "competition"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "4636a88e61e4dc13b406": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "851d4d4099b053c39652",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "provider"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "general": [
+                    {
+                      "properties": {
+                        "filter": {
+                          "filter": {
+                            "Version": 2,
+                            "From": [
+                              {
+                                "Name": "d",
+                                "Entity": "DimScope",
+                                "Type": 0
+                              }
+                            ],
+                            "Where": [
+                              {
+                                "Condition": {
+                                  "In": {
+                                    "Expressions": [
+                                      {
+                                        "Column": {
+                                          "Expression": {
+                                            "SourceRef": {
+                                              "Source": "d"
+                                            }
+                                          },
+                                          "Property": "provider"
+                                        }
+                                      }
+                                    ],
+                                    "Values": [
+                                      [
+                                        {
+                                          "Literal": {
+                                            "Value": "'sportmonks'"
+                                          }
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "data": [
+                    {
+                      "properties": {
+                        "mode": {
+                          "expr": {
+                            "Literal": {
+                              "Value": "'Dropdown'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "activeProjections": {
+                "Values": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "provider"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "473939fa6d5d6092b1cb": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "4d6cc28966056ec6ec03",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Resumo - Ação sugerida"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          },
+          "497a0d55d07071fbcf5b": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "objects": {}
+            }
+          },
+          "55f8376a82eac90df47f": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "objects": {}
+            }
+          },
+          "5e902cf6b43ddb99acbf": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "02bb0dc159ee5d0db317",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimDate"
+                        }
+                      },
+                      "Property": "date_day"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "data": [
+                    {
+                      "properties": {
+                        "mode": {
+                          "expr": {
+                            "Literal": {
+                              "Value": "'Between'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "activeProjections": {
+                "Values": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimDate"
+                        }
+                      },
+                      "Property": "date_day"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "6e861f35be1afec69955": {
+            "singleVisual": {
+              "visualType": "textbox",
+              "objects": {}
+            }
+          },
+          "70a7495bb13b6a3120df": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "d87bd618e91f5e0eaa4c",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Jogos do Time"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "c7158a449f4f4d61ab2f",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Pontos"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "4a3712542f7c98f1519a",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "PPG"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "f34136144986cc36d7d6",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "PPG Últimos 5"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "0658802e2dceb2298b11",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Delta Forma 5 Jogos"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "5349842bd6946451fdf2",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Conversão de Finalizações %"
+                    }
+                  },
+                  "howCreated": 0
+                },
+                {
+                  "name": "04e67479fd3ed1b7cea6",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Cobertura Estatísticas de Time %"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          },
+          "713a94671be05ef67392": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "102fd96de6307ac69fcb",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimTeam"
+                        }
+                      },
+                      "Property": "Time"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "data": [
+                    {
+                      "properties": {
+                        "mode": {
+                          "expr": {
+                            "Literal": {
+                              "Value": "'Dropdown'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "activeProjections": {
+                "Values": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimTeam"
+                        }
+                      },
+                      "Property": "Time"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "8bbbac55f3ee966b4a49": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "cae5a910f75337933d0f",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Resumo - Confiança"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          },
+          "923ad704e33b2a9ed30c": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "3a26c3c69a1cbaa7f701",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Resumo - Onde"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          },
+          "9ddf4b0737289de89ad9": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "ac0b1bed255323051e7d",
+                  "type": "Categorical",
+                  "expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "season_label"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "general": [
+                    {
+                      "properties": {
+                        "filter": {
+                          "filter": {
+                            "Version": 2,
+                            "From": [
+                              {
+                                "Name": "d",
+                                "Entity": "DimScope",
+                                "Type": 0
+                              }
+                            ],
+                            "Where": [
+                              {
+                                "Condition": {
+                                  "In": {
+                                    "Expressions": [
+                                      {
+                                        "Column": {
+                                          "Expression": {
+                                            "SourceRef": {
+                                              "Source": "d"
+                                            }
+                                          },
+                                          "Property": "season_label"
+                                        }
+                                      }
+                                    ],
+                                    "Values": [
+                                      [
+                                        {
+                                          "Literal": {
+                                            "Value": "'2024_25'"
+                                          }
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "data": [
+                    {
+                      "properties": {
+                        "mode": {
+                          "expr": {
+                            "Literal": {
+                              "Value": "'Dropdown'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "activeProjections": {
+                "Values": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimScope"
+                        }
+                      },
+                      "Property": "season_label"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "e5942f4e97fdb618d1da": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "cfecc56e2a1f6e881cbc",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Resumo - Por que importa"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          },
+          "ef5f925103aa4c7f71c8": {
+            "filters": {
+              "byExpr": [
+                {
+                  "name": "ab8dfb319deb1fe0b43e",
+                  "type": "Advanced",
+                  "expression": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Medidas"
+                        }
+                      },
+                      "Property": "Resumo - O que aconteceu"
+                    }
+                  },
+                  "howCreated": 0
+                }
+              ]
+            },
+            "singleVisual": {
+              "visualType": "cardVisual",
+              "objects": {}
+            }
+          }
+        }
+      }
+    },
+    "objects": {}
+  }
+}

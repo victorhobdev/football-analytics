@@ -93,11 +93,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Última Atualização"
+                  "Property": "Dados disponíveis até"
                 }
               },
-              "queryRef": "Medidas.Última Atualização",
-              "nativeQueryRef": "Última Atualização"
+              "queryRef": "Medidas.Dados disponíveis até",
+              "nativeQueryRef": "Dados disponíveis até"
             }
           ]
         }
@@ -253,6 +253,19 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Partidas, Times, Gols Totais, Gols por Partida, Cobertura de Placar %, Dados disponíveis até'"
                 }
               }
             }
