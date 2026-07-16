@@ -178,10 +178,10 @@ def chart(page: str, key: str, visual_type: str, title: str, category: tuple[str
     }
 
 
-def table(page: str, key: str, title: str, fields: list[tuple[str, str] | str], x: int, y: int, width: int, height: int, order: int, sort_measure: str) -> dict:
+def table(page: str, key: str, title: str, fields: list[tuple[str, str] | str], x: int, y: int, width: int, height: int, order: int, sort_measure: str, minimum_measure: tuple[str, int] | None = None) -> dict:
     name = object_id(f"{page}:{key}")
     projections = [measure(item) if isinstance(item, str) else column(*item) for item in fields]
-    return {
+    visual = {
         "$schema": VISUAL_SCHEMA,
         "name": name,
         "position": position(x, y, width, height, order),
@@ -210,6 +210,24 @@ def table(page: str, key: str, title: str, fields: list[tuple[str, str] | str], 
             "visualContainerObjects": title_objects(title),
         },
     }
+    if minimum_measure:
+        measure_name, minimum = minimum_measure
+        visual["filterConfig"] = {"filters": [{
+            "name": object_id(f"{page}:{key}:{measure_name}:minimum"),
+            "field": measure(measure_name)["field"],
+            "type": "Advanced",
+            "filter": {
+                "Version": 2,
+                "From": [{"Name": "m", "Entity": "Medidas", "Type": 0}],
+                "Where": [{"Condition": {"Comparison": {
+                    "ComparisonKind": 2,
+                    "Left": {"Measure": {"Expression": {"SourceRef": {"Source": "m"}}, "Property": measure_name}},
+                    "Right": {"Literal": {"Value": f"{minimum}L"}},
+                }}}],
+            },
+            "howCreated": "User",
+        }]}
+    return visual
 
 
 def common_slicers(page: str, include_team: bool) -> list[dict]:
@@ -245,12 +263,18 @@ def mobile_positions(visuals: list[dict]) -> dict[str, dict]:
         visual_type = visual["visual"]["visualType"]
 
         if visual_type == "textbox" and desktop["y"] == 12:
+            positions[visual["name"]] = {"x": 10, "y": 0, "z": desktop["z"], "width": 300, "height": 58, "tabOrder": desktop["tabOrder"]}
             continue
 
         if visual_type == "textbox":
-            height = 42 if desktop["y"] < 30 else 34
-            positions[visual["name"]] = {"x": 10, "y": y, "z": desktop["z"], "width": 300, "height": height, "tabOrder": desktop["tabOrder"]}
-            y += height + 6
+            if desktop["y"] == 18:
+                positions[visual["name"]] = {"x": 20, "y": 5, "z": desktop["z"], "width": 280, "height": 30, "tabOrder": desktop["tabOrder"]}
+            elif desktop["y"] == 45:
+                positions[visual["name"]] = {"x": 20, "y": 34, "z": desktop["z"], "width": 280, "height": 18, "tabOrder": desktop["tabOrder"]}
+                y = 64
+            else:
+                positions[visual["name"]] = {"x": 10, "y": y, "z": desktop["z"], "width": 300, "height": 34, "tabOrder": desktop["tabOrder"]}
+                y += 40
             continue
 
         if visual_type == "slicer":
@@ -369,7 +393,7 @@ def build_pages() -> list[tuple[str, str, list[dict]]]:
             *common_slicers(evolution, True),
             card(evolution, "kpis", ["PPG", "PPG Últimos 5", "PPG Casa", "PPG Fora"], 20, 152, 1240, 96, 30, 32),
             chart(evolution, "cumulative", "lineChart", "Evolução de pontos no período", ("DimDate", "Ano"), ["Pontos"], 20, 260, 800, 440, 40, tooltips=["Jogos do Time", "PPG", "PPG Últimos 5"]),
-            table(evolution, "venue", "Mando observado · mínimo de 20 partidas", [("DimTeam", "Time"), "Jogos do Time", "PPG", "PPG Casa", "PPG Fora", "Delta de Mando (20+ jogos)"], 835, 260, 425, 440, 41, "PPG"),
+            table(evolution, "venue", "Mando observado · mínimo de 20 partidas", [("DimTeam", "Time"), "Jogos do Time", "PPG", "PPG Casa", "PPG Fora", "Delta de Mando (20+ jogos)"], 835, 260, 425, 440, 41, "PPG", ("Jogos do Time", 20)),
         ]),
         (players, "5. Jogadores", [
             header_panel(players),

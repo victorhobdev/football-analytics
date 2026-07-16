@@ -108,7 +108,7 @@ def _validate_pbip(bi_root: Path) -> list[str]:
             visual = _load_json(visual_path)
             if not isinstance(visual, dict):
                 raise ValidationError(f"PBIR visual root must be an object: {visual_path}")
-            if visual.get("position", {}).get("y") != 12 and not (visual_path.parent / "mobile.json").is_file():
+            if not (visual_path.parent / "mobile.json").is_file():
                 raise ValidationError(f"public visual is missing its mobile layout: {visual_path}")
 
     if diagnostic_pages != 1:
