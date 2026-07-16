@@ -159,3 +159,6 @@ imagens.py
 **/.pbi/
 !bi/data/
 !bi/data/manifest.json
+
+# Local database snapshots
+platform/reports/quality/*.dump
