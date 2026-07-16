@@ -323,11 +323,11 @@ function QuickLinkCard({
         <span className={styles.quickLinkBadge}>Acesso rápido</span>
       </div>
 
-      <div className="space-y-3">
-        <h3 className="font-[family:var(--font-app-headline)] text-[1.45rem] font-extrabold tracking-[-0.035em] text-[#0d2240]">
+      <div className="space-y-2.5">
+        <h3 className="font-[family:var(--font-app-headline)] text-[1.5rem] font-extrabold tracking-[-0.04em] text-white">
           {label}
         </h3>
-        <p className="text-sm leading-6 text-[#57657a]">{description}</p>
+        <p className="text-sm leading-6 text-white/70">{description}</p>
       </div>
 
       <div className={styles.quickLinkFooter}>
@@ -545,7 +545,7 @@ export function HomeExecutivePage() {
               <div className={styles.quickActionsHeader}>
                 <div>
                   <p className={styles.sectionEyebrow}>Atalhos</p>
-                  <h2 className="font-[family:var(--font-app-headline)] text-[1.9rem] font-extrabold tracking-[-0.04em] text-[#003526]">
+                  <h2 className="font-[family:var(--font-app-headline)] text-[1.9rem] font-extrabold tracking-[-0.04em] text-white/90">
                     Acessos rápidos
                   </h2>
                 </div>
