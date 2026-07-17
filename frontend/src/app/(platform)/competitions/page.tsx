@@ -85,7 +85,7 @@ function buildCatalogCompetition(card: HomeCompetitionCard): CatalogCompetition 
     scope,
     visualAssetId: registryCompetition
       ? getCompetitionVisualAssetId(registryCompetition) ?? undefined
-      : card.assetId ?? undefined,
+      : card.competitionKey ?? card.assetId ?? card.competitionId,
     matchesCount: card.matchesCount,
     seasonsCount: card.seasonsCount,
     latestSeasonLabel: card.latestContext?.seasonLabel ?? card.range.toSeasonLabel,

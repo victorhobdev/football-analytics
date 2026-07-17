@@ -204,7 +204,7 @@ export function MarketPageContent() {
   const [teamDirection, setTeamDirection] = useState<(typeof TEAM_DIRECTION_FILTERS)[number]["value"]>("all");
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("dateDesc");
+  const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("amountDesc");
   const [onlyValuedTransfers, setOnlyValuedTransfers] = useState(false);
   const debouncedSearch = useDebouncedValue(search);
   const debouncedClubSearch = useDebouncedValue(clubSearch);
