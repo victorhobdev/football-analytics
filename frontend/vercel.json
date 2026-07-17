@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "env": {
+    "FOOTBALL_BFF_ORIGIN": "https://football.victorhob.me",
+    "FOOTBALL_VISUAL_ASSETS_MANIFEST_BASE_URL": "https://football.victorhob.me/visual-assets/manifests/",
+    "FOOTBALL_VISUAL_ASSETS_PUBLIC_BASE_URL": "https://football.victorhob.me/visual-assets/"
+  }
+}
