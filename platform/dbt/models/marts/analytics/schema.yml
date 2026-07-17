@@ -178,6 +178,17 @@ models:
         tests:
           - not_null
 
+  - name: team_serving_summary
+    description: "Resumo global por time para a rota de listagem sem recorte."
+    columns:
+      - name: team_id
+        tests:
+          - not_null
+          - unique
+      - name: matches_played
+        tests:
+          - not_null
+
   - name: player_season_summary
     description: "Resumo por temporada de estatisticas individuais."
     tests:

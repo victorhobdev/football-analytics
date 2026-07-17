@@ -6,7 +6,11 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from api.src.main import app
-from api.src.routers.competition_hub import CompetitionSeasonScope, _fetch_competition_editions
+from api.src.routers.competition_hub import (
+    CompetitionSeasonScope,
+    _fetch_competition_editions,
+    _fetch_competition_historical_stats,
+)
 
 
 class CompetitionHubAnalyticsApiTests(unittest.TestCase):
@@ -171,6 +175,17 @@ class CompetitionEditionsApiTests(unittest.TestCase):
 class CompetitionHubHistoricalStatsApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.client = TestClient(app)
+
+    @patch("api.src.routers.competition_hub.db_client.fetch_all")
+    def test_historical_player_resolution_only_scans_requested_names(self, fetch_all_mock) -> None:
+        fetch_all_mock.return_value = []
+
+        _fetch_competition_historical_stats("brasileirao_a", 2025)
+
+        query, params = fetch_all_mock.call_args.args
+        self.assertIn("target_player_names", query)
+        self.assertIn("join target_player_names", query)
+        self.assertEqual(params[:2], ["brasileirao_a", 2025])
 
     @patch("api.src.routers.competition_hub._fetch_competition_historical_scorers_fallback")
     @patch("api.src.routers.competition_hub._fetch_competition_historical_stats")

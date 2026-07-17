@@ -595,14 +595,74 @@ def _search_matches(
     normalized_query = _normalize_search_query(query)
     search_pattern = f"%{_escape_like(normalized_query)}%"
     prefix_pattern = f"{_escape_like(normalized_query)}%"
-    normalized_competition_name = _normalized_sql("dc.league_name")
-    normalized_home_team_name = _normalized_sql("home_team.team_name")
-    normalized_away_team_name = _normalized_sql("away_team.team_name")
+    match_id_query = int(normalized_query) if normalized_query.isdigit() else None
+    candidate_limit = max(limit_per_type * 4, 20)
     has_preferred_competition = len(preferred_competition_ids) > 0
 
     rows = db_client.fetch_all(
         f"""
-        with matched_matches as (
+        with matched_teams as (
+            select
+                dt.team_id,
+                case
+                    when {_normalized_sql("dt.team_name")} = %s then 1
+                    when {_normalized_sql("dt.team_name")} like %s escape '\\' then 2
+                    else 5
+                end as search_rank
+            from mart.dim_team dt
+            where {_normalized_sql("dt.team_name")} like %s escape '\\'
+        ),
+        matched_competitions as (
+            select distinct on (dc.league_id)
+                dc.league_id,
+                case
+                    when {_normalized_sql("dc.league_name")} = %s then 3
+                    when {_normalized_sql("dc.league_name")} like %s escape '\\' then 4
+                    else 5
+                end as search_rank
+            from mart.dim_competition dc
+            where dc.league_id = any(%s)
+              and {_normalized_sql("dc.league_name")} like %s escape '\\'
+            order by dc.league_id, search_rank
+        ),
+        candidate_matches as (
+            select fm.match_id, 0 as search_rank
+            from mart.fact_matches fm
+            where %s::bigint is not null
+              and fm.match_id = %s
+
+            union all
+
+            select fm.match_id, mt.search_rank
+            from matched_teams mt
+            inner join mart.fact_matches fm on fm.home_team_id = mt.team_id
+            where fm.league_id = any(%s)
+
+            union all
+
+            select fm.match_id, mt.search_rank
+            from matched_teams mt
+            inner join mart.fact_matches fm on fm.away_team_id = mt.team_id
+            where fm.league_id = any(%s)
+
+            union all
+
+            select fm.match_id, mc.search_rank
+            from matched_competitions mc
+            cross join lateral (
+                select fm.match_id
+                from mart.fact_matches fm
+                where fm.league_id = mc.league_id
+                order by fm.date_day desc nulls last, fm.match_id desc
+                limit %s
+            ) fm
+        ),
+        ranked_candidates as (
+            select match_id, min(search_rank) as search_rank
+            from candidate_matches
+            group by match_id
+        ),
+        matched_matches as (
             select
                 fm.match_id,
                 fm.league_id,
@@ -617,15 +677,7 @@ def _search_matches(
                 away_team.team_name as away_team_name,
                 fm.home_goals as home_score,
                 fm.away_goals as away_score,
-                case
-                    when fm.match_id::text = %s then 0
-                    when {normalized_home_team_name} = %s or {normalized_away_team_name} = %s then 1
-                    when {normalized_home_team_name} like %s escape '\\'
-                      or {normalized_away_team_name} like %s escape '\\' then 2
-                    when {normalized_competition_name} = %s then 3
-                    when {normalized_competition_name} like %s escape '\\' then 4
-                    else 5
-                end as search_rank,
+                candidates.search_rank,
                 case
                     when %s::boolean
                       and %s::int is not null
@@ -637,7 +689,8 @@ def _search_matches(
                       and fm.season = %s then 2
                     else 3
                 end as context_priority
-            from mart.fact_matches fm
+            from ranked_candidates candidates
+            inner join mart.fact_matches fm on fm.match_id = candidates.match_id
             left join raw.fixtures rf
               on rf.fixture_id = fm.match_id
             left join mart.dim_competition dc
@@ -646,13 +699,6 @@ def _search_matches(
               on home_team.team_id = fm.home_team_id
             left join mart.dim_team away_team
               on away_team.team_id = fm.away_team_id
-            where fm.league_id = any(%s)
-              and (
-                fm.match_id::text = %s
-                or {normalized_home_team_name} like %s escape '\\'
-                or {normalized_away_team_name} like %s escape '\\'
-                or {normalized_competition_name} like %s escape '\\'
-              )
         )
         select
             match_id,
@@ -678,25 +724,25 @@ def _search_matches(
         """,
         [
             normalized_query,
-            normalized_query,
-            normalized_query,
             prefix_pattern,
-            prefix_pattern,
+            search_pattern,
             normalized_query,
             prefix_pattern,
-            has_preferred_competition,
-            preferred_season_id,
-            list(preferred_competition_ids),
-            preferred_season_id,
-            has_preferred_competition,
-            list(preferred_competition_ids),
-            preferred_season_id,
-            preferred_season_id,
             list(SUPPORTED_COMPETITION_SOURCE_IDS),
-            normalized_query,
             search_pattern,
-            search_pattern,
-            search_pattern,
+            match_id_query,
+            match_id_query,
+            list(SUPPORTED_COMPETITION_SOURCE_IDS),
+            list(SUPPORTED_COMPETITION_SOURCE_IDS),
+            candidate_limit,
+            has_preferred_competition,
+            preferred_season_id,
+            list(preferred_competition_ids),
+            preferred_season_id,
+            has_preferred_competition,
+            list(preferred_competition_ids),
+            preferred_season_id,
+            preferred_season_id,
             limit_per_type,
         ],
     )

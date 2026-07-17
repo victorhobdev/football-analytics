@@ -13,6 +13,17 @@ class TeamsApiTests(unittest.TestCase):
         self.client = TestClient(app)
 
     @patch("api.src.routers.teams.db_client.fetch_all")
+    def test_default_team_list_uses_serving_summary(self, fetch_all_mock) -> None:
+        fetch_all_mock.return_value = []
+
+        response = self.client.get("/api/v1/teams")
+
+        self.assertEqual(response.status_code, 200)
+        query = fetch_all_mock.call_args.args[0]
+        self.assertIn("mart.team_serving_summary", query)
+        self.assertNotIn("mart.fact_matches", query)
+
+    @patch("api.src.routers.teams.db_client.fetch_all")
     def test_team_search_filters_both_match_branches_before_aggregation(self, fetch_all_mock) -> None:
         fetch_all_mock.return_value = []
 

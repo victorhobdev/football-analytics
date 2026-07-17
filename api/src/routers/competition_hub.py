@@ -1402,7 +1402,17 @@ def _empty_historical_stats_payload(as_of_year: int) -> dict[str, Any]:
 def _fetch_competition_historical_stats(competition_key: str, as_of_year: int) -> list[dict[str, Any]]:
     return db_client.fetch_all(
         """
-        with competition_lookup as (
+        with target_player_names as (
+            select distinct
+                regexp_replace(lower(trim(h.entity_name)), '\\s+', ' ', 'g') as normalized_player_name
+            from mart.competition_historical_stats h
+            where h.competition_key = %s
+              and h.as_of_year = %s
+              and h.entity_type = 'player'
+              and h.entity_id is null
+              and coalesce(trim(h.entity_name), '') <> ''
+        ),
+        competition_lookup as (
             select
                 dc.competition_sk,
                 min(ds.competition_key) as competition_key
@@ -1431,6 +1441,8 @@ def _fetch_competition_historical_stats(competition_key: str, as_of_year: int) -
                     (count(distinct pms.match_id) filter (where cl.competition_key = %s))::int as competition_matches,
                     max(pms.match_date) filter (where cl.competition_key = %s) as last_match_date
                 from mart.dim_player dp
+                join target_player_names tpn
+                  on tpn.normalized_player_name = regexp_replace(lower(trim(dp.player_name)), '\\s+', ' ', 'g')
                 left join mart.player_match_summary pms
                   on pms.player_id = dp.player_id
                  and pms.season <= %s
@@ -1514,7 +1526,15 @@ def _fetch_competition_historical_stats(competition_key: str, as_of_year: int) -
           r.value_numeric desc nulls last,
           r.entity_name nulls last;
         """,
-        [competition_key, competition_key, as_of_year, competition_key, as_of_year],
+        [
+            competition_key,
+            as_of_year,
+            competition_key,
+            competition_key,
+            as_of_year,
+            competition_key,
+            as_of_year,
+        ],
     )
 
 

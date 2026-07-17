@@ -15,6 +15,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 ]);
 const CACHEABLE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 const NO_STORE_CACHE_CONTROL = "no-store";
+const BFF_REVALIDATE_SECONDS = 86_400;
 
 function resolveBffOrigin(): string | null {
   const origin = process.env.FOOTBALL_BFF_ORIGIN?.trim() ?? process.env.BFF_ORIGIN?.trim();
@@ -79,11 +80,13 @@ async function proxyBffRequest(
   const cacheable = isCacheableRequest(request, path);
   const fetchOptions: RequestInit = {
     method,
-    headers: buildProxyHeaders(request),
+    headers: cacheable ? { Accept: "application/json" } : buildProxyHeaders(request),
     body,
     redirect: "manual",
-    cache: "no-store",
-    signal: request.signal,
+    cache: cacheable ? "force-cache" : "no-store",
+    ...(cacheable
+      ? { next: { revalidate: BFF_REVALIDATE_SECONDS } }
+      : { signal: request.signal }),
   };
 
   const upstreamResponse = await fetch(targetUrl, fetchOptions);

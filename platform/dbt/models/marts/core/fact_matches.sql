@@ -1,5 +1,15 @@
+{% set serving_indexes = [
+    {'columns': ['match_id'], 'type': 'btree'},
+    {'columns': ['league_id', 'season', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+    {'columns': ['league_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+    {'columns': ['competition_key', 'season_label', 'stage_id', 'round_id'], 'type': 'btree'},
+    {'columns': ['home_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+    {'columns': ['away_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
+    {'columns': ['league_id', 'season', 'round_number'], 'type': 'btree'},
+    {'columns': ['competition_key', 'date_day', 'season_label', 'provider'], 'type': 'btree'}
+] %}
 {% if var('canonical_snapshot_schema', '') %}
-{{ config(materialized='table') }}
+{{ config(materialized='table', indexes=serving_indexes) }}
 select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches
 {% else %}
 -- depends_on: {{ ref('competition_season_config') }}
@@ -8,14 +18,7 @@ select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches
     materialized='incremental',
     unique_key='match_id',
     on_schema_change='sync_all_columns',
-    indexes=[
-        {'columns': ['match_id'], 'type': 'btree'},
-        {'columns': ['league_id', 'season', 'date_day desc', 'match_id desc'], 'type': 'btree'},
-        {'columns': ['competition_key', 'season_label', 'stage_id', 'round_id'], 'type': 'btree'},
-        {'columns': ['home_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
-        {'columns': ['away_team_id', 'date_day desc', 'match_id desc'], 'type': 'btree'},
-        {'columns': ['league_id', 'season', 'round_number'], 'type': 'btree'}
-    ]
+    indexes=serving_indexes
 ) }}
 {% set lookback_hours = var('fact_matches_incremental_lookback_hours', 24) %}
 

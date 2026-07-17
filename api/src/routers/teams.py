@@ -211,6 +211,41 @@ def get_teams(
     }[sortBy]
     sort_dir = "asc" if sortDirection == "asc" else "desc"
 
+    use_serving_summary = (
+        global_filters.competition_id is None
+        and global_filters.season_id is None
+        and global_filters.round_id is None
+        and global_filters.stage_id is None
+        and global_filters.stage_format is None
+        and global_filters.venue == VenueFilter.all
+        and global_filters.last_n is None
+        and global_filters.date_start is None
+        and global_filters.date_end is None
+        and search_pattern is None
+    )
+
+    if use_serving_summary:
+        rows = db_client.fetch_all(
+            f"""
+            with ranked as (
+                select
+                    tss.*,
+                    row_number() over (
+                        order by tss.points desc, tss.goal_diff desc, tss.goals_for desc, tss.team_name asc
+                    )::int as position,
+                    count(*) over()::int as total_teams
+                from mart.team_serving_summary tss
+            )
+            select r.*, count(*) over()::int as _total_count
+            from ranked r
+            order by {sort_column} {sort_dir}, r.team_id asc
+            limit %s offset %s;
+            """,
+            [pageSize, offset],
+        )
+    else:
+        rows = None
+
     home_branch = f"""
         select
             fm.home_team_id as team_id,
@@ -311,16 +346,17 @@ def get_teams(
         order by {sort_column} {sort_dir}, r.team_id asc
         limit %s offset %s;
     """
-    rows = db_client.fetch_all(
-        query,
-        [
-            *team_rows_params,
-            global_filters.last_n,
-            global_filters.last_n,
-            pageSize,
-            offset,
-        ],
-    )
+    if rows is None:
+        rows = db_client.fetch_all(
+            query,
+            [
+                *team_rows_params,
+                global_filters.last_n,
+                global_filters.last_n,
+                pageSize,
+                offset,
+            ],
+        )
     total_count = int(rows[0]["_total_count"]) if rows else 0
     pagination = build_pagination(page, pageSize, total_count)
     coverage = (
