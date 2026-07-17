@@ -1,97 +1,95 @@
 # Football Analytics
 
-[**Acessar a aplicação**](https://football.victorhob.me/) · [Power BI](https://football.victorhob.me/analises) · [Documentação](docs/GUIA_MESTRE_APLICACAO.md)
+## Apresentação
 
-[![CI](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml)
-![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+Plataforma de dados que consolida décadas de futebol em um acervo navegável de competições, temporadas, partidas, jogadores, transferências e análises.
 
-Integra dados históricos de futebol provenientes de APIs e arquivos, organiza-os em uma camada analítica e os disponibiliza em uma aplicação web e no Power BI. O acervo publicado reúne **62 competições**, **861 temporadas**, **248,9 mil partidas** e **32,5 mil jogadores**.
+[**Acessar a aplicação**](https://football.victorhob.me/) · [Power BI](https://football.victorhob.me/analises)  · [![CI](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml)
 
-![Visão geral da Home do Football Analytics](docs/assets/readme/home-overview.png)
+| Competições | Temporadas | Partidas | Jogadores |
+| ---: | ---: | ---: | ---: |
+| **62** | **861** | **248,9 mil** | **32,5 mil** |
 
-## Plataforma
+![Home do Football Analytics](docs/assets/readme/home-overview.png)
 
-### Análises no Power BI
+## Explore o acervo
 
-Rankings, comparações, desempenho e cobertura do acervo em um relatório público incorporado à aplicação.
-
-![Ranking de jogadores no Power BI](docs/assets/readme/powerbi-player-rankings.png)
-
-### Explore a plataforma
-
-O catálogo em cards resume a cobertura das principais competições e conduz às temporadas disponíveis.
-
-![Competições apresentadas em cards](docs/assets/readme/competitions-cards.png)
-
-O arquivo da Copa do Mundo percorre 22 edições, com campeão, país-sede, seleções e partidas por edição.
+Navegue por competições e temporadas, consulte jogadores e times, compare desempenhos e explore transferências. O arquivo da Copa do Mundo reúne 22 edições, de 1930 a 2022.
 
 ![Arquivo histórico da Copa do Mundo](docs/assets/readme/world-cup-archive.png)
 
-O catálogo completo reúne competições, regiões, tipos, temporadas e última edição publicada.
+<details>
+<summary>Ver mais telas da aplicação</summary>
+
+**Competições em destaque**
+
+![Competições apresentadas em cards](docs/assets/readme/competitions-cards.png)
+
+**Catálogo completo**
 
 ![Catálogo completo de competições](docs/assets/readme/competitions-catalog.png)
 
-O mercado permite filtrar transferências por jogador, clube, tipo, direção e valor.
+**Mercado de transferências**
 
 ![Mercado de transferências](docs/assets/readme/transfer-market.png)
 
-## Engenharia de dados
+</details>
+
+## Análises no Power BI
+
+O relatório público reúne rankings, desempenho e comparações, com filtros por competição, temporada, período e time.
+
+![Ranking de jogadores no Power BI](docs/assets/readme/powerbi-player-rankings.png)
+
+## Do dado ao produto
 
 ```mermaid
 flowchart LR
     A[APIs e arquivos] --> B[Airflow]
-    B --> C[MinIO e PostgreSQL]
-    C --> D[dbt / camada analítica]
-    D --> E[dbt tests e Great Expectations]
+    B --> C[PostgreSQL e MinIO]
+    C --> D[dbt]
+    D --> E[Camada analítica]
     E --> F[FastAPI]
-    E --> G[Power BI]
-    F --> H[Aplicação Next.js]
+    F --> G[Aplicação Next.js]
+    E --> H[Snapshots analíticos]
+    H --> I[Power BI]
+    J[dbt tests e Great Expectations] -. validam .-> C
+    J -. validam .-> E
 ```
 
-O Airflow ingere APIs e arquivos em armazenamento de objetos e PostgreSQL; o dbt transforma esses dados em modelos analíticos, validados antes do consumo. A FastAPI serve a aplicação web, enquanto snapshots da camada `mart` alimentam o Power BI. A ingestão implementa escopos incrementais e de backfill, upserts idempotentes, retries e registro de execução; as DAGs atuais são acionadas manualmente.
+O Airflow ingere APIs e arquivos; PostgreSQL e MinIO preservam os dados até a modelagem analítica com dbt. A mesma camada curada abastece a FastAPI e os snapshots do Power BI, com validações antes do consumo.
 
-- **Ingestão e orquestração:** Airflow, provedores configuráveis, incrementalidade, retry e reprocessamento.
-- **Dados e qualidade:** MinIO, PostgreSQL, dbt, testes SQL e Great Expectations.
-- **Consumo:** FastAPI, aplicação Next.js e Power BI versionado em PBIP/PBIR.
+**Stack:** Python, Airflow, PostgreSQL, MinIO, dbt, Great Expectations, FastAPI, Next.js, React, TypeScript, Power BI, Docker e GitHub Actions.
 
-## Qualidade e operação
+- Ingestão incremental ou por backfill, com retries e registro de execução.
+- Upserts para reexecução idempotente no PostgreSQL.
+- Modelagem dimensional e marts com dbt.
+- Testes dbt e Great Expectations sobre dados brutos e analíticos.
 
-| Evidência versionada | Estado atual |
-| --- | ---: |
-| Testes Python coletados | 93 |
-| Modelos dbt | 104 |
-| Testes SQL singulares dbt | 50 |
-| Expectativas Great Expectations | 76 |
-| Acervo publicado | 62 competições · 861 temporadas |
-| Volume publicado | 248,9 mil partidas · 32,5 mil jogadores |
+A CI executa testes Python, parse do dbt, validação do Compose, typecheck/build do frontend e verificações estruturais do Power BI. A aplicação publicada roda em containers em uma VM OCI; DAGs, atualização do acervo e refresh/publicação do Power BI são acionados manualmente.
 
-A CI automatiza testes Python, parse do dbt, validação do Compose, typecheck/build do frontend e validação estrutural do Power BI. A aplicação é publicada em uma VM OCI com containers e proxy HTTPS; atualização de dados, DAGs e refresh/publicação do Power BI permanecem operações manuais. O ambiente local depende de `.env` e dos snapshots privados de serving/deltas descritos no script de inicialização.
+## Executar localmente
 
-## Execução local
-
-Pré-requisitos: Docker Desktop, PowerShell e os artefatos privados esperados em `artifacts/`.
+Requer Docker Desktop e PowerShell. Copie a configuração, preencha as variáveis locais e inicie:
 
 ```powershell
 Copy-Item .env.example .env
-# Preencha .env sem versionar credenciais.
 .\start-local.ps1
 ```
 
-A aplicação fica em `http://localhost:3001`. Valide a configuração antes de iniciar:
+Aplicação: `http://localhost:3001`
+
+Validação da configuração:
 
 ```powershell
 docker compose --env-file .env.example config --quiet
 ```
 
-Consulte o [guia de deploy e execução](deploy/oci/README.md) para dependências e operação detalhadas.
+O ambiente completo também usa artefatos de dados não versionados. Consulte o [guia de execução e deploy](deploy/oci/README.md) e o [script de inicialização](tools/start-local.ps1).
 
-## Documentação complementar
+## Documentação
 
-- [Visão geral da aplicação e arquitetura](docs/GUIA_MESTRE_APLICACAO.md)
-- [Power BI e fluxo analítico](docs/bi/README.md)
-- [Contrato do modelo analítico](docs/bi/MODELO_PUBLICO.md)
-- [Qualidade e limitações conhecidas](docs/bi/QUALIDADE_E_LIMITACOES.md)
-- [Refresh manual do Power BI](docs/bi/REFRESH_MANUAL.md)
-- [Deploy em OCI](deploy/oci/README.md)
-- [Gates de testes e CI](.github/workflows/ci.yml)
+- **Visão geral e arquitetura:** [guia da aplicação](docs/GUIA_MESTRE_APLICACAO.md)
+- **Modelo analítico e Power BI:** [modelo público](docs/bi/MODELO_PUBLICO.md) · [Power BI](docs/bi/README.md)
+- **Qualidade e limitações:** [qualidade do BI](docs/bi/QUALIDADE_E_LIMITACOES.md)
+- **Execução e deploy:** [refresh do Power BI](docs/bi/REFRESH_MANUAL.md) · [deploy em OCI](deploy/oci/README.md)
