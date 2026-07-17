@@ -3,23 +3,23 @@
   "tables": {
     "FactMatch": {
       "rows": 259872,
-      "bytes": 3143327,
-      "sha256": "15aedd203e186d88ed0988baa117c104b474a7f293a9802f411c7e12eeba644e"
+      "bytes": 3172061,
+      "sha256": "248cc69e79be0662ebd45f3400459a597620a7ccfec2952d72f719cd810d113a"
     },
     "FactTeamMatch": {
       "rows": 519734,
-      "bytes": 6593276,
-      "sha256": "dfaf57e9cd0e678d6804382df843c6dbf1b448440c910e76465c53049c3330a7"
+      "bytes": 6592740,
+      "sha256": "d660ef99c0f296181dcfac85adbaebe74c62d3a9a3ca722047a5ea27746c9f80"
     },
     "FactPlayerMatch": {
       "rows": 607096,
-      "bytes": 16844704,
-      "sha256": "4be57c627f8a0a63717949b98889d0fcb1fa6d0285aec6a1b98928777692c8ed"
+      "bytes": 16726672,
+      "sha256": "e66952352def37df1428d858c504dc9821a669a0ae9d7280527a7240a364461f"
     },
     "DimScope": {
       "rows": 1004,
-      "bytes": 20824,
-      "sha256": "282d26a0858f19d06c707b1b29c6cdf655adcbc64eb64cf97ecfd8a5a83cff32"
+      "bytes": 20886,
+      "sha256": "e0394cec60731893ad42bbb155810b8363495fee6328f6e835fcfc54620a98cf"
     },
     "DimDate": {
       "rows": 35023,

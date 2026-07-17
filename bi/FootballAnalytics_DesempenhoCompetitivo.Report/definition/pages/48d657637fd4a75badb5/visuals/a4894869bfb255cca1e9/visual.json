@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "a4894869bfb255cca1e9",
   "position": {
     "x": 20,
@@ -297,17 +297,6 @@
       "grid": [
         {
           "properties": {
-            "gridColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#D8E3FB'"
-                    }
-                  }
-                }
-              }
-            },
             "rowPadding": {
               "expr": {
                 "Literal": {

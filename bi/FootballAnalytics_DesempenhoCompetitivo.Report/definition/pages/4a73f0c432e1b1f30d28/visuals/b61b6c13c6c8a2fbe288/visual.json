@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "b61b6c13c6c8a2fbe288",
   "position": {
     "x": 20,
@@ -273,5 +273,93 @@
         }
       ]
     }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f2a0d71b7ab959f526e2",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Partidas"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "8b89d41a99d7bb13ed80",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Times"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "51a7cbb9a6a9bf5be898",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Gols Totais"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "15e1a16be4d52fd9f751",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Gols por Partida"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "597396e82ad60ebebef5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Cobertura de Placar %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e3517a4aaa51d057598c",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Dados disponíveis até"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

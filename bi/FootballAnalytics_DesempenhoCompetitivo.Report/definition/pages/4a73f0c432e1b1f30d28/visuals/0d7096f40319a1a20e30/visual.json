@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "0d7096f40319a1a20e30",
   "position": {
     "x": 20,
@@ -27,25 +27,8 @@
                 }
               },
               "queryRef": "DimTeam.Time",
-              "nativeQueryRef": "Time"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Pontos"
-                }
-              },
-              "queryRef": "Medidas.Pontos",
-              "nativeQueryRef": "Pontos"
+              "nativeQueryRef": "Time",
+              "active": true
             }
           ]
         },
@@ -92,6 +75,24 @@
               },
               "queryRef": "Medidas.PPG Últimos 5",
               "nativeQueryRef": "PPG Últimos 5"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Pontos"
+                }
+              },
+              "queryRef": "Medidas.Pontos",
+              "nativeQueryRef": "Pontos"
             }
           ]
         }

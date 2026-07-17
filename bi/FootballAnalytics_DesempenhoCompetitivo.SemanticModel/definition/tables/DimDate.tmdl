@@ -9,6 +9,8 @@ table DimDate
 		summarizeBy: none
 		sourceColumn: date_day
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Ano
 		dataType: int64
 		formatString: 0
@@ -38,3 +40,4 @@ table DimDate
 				    Source
 
 	annotation PBI_ResultType = Table
+

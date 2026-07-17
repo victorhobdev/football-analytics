@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "80c681922db35d2aecc7",
   "position": {
     "x": 825,
@@ -27,39 +27,8 @@
                 }
               },
               "queryRef": "DimTeam.Time",
-              "nativeQueryRef": "Time"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Conversão de Finalizações %"
-                }
-              },
-              "queryRef": "Medidas.Conversão de Finalizações %",
-              "nativeQueryRef": "Conversão de Finalizações %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Precisão de Finalização %"
-                }
-              },
-              "queryRef": "Medidas.Precisão de Finalização %",
-              "nativeQueryRef": "Precisão de Finalização %"
+              "nativeQueryRef": "Time",
+              "active": true
             }
           ]
         },
@@ -92,6 +61,38 @@
               },
               "queryRef": "Medidas.Cobertura Estatísticas de Time %",
               "nativeQueryRef": "Cobertura Estatísticas de Time %"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Conversão de Finalizações %"
+                }
+              },
+              "queryRef": "Medidas.Conversão de Finalizações %",
+              "nativeQueryRef": "Conversão de Finalizações %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Precisão de Finalização %"
+                }
+              },
+              "queryRef": "Medidas.Precisão de Finalização %",
+              "nativeQueryRef": "Precisão de Finalização %"
             }
           ]
         }

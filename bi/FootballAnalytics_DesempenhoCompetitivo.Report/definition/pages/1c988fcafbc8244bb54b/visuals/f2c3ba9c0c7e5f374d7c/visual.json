@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "f2c3ba9c0c7e5f374d7c",
   "position": {
     "x": 920,
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "DimTeam.Time",
-              "nativeQueryRef": "Time"
+              "nativeQueryRef": "Time",
+              "active": true
             }
           ]
         }

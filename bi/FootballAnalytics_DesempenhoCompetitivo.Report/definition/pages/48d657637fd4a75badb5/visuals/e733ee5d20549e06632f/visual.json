@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "e733ee5d20549e06632f",
   "position": {
     "x": 835,
@@ -27,25 +27,8 @@
                 }
               },
               "queryRef": "DimPlayer.Jogador",
-              "nativeQueryRef": "Jogador"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Medidas"
-                    }
-                  },
-                  "Property": "Participações por 90 (900+ min)"
-                }
-              },
-              "queryRef": "Medidas.Participações por 90 (900+ min)",
-              "nativeQueryRef": "Participações por 90 (900+ min)"
+              "nativeQueryRef": "Jogador",
+              "active": true
             }
           ]
         },
@@ -92,6 +75,24 @@
               },
               "queryRef": "Medidas.Cobertura de Minutos %",
               "nativeQueryRef": "Cobertura de Minutos %"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Participações por 90 (900+ min)"
+                }
+              },
+              "queryRef": "Medidas.Participações por 90 (900+ min)",
+              "nativeQueryRef": "Participações por 90 (900+ min)"
             }
           ]
         }

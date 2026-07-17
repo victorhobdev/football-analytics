@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "70a7495bb13b6a3120df",
   "position": {
     "x": 20,
@@ -287,5 +287,107 @@
         }
       ]
     }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "5986140dce9031a12af3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Jogos do Time"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "f1f401b2f66f292b6f6e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Pontos"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "0caec91b628b54971c82",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "PPG"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "19e046e83dc2c9f1a720",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "PPG Últimos 5"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "4d7e32fa5d5b9cdadb19",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Delta Forma 5 Jogos"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "b973b41ef8f5707f0876",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Conversão de Finalizações %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "21f19478fcd4d4fc7cb5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Medidas"
+              }
+            },
+            "Property": "Cobertura Estatísticas de Time %"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

@@ -36,3 +36,4 @@ relationship 10000000-0000-0000-0000-000000000008
 relationship 10000000-0000-0000-0000-000000000009
 	fromColumn: FactPlayerMatch.player_sk
 	toColumn: DimPlayer.player_sk
+

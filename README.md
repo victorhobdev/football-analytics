@@ -1,151 +1,97 @@
 # Football Analytics
 
-Projeto de análise de dados aplicado a futebol: ingestão e transformação de dados públicos, modelo dimensional, reconciliação SQL × DAX, Power BI versionável e uma aplicação web para exploração do domínio.
+[**Acessar a aplicação**](https://football.victorhob.me/) · [Power BI](https://football.victorhob.me/analises) · [Documentação](docs/GUIA_MESTRE_APLICACAO.md)
 
-![Football Analytics - página inicial](frontend/public/readme/home.jpg)
+[![CI](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/victorhobdev/football-analytics/actions/workflows/ci.yml)
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 
-## Pergunta do projeto
+Integra dados históricos de futebol provenientes de APIs e arquivos, organiza-os em uma camada analítica e os disponibiliza em uma aplicação web e no Power BI. O acervo publicado reúne **62 competições**, **861 temporadas**, **248,9 mil partidas** e **32,5 mil jogadores**.
 
-Como transformar fontes heterogêneas de resultados e estatísticas de futebol em análises comparáveis sem ocultar ausência de dados, misturar provedores ou apresentar agregações como classificações oficiais?
+![Visão geral da Home do Football Analytics](docs/assets/readme/home-overview.png)
 
-## Entrega analítica
+## Plataforma
 
-- Modelo estrela com fatos de partidas, times por partida e jogadores por partida.
-- Dimensões conformadas de data, escopo, time e jogador.
-- Snapshots Parquet gerados apenas a partir da camada `mart.*` curada.
-- Consultas SQL independentes para cobertura e reconciliação.
-- Modelo TMDL com 73 medidas DAX e limites explícitos de amostra.
-- Relatório PBIR com seis páginas públicas, duas páginas ocultas de drill-through e layout móvel.
-- Estudo estatístico reproduzível em Python e caso de performance com SQL avançado.
-- Power BI público integrado em `/analises`.
-- Catálogos, partidas, classificações oficiais e perfis preservados na aplicação Next.js.
+### Análises no Power BI
 
-## Snapshot validado
+Rankings, comparações, desempenho e cobertura do acervo em um relatório público incorporado à aplicação.
 
-| Evidência | Valor |
-| --- | ---: |
-| Partidas | 259.872 |
-| Linhas time–partida | 519.734 |
-| Linhas jogador–partida | 607.096 |
-| Escopos fonte–competição–temporada | 1.004 |
-| Cobertura de placar | 99,998% |
-| Cobertura de estatísticas de times | 5,43% |
-| Cobertura de notas de jogadores | 67,63% |
-| Cobertura de minutos | 71,62% |
+![Ranking de jogadores no Power BI](docs/assets/readme/powerbi-player-rankings.png)
 
-Os percentuais são evidências do snapshot de 2026-07-12, não promessas para atualizações futuras.
+### Explore a plataforma
 
-## Power BI
+O catálogo em cards resume a cobertura das principais competições e conduz às temporadas disponíveis.
 
-As seis páginas visíveis cobrem:
+![Competições apresentadas em cards](docs/assets/readme/competitions-cards.png)
 
-1. Resumo executivo orientado a decisão.
-2. Panorama do acervo.
-3. Benchmark e eficiência de times.
-4. Forma recente e mando observado.
-5. Produção e eficiência de jogadores.
-6. Cobertura e confiabilidade.
+O arquivo da Copa do Mundo percorre 22 edições, com campeão, país-sede, seleções e partidas por edição.
 
-Times e jogadores possuem páginas de drill-through. Conversão de finalizações só aparece com pelo menos 95% de cobertura e 50 finalizações; métricas por 90 exigem 900 minutos.
+![Arquivo histórico da Copa do Mundo](docs/assets/readme/world-cup-archive.png)
 
-Abra o projeto versionável em [`bi/FootballAnalytics_DesempenhoCompetitivo.pbip`](bi/FootballAnalytics_DesempenhoCompetitivo.pbip) ou consulte a [documentação do BI](docs/bi/README.md).
+O catálogo completo reúne competições, regiões, tipos, temporadas e última edição publicada.
 
-## Exemplo reconciliado — La Liga 2024/25
+![Catálogo completo de competições](docs/assets/readme/competitions-catalog.png)
 
-- Barcelona: 88 pontos em 38 jogos, 2,3158 PPG.
-- Real Madrid: 84 pontos em 38 jogos, 2,2105 PPG.
-- Barcelona: 102 gols em 677 finalizações, conversão de 15,07% no recorte coberto.
-- Alexander Sørloth: 20 gols em 1.559 minutos, 1,1546 gol por 90.
+O mercado permite filtrar transferências por jogador, clube, tipo, direção e valor.
 
-As consultas que sustentam esses valores estão em [`bi/validation`](bi/validation).
+![Mercado de transferências](docs/assets/readme/transfer-market.png)
 
-## Cases de Python e SQL
+## Engenharia de dados
 
-- [A vantagem de jogar em casa diminuiu?](analysis/home_advantage.py): pandas, exploração, intervalos de confiança, Welch, Hedges g e controle por competição sobre 207.770 partidas.
-- [Forma recente e posição relativa em SQL](analysis/sql/team_form_performance.sql): `LAG`, `LEAD`, janelas, percentis, `RANK`, `EXPLAIN ANALYZE` e benchmark antes/depois.
-- [Performance e arquitetura do Power BI](docs/bi/PERFORMANCE_E_ARQUITETURA.md): evidências do Performance Analyzer e DAX Studio, acessibilidade e decisão entre Import, DirectQuery e Direct Lake.
-
-## Limitações declaradas
-
-- Não há xG; conversão de finalizações não representa qualidade da chance.
-- A classificação DAX não implementa desempates oficiais, deduções ou regulamentos eliminatórios.
-- Notas de provedores diferentes não são tratadas como uma escala única.
-- Publicar na Web não aceita pré-filtros por URL. A aplicação preserva o contexto solicitado e orienta a seleção manual no relatório público.
-- O refresh do Power BI é manual nesta fase.
-
-## Arquitetura
-
-```text
-Fontes públicas
-      ↓
-PostgreSQL → dbt / camada mart → validações SQL
-      ↓
-Snapshots Parquet → Power Query → modelo TMDL / DAX → Power BI
-      ↓
-FastAPI / BFF → Next.js para catálogo, partidas e perfis
+```mermaid
+flowchart LR
+    A[APIs e arquivos] --> B[Airflow]
+    B --> C[MinIO e PostgreSQL]
+    C --> D[dbt / camada analítica]
+    D --> E[dbt tests e Great Expectations]
+    E --> F[FastAPI]
+    E --> G[Power BI]
+    F --> H[Aplicação Next.js]
 ```
 
-## Fluxo e dependências externas
+O Airflow ingere APIs e arquivos em armazenamento de objetos e PostgreSQL; o dbt transforma esses dados em modelos analíticos, validados antes do consumo. A FastAPI serve a aplicação web, enquanto snapshots da camada `mart` alimentam o Power BI. A ingestão implementa escopos incrementais e de backfill, upserts idempotentes, retries e registro de execução; as DAGs atuais são acionadas manualmente.
 
-1. As DAGs de ingestão consultam provedores configurados e gravam dados brutos; esse estágio exige rede, credenciais dos provedores e PostgreSQL/MinIO.
-2. dbt transforma os dados em `mart.*`; a API FastAPI/BFF lê as tabelas de serving e o Next.js apresenta catálogo, partidas e perfis.
-3. O exportador de snapshots lê `mart.*` e grava Parquet; o Power BI Desktop atualiza o PBIP na ordem descrita em [`docs/bi/REFRESH_MANUAL.md`](docs/bi/REFRESH_MANUAL.md).
-4. A publicação no serviço do Power BI e a URL pública dependem de conta autorizada, navegador e rede; não fazem parte da verificação offline.
+- **Ingestão e orquestração:** Airflow, provedores configuráveis, incrementalidade, retry e reprocessamento.
+- **Dados e qualidade:** MinIO, PostgreSQL, dbt, testes SQL e Great Expectations.
+- **Consumo:** FastAPI, aplicação Next.js e Power BI versionado em PBIP/PBIR.
 
-O `start-local.ps1` exige Docker, `.env`, as imagens/serviços do Compose e os artefatos locais `artifacts/football_serving_20260426.dump` e `artifacts/wc_delta_20260426.tgz`. Ele restaura o serving, executa materializações locais e sobe PostgreSQL, MinIO, Metabase, Airflow, API e frontend; esses artefatos não são versionados.
+## Qualidade e operação
 
-## Stack
+| Evidência versionada | Estado atual |
+| --- | ---: |
+| Testes Python coletados | 93 |
+| Modelos dbt | 104 |
+| Testes SQL singulares dbt | 50 |
+| Expectativas Great Expectations | 76 |
+| Acervo publicado | 62 competições · 861 temporadas |
+| Volume publicado | 248,9 mil partidas · 32,5 mil jogadores |
 
-Next.js 15 · React 19 · TypeScript · FastAPI · PostgreSQL · Airflow · dbt · Power BI · Power Query · DAX · PBIP/PBIR
+A CI automatiza testes Python, parse do dbt, validação do Compose, typecheck/build do frontend e validação estrutural do Power BI. A aplicação é publicada em uma VM OCI com containers e proxy HTTPS; atualização de dados, DAGs e refresh/publicação do Power BI permanecem operações manuais. O ambiente local depende de `.env` e dos snapshots privados de serving/deltas descritos no script de inicialização.
 
-## Executar localmente
+## Execução local
 
-Para validar a configuração sem expor credenciais:
+Pré-requisitos: Docker Desktop, PowerShell e os artefatos privados esperados em `artifacts/`.
 
 ```powershell
 Copy-Item .env.example .env
-docker compose --env-file .env.example config --quiet
-```
-
-Para subir o ambiente local completo no Windows:
-
-```powershell
+# Preencha .env sem versionar credenciais.
 .\start-local.ps1
 ```
 
-Aplicação: `http://localhost:3001`
-
-Power BI integrado: `http://localhost:3001/analises`
-
-O `start-local.ps1` exige o `.env` local e snapshots de serving/deltas em `artifacts/`. Esses artefatos não são versionados; portanto, esse caminho ainda não é um clone limpo completo.
-
-## Verificação reproduzível offline
-
-Os comandos abaixo reutilizam os mesmos gates da CI, não chamam APIs de provedores nem exigem API paga. Eles validam os reprodutores Python de primeira carga, segunda execução sem duplicação, falha, retry e reprocessamento; parse do dbt; configuração do Compose; estrutura do BI; e typecheck/build do frontend:
-
-Defina o mesmo caminho de importação usado pela CI antes do primeiro comando:
+A aplicação fica em `http://localhost:3001`. Valide a configuração antes de iniciar:
 
 ```powershell
-$env:PYTHONPATH = ".;api;infra/airflow/dags"
-```
-
-Em shells POSIX, use `export PYTHONPATH=.:api:infra/airflow/dags`.
-
-```text
-python -m pytest -q -p no:cacheprovider api/tests tests
-dbt parse --project-dir platform/dbt --profiles-dir platform/dbt --no-partial-parse
 docker compose --env-file .env.example config --quiet
-python -m unittest -v bi.scripts.test_validate_artifacts
-python bi/scripts/validate_artifacts.py bi
-pnpm --dir frontend install --frozen-lockfile
-pnpm --dir frontend run typecheck
-pnpm --dir frontend run build
 ```
 
-O primeiro comando usa mocks/stubs e não precisa do PostgreSQL nem de credenciais de provedor. `dbt`, Docker Compose e `pnpm` precisam estar instalados; a instalação do frontend usa apenas o lockfile versionado. A exportação de snapshots, o refresh do Power BI e a execução do ambiente local completo dependem dos serviços descritos em [Fluxo e dependências externas](#fluxo-e-dependências-externas).
+Consulte o [guia de deploy e execução](deploy/oci/README.md) para dependências e operação detalhadas.
 
-O detalhamento dos jobs está no [CI](.github/workflows/ci.yml). Em um clone limpo, o caminho de execução local ainda exige `.env`, imagens Docker e snapshots de serving/deltas em `artifacts/`.
+## Documentação complementar
 
-Para atualizar dados e republicar, siga [`docs/bi/REFRESH_MANUAL.md`](docs/bi/REFRESH_MANUAL.md).
-
-Para hospedar a aplicação em uma VM OCI Always Free, siga [`deploy/oci/README.md`](deploy/oci/README.md).
+- [Visão geral da aplicação e arquitetura](docs/GUIA_MESTRE_APLICACAO.md)
+- [Power BI e fluxo analítico](docs/bi/README.md)
+- [Contrato do modelo analítico](docs/bi/MODELO_PUBLICO.md)
+- [Qualidade e limitações conhecidas](docs/bi/QUALIDADE_E_LIMITACOES.md)
+- [Refresh manual do Power BI](docs/bi/REFRESH_MANUAL.md)
+- [Deploy em OCI](deploy/oci/README.md)
+- [Gates de testes e CI](.github/workflows/ci.yml)

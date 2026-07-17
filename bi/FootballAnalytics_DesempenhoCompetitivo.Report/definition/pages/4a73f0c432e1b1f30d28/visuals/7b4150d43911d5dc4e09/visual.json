@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.10.0/schema.json",
   "name": "7b4150d43911d5dc4e09",
   "position": {
     "x": 470,
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "DimScope.season_label",
-              "nativeQueryRef": "season_label"
+              "nativeQueryRef": "season_label",
+              "active": true
             }
           ]
         }

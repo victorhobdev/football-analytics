@@ -1,1 +1,5 @@
 expression SnapshotRoot = "C:\\Users\\Public\\football-analytics-bi-data" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 2ca30782-4bfe-4934-9fca-d412e7efe2a0
+
+	annotation PBI_ResultType = Text
+

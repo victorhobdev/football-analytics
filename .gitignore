@@ -16,6 +16,10 @@ config/*.local.yml
 docs/
 !docs/
 docs/*
+!docs/assets/
+docs/assets/*
+!docs/assets/readme/
+!docs/assets/readme/**
 !docs/bi/
 !docs/bi/**
 

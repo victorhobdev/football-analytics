@@ -403,3 +403,4 @@ table Medidas
 		source = #table(type table [Placeholder = text], {{"Medidas"}})
 
 	annotation PBI_ResultType = Table
+

@@ -8,7 +8,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["FactMatch","FactTeamMatch","FactPlayerMatch","DimScope","DimDate","DimTeam","DimPlayer","Medidas"]
+annotation PBI_QueryOrder = ["FactMatch","FactTeamMatch","FactPlayerMatch","DimScope","DimDate","DimTeam","DimPlayer","Medidas","SnapshotRoot"]
 
 annotation PBI_ProTooling = ["DevMode"]
 
@@ -22,3 +22,4 @@ ref table DimPlayer
 ref table Medidas
 
 ref cultureInfo pt-BR
+
