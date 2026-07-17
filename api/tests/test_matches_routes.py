@@ -256,6 +256,30 @@ class MatchCenterApiTests(unittest.TestCase):
         self.assertIn(True, fetch_all_mock.call_args.args[1])
         self.assertIn("events", fetch_all_mock.call_args.args[1])
 
+    @patch("api.src.routers.matches.db_client.fetch_all")
+    @patch("api.src.routers.matches.db_client.fetch_one")
+    def test_unfiltered_matches_counts_before_paginated_enrichment(self, fetch_one_mock, fetch_all_mock) -> None:
+        fetch_one_mock.side_effect = [
+            {"_total_count": 248853},
+            {
+                "total_matches": 248853,
+                "with_any_content": 1,
+                "events_count": 1,
+                "lineups_count": 1,
+                "team_stats_count": 0,
+                "player_stats_count": 0,
+            },
+        ]
+        fetch_all_mock.return_value = [{**self._match_row(), **self._depth_profile_row()}]
+
+        response = self.client.get("/api/v1/matches?page=1&pageSize=1")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["meta"]["pagination"]["totalCount"], 248853)
+        self.assertIn("select count(*) as _total_count from mart.fact_matches", fetch_one_mock.call_args_list[0].args[0])
+        list_query = fetch_all_mock.call_args.args[0]
+        self.assertNotIn("count(*) over()", list_query)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -422,9 +422,17 @@
 
 .competitionName {
   margin: 0;
+  display: inline-block;
   font-weight: 700;
   line-height: 1.3;
   color: #003526;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.competitionName:hover,
+.competitionName:focus-visible {
+  text-decoration: underline;
 }
 
 .competitionScope {

@@ -274,9 +274,16 @@ function CollapsibleFilterContent({
   children: ReactNode;
   summary: string;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <details className="group">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-[0.9rem] bg-white/80 px-3 py-2.5 text-left text-sm font-semibold text-[#223146] [&::-webkit-details-marker]:hidden md:hidden">
+    <div>
+      <button
+        aria-expanded={isOpen}
+        className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-[0.9rem] bg-white/80 px-3 py-2.5 text-left text-sm font-semibold text-[#223146] md:hidden"
+        onClick={() => setIsOpen((value) => !value)}
+        type="button"
+      >
         <span className="min-w-0">
           <span className="block text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#69778d]">
             Filtros
@@ -285,11 +292,11 @@ function CollapsibleFilterContent({
         </span>
         <span
           aria-hidden="true"
-          className="h-2.5 w-2.5 shrink-0 rotate-45 border-b-2 border-r-2 border-[#69778d] transition-transform group-open:rotate-[225deg]"
+          className={`h-2.5 w-2.5 shrink-0 rotate-45 border-b-2 border-r-2 border-[#69778d] transition-transform ${isOpen ? "rotate-[225deg]" : ""}`}
         />
-      </summary>
-      <div className="hidden pt-3 group-open:block md:block md:pt-0">{children}</div>
-    </details>
+      </button>
+      <div className={`${isOpen ? "block" : "hidden"} pt-3 md:block md:pt-0`}>{children}</div>
+    </div>
   );
 }
 

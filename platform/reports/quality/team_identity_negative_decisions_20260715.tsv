@@ -1,0 +1,44 @@
+decision_key	left_root	right_root	decision	score	left_name	right_name	countries
+fuzzy:001	1035107376214	910000000746	separate	0.882	Manchester City Football Club	Manchester City WFC	England
+fuzzy:002	48	239050	separate	0.857	Juventude	Juventude MA	Brazil
+fuzzy:003	58	981456457398	separate	0.857	Sporting Clube de Portugal	Sporting Clube de Braga	Portugal
+fuzzy:004	1025825843983	969162656301	separate	0.9	FC Barcelona	Barcelona B	Spain
+fuzzy:005	980291387384	1053671388629	separate	0.824	Granada CF	Granada 74	Spain
+fuzzy:006	975825545058	910000000160	separate	0.857	AC Ajaccio	GFC Ajaccio	France
+fuzzy:007	970397047056	1004690985240	separate	0.889	Sociedad	Sociedad B	Spain
+fuzzy:008	910000000134	1028	separate	0.833	Stade Rennais Football Club	Stade Reims	France
+fuzzy:009	910000000224	910000001076	separate	0.889	Juventus Football Club	Juventus W	Europe,Italy
+fuzzy:010	910000000213	980772093971	separate	0.875	Sevilla	Sevilla B	Spain
+fuzzy:011	1095	252839	separate	0.87	Fluminense Football Club	Fluminense PI	Brazil
+fuzzy:012	2505	8131	separate	0.909	Ferroviária	Ferroviário	Brazil
+fuzzy:013	2864	7740	separate	0.842	Botafogo	Botafogo PB	Brazil
+fuzzy:014	3341	11941	separate	0.947	Villa Nova	Vila Nova	Brazil
+fuzzy:015	3440	12317	separate	0.824	Vitória	Vitória ES	Brazil
+fuzzy:016	910000000220	1046683241238	separate	0.917	Real Madrid	Real Madrid B	Spain
+fuzzy:017	1019230468340	1028980846420	separate	0.909	Villarreal	Villarreal B	Spain
+fuzzy:018	4092	1051014975370	separate	0.839	Futebol Clube de Arouca	Futebol Clube de Alverca	Portugal
+fuzzy:019	5999	12622	separate	0.87	Rio Branco	Rio Branco ES	Brazil
+fuzzy:020	5999	142941	separate	0.87	Rio Branco	Rio Branco-VN	Brazil
+fuzzy:021	7469	981527234145	separate	0.87	Portuguesa RJ	Portuguesa	Brazil
+fuzzy:022	8237	978519696152	separate	0.87	Santa Cruz RS	Santa Cruz	Brazil
+fuzzy:023	12152	1043805773625	separate	0.846	Estrela Amadora	Est Amadora	Portugal
+fuzzy:024	12622	142941	separate	0.846	Rio Branco ES	Rio Branco-VN	Brazil
+fuzzy:025	910000000215	1001895918734	separate	0.938	Ath Bilbao	Ath Bilbao B	Spain
+fuzzy:026	14768	14870	separate	0.867	São Raimundo AM	São Raimundo RR	Brazil
+fuzzy:027	35528	249710	separate	0.833	Barcelona RO	Barcelona BA	Brazil
+fuzzy:028	269225	973475021256	separate	0.857	AVS	Aves	Portugal
+fuzzy:029	978417466014	996554488851	separate	0.857	Málaga CF	Malaga B	Spain
+fuzzy:030	987474220142	1003885580206	separate	0.889	SC Bastia	CA Bastia	France
+fuzzy:031	960970683478	1020206472990	separate	0.833	Bolton	Boston	England
+fuzzy:032	963756401471	1043447410072	separate	0.824	Bucaspor	Bursaspor	Turkey
+fuzzy:033	965200022423	970033910622	separate	0.933	Reggiana	Reggina	Italy
+fuzzy:034	972427883611	980793934348	separate	0.833	Cannes	Vannes	France
+fuzzy:035	975443773875	1034593872217	separate	0.857	Sakaryaspor	Ankaraspor	Turkey
+fuzzy:036	986329845691	1032574341679	separate	0.846	San Martin T.	San Martin S.J.	Argentina
+fuzzy:037	990134136624	1057891965939	separate	0.824	Cangzhou	Guangzhou FC	China
+fuzzy:038	990672680031	1039420541937	separate	0.824	Chester	Colchester	England
+fuzzy:039	998191785814	1004879255863	separate	0.88	Extremadura UD	Extremadura	Spain
+fuzzy:040	1002633571734	1025187804228	separate	0.87	Belenenses	CF Os Belenenses	Portugal
+fuzzy:041	1006533376449	1014541345830	separate	0.857	Malatyaspor	Alanyaspor	Turkey
+fuzzy:042	1014541345830	1053670037258	separate	0.842	Alanyaspor	Adanaspor	Turkey
+fuzzy:043	1030643008532	1036373150960	separate	0.833	Legia	Legnica	Poland

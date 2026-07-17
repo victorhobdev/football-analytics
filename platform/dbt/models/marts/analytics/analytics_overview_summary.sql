@@ -70,7 +70,7 @@ aggregated as (
         c.league_id,
         c.league_name,
         m.competition_key,
-        m.season,
+        max(m.season) as season,
         m.season_label,
         count(distinct m.match_id)::int as total_matches,
         sum(m.total_goals)::int as total_goals,
@@ -90,7 +90,7 @@ aggregated as (
     left join player_counts pc on pc.competition_sk = m.competition_sk and pc.season_label = m.season_label
     left join events_counts ec on ec.competition_sk = m.competition_sk and ec.season_label = m.season_label
     group by
-        m.competition_sk, c.league_id, c.league_name, m.competition_key, m.season, m.season_label,
+        m.competition_sk, c.league_id, c.league_name, m.competition_key, m.season_label,
         tc.total_teams, cc.total_coaches, pc.total_players, ec.total_matches_with_events
 )
 select * from aggregated

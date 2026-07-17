@@ -1,4 +1,32 @@
-with season_config as (
+with match_source as (
+{% if var('canonical_snapshot_schema', '') %}
+    select
+        f.match_id as fixture_id,
+        f.provider,
+        f.provider_league_id,
+        f.competition_key,
+        f.season_label,
+        f.stage_id,
+        f.round_id,
+        f.round_name,
+        f.date_day::timestamp as date_utc,
+        'FT'::text as status_short,
+        'Finished'::text as status_long,
+        f.leg_number,
+        f.home_team_id,
+        h.team_name as home_team_name,
+        f.away_team_id,
+        a.team_name as away_team_name,
+        f.home_goals,
+        f.away_goals
+    from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches f
+    join {{ adapter.quote(var('canonical_snapshot_schema')) }}.dim_team h on h.team_id = f.home_team_id
+    join {{ adapter.quote(var('canonical_snapshot_schema')) }}.dim_team a on a.team_id = f.away_team_id
+{% else %}
+    select * from {{ ref('stg_matches') }}
+{% endif %}
+),
+season_config as (
     select
         competition_key,
         season_label,
@@ -47,7 +75,7 @@ pure_knockout_matches as (
         m.away_goals,
         least(m.home_team_id, m.away_team_id) as team_pair_lo,
         greatest(m.home_team_id, m.away_team_id) as team_pair_hi
-    from {{ ref('stg_matches') }} m
+    from match_source m
     join season_config c
       on c.competition_key = m.competition_key
      and c.season_label = m.season_label

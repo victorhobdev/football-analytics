@@ -240,6 +240,24 @@ class PlayerServingRoutesTests(unittest.TestCase):
         self.assertIn("mart.player_serving_summary", first_query)
         self.assertIn("mart.player_match_summary pms", second_query)
 
+    @patch("api.src.routers.players.db_client.fetch_one")
+    @patch("api.src.routers.players.db_client.fetch_all")
+    def test_players_empty_search_does_not_run_expensive_fallback(
+        self,
+        fetch_all_mock,
+        fetch_one_mock,
+    ) -> None:
+        fetch_all_mock.return_value = []
+        fetch_one_mock.return_value = {"available_count": 0, "total_count": 0}
+
+        response = self.client.get("/api/v1/players?search=sem-correspondencia&pageSize=20")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["data"]["items"], [])
+        self.assertEqual(fetch_all_mock.call_count, 1)
+        query, _params = fetch_all_mock.call_args.args
+        self.assertIn("mart.player_serving_summary", query)
+
     @patch("api.src.routers.players._profile_coverage")
     @patch("api.src.routers.players._fetch_player_profile_meta")
     @patch("api.src.routers.players.db_client.fetch_one")

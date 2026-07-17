@@ -25,7 +25,6 @@ import {
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import type { CompetitionSeasonContext } from "@/shared/types/context.types";
-import type { CoverageState } from "@/shared/types/coverage.types";
 import {
   buildHeadToHeadPath,
   buildPlayersPath,
@@ -65,17 +64,6 @@ function buildTeamProfileTabHref(
 
   const serialized = nextSearchParams.toString();
   return serialized.length > 0 ? `${pathname}?${serialized}` : pathname;
-}
-
-function resolveSectionCoverage(
-  coverage: CoverageState | undefined,
-  fallback: CoverageState,
-): CoverageState {
-  if (coverage) {
-    return coverage;
-  }
-
-  return fallback;
 }
 
 function getTeamMonogram(teamName: string): string {
@@ -411,29 +399,13 @@ export function TeamProfileContent({
     );
   }
 
-  const { form, sectionCoverage, squad, standing, stats, summary, team } = profileQuery.data;
-  const overviewCoverage = resolveSectionCoverage(
-    sectionCoverage?.overview,
-    {
-      ...profileQuery.coverage,
-      label: sectionCoverage?.overview?.label ?? "Cobertura do resumo do time",
-    },
-  );
-  const squadCoverage = resolveSectionCoverage(sectionCoverage?.squad, {
-    status: squad && squad.length > 0 ? "complete" : "unknown",
-    label: "Cobertura do elenco",
-  });
-  const statsCoverage = resolveSectionCoverage(sectionCoverage?.stats, {
-    status: stats ? "complete" : "unknown",
-    label: "Cobertura das estatísticas do time",
-  });
-  const matchesCoverage = teamMatchesQuery.coverage;
+  const { form, squad, standing, stats, summary, team } = profileQuery.data;
   const tabLinks = [
-    { key: "overview" as const, label: "Resumo", coverage: overviewCoverage, badge: "Resumo" },
-    { key: "journey" as const, label: "Jornada", coverage: overviewCoverage, badge: "Histórico" },
-    { key: "squad" as const, label: "Elenco", coverage: squadCoverage, badge: `${squad?.length ?? 0} jogadores` },
-    { key: "matches" as const, label: "Partidas", coverage: matchesCoverage, badge: `${teamMatchesQuery.data?.items.length ?? 0} jogos` },
-    { key: "stats" as const, label: "Estatísticas", coverage: statsCoverage, badge: `${stats?.trend?.length ?? 0} períodos` },
+    { key: "overview" as const, label: "Resumo", badge: "Resumo" },
+    { key: "journey" as const, label: "Jornada", badge: "Histórico" },
+    { key: "squad" as const, label: "Elenco", badge: `${squad?.length ?? 0} jogadores` },
+    { key: "matches" as const, label: "Partidas", badge: `${teamMatchesQuery.data?.items.length ?? 0} jogos` },
+    { key: "stats" as const, label: "Estatísticas", badge: `${stats?.trend?.length ?? 0} períodos` },
   ];
   const activeTabLabel = tabLinks.find((tabLink) => tabLink.key === activeTab)?.label ?? "Resumo";
   const topSquadPlayers = [...(squad ?? [])]
@@ -729,7 +701,6 @@ export function TeamProfileContent({
       {activeTab === "squad" ? (
         <TeamSquadSection
           competitionContext={contextOverride}
-          coverage={squadCoverage}
           filters={sharedFilters}
           squad={squad}
         />
@@ -738,7 +709,6 @@ export function TeamProfileContent({
       {activeTab === "matches" ? (
         <TeamMatchesSection
           competitionContext={contextOverride}
-          coverage={matchesCoverage}
           errorMessage={teamMatchesQuery.error?.message}
           filters={sharedFilters}
           isError={teamMatchesQuery.isError}
@@ -749,7 +719,7 @@ export function TeamProfileContent({
       ) : null}
 
       {activeTab === "stats" ? (
-        <TeamStatsSection coverage={statsCoverage} stats={stats} />
+        <TeamStatsSection stats={stats} />
       ) : null}
     </ProfileShell>
   );

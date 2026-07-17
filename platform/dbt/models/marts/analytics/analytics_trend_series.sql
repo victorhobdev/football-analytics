@@ -28,7 +28,7 @@ round_trends as (
         season_label,
         'round' as period_type,
         round_number::text as period,
-        round_name,
+        max(round_name) as round_name,
         round_number as period_sort_key,
         count(distinct match_id)::int as matches,
         sum(total_goals)::int as total_goals,
@@ -40,7 +40,7 @@ round_trends as (
         sum(away_win)::int as away_wins,
         sum(draw)::int as draws
     from match_base
-    group by competition_sk, competition_key, season_label, round_number, round_name
+    group by competition_sk, competition_key, season_label, round_number
 ),
 month_trends as (
     select

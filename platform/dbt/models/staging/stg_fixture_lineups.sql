@@ -12,6 +12,14 @@ statsbomb_lineups as (
     where l.match_identity_status = 'new_external_match'
       and m.match_date is not null
 ),
+statsbomb_team_identity as (
+    select
+        source_name as identity_source_name,
+        source_team_id,
+        identity_status,
+        local_team_id
+    from {{ source('postgres_mart', 'stg_statsbomb_team_identity') }}
+),
 enriched as (
     select
         l.provider,
@@ -77,7 +85,11 @@ statsbomb_enriched as (
     select
         source_name as provider,
         900000000000 + match_id as fixture_id,
-        910000000000 + source_team_id as team_id,
+        case
+            when team_identity.identity_status = 'linked_to_sportmonks'
+             and team_identity.local_team_id is not null then team_identity.local_team_id
+            else 910000000000 + l.source_team_id
+        end as team_id,
         920000000000 + source_player_id as player_id,
         nullif(trim(source_player_name), '') as player_name,
         source_player_id as lineup_id,
@@ -98,9 +110,12 @@ statsbomb_enriched as (
             '2026-06-19T000000Z'
         ) as ingested_run,
         updated_at
-    from statsbomb_lineups
-    where source_team_id is not null
-      and source_player_id is not null
+    from statsbomb_lineups l
+    left join statsbomb_team_identity team_identity
+      on team_identity.identity_source_name = l.source_name
+     and team_identity.source_team_id = l.source_team_id
+    where l.source_team_id is not null
+      and l.source_player_id is not null
 )
 select
     provider,

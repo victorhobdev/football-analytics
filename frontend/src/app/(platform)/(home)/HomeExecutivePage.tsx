@@ -12,11 +12,9 @@ import {
 } from "@/config/competitions.registry";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
 import type { HomeCompetitionCard } from "@/features/home/types/home.types";
-import { PartialDataBanner } from "@/shared/components/coverage/PartialDataBanner";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { PlatformStateSurface } from "@/shared/components/feedback/PlatformStateSurface";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
-import type { CoverageState } from "@/shared/types/coverage.types";
 import {
   buildCompetitionHubPath,
   buildHeadToHeadPath,
@@ -59,50 +57,6 @@ function formatWholeNumber(value: number | null | undefined): string {
   }
 
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
-}
-
-function shouldDisplayCompleteCoverage(coverage: CoverageState): boolean {
-  if (coverage.status === "complete") {
-    return true;
-  }
-
-  return (
-    coverage.status === "partial" &&
-    typeof coverage.percentage === "number" &&
-    coverage.percentage > 90
-  );
-}
-
-function buildCoverageBadgeLabel(coverage: CoverageState): string {
-  if (shouldDisplayCompleteCoverage(coverage)) {
-    return "Completo";
-  }
-
-  if (coverage.status === "partial") {
-    return "Parcial";
-  }
-
-  if (coverage.status === "empty") {
-    return "Vazio";
-  }
-
-  return "Cobertura";
-}
-
-function buildCoverageBadgeClasses(coverage: CoverageState): string {
-  if (shouldDisplayCompleteCoverage(coverage)) {
-    return "bg-[#a6f2d1] text-[#00513b]";
-  }
-
-  if (coverage.status === "partial") {
-    return "bg-[#ffdcc3] text-[#6e3900]";
-  }
-
-  if (coverage.status === "empty") {
-    return "bg-[#ffdad6] text-[#93000a]";
-  }
-
-  return "bg-[rgba(216,227,251,0.76)] text-[#404944]";
 }
 
 function buildCompetitionOrder(items: HomeCompetitionCard[]): HomeCompetitionCard[] {
@@ -369,11 +323,11 @@ function QuickLinkCard({
         <span className={styles.quickLinkBadge}>Acesso rápido</span>
       </div>
 
-      <div className="space-y-3">
-        <h3 className="font-[family:var(--font-app-headline)] text-[1.45rem] font-extrabold tracking-[-0.035em] text-[#0d2240]">
+      <div className="space-y-2.5">
+        <h3 className="font-[family:var(--font-app-headline)] text-[1.5rem] font-extrabold tracking-[-0.04em] text-white">
           {label}
         </h3>
-        <p className="text-sm leading-6 text-[#57657a]">{description}</p>
+        <p className="text-sm leading-6 text-white/70">{description}</p>
       </div>
 
       <div className={styles.quickLinkFooter}>
@@ -442,14 +396,6 @@ function CompetitionCard({
               </div>
             </div>
 
-            <span
-              className={joinClasses(
-                styles.coverageBadge,
-                buildCoverageBadgeClasses(competition.coverage),
-              )}
-            >
-              {buildCoverageBadgeLabel(competition.coverage)}
-            </span>
           </div>
 
           <h3 className={styles.competitionTitle}>{competition.competitionName}</h3>
@@ -563,16 +509,19 @@ export function HomeExecutivePage() {
     <div className={joinClasses(styles.homeRoot, "bg-[var(--app-surface)] text-[var(--app-text)]")}>
       <section className="px-4 pb-8 pt-5 sm:px-6 md:px-10 md:pb-14 md:pt-10 xl:px-12">
         <div className="mx-auto max-w-6xl">
-          {homeQuery.isPartial ? (
-            <div className="mb-8">
-              <PartialDataBanner coverage={homeQuery.coverage} />
-            </div>
-          ) : null}
-
           <div className={styles.heroShell}>
             <div className={styles.heroGrid}>
               <div className={styles.heroContent}>
-                <h1 className={styles.heroTitle}>Explore a história do futebol em dados</h1>
+                <div className={styles.heroMessage}>
+                  <p className={styles.heroEyebrow}>Arquivo vivo do futebol</p>
+                  <h1 className={styles.heroTitle}>
+                    O futebol inteiro, <span>contado pelos dados.</span>
+                  </h1>
+                  <p className={styles.heroLead}>
+                    Explore décadas de competições, partidas e carreiras em um acervo conectado e
+                    pronto para análise.
+                  </p>
+                </div>
 
                 <div className={styles.heroCtaRow}>
                   <Link className={styles.primaryCta} href="/competitions">
@@ -586,6 +535,10 @@ export function HomeExecutivePage() {
               </div>
 
               <aside className={styles.heroMetricsPanel}>
+                <div className={styles.heroMetricsHeader}>
+                  <p className={styles.panelEyebrow}>Acervo em números</p>
+                  <span className={styles.heroMetricsStatus}>Atualizado</span>
+                </div>
                 <div className={styles.heroMetricsGrid}>
                   {archiveMetrics.map((metric) => (
                     <HeroMetricCard
@@ -596,8 +549,6 @@ export function HomeExecutivePage() {
                     />
                   ))}
                 </div>
-
-                
               </aside>
             </div>
 
@@ -605,7 +556,7 @@ export function HomeExecutivePage() {
               <div className={styles.quickActionsHeader}>
                 <div>
                   <p className={styles.sectionEyebrow}>Atalhos</p>
-                  <h2 className="font-[family:var(--font-app-headline)] text-[1.9rem] font-extrabold tracking-[-0.04em] text-[#003526]">
+                  <h2 className="font-[family:var(--font-app-headline)] text-[1.9rem] font-extrabold tracking-[-0.04em] text-white/90">
                     Acessos rápidos
                   </h2>
                 </div>

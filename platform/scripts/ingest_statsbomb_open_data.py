@@ -518,6 +518,8 @@ def preload_source_state(conn: psycopg.Connection[Any]) -> SourceState:
         select entity_type, source_id, canonical_id
         from raw.provider_entity_map
         where provider = %s
+          and mapping_state = 'approved'
+          and is_active
         """,
         (SOURCE_NAME,),
     ).fetchall()
@@ -757,15 +759,19 @@ def merge_identity(
 
 
 def upsert_provider_entity_map(conn: psycopg.Connection[Any], entity_type: str, source_id: int, canonical_id: int) -> None:
+    source_team_key = f"{SOURCE_NAME}:{source_id}"
     conn.execute(
         """
-        insert into raw.provider_entity_map (provider, entity_type, source_id, canonical_id)
-        values (%s, %s, %s, %s)
-        on conflict (provider, entity_type, source_id) do update set
+        insert into raw.provider_entity_map
+          (provider, entity_type, source_id, source_team_key, canonical_id, mapping_state)
+        values (%s, %s, %s, %s, %s, 'approved')
+        on conflict (provider, entity_type, source_team_key) do update set
+          source_id = excluded.source_id,
           canonical_id = excluded.canonical_id,
+          mapping_state = excluded.mapping_state,
           updated_at = now()
         """,
-        (SOURCE_NAME, entity_type, str(source_id), str(canonical_id)),
+        (SOURCE_NAME, entity_type, str(source_id), source_team_key, str(canonical_id)),
     )
 
 

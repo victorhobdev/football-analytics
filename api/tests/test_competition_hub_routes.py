@@ -6,7 +6,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from api.src.main import app
-from api.src.routers.competition_hub import CompetitionSeasonScope
+from api.src.routers.competition_hub import CompetitionSeasonScope, _fetch_competition_editions
 
 
 class CompetitionHubAnalyticsApiTests(unittest.TestCase):
@@ -124,6 +124,48 @@ class CompetitionHubAnalyticsApiTests(unittest.TestCase):
         self.assertEqual(payload["data"]["seasonSummary"]["averageGoals"], 2.52)
         self.assertEqual(payload["data"]["seasonComparisons"], [])
         self.assertEqual(payload["data"]["competition"]["competitionKey"], "brasileirao_a")
+
+
+class CompetitionEditionsApiTests(unittest.TestCase):
+    def test_editions_select_one_preferred_provider_per_season(self) -> None:
+        with patch("api.src.routers.competition_hub.db_client") as db_client:
+            db_client.fetch_all.return_value = []
+
+            _fetch_competition_editions("brasileirao_a")
+
+        query, params = db_client.fetch_all.call_args.args
+        self.assertIn("partition by competition_key, season_label", query)
+        self.assertIn("when 'sportmonks' then 1", query)
+        self.assertEqual(params[0], "brasileirao_a")
+        self.assertEqual(len(params), 5)
+
+    def setUp(self) -> None:
+        self.client = TestClient(app)
+
+    @patch("api.src.routers.competition_hub._fetch_competition_editions")
+    def test_competition_editions_returns_all_summaries_in_one_response(self, fetch_mock) -> None:
+        fetch_mock.return_value = [
+            {
+                "season_label": "2025",
+                "match_count": 38,
+                "champion_team_id": 1024,
+                "champion_team_name": "Flamengo",
+                "runner_up_team_id": 629,
+                "runner_up_team_name": "Palmeiras",
+                "top_scorer_player_id": 10,
+                "top_scorer_player_name": "Atacante",
+                "top_scorer_goals": 20,
+            }
+        ]
+
+        response = self.client.get("/api/v1/competition-editions?competitionKey=brasileirao_a")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()["data"]
+        self.assertEqual(len(payload["editions"]), 1)
+        self.assertEqual(payload["editions"][0]["champion"]["name"], "Flamengo")
+        self.assertEqual(payload["editions"][0]["topScorer"]["goals"], 20)
+        fetch_mock.assert_called_once_with("brasileirao_a")
 
 
 class CompetitionHubHistoricalStatsApiTests(unittest.TestCase):

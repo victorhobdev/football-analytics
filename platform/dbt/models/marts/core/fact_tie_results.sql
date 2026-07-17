@@ -36,3 +36,5 @@ select
     next_stage_name,
     is_inferred
 from tie_results
+where winner_team_id is not null
+  and resolution_type is not null

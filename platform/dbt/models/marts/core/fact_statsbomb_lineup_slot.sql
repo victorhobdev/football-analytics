@@ -62,3 +62,6 @@ select
     player_identity_confidence,
     updated_at
 from slots
+{% if var('canonical_snapshot_schema', '') %}
+where local_match_id is not null
+{% endif %}

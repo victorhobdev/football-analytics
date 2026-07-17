@@ -12,7 +12,8 @@ resolved as (
                 else null
             end,
             case
-                when px.publication_status = 'publishable' then px.canonical_external_match_id
+                when ex.review_status = 'auto_approved'
+                 and px.publication_status = 'publishable' then px.canonical_external_match_id
                 else null
             end
         ) as match_id,
@@ -64,7 +65,11 @@ resolved as (
         row_number() over (
             partition by coalesce(
                 case when ex.identity_status = 'linked_to_sportmonks' then ex.local_fixture_id else null end,
-                case when px.publication_status = 'publishable' then px.canonical_external_match_id else null end
+                case
+                    when ex.review_status = 'auto_approved'
+                     and px.publication_status = 'publishable' then px.canonical_external_match_id
+                    else null
+                end
             )
             order by
                 case when ex.identity_status = 'linked_to_sportmonks' then 0 else 1 end,
@@ -76,7 +81,12 @@ resolved as (
     left join control.external_match_publication_xref px
       on px.source = 'eloratings'
      and px.source_entity_id = em.record_hash
-    where ex.identity_status in ('linked_to_sportmonks', 'new_coverage')
+    where ex.identity_status = 'linked_to_sportmonks'
+       or (
+            ex.identity_status = 'new_coverage'
+        and ex.review_status = 'auto_approved'
+        and px.publication_status = 'publishable'
+       )
 )
 select *
 from resolved

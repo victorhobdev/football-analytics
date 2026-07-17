@@ -643,34 +643,6 @@ export function usePlatformShellState(): PlatformShellState {
         ),
         buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
       );
-    } else if (pathname === "/coaches") {
-      surfaceLabel = "Técnicos";
-      surfaceTitle = "Cobertura de técnicos";
-      description =
-        "A área de técnicos ainda está sendo ampliada. Enquanto isso, navegue por times e competições.";
-      helperText =
-        "Use times e competições como caminho principal para encontrar contextos de técnicos.";
-      breadcrumbs.push({ label: "Técnicos" });
-      surfaceLinks.splice(
-        0,
-        surfaceLinks.length,
-        buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Competições", "/competitions"),
-      );
-    } else if (pathname.startsWith("/coaches/")) {
-      surfaceLabel = "Técnicos";
-      surfaceTitle = "Perfil de técnico";
-      description =
-        "Este perfil ainda não tem histórico completo disponível para exibição.";
-      helperText =
-        "Use times, jogadores e competições para continuar navegando pelo contexto atual.";
-      breadcrumbs.push({ label: "Técnicos" });
-      surfaceLinks.splice(
-        0,
-        surfaceLinks.length,
-        buildSurfaceLink(pathname, searchParams, "Times", buildTeamsPath(sharedFilterInput)),
-        buildSurfaceLink(pathname, searchParams, "Jogadores", buildPlayersPath(sharedFilterInput)),
-      );
     } else if (pathname === "/audit") {
       surfaceLabel = "Área indisponível";
       surfaceTitle = "Área indisponível";

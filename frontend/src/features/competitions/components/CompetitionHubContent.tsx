@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import {
@@ -7,22 +8,22 @@ import {
   type CompetitionDef,
 } from "@/config/competitions.registry";
 import {
-  getLatestSeasonForCompetition,
-  listSeasonsForCompetition,
+  getSeasonByLabel,
   type SeasonDef,
 } from "@/config/seasons.registry";
-import { useCompetitionHistoricalStats } from "@/features/competitions/hooks";
+import { useCompetitionEditions, useCompetitionHistoricalStats } from "@/features/competitions/hooks";
 import { useHomePage } from "@/features/home/hooks/useHomePage";
 import type { HomeCompetitionCard } from "@/features/home/types/home.types";
 import type {
   CompetitionHistoricalStatGroup,
   CompetitionHistoricalStatItem,
+  CompetitionEdition,
 } from "@/features/competitions/types";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 import {
   ProfilePanel,
-  ProfileCoveragePill,
+  ProfileAlert,
   ProfileShell,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
@@ -328,7 +329,6 @@ function CompetitionHistoricalStatsSection({ competition }: { competition: Compe
             </h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <ProfileCoveragePill coverage={historicalStatsQuery.coverage} />
             <ProfileTag>Base {HISTORICAL_STATS_AS_OF_YEAR}</ProfileTag>
           </div>
         </div>
@@ -477,12 +477,28 @@ function CompetitionHero({
   );
 }
 
+function SeasonCardStat({ label, media, value }: { label: string; media?: ReactNode; value: string }) {
+  return (
+    <div className="rounded-[1.1rem] border border-[rgba(191,201,195,0.44)] bg-white/86 px-3 py-3">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">{label}</p>
+      <div className="mt-2 flex min-w-0 items-center gap-2">
+        {media}
+        <p className="min-w-0 truncate font-[family:var(--font-profile-headline)] text-[1.02rem] font-extrabold text-[#111c2d]">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SeasonCard({
   competition,
+  edition,
   isLatestSeason,
   season,
 }: {
   competition: CompetitionDef;
+  edition: CompetitionEdition;
   isLatestSeason: boolean;
   season: SeasonDef;
 }) {
@@ -519,8 +535,61 @@ function SeasonCard({
           </div>
         </div>
 
-        <div className="rounded-[1.2rem] border border-[rgba(191,201,195,0.44)] bg-white/86 px-4 py-4 text-sm/6 text-[#57657a]">
-          Classificação, partidas e destaques carregam ao abrir a edição.
+        <div className="rounded-[1.2rem] border border-[rgba(191,201,195,0.44)] bg-white/86 px-3 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <ProfileMedia
+              alt={`Campeão ${edition.champion?.name ?? "não disponível"}`}
+              assetId={edition.champion?.id}
+              category="clubs"
+              className="h-11 w-11 rounded-full"
+              fallback={buildFallbackLabel(edition.champion?.name ?? "Não disponível")}
+              imageClassName="p-1.5"
+              linkBehavior="none"
+              shape="circle"
+            />
+            <div className="min-w-0">
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#57657a]">Campeão</p>
+              <p className="mt-1 truncate font-[family:var(--font-profile-headline)] text-[1.25rem] font-extrabold text-[#111c2d]">
+                {edition.champion?.name ?? "Não disponível"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          <SeasonCardStat
+            label="Artilheiro"
+            media={
+              <ProfileMedia
+                alt={edition.topScorer?.name ?? "Artilheiro não disponível"}
+                assetId={edition.topScorer?.id}
+                category="players"
+                className="h-8 w-8 rounded-full"
+                fallback={buildFallbackLabel(edition.topScorer?.name ?? "Não disponível")}
+                linkBehavior="none"
+                shape="circle"
+              />
+            }
+            value={edition.topScorer
+              ? `${edition.topScorer.name} · ${formatWholeNumber(edition.topScorer.goals)} gols`
+              : "Não disponível"}
+          />
+          <SeasonCardStat
+            label="Vice-campeão"
+            media={
+              <ProfileMedia
+                alt={edition.runnerUp?.name ?? "Vice-campeão não disponível"}
+                assetId={edition.runnerUp?.id}
+                category="clubs"
+                className="h-8 w-8 rounded-full"
+                fallback={buildFallbackLabel(edition.runnerUp?.name ?? "Não disponível")}
+                imageClassName="p-1"
+                linkBehavior="none"
+                shape="circle"
+              />
+            }
+            value={edition.runnerUp?.name ?? "Não disponível"}
+          />
         </div>
 
         <div className="flex items-center justify-between border-t border-[rgba(191,201,195,0.4)] pt-4 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#003526]">
@@ -534,11 +603,13 @@ function SeasonCard({
 
 function SeasonsGrid({
   competition,
+  editionsBySeason,
   latestSeason,
   seasons,
   totalSeasonsCount,
 }: {
   competition: CompetitionDef;
+  editionsBySeason: Map<string, CompetitionEdition>;
   latestSeason: SeasonDef | null;
   seasons: SeasonDef[];
   totalSeasonsCount?: number;
@@ -583,6 +654,7 @@ function SeasonsGrid({
         {seasons.map((season) => (
           <SeasonCard
             competition={competition}
+            edition={editionsBySeason.get(season.label)!}
             isLatestSeason={latestSeason?.id === season.id}
             key={season.id}
             season={season}
@@ -595,12 +667,19 @@ function SeasonsGrid({
 
 export function CompetitionHubContent({ catalogCompetition, competition }: CompetitionHubContentProps) {
   const homeQuery = useHomePage();
-  const seasons = listSeasonsForCompetition(competition);
-  const latestSeason = getLatestSeasonForCompetition(competition) ?? null;
+  const editionsQuery = useCompetitionEditions({ competitionKey: competition.key });
+  const editions = editionsQuery.data?.editions ?? [];
+  const editionsBySeason = new Map(editions.map((edition) => [edition.seasonLabel, edition]));
+  const seasons = editions
+    .map((edition) => getSeasonByLabel(edition.seasonLabel))
+    .filter((season): season is SeasonDef => Boolean(season));
+  const latestSeason = seasons[0] ?? null;
   const resolvedCatalogCompetition =
     catalogCompetition ??
     homeQuery.data?.competitions.find((item) => item.competitionKey === competition.key);
-  const totalSeasonsCount = resolvedCatalogCompetition?.seasonsCount;
+  const totalSeasonsCount = editionsQuery.data
+    ? editions.length
+    : resolvedCatalogCompetition?.seasonsCount;
 
   return (
     <CompetitionRouteContextSync competition={competition}>
@@ -620,12 +699,21 @@ export function CompetitionHubContent({ catalogCompetition, competition }: Compe
           seasonsCount={totalSeasonsCount}
         />
 
-        <SeasonsGrid
-          competition={competition}
-          latestSeason={latestSeason}
-          seasons={seasons}
-          totalSeasonsCount={totalSeasonsCount}
-        />
+        {editionsQuery.isLoading ? (
+          <ProfilePanel>Carregando edições…</ProfilePanel>
+        ) : editionsQuery.isError ? (
+          <ProfileAlert title="Falha ao carregar edições" tone="critical">
+            <p>{editionsQuery.error?.message}</p>
+          </ProfileAlert>
+        ) : (
+          <SeasonsGrid
+            competition={competition}
+            editionsBySeason={editionsBySeason}
+            latestSeason={latestSeason}
+            seasons={seasons}
+            totalSeasonsCount={totalSeasonsCount}
+          />
+        )}
 
         <CompetitionHistoricalStatsSection competition={competition} />
       </ProfileShell>

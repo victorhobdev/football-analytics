@@ -94,35 +94,6 @@ def _player_scope_filters_sql(filters: GlobalFilters) -> tuple[str, list[Any]]:
     return " and ".join(where_clauses), params
 
 
-def _player_coverage(filters: GlobalFilters) -> dict[str, Any]:
-    match_where: list[str] = ["1=1"]
-    match_params: list[Any] = []
-    append_fact_match_filters(match_where, match_params, alias="fm", filters=filters)
-
-    player_where, player_params = _player_scope_filters_sql(filters)
-    query = f"""
-        with scoped_matches as (
-            select distinct fm.match_id
-            from mart.fact_matches fm
-            where {" and ".join(match_where)}
-        ),
-        scoped_stats as (
-            select distinct pms.match_id
-            from mart.player_match_summary pms
-            inner join mart.fact_matches fm
-              on fm.match_id = pms.match_id
-            where {player_where}
-        )
-        select
-            (select count(*) from scoped_stats) as available_count,
-            (select count(*) from scoped_matches) as total_count;
-    """
-    row = db_client.fetch_one(query, [*match_params, *player_params]) or {}
-    available = int(row.get("available_count") or 0)
-    total = int(row.get("total_count") or 0)
-    return build_coverage_from_counts(available, total, "Player stats coverage")
-
-
 def _can_use_player_serving_summary(filters: GlobalFilters) -> bool:
     return (
         not filters.competition_ids
@@ -442,7 +413,15 @@ def get_players(
             sort_by=sortBy,
             sort_direction=sortDirection,
         )
-    if not use_serving_summary or not rows:
+    serving_table_is_empty = (
+        use_serving_summary
+        and not rows
+        and search_pattern is None
+        and team_id_int is None
+        and position_pattern is None
+        and minMinutes is None
+    )
+    if not use_serving_summary or serving_table_is_empty:
         query = f"""
         with scoped as (
             select
@@ -596,8 +575,6 @@ def get_players(
 
     total_count = int(rows[0]["_total_count"]) if rows else 0
     pagination = build_pagination(page, pageSize, total_count)
-    coverage = _player_coverage(global_filters)
-
     items = [
         {
             "playerId": str(row["player_id"]),
@@ -630,7 +607,6 @@ def get_players(
         {"items": items},
         request_id=_request_id(request),
         pagination=pagination,
-        coverage=coverage,
     )
 
 

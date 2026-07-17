@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,12 +11,12 @@ import { LoadingSkeleton } from "@/shared/components/feedback/LoadingSkeleton";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
 import {
   ProfileAlert,
-  ProfileCoveragePill,
   ProfilePanel,
   ProfileShell,
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
 import {
   buildPlayerResolverPath,
@@ -149,14 +149,6 @@ function getTransferTypeLabel(typeId: number | null | undefined, typeName: strin
   return "Tipo desconhecido";
 }
 
-function getTransferSourceLabel(source: string | null | undefined): string {
-  if (source === "transfermarkt") {
-    return "Transfermarkt";
-  }
-
-  return "SportMonks";
-}
-
 function formatMovement(item: {
   fromTeamName?: string | null;
   toTeamName?: string | null;
@@ -196,6 +188,16 @@ function getTeamFallback(teamName: string | null | undefined): string {
   return "CLB";
 }
 
+function MarketAction({ href, label, primary = false }: { href: string | null; label: string; primary?: boolean }) {
+  const className = `button-pill min-h-11 justify-center ${primary ? "button-pill-primary" : "button-pill-secondary"}`;
+
+  return href ? (
+    <Link className={className} href={href}>{label}</Link>
+  ) : (
+    <span aria-disabled="true" className={`${className} cursor-not-allowed opacity-45`}>{label}</span>
+  );
+}
+
 export function MarketPageContent() {
   const [search, setSearch] = useState("");
   const [clubSearch, setClubSearch] = useState("");
@@ -204,8 +206,8 @@ export function MarketPageContent() {
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<(typeof MARKET_SORT_OPTIONS)[number]["key"]>("dateDesc");
   const [onlyValuedTransfers, setOnlyValuedTransfers] = useState(false);
-  const deferredSearch = useDeferredValue(search);
-  const deferredClubSearch = useDeferredValue(clubSearch);
+  const debouncedSearch = useDebouncedValue(search);
+  const debouncedClubSearch = useDebouncedValue(clubSearch);
   const searchParams = useSearchParams();
   const resolvedGlobalContext = useResolvedCompetitionContext();
   const resolvedContext = useMemo(
@@ -223,8 +225,8 @@ export function MarketPageContent() {
     competitionId,
     dateRangeEnd,
     dateRangeStart,
-    deferredClubSearch,
-    deferredSearch,
+    debouncedClubSearch,
+    debouncedSearch,
     lastN,
     onlyValuedTransfers,
     roundId,
@@ -237,8 +239,8 @@ export function MarketPageContent() {
 
   const marketQuery = useMarketTransfers(
     {
-      search: deferredSearch,
-      clubSearch: deferredClubSearch,
+      search: debouncedSearch,
+      clubSearch: debouncedClubSearch,
       teamDirection,
       typeId: selectedTypeId,
       hasAmount: onlyValuedTransfers ? true : undefined,
@@ -314,40 +316,18 @@ export function MarketPageContent() {
   const currentRangeEnd = totalCount === 0 ? 0 : currentRangeStart + items.length - 1;
   const hasPreviousPage = pagination?.hasPreviousPage ?? currentPage > 1;
   const hasNextPage = pagination?.hasNextPage ?? currentPage < totalPages;
-  const valuedTransfers = items.filter((item) => getAmountValue(item) !== null).length;
-  const topAmount = items.reduce<{ value: number; currency: string | null } | null>((currentTop, item) => {
-    const amountValue = getAmountValue(item);
-
-    if (amountValue === null) {
-      return currentTop;
-    }
-
-    if (currentTop === null || amountValue > currentTop.value) {
-      return { value: amountValue, currency: item.currency ?? null };
-    }
-
-    return currentTop;
-  }, null);
-  const trustedCurrencyLabels = Array.from(
-    new Set(items.map((item) => item.currency?.trim()).filter((currency): currency is string => Boolean(currency))),
-  );
-
   return (
     <ProfileShell className="space-y-6">
+      {marketQuery.isFetching && marketQuery.data ? (
+        <p className="text-sm font-semibold text-[#57657a]" role="status">
+          Atualizando mercado…
+        </p>
+      ) : null}
       <section className="space-y-4">
         <ProfilePanel className="p-0" tone="accent">
-          <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.9fr)] lg:items-center">
+          <div className="p-4 sm:p-5">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <ProfileCoveragePill coverage={marketQuery.coverage} className="bg-white/16 text-white" />
-                <ProfileTag className="bg-white/12 text-white/82">
-                  {resolvedContext ? "Contexto fechado" : "Entrada direta"}
-                </ProfileTag>
-                {trustedCurrencyLabels.map((currency) => (
-                  <ProfileTag className="bg-white/12 text-white/82" key={currency}>
-                    {currency}
-                  </ProfileTag>
-                ))}
                 <ProfileTag className="bg-white/12 text-white/82">{activeWindowLabel}</ProfileTag>
               </div>
               <div>
@@ -365,32 +345,6 @@ export function MarketPageContent() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-white/10 bg-white/8 px-4 py-3 text-white">
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/64">
-                  Transferências
-                </p>
-                <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold">
-                  {formatInteger(totalCount)}
-                </p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/8 px-4 py-3 text-white">
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/64">
-                  Com valor página
-                </p>
-                <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold">
-                  {formatInteger(valuedTransfers)}
-                </p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/8 px-4 py-3 text-white">
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/64">
-                  Maior valor
-                </p>
-                <p className="mt-1 font-[family:var(--font-profile-headline)] text-2xl font-extrabold">
-                  {formatAmountInMillions(topAmount?.value ?? null, topAmount?.currency)}
-                </p>
-              </div>
-            </div>
           </div>
         </ProfilePanel>
 
@@ -413,7 +367,7 @@ export function MarketPageContent() {
 
             <label className="space-y-1.5">
               <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#57657a]">
-                Clube
+                Movimentação
               </span>
               <input
                 className="min-h-11 w-full rounded-lg border border-[rgba(191,201,195,0.72)] bg-white px-3.5 py-2.5 text-base text-[#111c2d] outline-none transition-colors placeholder:text-[#7f8b99] focus:border-[#00885f] focus:ring-2 focus:ring-[#00885f]/12 sm:text-sm"
@@ -554,7 +508,6 @@ export function MarketPageContent() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <ProfileTag>{getTransferSourceLabel(item.source)}</ProfileTag>
                       <ProfileTag>{getTransferTypeLabel(item.typeId, item.typeName)}</ProfileTag>
                       {item.careerEnded ? <ProfileTag>Fim de carreira</ProfileTag> : null}
                     </div>
@@ -632,30 +585,9 @@ export function MarketPageContent() {
               </div>
 
               <div className="grid grid-cols-1 gap-2 px-4 py-4 sm:flex sm:flex-wrap sm:px-5">
-                {playerHref ? (
-                  <Link
-                    className="button-pill button-pill-primary min-h-11 justify-center"
-                    href={playerHref}
-                  >
-                    Abrir jogador
-                  </Link>
-                ) : null}
-                {fromTeamHref ? (
-                  <Link
-                    className="button-pill button-pill-secondary min-h-11 justify-center"
-                    href={fromTeamHref}
-                  >
-                    Time de origem
-                  </Link>
-                ) : null}
-                {toTeamHref ? (
-                  <Link
-                    className="button-pill button-pill-secondary min-h-11 justify-center"
-                    href={toTeamHref}
-                  >
-                    Time de destino
-                  </Link>
-                ) : null}
+                <MarketAction href={playerHref} label="Abrir jogador" primary />
+                <MarketAction href={fromTeamHref} label="Time de origem" />
+                <MarketAction href={toTeamHref} label="Time de destino" />
               </div>
             </article>
           );
@@ -672,7 +604,7 @@ export function MarketPageContent() {
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
               className="button-pill min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
-              disabled={!hasPreviousPage}
+              disabled={marketQuery.isFetching || !hasPreviousPage}
               onClick={() => setPage((value) => Math.max(value - 1, 1))}
               type="button"
             >
@@ -680,7 +612,7 @@ export function MarketPageContent() {
             </button>
             <button
               className="button-pill button-pill-primary min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
-              disabled={!hasNextPage}
+              disabled={marketQuery.isFetching || !hasNextPage}
               onClick={() => setPage((value) => Math.min(value + 1, totalPages))}
               type="button"
             >

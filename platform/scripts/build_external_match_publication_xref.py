@@ -163,6 +163,23 @@ def canonical_external_match_id(source: str, source_entity_id: str) -> int:
     return offset + (int(digest[:15], 16) % 99_999_999_999)
 
 
+def is_publishable_new_coverage(
+    *, identity_status: str, review_status: str, publication_status: str
+) -> bool:
+    """Return true only for an explicitly approved, non-linked publication.
+
+    The publication table is a derived artifact.  The reconciliation decision is
+    authoritative, so a stale ``publishable`` row must never make a pending
+    identity visible again.
+    """
+
+    return (
+        identity_status == "new_coverage"
+        and review_status == "auto_approved"
+        and publication_status == "publishable"
+    )
+
+
 def load_external_new_coverage(conn: psycopg.Connection[Any]) -> list[ExternalCoverageMatch]:
     with conn.cursor() as cursor:
         cursor.execute(
@@ -181,6 +198,7 @@ def load_external_new_coverage(conn: psycopg.Connection[Any]) -> list[ExternalCo
               left join raw.brasileirao_matches bm
                 on bm.match_id = bx.brasileirao_match_id
               where bx.identity_status = 'new_coverage'
+                and bx.review_status = 'auto_approved'
                 and bx.match_date is not null
             ),
             transfermarkt as (
@@ -200,6 +218,7 @@ def load_external_new_coverage(conn: psycopg.Connection[Any]) -> list[ExternalCo
                 on cpm.provider = 'transfermarkt'
                and cpm.provider_league_code = tg.competition_id
               where tx.identity_status = 'new_coverage'
+                and tx.review_status = 'auto_approved'
                 and tx.match_date is not null
             ),
             eloratings as (
@@ -216,6 +235,7 @@ def load_external_new_coverage(conn: psycopg.Connection[Any]) -> list[ExternalCo
               left join raw.elo_matches em
                 on em.record_hash = ex.elo_match_hash
               where ex.identity_status = 'new_coverage'
+                and ex.review_status = 'auto_approved'
                 and ex.match_date is not null
                 and ex.competition_key is not null
             )

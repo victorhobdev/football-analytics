@@ -94,7 +94,8 @@ def _fetch_unfiltered_match_list(
     sort_direction: SortDirection,
 ) -> list[dict[str, Any]]:
     sort_dir = "asc" if sort_direction == "asc" else "desc"
-    return db_client.fetch_all(
+    total_row = db_client.fetch_one("select count(*) as _total_count from mart.fact_matches;") or {}
+    rows = db_client.fetch_all(
         f"""
         with enriched as (
             select
@@ -164,14 +165,17 @@ def _fetch_unfiltered_match_list(
               on mdp.match_id = fm.match_id
         )
         select
-            f.*,
-            count(*) over() as _total_count
+            f.*
         from enriched f
         order by {sort_column} {sort_dir} nulls last, f.match_id desc
         limit %s offset %s;
         """,
         [page_size, offset],
     )
+    total_count = int(total_row.get("_total_count") or 0)
+    for row in rows:
+        row["_total_count"] = total_count
+    return rows
 
 
 def _to_float(value: Any) -> float | None:

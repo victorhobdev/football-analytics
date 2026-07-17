@@ -13,6 +13,7 @@ from ..core.context_registry import (
     get_canonical_competition_by_key,
     list_canonical_competition_ids,
 )
+from ..core.config import get_settings
 from ..core.contracts import build_api_response, build_coverage_from_counts
 from ..db.client import db_client
 
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/api/v1/home", tags=["home"])
 
 _HOME_SECTION_COUNT = 3
 _HOME_CACHE_LOCK = Lock()
+PRODUCT_DATA_CUTOFF = get_settings().product_data_cutoff
 
 
 def _request_id(request: Request) -> str | None:
@@ -297,7 +299,26 @@ def _fetch_control_competition_catalog() -> dict[str, dict[str, Any]]:
 def _fetch_competitions() -> list[dict[str, Any]]:
     rows = db_client.fetch_all(
         """
-        with latest_context as (
+        with canonical_seasons as (
+            select
+                competition_key,
+                season_label,
+                count(*)::int as matches_count
+            from mart.fact_matches
+            where date_day <= %s
+            group by competition_key, season_label
+        ),
+        canonical_depth as (
+            select
+                competition_key,
+                sum(matches_count)::int as matches_count,
+                count(*)::int as seasons_count,
+                min(season_label) as min_season_label,
+                max(season_label) as max_season_label
+            from canonical_seasons
+            group by competition_key
+        ),
+        latest_context as (
             select distinct on (league_id)
                 league_id,
                 competition_key
@@ -328,17 +349,19 @@ def _fetch_competitions() -> list[dict[str, Any]]:
             competition_id,
             competition_key,
             competition_name,
-            matches_count,
-            seasons_count,
-            min_season_label,
-            max_season_label,
+            coalesce(cd.matches_count, rc.matches_count) as matches_count,
+            coalesce(cd.seasons_count, rc.seasons_count) as seasons_count,
+            coalesce(cd.min_season_label, rc.min_season_label) as min_season_label,
+            coalesce(cd.max_season_label, rc.max_season_label) as max_season_label,
             match_statistics_count,
             lineups_count,
             events_count,
             player_statistics_count
-        from ranked_competitions
+        from ranked_competitions rc
+        left join canonical_depth cd using (competition_key)
         order by competition_name asc;
-        """
+        """,
+        [PRODUCT_DATA_CUTOFF],
     )
 
     competition_order = {
@@ -386,17 +409,19 @@ def _fetch_competitions() -> list[dict[str, Any]]:
             continue
 
         canonical_competition = get_canonical_competition_by_key(competition_key)
+        catalog_competition = control_catalog.get(competition_key)
         metadata = _infer_competition_catalog_metadata(
             competition_key,
             competition_name,
-            control_catalog.get(competition_key),
+            catalog_competition,
         )
         public_competition_id = (
             str(canonical_competition.competition_id)
             if canonical_competition is not None
             else competition_id
         )
-        public_competition_name = (
+        catalog_name = str((catalog_competition or {}).get("competition_name") or "").strip()
+        public_competition_name = catalog_name or (
             canonical_competition.default_name
             if canonical_competition is not None
             else competition_name
@@ -479,8 +504,8 @@ def _fetch_competitions() -> list[dict[str, Any]]:
                 "region": metadata["region"],
                 "scope": metadata["scope"],
                 "type": metadata["type"],
-                "matchesCount": _to_int(dominant_candidate.get("matchesCount")),
-                "seasonsCount": _to_int(dominant_candidate.get("seasonsCount")),
+                "matchesCount": _to_int(row.get("matches_count")),
+                "seasonsCount": _to_int(row.get("seasons_count")),
                 "range": {
                     "fromSeasonId": str(min_season) if min_season is not None else None,
                     "fromSeasonLabel": from_season_label,

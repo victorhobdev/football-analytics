@@ -259,6 +259,12 @@ def get_market_transfers(
         f"{_normalized_sql(to_team_name_sql)} || ' ' || coalesce(ut.to_team_id::text, '')"
     )
 
+    recent_rank_sql = (
+        "row_number() over (order by et.transfer_date desc nulls last, et.transfer_id desc)"
+        if filters.last_n is not None
+        else "null::bigint"
+    )
+
     query = f"""
         with sportmonks_transfers as (
             select
@@ -432,9 +438,7 @@ def get_market_transfers(
         ranked_transfers as (
             select
                 et.*,
-                row_number() over (
-                    order by et.transfer_date desc nulls last, et.transfer_id desc
-                ) as rn_recent
+                {recent_rank_sql} as rn_recent
             from enriched_transfers et
             where (%s::boolean is not true or et.amount_value is not null)
               and (%s::numeric is null or et.amount_value >= %s)

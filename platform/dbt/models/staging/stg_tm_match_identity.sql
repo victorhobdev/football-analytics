@@ -8,7 +8,8 @@ select
             else null
         end,
         case
-            when px.publication_status = 'publishable' then px.canonical_external_match_id
+            when x.review_status = 'auto_approved'
+             and px.publication_status = 'publishable' then px.canonical_external_match_id
             else null
         end
     ) as match_id,
@@ -24,4 +25,8 @@ where (
         x.identity_status = 'linked_to_sportmonks'
     and x.local_fixture_id is not null
 )
-or px.publication_status = 'publishable'
+or (
+    x.identity_status = 'new_coverage'
+    and x.review_status = 'auto_approved'
+    and px.publication_status = 'publishable'
+)

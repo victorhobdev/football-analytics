@@ -83,6 +83,7 @@ async function proxyBffRequest(
     body,
     redirect: "manual",
     cache: "no-store",
+    signal: request.signal,
   };
 
   const upstreamResponse = await fetch(targetUrl, fetchOptions);

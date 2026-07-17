@@ -22,8 +22,15 @@ type CachedManifest = {
   loadedAtMs?: number;
 };
 
+type CachedMergedManifest = {
+  sources: ManifestEntry[][];
+  entries: ManifestEntry[];
+};
+
 const manifestCache = new Map<string, CachedManifest>();
+const mergedManifestCache = new Map<string, CachedMergedManifest>();
 const manifestEntryIndexCache = new WeakMap<ManifestEntry[], Map<string, ManifestEntry>>();
+const EMPTY_MANIFEST_ENTRIES: ManifestEntry[] = [];
 const REMOTE_MANIFEST_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function resolveConfiguredValue(...values: Array<string | undefined>): string | null {
@@ -211,7 +218,7 @@ async function loadLocalManifestEntries(
     manifestStat = await fs.stat(manifestPath);
   } catch (error) {
     if (optional && (error as NodeJS.ErrnoException).code === "ENOENT") {
-      return [];
+      return EMPTY_MANIFEST_ENTRIES;
     }
     throw error;
   }
@@ -236,16 +243,27 @@ async function loadLocalManifestEntries(
 async function loadManifestEntries(category: string): Promise<ManifestEntry[]> {
   const manifestFileNames = buildManifestFileNames(category);
   const manifestBaseUrl = resolveManifestBaseUrl();
-  const entries: ManifestEntry[] = [];
+  const sources: ManifestEntry[][] = [];
 
   for (const [index, fileName] of manifestFileNames.entries()) {
     const optional = index > 0;
     const manifestEntries = manifestBaseUrl
       ? await loadRemoteManifestEntries(fileName, optional)
       : await loadLocalManifestEntries(fileName, optional);
-    entries.push(...manifestEntries);
+    sources.push(manifestEntries);
   }
 
+  const cached = mergedManifestCache.get(category);
+  if (
+    cached &&
+    cached.sources.length === sources.length &&
+    cached.sources.every((source, index) => source === sources[index])
+  ) {
+    return cached.entries;
+  }
+
+  const entries = sources.flat();
+  mergedManifestCache.set(category, { sources, entries });
   return entries;
 }
 

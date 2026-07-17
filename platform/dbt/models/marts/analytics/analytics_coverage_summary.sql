@@ -1,3 +1,5 @@
+{{ config(pre_hook="set local max_parallel_workers_per_gather = 0") }}
+
 with match_base as (
     select
         m.competition_sk,

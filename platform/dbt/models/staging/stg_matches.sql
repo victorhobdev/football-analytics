@@ -1,10 +1,42 @@
 with source_matches as (
     select * from {{ source('postgres_raw', 'fixtures') }}
 ),
+{% if var('canonical_snapshot_schema', '') %}
+home_team_identity as (
+    select
+        source_id::bigint as legacy_home_team_id,
+        canonical_id::bigint as canonical_home_team_id,
+        valid_from,
+        valid_to
+    from raw.provider_entity_map
+    where provider = 'legacy_dim_team'
+      and entity_type = 'team'
+      and mapping_state = 'approved'
+),
+away_team_identity as (
+    select
+        source_id::bigint as legacy_away_team_id,
+        canonical_id::bigint as canonical_away_team_id,
+        valid_from,
+        valid_to
+    from raw.provider_entity_map
+    where provider = 'legacy_dim_team'
+      and entity_type = 'team'
+      and mapping_state = 'approved'
+),
+{% endif %}
 statsbomb_matches as (
     select * from {{ source('postgres_raw', 'statsbomb_matches') }}
     where identity_status = 'new_external_match'
       and match_date is not null
+),
+statsbomb_team_identity as (
+    select
+        source_name as identity_source_name,
+        source_team_id,
+        identity_status,
+        local_team_id
+    from {{ source('postgres_mart', 'stg_statsbomb_team_identity') }}
 )
 select
     fixture_id,
@@ -43,9 +75,17 @@ select
     weather_description,
     weather_temperature_c,
     weather_wind_kph,
+    {% if var('canonical_snapshot_schema', '') %}
+    home_team_identity.canonical_home_team_id as home_team_id,
+    {% else %}
     home_team_id,
+    {% endif %}
     home_team_name,
+    {% if var('canonical_snapshot_schema', '') %}
+    away_team_identity.canonical_away_team_id as away_team_id,
+    {% else %}
     away_team_id,
+    {% endif %}
     away_team_name,
     home_goals,
     away_goals,
@@ -73,6 +113,16 @@ select
     source_run_id,
     ingested_at
 from source_matches
+{% if var('canonical_snapshot_schema', '') %}
+join home_team_identity
+  on home_team_identity.legacy_home_team_id = source_matches.home_team_id
+ and (home_team_identity.valid_from is null or home_team_identity.valid_from <= coalesce(source_matches.date_utc, source_matches.date::timestamp)::date)
+ and (home_team_identity.valid_to is null or coalesce(source_matches.date_utc, source_matches.date::timestamp)::date < home_team_identity.valid_to)
+join away_team_identity
+  on away_team_identity.legacy_away_team_id = source_matches.away_team_id
+ and (away_team_identity.valid_from is null or away_team_identity.valid_from <= coalesce(source_matches.date_utc, source_matches.date::timestamp)::date)
+ and (away_team_identity.valid_to is null or coalesce(source_matches.date_utc, source_matches.date::timestamp)::date < away_team_identity.valid_to)
+{% endif %}
 
 union all
 
@@ -141,9 +191,17 @@ select
     cast(null as text) as weather_description,
     cast(null as numeric) as weather_temperature_c,
     cast(null as numeric) as weather_wind_kph,
-    910000000000 + home_team_id as home_team_id,
+    case
+        when home_identity.identity_status = 'linked_to_sportmonks'
+         and home_identity.local_team_id is not null then home_identity.local_team_id
+        else 910000000000 + home_team_id
+    end as home_team_id,
     home_team_name,
-    910000000000 + away_team_id as away_team_id,
+    case
+        when away_identity.identity_status = 'linked_to_sportmonks'
+         and away_identity.local_team_id is not null then away_identity.local_team_id
+        else 910000000000 + away_team_id
+    end as away_team_id,
     away_team_name,
     home_score as home_goals,
     away_score as away_goals,
@@ -159,4 +217,15 @@ select
     ) as ingested_run,
     'statsbomb_open_data' as source_run_id,
     updated_at as ingested_at
-from statsbomb_matches
+from statsbomb_matches m
+left join statsbomb_team_identity home_identity
+  on home_identity.identity_source_name = m.source_name
+ and home_identity.source_team_id = m.home_team_id
+left join statsbomb_team_identity away_identity
+  on away_identity.identity_source_name = m.source_name
+ and away_identity.source_team_id = m.away_team_id
+
+union all
+
+select *
+from {{ ref('stg_external_matches') }}

@@ -73,7 +73,7 @@ export function useMarketTransfers(
 
   return useQueryWithCoverage<MarketTransfersData>({
     queryKey: marketQueryKeys.transfers(mergedFilters),
-    queryFn: () => fetchMarketTransfers(mergedFilters),
+    queryFn: ({ signal }) => fetchMarketTransfers(mergedFilters, signal),
     placeholderData: keepPreviousData,
     staleTime: MARKET_TRANSFERS_STALE_TIME_MS,
     gcTime: MARKET_TRANSFERS_GC_TIME_MS,

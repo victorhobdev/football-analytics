@@ -1,3 +1,18 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table', indexes=[{'columns': ['venue_id'], 'type': 'btree'}]) }}
+
+select
+    f.venue_sk,
+    f.venue_id,
+    coalesce(max(v.venue_name), concat('Unknown Venue #', f.venue_id::text)) as venue_name,
+    max(v.venue_city) as venue_city,
+    max(v.venue_country) as venue_country,
+    now() as updated_at
+from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches f
+left join mart.dim_venue v on v.venue_id = f.venue_id
+where f.venue_id is not null
+group by f.venue_sk, f.venue_id
+{% else %}
 {{ config(
     materialized='incremental',
     unique_key='venue_sk',
@@ -59,3 +74,4 @@ select
 from ranked
 where row_num = 1
   and venue_id is not null
+{% endif %}

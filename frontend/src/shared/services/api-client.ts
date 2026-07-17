@@ -18,6 +18,7 @@ type ApiClientErrorCode =
   | "CONFIG_ERROR"
   | "HTTP_ERROR"
   | "NETWORK_ERROR"
+  | "CANCELLED_ERROR"
   | "TIMEOUT_ERROR"
   | "INVALID_JSON_RESPONSE";
 
@@ -291,9 +292,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       });
     }
 
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (signal?.aborted || (error instanceof DOMException && error.name === "AbortError")) {
       throw new ApiClientError("Requisicao cancelada.", {
-        code: "NETWORK_ERROR",
+        code: "CANCELLED_ERROR",
       });
     }
 

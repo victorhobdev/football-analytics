@@ -1,3 +1,16 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table', indexes=[{'columns': ['league_id'], 'type': 'btree'}]) }}
+
+select
+    md5(concat('competition:', league_id::text)) as competition_sk,
+    league_id,
+    max(competition_key) as league_name,
+    cast(null as text) as country,
+    now() as updated_at
+from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches
+where league_id is not null
+group by league_id
+{% else %}
 {{ config(
     materialized='incremental',
     unique_key='league_id',
@@ -31,3 +44,4 @@ select
     now() as updated_at
 from ranked
 where rn = 1
+{% endif %}

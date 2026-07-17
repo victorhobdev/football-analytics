@@ -212,24 +212,24 @@ coach_most_matches as (
     where total_matches > 0
 ),
 combined as (
-    select category, 'total_goals'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from match_scoring where rn = 1
+    select category, 'total_goals'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from match_scoring where rn = 1
     union all
-    select category, 'goal_difference'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from biggest_win where rn = 1
+    select category, 'goal_difference'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from biggest_win where rn = 1
     union all
-    select category, 'goals_for'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from team_attack where rn = 1
+    select category, 'goals_for'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from team_attack where rn = 1
     union all
-    select category, 'goals_against'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from team_defense where rn = 1
+    select category, 'goals_against'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from team_defense where rn = 1
     union all
-    select category, 'goal_diff'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from team_goal_diff where rn = 1
+    select category, 'goal_diff'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from team_goal_diff where rn = 1
     union all
-    select category, 'goals'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from round_scoring where rn = 1
+    select category, 'goals'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from round_scoring where rn = 1
     union all
-    select category, 'avg_goals'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from round_avg where rn = 1
+    select category, 'avg_goals'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from round_avg where rn = 1
     union all
-    select category, 'points_per_game'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from team_ppg where rn = 1
+    select category, 'points_per_game'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from team_ppg where rn = 1
     union all
-    select category, 'points_per_match'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from coach_ppm where rn = 1
+    select category, 'points_per_match'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from coach_ppm where rn = 1
     union all
-    select category, 'matches'::text as metric_name, entity_id, entity_name, value::numeric, scope, sample_size from coach_most_matches where rn = 1
+    select category, 'matches'::text as metric_name, entity_id::text, entity_name, value::numeric, scope, sample_size from coach_most_matches where rn = 1
 )
 select * from combined

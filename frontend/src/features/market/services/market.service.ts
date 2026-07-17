@@ -32,9 +32,11 @@ function toQueryParams<TFilters extends object>(filters: TFilters): QueryParams 
 
 export async function fetchMarketTransfers(
   filters: MarketTransfersFilters = {},
+  signal?: AbortSignal,
 ): Promise<ApiResponse<MarketTransfersData>> {
   return apiRequest<ApiResponse<MarketTransfersData>>(MARKET_ENDPOINTS.transfers, {
     method: "GET",
     params: toQueryParams(filters),
+    signal,
   });
 }

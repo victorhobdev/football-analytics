@@ -1,3 +1,7 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table') }}
+select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_match_events
+{% else %}
 {{ config(materialized='incremental', unique_key='event_id', on_schema_change='sync_all_columns') }}
 {% set lookback_hours = var('fact_match_events_incremental_lookback_hours', 24) %}
 
@@ -15,3 +19,4 @@ filtered as (
     {% endif %}
 )
 select * from filtered
+{% endif %}

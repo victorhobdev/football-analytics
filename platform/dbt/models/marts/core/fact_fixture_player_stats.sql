@@ -1,3 +1,7 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table') }}
+select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_fixture_player_stats
+{% else %}
 {{ config(
     materialized='incremental',
     unique_key='fixture_player_stat_id',
@@ -75,3 +79,4 @@ filtered as (
     {% endif %}
 )
 select * from filtered
+{% endif %}

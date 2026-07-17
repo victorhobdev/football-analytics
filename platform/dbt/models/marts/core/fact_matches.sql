@@ -1,3 +1,7 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table') }}
+select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.fact_matches
+{% else %}
 -- depends_on: {{ ref('competition_season_config') }}
 -- depends_on: {{ ref('dim_stage') }}
 {{ config(
@@ -69,3 +73,4 @@ filtered as (
     {% endif %}
 )
 select * from filtered
+{% endif %}

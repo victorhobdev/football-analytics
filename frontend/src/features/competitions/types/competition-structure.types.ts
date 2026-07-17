@@ -191,6 +191,33 @@ export interface CompetitionAnalyticsFilters {
   seasonLabel?: string | null;
 }
 
+export interface CompetitionEditionEntity {
+  id?: string | null;
+  name: string;
+}
+
+export interface CompetitionEditionTopScorer extends CompetitionEditionEntity {
+  goals: number;
+}
+
+export interface CompetitionEdition {
+  seasonLabel: string;
+  matchCount: number;
+  champion?: CompetitionEditionEntity | null;
+  runnerUp?: CompetitionEditionEntity | null;
+  topScorer?: CompetitionEditionTopScorer | null;
+}
+
+export interface CompetitionEditionsData {
+  competitionKey: string;
+  editions: CompetitionEdition[];
+  updatedAt?: string | null;
+}
+
+export interface CompetitionEditionsFilters {
+  competitionKey?: string | null;
+}
+
 export interface TeamJourneyStage {
   stageId: string;
   stageName?: string | null;

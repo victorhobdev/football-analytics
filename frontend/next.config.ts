@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
     ],
   },
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/coaches/:path*",
+        destination: "/teams",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

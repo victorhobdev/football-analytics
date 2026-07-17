@@ -74,3 +74,6 @@ base as (
       on et.event_type = e.event_type
 )
 select * from base
+{% if var('canonical_snapshot_schema', '') %}
+where local_match_id is not null
+{% endif %}

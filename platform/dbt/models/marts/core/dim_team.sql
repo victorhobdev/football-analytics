@@ -1,3 +1,7 @@
+{% if var('canonical_snapshot_schema', '') %}
+{{ config(materialized='table') }}
+select * from {{ adapter.quote(var('canonical_snapshot_schema')) }}.dim_team
+{% else %}
 {{ config(
     materialized='incremental',
     unique_key='team_sk',
@@ -62,3 +66,4 @@ select
     now() as updated_at
 from ranked
 where row_num = 1
+{% endif %}

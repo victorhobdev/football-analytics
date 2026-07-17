@@ -2,16 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { useQueries } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { useTeamsList } from "@/features/teams/hooks/useTeamsList";
-import { teamsQueryKeys } from "@/features/teams/queryKeys";
-import { fetchTeamsList } from "@/features/teams/services/teams.service";
 import type {
   TeamListItem,
-  TeamsListFilters,
   TeamsListSortBy,
   TeamsListSortDirection,
 } from "@/features/teams/types";
@@ -25,6 +21,7 @@ import {
   ProfileTag,
 } from "@/shared/components/profile/ProfilePrimitives";
 import { ProfileMedia } from "@/shared/components/profile/ProfileMedia";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useGlobalFiltersState } from "@/shared/hooks/useGlobalFilters";
 import { useResolvedCompetitionContext } from "@/shared/hooks/useResolvedCompetitionContext";
 import {
@@ -260,7 +257,7 @@ function calculateTotals(items: TeamListItem[]) {
 }
 
 const TEAM_PAGE_SIZE_OPTIONS = [10, 20, 40, 100] as const;
-type TeamPageSizeSelection = (typeof TEAM_PAGE_SIZE_OPTIONS)[number] | "all";
+type TeamPageSizeSelection = (typeof TEAM_PAGE_SIZE_OPTIONS)[number];
 
 const TEAM_SORT_OPTIONS: Array<{ label: string; value: TeamsListSortBy }> = [
   { label: "Pontos", value: "points" },
@@ -272,6 +269,7 @@ const TEAM_SORT_OPTIONS: Array<{ label: string; value: TeamsListSortBy }> = [
 
 export function TeamsPageContent() {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<TeamPageSizeSelection>(40);
   const [sortBy, setSortBy] = useState<TeamsListSortBy>("points");
@@ -284,14 +282,11 @@ export function TeamsPageContent() {
   );
   const { competitionId, seasonId, roundId, venue, lastN, dateRangeStart, dateRangeEnd } =
     useGlobalFiltersState();
-  const isAllRowsMode = pageSize === "all";
-  const requestPage = isAllRowsMode ? 1 : page;
-  const requestPageSize = isAllRowsMode ? 100 : pageSize;
   const teamsQuery = useTeamsList(
     {
-      page: requestPage,
-      pageSize: requestPageSize,
-      search,
+      page,
+      pageSize,
+      search: debouncedSearch,
       sortBy,
       sortDirection,
     },
@@ -325,65 +320,6 @@ export function TeamsPageContent() {
     dateRangeStart,
     dateRangeEnd,
   });
-  const allRowsBaseFilters = useMemo<TeamsListFilters>(() => {
-    const normalizedSearch = search.trim();
-
-    return {
-      competitionId: resolvedContext?.competitionId ?? competitionId,
-      seasonId: resolvedContext?.seasonId ?? seasonId,
-      roundId,
-      venue,
-      lastN,
-      dateRangeStart,
-      dateRangeEnd,
-      search: normalizedSearch.length > 0 ? normalizedSearch : undefined,
-      pageSize: requestPageSize,
-      sortBy,
-      sortDirection,
-    };
-  }, [
-    competitionId,
-    dateRangeEnd,
-    dateRangeStart,
-    lastN,
-    requestPageSize,
-    resolvedContext?.competitionId,
-    resolvedContext?.seasonId,
-    roundId,
-    search,
-    seasonId,
-    sortBy,
-    sortDirection,
-    venue,
-  ]);
-  const allRowsPageNumbers = useMemo(() => {
-    if (!isAllRowsMode || !teamsQuery.data || teamsQuery.isError) {
-      return [];
-    }
-
-    const totalPages = teamsQuery.meta?.pagination?.totalPages ?? 1;
-    return Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
-  }, [
-    isAllRowsMode,
-    teamsQuery.data,
-    teamsQuery.isError,
-    teamsQuery.meta?.pagination?.totalPages,
-  ]);
-  const allRowsQueries = useQueries({
-    queries: allRowsPageNumbers.map((allPage) => {
-      const filters = { ...allRowsBaseFilters, page: allPage };
-
-      return {
-        queryKey: teamsQueryKeys.list(filters),
-        queryFn: () => fetchTeamsList(filters),
-        staleTime: 10 * 60 * 1000,
-        gcTime: 30 * 60 * 1000,
-      };
-    }),
-  });
-  const isLoadingAllRows = isAllRowsMode && allRowsQueries.some((query) => query.isLoading);
-  const allRowsError = allRowsQueries.find((query) => query.isError)?.error;
-
   useEffect(() => {
     setPage(1);
   }, [
@@ -451,27 +387,14 @@ export function TeamsPageContent() {
     );
   }
 
-  const items = isAllRowsMode
-    ? [
-        ...teamsQuery.data.items,
-        ...allRowsQueries.flatMap((query) => query.data?.data.items ?? []),
-      ]
-    : teamsQuery.data.items;
+  const items = teamsQuery.data.items;
   const pagination = teamsQuery.meta?.pagination;
   const totalCount = pagination?.totalCount ?? items.length;
-  const currentPage = isAllRowsMode ? 1 : pagination?.page ?? page;
-  const resolvedPageSize = isAllRowsMode
-    ? Math.max(totalCount, items.length, 1)
-    : pagination?.pageSize ?? requestPageSize;
-  const totalPages = isAllRowsMode
-    ? 1
-    : Math.max(pagination?.totalPages ?? Math.ceil(totalCount / resolvedPageSize), 1);
+  const currentPage = pagination?.page ?? page;
+  const resolvedPageSize = pagination?.pageSize ?? pageSize;
+  const totalPages = Math.max(pagination?.totalPages ?? Math.ceil(totalCount / resolvedPageSize), 1);
   const currentRangeStart = totalCount === 0 ? 0 : (currentPage - 1) * resolvedPageSize + 1;
-  const currentRangeEnd = isAllRowsMode
-    ? items.length
-    : totalCount === 0
-      ? 0
-      : currentRangeStart + items.length - 1;
+  const currentRangeEnd = totalCount === 0 ? 0 : currentRangeStart + items.length - 1;
   const featuredTeams = items.slice(0, 3);
   const featuredTeam = featuredTeams[0] ?? null;
   const featuredTeamMetric = featuredTeam ? resolveFeaturedTeamMetric(featuredTeam) : null;
@@ -482,6 +405,11 @@ export function TeamsPageContent() {
 
   return (
     <ProfileShell className="space-y-6">
+      {teamsQuery.isFetching && teamsQuery.data ? (
+        <p className="text-sm font-semibold text-[#57657a]" role="status">
+          Atualizando times…
+        </p>
+      ) : null}
       <ProfilePanel className="profile-hero-clean relative overflow-hidden p-0" tone="accent">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(166,242,209,0.24),transparent_30%),radial-gradient(circle_at_88%_0%,rgba(216,227,251,0.2),transparent_34%)]" />
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-white/10" />
@@ -500,8 +428,8 @@ export function TeamsPageContent() {
                 <TeamsPageIcon className="h-4 w-4" icon="shield" />
                 Times
               </p>
-              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl md:text-6xl">
-                Resumo rápido dos clubes
+              <h1 className="mt-3 font-[family:var(--font-profile-headline)] text-3xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-4xl">
+                Times
               </h1>
             </div>
 
@@ -542,7 +470,7 @@ export function TeamsPageContent() {
           <aside className="grid content-start gap-3 xl:pt-14">
             {featuredTeam && featuredTeamMetric ? (
               <Link
-                className="group flex min-h-[12rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/16"
+                className="group flex min-h-[9rem] flex-col justify-between rounded-[1.55rem] border border-white/12 bg-white/12 p-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors hover:bg-white/16"
                 href={
                   resolvedContext
                     ? `${buildCanonicalTeamPath(resolvedContext, featuredTeam.teamId)}${canonicalExtraQuery}`
@@ -653,15 +581,6 @@ export function TeamsPageContent() {
         </ProfileAlert>
       ) : null}
 
-      {allRowsError ? (
-        <ProfileAlert title="Lista completa incompleta" tone="warning">
-          <p>
-            Algumas páginas adicionais não carregaram. A lista segue disponível com o recorte
-            carregado até agora.
-          </p>
-        </ProfileAlert>
-      ) : null}
-
       <ProfilePanel className="space-y-4 border-white/80 bg-white/84">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
@@ -742,12 +661,7 @@ export function TeamsPageContent() {
             <select
               className="h-[58px] rounded-[1.2rem] border border-[rgba(191,201,195,0.48)] bg-[#f9f9ff] px-4 text-base font-semibold normal-case tracking-normal text-[#111c2d] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:text-sm"
               onChange={(event) => {
-                const nextPageSize =
-                  event.target.value === "all"
-                    ? "all"
-                    : (Number(event.target.value) as (typeof TEAM_PAGE_SIZE_OPTIONS)[number]);
-
-                setPageSize(nextPageSize);
+                setPageSize(Number(event.target.value) as TeamPageSizeSelection);
                 setPage(1);
               }}
               value={pageSize}
@@ -757,7 +671,6 @@ export function TeamsPageContent() {
                   {option}
                 </option>
               ))}
-              <option value="all">Todos</option>
             </select>
           </label>
         </div>
@@ -825,25 +738,14 @@ export function TeamsPageContent() {
 
       <ProfilePanel className="flex flex-col gap-3 border-white/80 bg-white/84 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-medium text-[#57657a]">
-          {isAllRowsMode ? (
-            isLoadingAllRows ? (
-              <>Carregando todos os clubes · {formatInteger(currentRangeEnd)} de {formatInteger(totalCount)}</>
-            ) : (
-              <>Todos os {formatInteger(currentRangeEnd)} clubes carregados</>
-            )
-          ) : (
-            <>
-              Página {formatInteger(currentPage)} de {formatInteger(totalPages)} · mostrando{" "}
-              {formatInteger(currentRangeStart)}-{formatInteger(currentRangeEnd)} de{" "}
-              {formatInteger(totalCount)} clubes
-            </>
-          )}
+          Página {formatInteger(currentPage)} de {formatInteger(totalPages)} · mostrando{" "}
+          {formatInteger(currentRangeStart)}-{formatInteger(currentRangeEnd)} de{" "}
+          {formatInteger(totalCount)} clubes
         </p>
-        {!isAllRowsMode ? (
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button
               className="button-pill min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
-              disabled={currentPage <= 1}
+              disabled={teamsQuery.isFetching || currentPage <= 1}
               onClick={() => setPage((value) => Math.max(value - 1, 1))}
               type="button"
             >
@@ -851,14 +753,13 @@ export function TeamsPageContent() {
             </button>
             <button
               className="button-pill button-pill-primary min-h-11 justify-center disabled:cursor-not-allowed disabled:opacity-45"
-              disabled={currentPage >= totalPages}
+              disabled={teamsQuery.isFetching || currentPage >= totalPages}
               onClick={() => setPage((value) => Math.min(value + 1, totalPages))}
               type="button"
             >
               Próxima
             </button>
-          </div>
-        ) : null}
+        </div>
       </ProfilePanel>
     </ProfileShell>
   );
