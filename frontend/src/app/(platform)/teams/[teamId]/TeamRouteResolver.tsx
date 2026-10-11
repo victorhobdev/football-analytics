@@ -42,6 +42,7 @@ export function TeamRouteResolver({
     profileContext,
   );
   const teamType = profileQuery.data?.identity.teamType;
+  const resolvedTeamId = profileQuery.data?.team.teamId ?? teamId;
   const worldCupContext = useMemo(
     () =>
       [localContext, ...(contextsQuery.data?.availableContexts ?? [])].find(
@@ -51,7 +52,7 @@ export function TeamRouteResolver({
   );
   const redirectHref =
     teamType === "club" && surface === "teams"
-      ? `/clubs/${encodeURIComponent(teamId.trim())}${currentQueryString}`
+      ? `/clubs/${encodeURIComponent(resolvedTeamId.trim())}${currentQueryString}`
       : teamType === "national_team" && worldCupContext
         ? `${buildWorldCupTeamPath(teamId)}${currentQueryString}`
         : null;

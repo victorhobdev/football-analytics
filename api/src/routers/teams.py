@@ -28,6 +28,7 @@ from ..core.filters import (
     append_fact_match_filters,
     validate_and_build_global_filters,
 )
+from ..core.team_identity import resolve_legacy_team_ids
 from ..db.client import db_client
 
 router = APIRouter(prefix="/api/v1/teams", tags=["teams"])
@@ -71,6 +72,22 @@ def _require_canonical_team_context(filters: GlobalFilters) -> None:
             status=400,
             details={"missing": missing_fields},
         )
+
+
+def _fetch_team_reference(team_id: int, filters: GlobalFilters) -> dict[str, Any] | None:
+    query = "select team_id, team_name from mart.dim_team where team_id = %s;"
+    team = db_client.fetch_one(query, [team_id])
+    if team is not None:
+        return team
+    context = build_canonical_context(
+        competition_id=filters.competition_id,
+        competition_name=None,
+        season_id=filters.season_id,
+    )
+    canonical_id = resolve_legacy_team_ids(
+        [str(team_id)], context["seasonLabel"] if context else None,
+    ).get(str(team_id))
+    return db_client.fetch_one(query, [int(canonical_id)]) if canonical_id is not None else None
 
 
 def _team_scope_filters_sql(team_id: int, filters: GlobalFilters) -> tuple[str, list[Any]]:
@@ -697,10 +714,7 @@ def get_team_contexts(
             request_id=_request_id(request),
         )
 
-    team_ref = db_client.fetch_one(
-        "select team_id, team_name from mart.dim_team where team_id = %s;",
-        [team_id],
-    )
+    team_ref = _fetch_team_reference(team_id, preference_filters)
     if team_ref is None:
         raise AppError(
             message="Team not found.",
@@ -709,6 +723,7 @@ def get_team_contexts(
             details={"teamId": teamId},
         )
 
+    team_id = int(team_ref["team_id"])
     context_rows = db_client.fetch_all(
         """
         with team_contexts as (
@@ -1160,10 +1175,7 @@ def get_team_profile(
             recent_matches_limit=recentMatchesLimit,
         )
 
-    team_ref = db_client.fetch_one(
-        "select team_id, team_name from mart.dim_team where team_id = %s;",
-        [team_id],
-    )
+    team_ref = _fetch_team_reference(team_id, global_filters)
     if team_ref is None:
         raise AppError(
             message="Team not found.",
@@ -1172,6 +1184,7 @@ def get_team_profile(
             details={"teamId": teamId},
         )
 
+    team_id = int(team_ref["team_id"])
     foundation = _fetch_team_profile_foundation(team_id, str(team_ref["team_name"]))
     honors = _load_team_honors(team_id, foundation["identity"]["officialName"])
 

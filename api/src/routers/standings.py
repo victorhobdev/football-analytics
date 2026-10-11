@@ -11,6 +11,7 @@ from ..core.context_registry import get_canonical_competition
 from ..core.contracts import build_api_response, build_coverage_from_counts
 from ..core.errors import AppError
 from ..core.filters import GlobalFilters, VenueFilter, validate_and_build_global_filters
+from ..core.team_identity import resolve_legacy_team_ids
 from ..db.client import db_client
 
 router = APIRouter(prefix="/api/v1/standings", tags=["standings"])
@@ -810,6 +811,9 @@ def get_standings(
         if group is not None
         else _fetch_standings_rows(scope, stage, selected_round)
     )
+    canonical_team_ids = resolve_legacy_team_ids(
+        [str(row["team_id"]) for row in rows], scope.season_label,
+    )
     coverage = build_coverage_from_counts(
         len(rows),
         expected_teams,
@@ -826,7 +830,7 @@ def get_standings(
         "rows": [
             {
                 "position": int(row["position"]),
-                "teamId": row["team_id"],
+                "teamId": canonical_team_ids.get(str(row["team_id"]), str(row["team_id"])),
                 "teamName": row.get("team_name"),
                 "matchesPlayed": int(row.get("matches_played") or row.get("games_played") or 0),
                 "wins": int(row.get("wins") or row.get("won") or 0),

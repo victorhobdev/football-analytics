@@ -36,9 +36,10 @@ export function ContextualTeamRouteResolver({
     context,
   );
   const teamType = profileQuery.data?.identity.teamType;
+  const resolvedTeamId = profileQuery.data?.team.teamId ?? teamId;
   const redirectHref =
     teamType === "club" && surface === "teams"
-      ? `${buildCanonicalClubPath(context, teamId)}${currentQueryString}`
+      ? `${buildCanonicalClubPath(context, resolvedTeamId)}${currentQueryString}`
       : teamType === "national_team" && context.competitionKey === "fifa_world_cup_mens"
         ? `${buildWorldCupTeamPath(teamId)}${currentQueryString}`
         : null;
