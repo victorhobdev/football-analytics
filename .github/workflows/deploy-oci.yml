@@ -53,6 +53,23 @@ jobs:
             -o ServerAliveInterval=30 \
             "$OCI_USER@$OCI_HOST" 'echo ssh-ok'
 
+      - name: Ensure remote sync dependency
+        run: |
+          ssh -T \
+            -i "$HOME/.ssh/oci_deploy" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ServerAliveInterval=30 \
+            "$OCI_USER@$OCI_HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          if ! command -v rsync >/dev/null 2>&1; then
+            sudo -n apt-get update
+            sudo -n apt-get install -y rsync
+          fi
+          REMOTE
+
       - name: Sync application sources
         run: |
           export RSYNC_RSH="ssh -i $HOME/.ssh/oci_deploy -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o ServerAliveInterval=30"
